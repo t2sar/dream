@@ -88,8 +88,6 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
       contents: prompt,
       config: {
         systemInstruction: "You are a motivational habit coach. Keep it short, punchy, and under 3 sentences.",
-        // Use a small thinking budget for better reasoning on the data patterns
-        thinkingConfig: { thinkingBudget: 128 }, 
       }
     });
     return response.text || "Keep going! Consistency is key.";
@@ -102,8 +100,7 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
 export const chatWithCoach = async (history: {role: string, content: string}[], userMessage: string): Promise<string> => {
     if (!apiKey) return "API Key missing.";
     
-    // Format history for the prompt context since we are using a single-turn generateContent for simplicity
-    // in this specific architecture, but enhancing it with system instructions.
+    // Format history for the prompt context
     const context = history.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'Coach'}: ${m.content}`).join('\n');
     
     const prompt = `
