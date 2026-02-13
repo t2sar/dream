@@ -13,9 +13,9 @@ export const getHabitSuggestions = async (goal: string): Promise<any[]> => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate 3 concrete, daily habit suggestions for someone who wants to: "${goal}". 
-      Return JSON only. Format: Array of objects with keys: name, description, category (health|productivity|learning|mindfulness|other), icon (lucide icon name e.g. 'Zap', 'Book', 'Dumbbell').`,
+      contents: `Generate 3 concrete, daily habit suggestions for someone who wants to: "${goal}".`,
       config: {
+        systemInstruction: "You are a helpful habit coach. Return JSON only. Format: Array of objects with keys: name, description, category (health|productivity|learning|mindfulness|other), icon (lucide icon name e.g. 'Zap', 'Book', 'Dumbbell').",
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
@@ -49,13 +49,16 @@ export const getExcuseBuster = async (habitName: string): Promise<string> => {
     They are feeling lazy or unmotivated.
     Give a concise, "tough love" but encouraging "No Zero Days" counter-argument.
     Suggest a 2-minute micro-version of this habit they can do right now just to keep the streak alive.
-    Max 2 sentences.
   `;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
+      config: {
+        systemInstruction: "You are a tough but fair accountability partner. Keep your response under 2 sentences.",
+        temperature: 0.7,
+      }
     });
     return response.text || "Do it for 2 minutes. Start now.";
   } catch (error) {
@@ -73,10 +76,9 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
   const habitsList = habits.map(h => h.name).join(", ");
   
   const prompt = `
-    You are a motivational habit coach. 
     The user is tracking these habits: ${habitsList}.
     Here is their recent activity (Date: Completed IDs): ${JSON.stringify(recentLogs)}.
-    Provide a short, punchy, 2-sentence motivational analysis of their week. 
+    Provide a motivational analysis of their week. 
     Be encouraging but honest. If they are doing well, celebrate it. If not, gentle nudge.
   `;
 
@@ -84,6 +86,11 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
+      config: {
+        systemInstruction: "You are a motivational habit coach. Keep it short, punchy, and under 3 sentences.",
+        // Use a small thinking budget for better reasoning on the data patterns
+        thinkingConfig: { thinkingBudget: 128 }, 
+      }
     });
     return response.text || "Keep going! Consistency is key.";
   } catch (error) {
@@ -95,20 +102,27 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
 export const chatWithCoach = async (history: {role: string, content: string}[], userMessage: string): Promise<string> => {
     if (!apiKey) return "API Key missing.";
     
+    // Format history for the prompt context since we are using a single-turn generateContent for simplicity
+    // in this specific architecture, but enhancing it with system instructions.
     const context = history.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'Coach'}: ${m.content}`).join('\n');
+    
     const prompt = `
-      System: You are t2sar AI, an ethereal and focused habit coaching AI developed for the t2sar dream app. You are concise, philosophical, and helpful.
-      Context:
+      Context of conversation:
       ${context}
       
-      User: ${userMessage}
-      Coach:
+      User's latest message: ${userMessage}
+      
+      Respond as the Coach.
     `;
 
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
+        config: {
+           systemInstruction: "You are t2sar AI, an ethereal and focused habit coaching AI developed for the t2sar dream app. You are concise, philosophical, and helpful. Do not start responses with 'Coach:'.",
+           temperature: 0.8,
+        }
       });
       return response.text || "I'm listening.";
     } catch (e) {
