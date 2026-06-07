@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Google accounts typically provide verified emails.
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function existing() { return resource.data; }
+    function incoming() { return request.resource.data; }
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
+    function isValidUser(data) {
+      return (
+        (!('createdAt' in data) || data.createdAt is string) &&
+        (!('habits' in data) || (data.habits is list && data.habits.size() <= 500)) &&
+        (!('logs' in data) || (data.logs is map && data.logs.keys().size() <= 2000))
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      allow create: if isVerified() 
+        && isValidId(userId) 
+        && isOwner(userId) 
+        && isValidUser(incoming());
+
+      allow update: if isVerified() 
+        && isValidId(userId) 
+        && isOwner(userId) 
+        && isValidUser(incoming())
+        // Immutable check for createdAt if exists
+        && (!('createdAt' in existing()) || incoming().createdAt == existing().createdAt);
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}

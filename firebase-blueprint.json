@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user's profile and tracked habits.",
+      "type": "object",
+      "properties": {
+        "habits": {
+          "type": "array",
+          "description": "List of user habits."
+        },
+        "logs": {
+          "type": "object",
+          "description": "Log of completed habits per date."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "When the user document was created."
+        }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user habit tracking state, separated by their auth token UID."
+    }
+  }
+}

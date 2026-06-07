@@ -2,5 +2,5 @@
   "name": "t2sar dream",
   "description": "An ethereal, glass-morphic habit tracker designed for focus and growth.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
