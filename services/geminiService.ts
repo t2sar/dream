@@ -1,11 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Habit, HabitLog } from "../types";
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+let aiClient: GoogleGenAI | null = null;
+
+const getAi = () => {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      aiClient = new GoogleGenAI({ apiKey });
+    }
+  }
+  return aiClient;
+};
 
 export const getHabitSuggestions = async (goal: string): Promise<any[]> => {
-  if (!apiKey) {
+  const ai = getAi();
+  if (!ai) {
     console.warn("API Key missing");
     return [];
   }
@@ -42,7 +52,8 @@ export const getHabitSuggestions = async (goal: string): Promise<any[]> => {
 };
 
 export const getExcuseBuster = async (habitName: string): Promise<string> => {
-  if (!apiKey) return "Just do 2 minutes of it. Something is better than nothing.";
+  const ai = getAi();
+  if (!ai) return "Just do 2 minutes of it. Something is better than nothing.";
 
   const prompt = `
     The user is about to skip their habit: "${habitName}".
@@ -67,7 +78,8 @@ export const getExcuseBuster = async (habitName: string): Promise<string> => {
 };
 
 export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<string> => {
-  if (!apiKey) return "Please configure your API Key to get AI insights.";
+  const ai = getAi();
+  if (!ai) return "Please configure your API Key to get AI insights.";
 
   const recentLogs = Object.entries(logs)
     .sort((a, b) => b[0].localeCompare(a[0]))
@@ -98,7 +110,8 @@ export const analyzeProgress = async (habits: Habit[], logs: HabitLog): Promise<
 };
 
 export const chatWithCoach = async (history: {role: string, content: string}[], userMessage: string): Promise<string> => {
-    if (!apiKey) return "API Key missing.";
+    const ai = getAi();
+    if (!ai) return "API Key missing.";
     
     // Format history for the prompt context
     const context = history.slice(-5).map(m => `${m.role === 'user' ? 'User' : 'Coach'}: ${m.content}`).join('\n');

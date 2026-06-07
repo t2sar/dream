@@ -47,22 +47,42 @@ const firebaseConfig = {
 };
 
 // Initialize App
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+let app: any = null;
+let authInstance: any = null;
+let dbInstance: any = null;
+
+if (apiKey && apiKey.length > 10) {
+  try {
+    app = initializeApp(firebaseConfig);
+    authInstance = getAuth(app);
+
+    dbInstance = initializeFirestore(app, {
+      cacheSizeBytes: CACHE_SIZE_UNLIMITED
+    });
+
+    enableIndexedDbPersistence(dbInstance).catch((err) => {
+        console.debug('Persistence disabled:', err.code);
+    });
+  } catch (e) {
+    console.error("Firebase init error", e);
+  }
+}
+
+// Mock auth for fast-failing without crashing the app boundary
+export const auth = authInstance || ({
+  currentUser: null,
+} as any);
+
+export const db = dbInstance || ({} as any);
+
 export const googleProvider = new GoogleAuthProvider();
 
-// Initialize Firestore
-const db = initializeFirestore(app, {
-  cacheSizeBytes: CACHE_SIZE_UNLIMITED
-});
-
-// Attempt persistence, but don't block app start if it fails
-enableIndexedDbPersistence(db).catch((err) => {
-    console.debug('Persistence disabled:', err.code);
-});
-
 export const subscribeToUserData = (userId: string, onUpdate: (data: any) => void) => {
-  return onSnapshot(doc(db, "users", userId), (doc) => {
+  if (!dbInstance) {
+    onUpdate(null);
+    return () => {};
+  }
+  return onSnapshot(doc(dbInstance, "users", userId), (doc) => {
     if (doc.exists()) {
       onUpdate(doc.data());
     } else {
@@ -74,16 +94,18 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 };
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog }) => {
+  if (!dbInstance) return;
   try {
-    await setDoc(doc(db, "users", userId), data, { merge: true });
+    await setDoc(doc(dbInstance, "users", userId), data, { merge: true });
   } catch (e) {
     console.error("Firestore Save Error:", e);
   }
 };
 
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog) => {
+  if (!dbInstance) return false;
   try {
-    const userRef = doc(db, "users", userId);
+    const userRef = doc(dbInstance, "users", userId);
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
@@ -102,12 +124,12 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
 };
 
 export const loginWithGoogle = async () => {
-  if (!apiKey) {
-    throw new Error("API Key is missing. Check configuration.");
+  if (!apiKey || !authInstance) {
+    throw new Error("Missing FIREBASE_API_KEY. Please set it in your Environment Variables (.env).");
   }
   
   try {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithPopup(authInstance, googleProvider);
   } catch (error: any) {
     // Handle specific error codes
     const code = error.code;
@@ -128,4 +150,7 @@ export const loginWithGoogle = async () => {
   }
 };
 
-export const logout = () => signOut(auth);
+export const logout = () => {
+  if (authInstance) return signOut(authInstance);
+  return Promise.resolve();
+};

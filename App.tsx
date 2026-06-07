@@ -49,6 +49,10 @@ function App() {
 
   // 1. Auth Listener
   useEffect(() => {
+    if (!auth.app) {
+      setAuthLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
