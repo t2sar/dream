@@ -4,7 +4,10 @@ import {
   GoogleAuthProvider, 
   signInWithPopup, 
   signOut,
-  AuthError
+  AuthError,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -198,4 +201,48 @@ export const loginWithGoogle = async () => {
 export const logout = () => {
   if (authInstance) return signOut(authInstance);
   return Promise.resolve();
+};
+
+export const loginWithEmail = async (email: string, password: string) => {
+  if (!apiKey || !authInstance) {
+    throw new Error("Missing FIREBASE_API_KEY. Please set it in your Environment Variables (.env).");
+  }
+  try {
+    const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
+    return userCredential.user;
+  } catch (error: any) {
+    const code = error.code;
+    if (code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+      throw new Error("Invalid email or password.");
+    }
+    if (code === 'auth/invalid-email') {
+      throw new Error("Invalid email format.");
+    }
+    throw new Error(error.message || "Failed to sign in.");
+  }
+};
+
+export const registerWithEmail = async (email: string, password: string, displayName: string) => {
+  if (!apiKey || !authInstance) {
+    throw new Error("Missing FIREBASE_API_KEY. Please set it in your Environment Variables (.env).");
+  }
+  try {
+    const userCredential = await createUserWithEmailAndPassword(authInstance, email, password);
+    if (userCredential.user) {
+      await updateProfile(userCredential.user, { displayName });
+    }
+    return userCredential.user;
+  } catch (error: any) {
+    const code = error.code;
+    if (code === 'auth/email-already-in-use') {
+      throw new Error("This email is already registered.");
+    }
+    if (code === 'auth/weak-password') {
+      throw new Error("Password is too weak. Must be at least 6 characters.");
+    }
+    if (code === 'auth/invalid-email') {
+      throw new Error("Invalid email format.");
+    }
+    throw new Error(error.message || "Failed to sign up.");
+  }
 };

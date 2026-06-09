@@ -11,6 +11,7 @@ import { ProgressChart } from './components/ProgressChart';
 import { Heatmap } from './components/Heatmap';
 import { Button } from './components/Button';
 import { Login } from './components/Login';
+import { LivingMonolith } from './components/LivingMonolith';
 
 const MOTIVATIONAL_QUOTES = [
   { text: "Consistency is what transforms average into excellence.", author: "Discipline" },
@@ -203,12 +204,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-0 md:pl-28 transition-all bg-[#09090B] selection:bg-amber-500/30">
+    <div className="min-h-screen pb-24 md:pb-0 md:pl-28 transition-all bg-[#07080A] selection:bg-cyan-500/30 bg-grain relative">
       
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px] opacity-40" />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-orange-600/5 rounded-full blur-[120px] opacity-30" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[140px] opacity-40" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[140px] opacity-30" />
       </div>
 
       {/* Sync Status Indicator (Absolute Top Right) */}
@@ -228,20 +229,20 @@ function App() {
 
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 glass-card rounded-2xl z-50 flex justify-between items-center px-8 text-xs font-medium text-slate-500 shadow-2xl shadow-black/50 overflow-x-auto gap-4">
-        <button onClick={() => setActiveTab(Tab.TRACKER)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.TRACKER ? 'text-amber-500 scale-110' : 'hover:text-slate-300'}`}>
+        <button onClick={() => setActiveTab(Tab.TRACKER)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.TRACKER ? 'text-cyan-400 scale-110' : 'hover:text-slate-300'}`}>
           <LayoutDashboard className="w-6 h-6" />
         </button>
-        <button onClick={() => setActiveTab(Tab.PROGRESS)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.PROGRESS ? 'text-amber-500 scale-110' : 'hover:text-slate-300'}`}>
+        <button onClick={() => setActiveTab(Tab.PROGRESS)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.PROGRESS ? 'text-cyan-400 scale-110' : 'hover:text-slate-300'}`}>
           <BarChart2 className="w-6 h-6" />
         </button>
-        <button onClick={() => setActiveTab(Tab.SETTINGS)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SETTINGS ? 'text-amber-500 scale-110' : 'hover:text-slate-300'}`}>
+        <button onClick={() => setActiveTab(Tab.SETTINGS)} className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SETTINGS ? 'text-cyan-400 scale-110' : 'hover:text-slate-300'}`}>
           <Settings className="w-6 h-6" />
         </button>
       </nav>
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 glass border-r border-white/5 flex-col items-center py-12 z-50">
-        <div className="w-12 h-12 bg-gradient-to-tr from-violet-600 via-pink-500 to-amber-400 rounded-2xl flex items-center justify-center mb-16 shadow-[0_0_20px_rgba(219,39,119,0.4)] rotate-3 hover:rotate-12 transition-transform duration-500">
+        <div className="w-12 h-12 bg-gradient-to-tr from-violet-600 via-pink-500 to-cyan-400 rounded-2xl flex items-center justify-center mb-16 shadow-[0_0_20px_rgba(0,245,212,0.35)] rotate-3 hover:rotate-12 transition-transform duration-500">
           <Calendar className="w-6 h-6 text-white" />
         </div>
         
@@ -254,7 +255,7 @@ function App() {
              <button 
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 ${activeTab === item.id ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-lg shadow-amber-500/10' : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'}`}
+              className={`w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 ${activeTab === item.id ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-lg shadow-cyan-500/10' : 'text-slate-500 hover:text-slate-200 hover:bg-white/5'}`}
             >
               <item.icon className="w-6 h-6" />
             </button>
@@ -275,29 +276,29 @@ function App() {
         <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
-              <h1 className="text-4xl font-extrabold tracking-tight font-display text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-500 to-amber-400 bg-300% animate-gradient">
-                {activeTab === Tab.TRACKER && `Hello, ${user.displayName?.split(' ')[0] || 'Dreamer'}`}
-                {activeTab === Tab.PROGRESS && 'Progress'}
-                {activeTab === Tab.SETTINGS && 'Settings'}
+              <h1 className="text-4xl font-extrabold tracking-tight font-display text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-300% animate-gradient">
+                {activeTab === Tab.TRACKER && `HELLO, ${user.displayName?.split(' ')[0] || 'DREAMER'}`}
+                {activeTab === Tab.PROGRESS && 'INDEX: METRICS'}
+                {activeTab === Tab.SETTINGS && 'INDEX: CONFIG'}
               </h1>
               {activeTab === Tab.TRACKER && (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/30 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/20 border border-cyan-500/20 text-cyan-400 text-[10px] font-mono tracking-widest uppercase backdrop-blur-sm">
                   <Trophy className="w-3 h-3" />
-                  Lvl {stats.level}
+                  LVL {stats.level}
                 </div>
               )}
             </div>
             
             {/* XP Bar */}
             {activeTab === Tab.TRACKER && (
-              <div className="mt-6 max-w-md">
-                <div className="flex justify-between text-[10px] text-slate-500 mb-2 uppercase tracking-widest font-semibold">
-                   <span>Experience</span>
-                   <span className="text-amber-550">{stats.xp} XP</span>
+              <div className="mt-6 max-w-sm">
+                <div className="flex justify-between text-[9px] text-slate-500 mb-2 font-mono uppercase tracking-[0.15em] font-bold">
+                   <span>CORE SYNC PROGRESS</span>
+                   <span className="text-cyan-400">XP // {stats.xp % 100} / 100</span>
                 </div>
-                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden p-[1px]">
                   <div 
-                    className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                    className="h-full bg-gradient-to-r from-violet-600 via-pink-500 to-cyan-400 rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(0,245,212,0.4)]"
                     style={{ width: `${Math.min(100, (stats.xp % 100))}%` }} 
                   />
                 </div>
@@ -309,10 +310,10 @@ function App() {
             {activeTab === Tab.TRACKER && (
                <button 
                onClick={() => setShowAddForm(true)}
-               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 rounded-2xl p-4 md:px-8 md:py-4 flex items-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all hover:-translate-y-1 active:scale-95"
+               className="bg-[#00F5D4] hover:bg-[#00d8b9] text-zinc-950 rounded-none p-4 md:px-8 md:py-4 flex items-center gap-2 shadow-[0_0_25px_rgba(0,245,212,0.3)] font-mono text-xs tracking-widest uppercase font-bold transition-all hover:-translate-y-1 active:scale-95 border border-white/10"
              >
-               <Plus className="w-6 h-6" strokeWidth={3} />
-               <span className="hidden md:inline font-bold tracking-wide">New Habit</span>
+               <Plus className="w-4 h-4" strokeWidth={3.5} />
+               <span className="hidden md:inline">INITIALIZE SECTOR</span>
              </button>
             )}
           </div>
@@ -326,17 +327,24 @@ function App() {
           <>
             {activeTab === Tab.TRACKER && (
               <div className="space-y-8">
+                <LivingMonolith 
+                  habits={habits}
+                  completedHabitIds={logs[dateKey] || []}
+                  level={stats.level}
+                />
+
                 {/* Dynamic Motivational Quote Banner */}
-                <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/15 flex gap-5 items-center backdrop-blur-sm">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-zinc-950 shrink-0 shadow-lg shadow-amber-500/20">
-                     <Zap className="w-6 h-6" strokeWidth={2.5} />
+                <div className="p-6 rounded-none bg-[#0d1017]/30 border border-white/5 flex gap-5 items-center backdrop-blur-sm relative">
+                  <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00F5D4]/40" />
+                  <div className="w-12 h-12 rounded-none bg-cyan-950/40 border border-[#00F5D4]/30 flex items-center justify-center text-[#00F5D4] shrink-0 shadow-lg shadow-cyan-950">
+                     <Zap className="w-5 h-5 text-[#00F5D4]" strokeWidth={2.5} />
                   </div>
                   <div>
-                     <p className="text-sm font-medium italic text-slate-200">
+                     <p className="text-sm font-medium italic text-slate-300">
                        "{quote.text}"
                      </p>
-                     <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-1.5">
-                       — {quote.author}
+                     <p className="text-[9px] text-[#00F5D4] font-mono font-bold uppercase tracking-widest mt-1.5">
+                       // QUANTUM FOCUS ANCHOR: {quote.author}
                      </p>
                   </div>
                 </div>
@@ -347,12 +355,13 @@ function App() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {habits.length === 0 ? (
-                    <div className="col-span-full text-center py-24 glass rounded-3xl border-dashed border-white/10">
-                      <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/5">
-                        <Calendar className="w-10 h-10 text-slate-600" />
+                    <div className="col-span-full text-center py-20 bg-[#0d1017]/30 border border-white/5 rounded-none relative">
+                      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00F5D4]/40" />
+                      <div className="w-16 h-16 bg-cyan-500/5 rounded-none flex items-center justify-center mx-auto mb-6 border border-cyan-500/20 shadow-[0_0_20px_rgba(0,245,212,0.1)] rotate-45">
+                        <Calendar className="w-6 h-6 text-[#00F5D4] -rotate-45" />
                       </div>
-                      <h3 className="text-2xl font-semibold text-white mb-2">Begin your journey</h3>
-                      <p className="text-slate-500 max-w-sm mx-auto font-light">Add your first seed.</p>
+                      <h3 className="text-xl font-bold font-display text-white mb-2 uppercase tracking-wide">SHARDS DISPERSED</h3>
+                      <p className="text-slate-500 max-w-sm mx-auto font-mono text-[10px] uppercase tracking-widest leading-relaxed">Initialize habit sectors to activate structural core assembly.</p>
                     </div>
                   ) : (
                     habits.map(habit => (
@@ -372,19 +381,21 @@ function App() {
             {activeTab === Tab.PROGRESS && (
               <div className="space-y-8">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div className="glass p-6 rounded-3xl">
+                    <div className="glass p-6 rounded-none border border-white/5 relative">
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
                         <div className="flex items-center gap-2 mb-2">
-                           <Zap className="w-4 h-4 text-amber-500" />
-                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                           <Zap className="w-4 h-4 text-cyan-400" />
+                           <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest">Completed</span>
                         </div>
-                        <span className="text-3xl font-bold text-white tracking-tight">{stats.totalHabitsCompleted}</span>
+                        <span className="text-3xl font-bold font-display text-white tracking-tight">{stats.totalHabitsCompleted}</span>
                     </div>
-                     <div className="glass p-6 rounded-3xl">
+                     <div className="glass p-6 rounded-none border border-white/5 relative">
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
                         <div className="flex items-center gap-2 mb-2">
-                           <Trophy className="w-4 h-4 text-amber-500" />
-                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Level</span>
+                           <Trophy className="w-4 h-4 text-cyan-400" />
+                           <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest">Level</span>
                         </div>
-                        <span className="text-3xl font-bold text-white tracking-tight">{stats.level}</span>
+                        <span className="text-3xl font-bold font-display text-white tracking-tight">{stats.level}</span>
                     </div>
                  </div>
                  
@@ -397,38 +408,39 @@ function App() {
 
             {activeTab === Tab.SETTINGS && (
                 <div className="space-y-8">
-                    <div className="glass p-10 rounded-3xl">
+                    <div className="glass p-10 rounded-none border border-white/5 relative">
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00F5D4]/40" />
                         <div className="flex items-center gap-6 mb-8">
                             {user.photoURL ? (
-                                <img src={user.photoURL} alt="User" className="w-14 h-14 rounded-2xl border border-amber-500/20" />
+                                <img src={user.photoURL} alt="User" className="w-14 h-14 rounded-none border border-cyan-500/20" />
                             ) : (
-                                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                                    <Cloud className="w-7 h-7 text-amber-500" />
+                                <div className="w-14 h-14 rounded-none bg-cyan-500/5 flex items-center justify-center border border-cyan-500/20">
+                                    <Cloud className="w-7 h-7 text-cyan-400" />
                                 </div>
                             )}
                             <div>
-                                <h2 className="text-2xl font-bold text-white">{user.displayName}</h2>
-                                <p className="text-slate-400 font-light">{user.email}</p>
+                                <h2 className="text-2xl font-bold text-white font-display uppercase tracking-wide">{user.displayName}</h2>
+                                <p className="text-slate-500 font-mono text-xs">{user.email}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-emerald-400 text-sm font-medium bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/10 mb-6">
-                            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'} animate-pulse`} />
-                            {isOnline ? 'Cloud Sync Active' : 'Offline Mode (Changes queued)'}
+                        <div className="flex items-center gap-3 text-cyan-400 text-xs font-mono tracking-widest uppercase bg-cyan-500/5 p-4 rounded-none border border-cyan-500/10 mb-6">
+                            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-cyan-400 shadow-[0_0_8px_#00F5D4]' : 'bg-rose-500'} animate-pulse`} />
+                            {isOnline ? 'CLOUD SYNC PROTOCOL ACTIVE' : 'OFFLINE MODE (CHANGES QUEUED)'}
                         </div>
 
-                        <Button onClick={() => logout()} variant="danger" className="w-full md:w-auto px-8">
-                            <LogOut className="w-5 h-5 mr-2" />
-                            Sign Out
+                        <Button onClick={() => logout()} variant="danger" className="w-full md:w-auto px-8 rounded-none font-mono text-xs tracking-widest uppercase py-3 border border-rose-500/20 hover:bg-rose-500/10">
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Disconnect Session
                         </Button>
                     </div>
 
-                    <div className="glass p-8 rounded-3xl">
-                         <h2 className="text-lg font-bold text-white mb-4">About t2sar dream</h2>
-                         <p className="text-slate-400 text-sm">
-                           Version 3.1<br/>
-                           Your data is backed up to Google Cloud. 
-                           Install on Android for a native experience.
+                    <div className="glass p-8 rounded-none border border-white/5 relative">
+                         <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4">SYSTEM PROTOCOL BUILD</h2>
+                         <p className="text-slate-500 font-mono text-[10px] leading-relaxed uppercase tracking-wider">
+                           Version 3.2 // THE LIVING MONOLITH CORE<br/>
+                           Your physical and intellectual metrics are encrypted and stored in Google Cloud Firestore database.<br/>
+                           Install on Android for real-time edge telemetry.
                          </p>
                     </div>
                 </div>

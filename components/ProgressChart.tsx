@@ -39,52 +39,61 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ logs, habits }) =>
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass p-6 rounded-3xl border-t border-sky-500/10">
-          <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Completion Rate</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="glass p-6 rounded-none border border-white/5 relative">
+          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
+          <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">COMPLETION CONCORDANCE</p>
           <div className="flex items-end gap-3">
-            <h3 className="text-5xl font-bold text-sky-400 tracking-tighter">{completionRate}%</h3>
-            <span className="text-slate-500 text-sm mb-1.5">last 14 days</span>
+            <h3 className="text-5xl font-bold text-[#00F5D4] font-display tracking-tight">{completionRate}%</h3>
+            <span className="text-slate-600 font-mono text-[9px] mb-2 uppercase tracking-wider">last 14 days</span>
           </div>
         </div>
-        <div className="glass p-6 rounded-3xl">
-           <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Total Completed</p>
-           <h3 className="text-5xl font-bold text-emerald-400 tracking-tighter">{totalCompleted}</h3>
+        
+        <div className="glass p-6 rounded-none border border-white/5 relative">
+           <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
+           <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">TOTAL COMPLETED</p>
+           <h3 className="text-5xl font-bold text-violet-400 font-display tracking-tight">{totalCompleted}</h3>
         </div>
-         <div className="glass p-6 rounded-3xl">
-           <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Active Habits</p>
-           <h3 className="text-5xl font-bold text-slate-200 tracking-tighter">{habits.length}</h3>
+        
+        <div className="glass p-6 rounded-none border border-white/5 relative">
+           <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
+           <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">ACTIVE SECTORS</p>
+           <h3 className="text-5xl font-bold text-slate-200 font-display tracking-tight">{habits.length}</h3>
         </div>
       </div>
 
-      <div className="glass p-8 rounded-3xl h-[400px]">
-        <h3 className="text-lg font-semibold text-white mb-6">Daily Activity</h3>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="glass p-8 rounded-none border border-white/5 h-[400px] relative">
+        <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-[#00F5D4]/40" />
+        <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-6">DAILY ACTIVITY LOGS</h3>
+        <ResponsiveContainer width="100%" height="80%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#1f232b" opacity={0.4} vertical={false} />
             <XAxis 
               dataKey="date" 
               stroke="#64748b" 
-              tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} 
+              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500, fontFamily: 'JetBrains Mono' }} 
               tickLine={false}
               axisLine={false}
               dy={10}
             />
             <YAxis 
               stroke="#64748b" 
-              tick={{ fill: '#94a3b8', fontSize: 11 }} 
+              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'JetBrains Mono' }} 
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: '#09090b', borderColor: '#1e293b', borderRadius: '12px', color: '#f8fafc', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)' }}
-              itemStyle={{ color: '#38bdf8' }}
-              cursor={{ fill: '#38bdf8', opacity: 0.1 }}
+              contentStyle={{ backgroundColor: '#07080a', borderColor: 'rgba(0, 245, 212, 0.3)', borderRadius: '0px', color: '#f8fafc', fontFamily: 'JetBrains Mono', fontSize: '10px' }}
+              itemStyle={{ color: '#00F5D4' }}
+              cursor={{ fill: 'rgba(0, 245, 212, 0.05)' }}
             />
-            <Bar dataKey="completed" radius={[6, 6, 0, 0]} maxBarSize={40}>
+            <Bar dataKey="completed" radius={[0, 0, 0, 0]} maxBarSize={30}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.completed >= habits.length && habits.length > 0 ? '#10b981' : '#38bdf8'} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.completed >= habits.length && habits.length > 0 ? '#00F5D4' : '#7B2CBF'} 
+                />
               ))}
             </Bar>
           </BarChart>
