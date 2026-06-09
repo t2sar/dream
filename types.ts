@@ -19,20 +19,8 @@ export interface UserStats {
   totalHabitsCompleted: number;
 }
 
-export interface AIAdvice {
-  text: string;
-  actionableSteps?: string[];
-}
-
 export enum Tab {
   TRACKER = 'tracker',
   PROGRESS = 'progress',
-  COACH = 'coach',
   SETTINGS = 'settings',
-}
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  content: string;
-  timestamp: number;
 }
