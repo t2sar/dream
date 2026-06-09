@@ -116,8 +116,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, isCompleted, onTogg
                 {habit.name}
               </h3>
               {habit.streak >= 7 && (
-                <div className="p-1 rounded-none bg-white/5 text-amber-400 border border-white/10">
-                    <Flame className="w-3.5 h-3.5 fill-current" />
+                <div className={`p-1 rounded-none border transition-all duration-500 flex items-center justify-center ${isCompleted ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)] scale-110' : 'bg-white/5 text-amber-500/50 border-white/10'}`}>
+                    <Flame className={`w-3.5 h-3.5 fill-current ${isCompleted ? 'animate-pulse' : ''}`} />
                 </div>
               )}
             </div>
@@ -127,7 +127,13 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, isCompleted, onTogg
               <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-[#00F5D4] bg-zinc-950/60 px-2.5 py-1 uppercase border border-white/5">
                  <span className="font-bold">{theme.sparkName}</span>
               </div>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">{habit.streak} day sync</span>
+              <span 
+                className={`text-[10px] font-mono uppercase tracking-widest transition-all duration-500 flex items-center gap-1.5 ${isCompleted ? theme.textColor : 'text-slate-500'}`}
+                style={{ textShadow: isCompleted ? '0 0 15px currentColor' : 'none' }}
+              >
+                {isCompleted && <Flame className="w-3.5 h-3.5 animate-pulse" style={{ filter: 'drop-shadow(0 0 5px currentColor)' }} />}
+                {habit.streak} day sync
+              </span>
             </div>
           </div>
         </div>

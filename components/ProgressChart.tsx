@@ -71,20 +71,20 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({ logs, habits }) =>
             <XAxis 
               dataKey="date" 
               stroke="#64748b" 
-              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500, fontFamily: 'JetBrains Mono' }} 
+              tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500, fontFamily: '"Google Sans", sans-serif' }} 
               tickLine={false}
               axisLine={false}
               dy={10}
             />
             <YAxis 
               stroke="#64748b" 
-              tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'JetBrains Mono' }} 
+              tick={{ fill: '#64748b', fontSize: 10, fontFamily: '"Google Sans", sans-serif' }} 
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: '#07080a', borderColor: 'rgba(0, 245, 212, 0.3)', borderRadius: '0px', color: '#f8fafc', fontFamily: 'JetBrains Mono', fontSize: '10px' }}
+              contentStyle={{ backgroundColor: '#07080a', borderColor: 'rgba(0, 245, 212, 0.3)', borderRadius: '0px', color: '#f8fafc', fontFamily: '"Google Sans", sans-serif', fontSize: '10px' }}
               itemStyle={{ color: '#00F5D4' }}
               cursor={{ fill: 'rgba(0, 245, 212, 0.05)' }}
             />
