@@ -10,23 +10,23 @@ interface OrchardModalProps {
 }
 
 export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onClose }) => {
-  // Merge duplicates by fruitId
+  // Merge duplicates by habitId
   const mergedFruits = useMemo(() => {
-    const map = new Map<string, { fruitId: string, count: number, habits: string[], first: Date, last: Date }>();
+    const map = new Map<string, { habitId: string, fruitId: string, name: string, count: number, first: Date, last: Date }>();
     for (const entry of entries) {
       const hName = habits.find(h => h.id === entry.habitId)?.name || 'Unknown Plant';
-      if (!map.has(entry.fruitId)) {
-         map.set(entry.fruitId, {
+      if (!map.has(entry.habitId)) {
+         map.set(entry.habitId, {
+            habitId: entry.habitId,
             fruitId: entry.fruitId,
+            name: hName,
             count: entry.count,
-            habits: [`${hName} (${entry.count})`],
             first: new Date(entry.firstHarvest),
             last: new Date(entry.lastHarvest)
          });
       } else {
-         const existing = map.get(entry.fruitId)!;
+         const existing = map.get(entry.habitId)!;
          existing.count += entry.count;
-         existing.habits.push(`${hName} (${entry.count})`);
          const eFirst = new Date(entry.firstHarvest);
          const eLast = new Date(entry.lastHarvest);
          if (eFirst < existing.first) existing.first = eFirst;
@@ -50,14 +50,10 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                 <div className="w-24 h-24 mb-4 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
                    <PlantIcon plantType={selected.fruitId as any} stage="Fruiting Plant" status="Normal" className="w-16 h-16 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] animate-hovering" />
                 </div>
-                <h3 className="text-2xl font-black font-display text-white mb-1">{selected.fruitId.split(' / ')[0]}</h3>
+                <h3 className="text-2xl font-black font-display text-white mb-1">{selected.name}</h3>
                 <p className="text-xs font-mono text-amber-500 tracking-widest uppercase mb-6">Harvested {selected.count} {selected.count === 1 ? 'Time' : 'Times'}</p>
                 
                 <div className="w-full bg-black/30 rounded-xl p-4 text-left border border-surface-alt space-y-3">
-                   <div>
-                      <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">Grown From</div>
-                      <div className="text-sm text-slate-300">{selected.habits.join(', ')}</div>
-                   </div>
                    <div className="grid grid-cols-2 gap-2">
                       <div>
                          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">First Harvest</div>
@@ -120,7 +116,7 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                              ×{item.count}
                           </div>
                        </div>
-                       <span className="text-xs font-bold text-white text-center leading-tight truncate w-full">{item.fruitId.split(' / ')[0]}</span>
+                       <span className="text-xs font-bold text-white text-center leading-tight truncate w-full">{item.name}</span>
                     </button>
                  ))}
               </div>

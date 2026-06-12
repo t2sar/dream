@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#09090B" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="t2sar dream">
+    <title>t2sar dream</title>
+    <link rel="manifest" href="/assets/manifest-DtF_JCE3.json">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              mono: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              display: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              background: {
+                main: 'rgb(var(--bg-main) / <alpha-value>)',
+              },
+              surface: {
+                card: 'rgb(var(--surface-card) / <alpha-value>)',
+                soft: 'rgb(var(--surface-soft) / <alpha-value>)',
+                alt: 'rgb(var(--surface-alt) / <alpha-value>)',
+              },
+              primary: {
+                mint: '#8FCFAD',
+                blush: '#E3A47D',
+                text: '#F7EBDD',
+              },
+              secondary: {
+                blue: '#8CBAC4',
+                text: '#D4C4B5',
+              },
+              accent: {
+                peach: '#E3A47D',
+              },
+              muted: {
+                text: '#AFA095',
+              },
+              status: {
+                excellent: '#66B58F',
+                healthy: '#8FCFAD',
+                needsCare: '#DCBA7A',
+                wilting: '#DD9D6D',
+                critical: '#C67474',
+                resting: '#8CBAC4',
+                protected: '#8FCFAD',
+                completed: '#8FCFAD',
+              }
+            },
+            borderRadius: {
+              'chip': '14px',
+              'input': '20px',
+              'button': '24px',
+              'card': '24px',
+              'large-card': '32px',
+              'bottom-sheet': '32px',
+              'progress': '9999px',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --bg-main: 46 41 37; /* #2E2925 */
+        --surface-card: 68 59 52; /* #443B34 */
+        --surface-soft: 58 51 45; /* #3A332D */
+        --surface-alt: 78 69 60; /* #4E453C */
+      }
+      body {
+        font-family: 'Nunito', sans-serif;
+        background-color: rgb(var(--bg-main));
+        color: #F7EBDD;
+        -webkit-tap-highlight-color: transparent;
+        transition: background-color 3s ease-in-out;
+      }
+      
+      /* Target layout elements without affecting hover states directly with a high specificity */
+      .bg-surface-card, .bg-surface-soft, .bg-surface-alt, .glass, .glass-card {
+         transition: background-color 3s ease-in-out, border-color 3s ease-in-out;
+      }
+      body[data-time-phase="Dawn"] {
+        --bg-main: 51 38 38; 
+        --surface-card: 74 58 53; 
+        --surface-soft: 62 48 43; 
+        --surface-alt: 85 68 63; 
+      }
+      body[data-time-phase="Morning"], body[data-time-phase="Midday"], body[data-time-phase="Afternoon"] {
+        --bg-main: 46 41 37; 
+        --surface-card: 68 59 52; 
+        --surface-soft: 58 51 45; 
+        --surface-alt: 78 69 60; 
+      }
+      body[data-time-phase="Sunset"] {
+        --bg-main: 56 42 38; 
+        --surface-card: 79 60 53; 
+        --surface-soft: 66 50 44; 
+        --surface-alt: 93 70 62; 
+      }
+      body[data-time-phase="Evening"] {
+        --bg-main: 29 26 33; 
+        --surface-card: 43 38 49; 
+        --surface-soft: 36 32 40; 
+        --surface-alt: 54 46 61; 
+      }
+      body[data-time-phase="Night"] {
+        --bg-main: 22 21 29; 
+        --surface-card: 36 34 45; 
+        --surface-soft: 30 28 37; 
+        --surface-alt: 43 40 55; 
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(247, 235, 221, 0.2);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(247, 235, 221, 0.4);
+      }
+      .glass {
+        background: rgba(30, 28, 25, 0.3);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      .glass-card {
+        background: rgba(68, 59, 52, 0.45);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      /* Noise Grain Overlay */
+      .bg-grain::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.025;
+        pointer-events: none;
+        z-index: 9999;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+      /* Font Utilities */
+      .font-mono-extended {
+        font-family: 'Google Sans', sans-serif;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .font-display {
+        font-family: 'Google Sans', sans-serif;
+        letter-spacing: -0.02em;
+      }
+      
+      /* Companion Animations */
+      @keyframes fluttering {
+        0% { transform: translate(0, 0) scaleX(1); opacity: 0; }
+        10% { opacity: 1; }
+        25% { transform: translate(30vw, -20px) scaleX(0.8) rotate(10deg); }
+        50% { transform: translate(60vw, 10px) scaleX(1) rotate(-5deg); }
+        75% { transform: translate(80vw, -15px) scaleX(0.8) rotate(15deg); }
+        90% { opacity: 1; }
+        100% { transform: translate(100vw, -50px) scaleX(1) rotate(0deg); opacity: 0; }
+      }
+      @keyframes hovering {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(10px, -10px) rotate(5deg); }
+        50% { transform: translate(0, -15px) rotate(-5deg); }
+        75% { transform: translate(-10px, -10px) rotate(0deg); }
+      }
+      @keyframes crawling {
+        0% { transform: translate(0, 0) rotate(0); }
+        100% { transform: translate(80vw, -5px) rotate(5deg); }
+      }
+      @keyframes hopping {
+        0%, 10% { transform: translate(0, 0); }
+        15% { transform: translate(15px, -10px); }
+        20%, 30% { transform: translate(30px, 0); }
+        35% { transform: translate(45px, -10px); }
+        40%, 100% { transform: translate(60px, 0); }
+      }
+      @keyframes perch-flick {
+        0%, 90% { transform: rotate(0); }
+        92%, 96% { transform: rotate(-10deg); }
+        94%, 98% { transform: rotate(10deg); }
+        100% { transform: rotate(0); }
+      }
+      @keyframes darting {
+        0% { transform: translate(0,0) scaleX(-1); opacity: 0; }
+        5% { opacity: 1; }
+        10%, 40% { transform: translate(-80px, 20px) scaleX(-1); }
+        45%, 80% { transform: translate(50px, 40px) scaleX(1); }
+        90% { opacity: 1; }
+        100% { transform: translate(120px, 10px) scaleX(1); opacity: 0; }
+      }
+      @keyframes frog-hop {
+        0%, 90% { transform: scaleY(1); }
+        92% { transform: scaleY(0.8); }
+        94% { transform: translate(15px, -20px) scaleY(1.1); }
+        96% { transform: translate(30px, 0) scaleY(0.9); }
+        100% { transform: translate(30px, 0) scaleY(1); }
+      }
+      @keyframes strutting {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(100px, 0) rotate(0); }
+      }
+      @keyframes dive {
+        0%, 80% { transform: translate(0, 0); }
+        85% { transform: translate(50px, 100px) rotate(45deg); opacity: 1; }
+        90% { opacity: 0; transform: translate(50px, 100px); }
+        95% { opacity: 0; transform: translate(0, 0); }
+        100% { opacity: 1; transform: translate(0, 0); }
+      }
+
+      .animate-gradient {
+        background-size: 300%;
+        animation: gradient 8s ease infinite;
+      }
+      .animate-fluttering { animation: fluttering infinite linear; }
+      .animate-hovering { animation: hovering infinite ease-in-out; }
+      .animate-crawling { animation: crawling infinite alternate-reverse linear; }
+      .animate-hopping { animation: hopping infinite ease-in-out; }
+      .animate-perch-flick { animation: perch-flick infinite ease-in-out; }
+      .animate-darting { animation: darting infinite ease-in-out; }
+      .animate-perch-sing { animation: perch-flick infinite ease-in-out; }
+      .animate-frog-hop { animation: frog-hop infinite ease-in-out; }
+      .animate-strutting { animation: strutting infinite alternate ease-in-out; }
+      .animate-dive { animation: dive infinite ease-in-out; }
+      .animate-perch-blink { animation: hovering infinite alternate linear; }
+    </style>
+    <script type="module" crossorigin src="/assets/index-BOs8FOoG.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((registration) => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, (err) => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

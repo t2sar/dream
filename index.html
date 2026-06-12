@@ -23,12 +23,12 @@
             },
             colors: {
               background: {
-                main: '#2E2925',
+                main: 'rgb(var(--bg-main) / <alpha-value>)',
               },
               surface: {
-                card: '#443B34',
-                soft: '#3A332D',
-                alt: '#4E453C',
+                card: 'rgb(var(--surface-card) / <alpha-value>)',
+                soft: 'rgb(var(--surface-soft) / <alpha-value>)',
+                alt: 'rgb(var(--surface-alt) / <alpha-value>)',
               },
               primary: {
                 mint: '#8FCFAD',
@@ -70,11 +70,53 @@
       }
     </script>
     <style>
+      :root {
+        --bg-main: 46 41 37; /* #2E2925 */
+        --surface-card: 68 59 52; /* #443B34 */
+        --surface-soft: 58 51 45; /* #3A332D */
+        --surface-alt: 78 69 60; /* #4E453C */
+      }
       body {
         font-family: 'Nunito', sans-serif;
-        background-color: #2E2925;
+        background-color: rgb(var(--bg-main));
         color: #F7EBDD;
         -webkit-tap-highlight-color: transparent;
+        transition: background-color 3s ease-in-out;
+      }
+      
+      /* Target layout elements without affecting hover states directly with a high specificity */
+      .bg-surface-card, .bg-surface-soft, .bg-surface-alt, .glass, .glass-card {
+         transition: background-color 3s ease-in-out, border-color 3s ease-in-out;
+      }
+      body[data-time-phase="Dawn"] {
+        --bg-main: 51 38 38; 
+        --surface-card: 74 58 53; 
+        --surface-soft: 62 48 43; 
+        --surface-alt: 85 68 63; 
+      }
+      body[data-time-phase="Morning"], body[data-time-phase="Midday"], body[data-time-phase="Afternoon"] {
+        --bg-main: 46 41 37; 
+        --surface-card: 68 59 52; 
+        --surface-soft: 58 51 45; 
+        --surface-alt: 78 69 60; 
+      }
+      body[data-time-phase="Sunset"] {
+        --bg-main: 56 42 38; 
+        --surface-card: 79 60 53; 
+        --surface-soft: 66 50 44; 
+        --surface-alt: 93 70 62; 
+      }
+      body[data-time-phase="Evening"] {
+        --bg-main: 29 26 33; 
+        --surface-card: 43 38 49; 
+        --surface-soft: 36 32 40; 
+        --surface-alt: 54 46 61; 
+      }
+      body[data-time-phase="Night"] {
+        --bg-main: 22 21 29; 
+        --surface-card: 36 34 45; 
+        --surface-soft: 30 28 37; 
+        --surface-alt: 43 40 55; 
       }
       /* Custom Scrollbar */
       ::-webkit-scrollbar {

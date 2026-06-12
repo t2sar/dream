@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Habit } from "../types";
 import { CATEGORIES } from "../categories";
+import { PlantIcon } from "./PlantIcon";
 import * as LucideIcons from "lucide-react";
 
 interface HabitCardProps {
@@ -175,21 +176,24 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-3 mb-2">
+              <PlantIcon 
+                plantType={habit.plantType} 
+                stage={habit.plantStage} 
+                status={habit.plantStatus} 
+                isPrivate={habit.isPrivate} 
+                isLegendary={habit.isLegendary} 
+                isArchived={habit.isArchived} 
+                className="w-10 h-10" 
+              />
               <h3
-                className={`font-display text-lg tracking-tight font-medium transition-colors duration-300 ${isCompleted ? "text-white" : "text-slate-350"}`}
+                className={`font-display text-xl tracking-tight font-medium transition-colors duration-300 ${isCompleted ? "text-white" : "text-slate-200"}`}
               >
                 {habit.name}
               </h3>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mt-2">
-              <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest text-[#00F5D4] bg-zinc-950/60 px-2.5 py-1 uppercase border border-white/5">
-                <span className="font-bold">
-                  {habit.plantType || "Sunflower"}
-                </span>
-              </div>
-              
               {CATEGORIES[habit.category] && (
                 <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-widest bg-zinc-950/60 px-2.5 py-1 uppercase border border-white/5 text-slate-400">
                   {React.createElement(CATEGORIES[habit.category].icon, { className: "w-3 h-3 text-slate-400" })}

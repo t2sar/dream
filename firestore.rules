@@ -49,6 +49,10 @@ service cloud.firestore {
         && (!('createdAt' in existing()) || incoming().createdAt == existing().createdAt);
 
       allow delete: if isOwner(userId);
+
+      match /logs/{logMonth} {
+        allow read, write: if isOwner(userId);
+      }
     }
   }
 }

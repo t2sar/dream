@@ -58,6 +58,7 @@ import { AlmanacView } from "./components/AlmanacView";
 import { isAlmanacSeason, getAlmanacYear, generateAlmanac } from "./almanacUtils";
 import { isHabitDueOnDate, getCompletedCountThisWeek } from "./scheduleUtils";
 import { GardenBadgesView } from "./components/GardenBadgesView";
+import { useAndroidApp } from "./services/useAndroidApp";
 import { SimpleGardenStatsDashboard } from "./components/SimpleGardenStatsDashboard";
 import { checkBadgeUnlocks } from "./badgeUtils";
 import { ACHIEVEMENT_BADGES } from "./badgeConfig";
@@ -112,6 +113,10 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Data State
+  const [habits, setHabits] = useState<Habit[]>([]);
+  useAndroidApp(habits);
+
   const quote =
     MOTIVATIONAL_QUOTES[new Date().getDate() % MOTIVATIONAL_QUOTES.length];
 
@@ -134,12 +139,25 @@ function App() {
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   // Data State
-  const [habits, setHabits] = useState<Habit[]>([]);
   const [logs, setLogs] = useState<HabitLog>({});
   const [extraStats, setExtraStats] = useState<Partial<UserStats>>({
       perfectGardenDays: 0, plantsRevived: 0, xp: 0
   });
   const [dataLoading, setDataLoading] = useState(false);
+  const [hasProcessedStreak, setHasProcessedStreak] = useState(false);
+
+  // Time of Day Synchronization
+  React.useEffect(() => {
+    const updateTimePhase = () => {
+      import('./components/GardenSky').then(({ getGardenTimePhase }) => {
+         const phase = getGardenTimePhase();
+         document.body.setAttribute('data-time-phase', phase);
+      });
+    };
+    updateTimePhase();
+    const interval = setInterval(updateTimePhase, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const activeEvent = React.useMemo(() => getActiveEvent(new Date()), []);
   const eventProgress = extraStats.eventProgress?.eventId === activeEvent?.id 
@@ -219,6 +237,57 @@ function App() {
 
     return () => unsubscribe();
   }, [user]);
+
+  // Gardener's Streak Processing
+  useEffect(() => {
+    if (dataLoading || !user || !extraStats || hasProcessedStreak) return;
+
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const lastLogin = extraStats.lastLoginDate;
+    
+    if (lastLogin === todayStr) {
+      setHasProcessedStreak(true);
+      return;
+    }
+
+    let currentStreak = extraStats.currentLoginStreak || 0;
+    let xpBonus = 0;
+    let updated = false;
+
+    if (!lastLogin) {
+      currentStreak = 1;
+      xpBonus = 10;
+      updated = true;
+    } else {
+      const diff = differenceInCalendarDays(new Date(todayStr), new Date(lastLogin));
+      if (diff === 1) {
+        currentStreak += 1;
+        xpBonus = Math.min(currentStreak * 5, 50);
+        updated = true;
+      } else if (diff > 1) {
+        currentStreak = 1;
+        xpBonus = 5;
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      setHasProcessedStreak(true);
+      const updatedStats = {
+        ...extraStats,
+        lastLoginDate: todayStr,
+        currentLoginStreak: currentStreak,
+        xp: (extraStats.xp || 0) + xpBonus
+      };
+      setExtraStats(updatedStats);
+      saveUserData(user.uid, { habits, logs, extraStats: updatedStats, activeRestMode });
+      
+      setTimeout(() => {
+        showToast(`🌱 Gardener's Streak Day ${currentStreak}! +${xpBonus} XP`);
+        playHaptic('grow');
+      }, 1500);
+    }
+  }, [dataLoading, user, extraStats, habits, logs, activeRestMode, hasProcessedStreak]);
 
   // Process missed habits once per day
   useEffect(() => {
@@ -1795,11 +1864,8 @@ function App() {
                           <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-12 h-12" />
                         </div>
                         <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize mb-1">
-                          {habit.type === 'avoid' && habit.isPrivate ? 'Private' : (habit.plantType ? habit.plantType.split(" / ")[1] || habit.plantType.split(" / ")[0] : "Aam")}
-                        </h3>
-                        <h4 className="text-xs text-secondary-text text-center font-sans leading-tight mb-2 opacity-80">
                           {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
-                        </h4>
+                        </h3>
                         <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 mt-1 w-full">
                           <Flame className="w-3.5 h-3.5" />
                           Streak: {habit.streak} days
@@ -1867,6 +1933,11 @@ function App() {
 
                 {/* Profile Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                    <Zap className="w-6 h-6 text-yellow-400 mb-3" />
+                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.currentLoginStreak || 0}</div>
+                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Login Streak</div>
+                  </div>
                   <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
                     <Trophy className="w-6 h-6 text-accent-peach mb-3" />
                     <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.totalHabitsCompleted}</div>

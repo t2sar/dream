@@ -61,12 +61,9 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
                     <Trophy className="w-3 h-3" />
                     {formatArchiveType(selectedHabit.archiveType)}
                  </div>
-                 <h2 className="text-3xl font-display font-bold text-white mb-1">
-                    {selectedHabit.isPrivate ? "Private Plant" : (selectedHabit.plantType?.split(' / ')[0] || "Plant")}
+                 <h2 className="text-3xl font-display font-bold text-white mb-4">
+                    {selectedHabit.isPrivate ? "Protected" : selectedHabit.name}
                  </h2>
-                 <p className="text-slate-400 text-sm mb-4">
-                    {selectedHabit.isPrivate ? "Protection Journey" : selectedHabit.name}
-                 </p>
                  
                  <div className="grid grid-cols-2 gap-4 max-w-xs">
                     <div className="bg-surface-alt/5 p-3 rounded-lg border border-surface-alt">
@@ -223,8 +220,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
                     </div>
                  </div>
                  
-                 <h4 className="font-bold text-white mb-1 line-clamp-1">{habit.isPrivate ? "Private Plant" : (habit.plantType?.split(' / ')[0] || "Plant")}</h4>
-                 <p className="text-[10px] text-slate-500 uppercase font-mono tracking-widest mb-3 line-clamp-1">{habit.isPrivate ? "Hidden Details" : habit.name}</p>
+                 <h4 className="font-bold text-white mb-4 line-clamp-2">{habit.isPrivate ? "Protected" : habit.name}</h4>
                  
                  <div className="mt-auto pt-3 border-t border-surface-alt flex gap-4 w-full">
                     <div className="flex flex-col">

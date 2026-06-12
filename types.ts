@@ -196,6 +196,9 @@ export interface UserStats {
   monthlyReports?: Record<string, MonthlyGardenReport>; // key is YYYY-MM
   almanacs?: Record<string, AlmanacData>; // key is YYYY
   quantityLogs?: Record<string, Record<string, number>>; // dateKey -> habitId -> amount
+  // Gardener's Streak
+  lastLoginDate?: string;
+  currentLoginStreak?: number;
   // Achievement fields
   habitsCreatedCount?: number;
   challengesCompletedCount?: number;

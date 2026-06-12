@@ -20,11 +20,10 @@ export const HarvestModal: React.FC<HarvestModalProps> = ({ data, onClose }) => 
           
           <h2 className="text-2xl font-black font-display text-white mb-2 line-clamp-1">Harvested!</h2>
           <p className="text-amber-500 font-mono text-sm tracking-widest uppercase pb-4">
-             {data.fruitName}
+             {data.habitName}
           </p>
 
           <div className="bg-black/30 rounded-xl p-4 border border-surface-alt mb-6">
-             <p className="text-xs text-slate-400 mb-2">From habit <span className="text-slate-300 font-bold">"{data.habitName}"</span></p>
              <div className="flex justify-center gap-6 mt-4">
                 <div className="text-center">
                    <div className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest mb-1">XP Gained</div>

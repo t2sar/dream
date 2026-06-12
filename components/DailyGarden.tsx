@@ -198,7 +198,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
   const isDarkPhase = matchTimeOfDay && (currentPhase === 'Evening' || currentPhase === 'Night' || currentPhase === 'Dawn');
 
   return (
-    <div className={bgClass}>
+    <div className={bgClass} style={{ backgroundColor: '#24676d' }}>
       <GardenSky enabled={matchTimeOfDay} extraFireflies={extraFireflies} />
       
       <div className="relative z-10 space-y-8">
@@ -401,7 +401,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
                <ShieldAlert className="w-8 h-8 text-rose-400" />
                <div>
                   <h3 className="text-base font-bold text-rose-400">Urgent Care Needed</h3>
-                  <p className="text-xs text-rose-300/80">Your {critical[0].plantType?.split('/')[0]} is critical. Complete its habit today to start recovery.</p>
+                  <p className="text-xs text-rose-300/80">Your "{critical[0].name}" plant is critical. Complete its habit today to start recovery.</p>
                </div>
             </div>
          </div>
@@ -628,8 +628,7 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
                {isDanger ? <AlertTriangle className="w-3.5 h-3.5 text-status-wilting" /> : isCompleted ? <Check className="w-3.5 h-3.5 text-status-healthy" /> : <div className="w-2 h-2 rounded-full bg-status-healthy" />}
                <span className={statusColor}>{isSlipped ? "Slipped Today" : status}</span>
              </div>
-             <h4 className="font-bold text-primary-text text-base capitalize">{habit.type === 'avoid' && habit.isPrivate ? 'Private Plant' : (habit.plantType?.split(' / ')[0] || 'Plant')}</h4>
-             <p className="text-secondary-text text-sm mb-1 line-clamp-1">{habit.type === 'avoid' && habit.isPrivate ? 'Private Plant' : habit.name}</p>
+             <h4 className="font-bold text-primary-text text-base capitalize">{habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}</h4>
              {habit.scheduleType && habit.scheduleType !== 'daily' && (
                 <div className="inline-block mt-1 px-2 py-0.5 bg-surface-alt/40 border border-black/5 rounded-chip text-[10px] font-bold text-muted-text tracking-wide uppercase">
                    {formattedSchedule()}

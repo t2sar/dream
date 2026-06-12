@@ -335,7 +335,7 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = ({ logs, habi
             </div>
             <p className="text-sm text-slate-300">
               Completed {reportData.habitPerformance[reportData.bestHabit.id].completed} / {reportData.habitPerformance[reportData.bestHabit.id].scheduled} times.
-              Your {reportData.bestHabit.plantType?.split(' / ')[0] || "plant"} grew strongly this month.
+              Your "{reportData.bestHabit.name}" plant grew strongly this month.
             </p>
           </div>
         )}

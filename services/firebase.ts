@@ -17,7 +17,8 @@ import {
   onSnapshot, 
   enableIndexedDbPersistence,
   initializeFirestore,
-  CACHE_SIZE_UNLIMITED 
+  CACHE_SIZE_UNLIMITED,
+  collection
 } from "firebase/firestore";
 import { Habit, HabitLog } from "../types";
 import firebaseConfig from "../firebase-applet-config.json";
@@ -45,9 +46,7 @@ if (apiKey && apiKey.length > 10) {
     app = initializeApp(configToUse);
     authInstance = getAuth(app);
 
-    dbInstance = initializeFirestore(app, {
-      cacheSizeBytes: CACHE_SIZE_UNLIMITED
-    }, firebaseConfig.firestoreDatabaseId);
+    dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
     enableIndexedDbPersistence(dbInstance).catch((err) => {
         console.debug('Persistence disabled:', err.code);
@@ -124,22 +123,82 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
     return () => {};
   }
   const pathForGetDocs = `users/${userId}`;
-  return onSnapshot(doc(dbInstance, "users", userId), (doc) => {
-    if (doc.exists()) {
-      onUpdate(doc.data());
+  
+  let currentData: any = null;
+  let currentLogs: any = {};
+  let isFirstDocFetch = true;
+  
+  const notifyUpdate = () => {
+    if (currentData) {
+      onUpdate({
+        ...currentData,
+        logs: { ...(currentData.logs || {}), ...currentLogs }
+      });
+    }
+  };
+
+  const unsubDoc = onSnapshot(doc(dbInstance, "users", userId), (docSnap) => {
+    if (docSnap.exists()) {
+      currentData = docSnap.data();
+      if (!isFirstDocFetch) notifyUpdate();
+      isFirstDocFetch = false;
     } else {
       onUpdate(null);
     }
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, pathForGetDocs);
   });
+
+  const unsubLogs = onSnapshot(collection(dbInstance, "users", userId, "logs"), (collSnap) => {
+    collSnap.docChanges().forEach((change) => {
+      // Each doc is a YYYY-MM record
+      Object.assign(currentLogs, change.doc.data());
+    });
+    if (currentData && !isFirstDocFetch) notifyUpdate();
+  }, (error) => {
+    handleFirestoreError(error, OperationType.LIST, `${pathForGetDocs}/logs`);
+  });
+
+  return () => {
+    unsubDoc();
+    unsubLogs();
+  };
 };
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
   if (!dbInstance) return;
   const pathForWrite = `users/${userId}`;
   try {
-    await setDoc(doc(dbInstance, "users", userId), data, { merge: true });
+    const { logs, ...mainData } = data;
+    
+    // Safe stringify to handle unexpected circular references
+    const safeStringify = (obj: any) => {
+      return JSON.stringify(obj, function(key, value) {
+        if (typeof value !== 'object' || value === null) {
+          return value;
+        }
+        if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
+            return undefined; 
+        }
+        return value;
+      });
+    };
+    
+    const cleanMainData = JSON.parse(safeStringify(mainData));
+    await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
+
+    // Sub-collections & Pagination (Delta Updates)
+    const logsByMonth: Record<string, HabitLog> = {};
+    for (const [dateStr, ids] of Object.entries(logs || {})) {
+      const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
+      if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+      logsByMonth[monthPrefix][dateStr] = ids;
+    }
+
+    for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+      const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+      await setDoc(monthDocRef, JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+    }
   } catch (e) {
     handleFirestoreError(e, OperationType.WRITE, pathForWrite);
   }
@@ -148,17 +207,43 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
   if (!dbInstance) return false;
   const pathForWrite = `users/${userId}`;
+  
+  // Safe stringify to handle unexpected circular references
+  const safeStringify = (obj: any) => {
+    return JSON.stringify(obj, function(key, value) {
+      if (typeof value !== 'object' || value === null) {
+        return value;
+      }
+      if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
+          return undefined; 
+      }
+      return value;
+    });
+  };
+
   try {
     const userRef = doc(dbInstance, "users", userId);
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-      await setDoc(userRef, {
+      const cleanData = JSON.parse(safeStringify({
         habits: localHabits,
-        logs: localLogs,
         activeRestMode: activeRestMode || null,
         createdAt: new Date().toISOString()
-      });
+      }));
+      await setDoc(userRef, cleanData);
+
+      // Save initial logs to subcollections
+      const logsByMonth: Record<string, HabitLog> = {};
+      for (const [dateStr, ids] of Object.entries(localLogs || {})) {
+        const monthPrefix = dateStr.substring(0, 7);
+        if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+        logsByMonth[monthPrefix][dateStr] = ids;
+      }
+      for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+      }
+
       return true; 
     }
     return false; 

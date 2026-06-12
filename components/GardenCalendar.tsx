@@ -322,7 +322,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = ({ logs, habits, ac
                        {selectedDayData.completedHabits.map(h => (
                          <li key={h.id} className="flex items-center gap-2 text-sm text-slate-300">
                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                           {h.name} <span className="text-xs text-slate-500 ml-1">({h.plantType || 'Seed'})</span>
+                           {h.name}
                          </li>
                        ))}
                      </ul>
