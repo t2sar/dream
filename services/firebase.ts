@@ -135,7 +135,7 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
   });
 };
 
-export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog }) => {
+export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
   if (!dbInstance) return;
   const pathForWrite = `users/${userId}`;
   try {
@@ -145,7 +145,7 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
   }
 };
 
-export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog) => {
+export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
   if (!dbInstance) return false;
   const pathForWrite = `users/${userId}`;
   try {
@@ -156,6 +156,7 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
       await setDoc(userRef, {
         habits: localHabits,
         logs: localLogs,
+        activeRestMode: activeRestMode || null,
         createdAt: new Date().toISOString()
       });
       return true; 

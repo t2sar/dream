@@ -1,4 +1,4 @@
-const CACHE_NAME = 't2sar-v2';
+const CACHE_NAME = 't2sar-v3';
 const urlsToCache = [
   '/',
   '/index.html',

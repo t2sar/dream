@@ -1,5 +1,6 @@
 // Ensure you have React App environment variables or replace this with your Client ID
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''; 
+// @ts-ignore
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''; 
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 
 declare const google: any;
