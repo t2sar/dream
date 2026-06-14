@@ -23,118 +23,142 @@
   --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif;
-  --radius-chip: 14px;
-  --radius-input: 20px;
-  --radius-button: 24px;
-  --radius-card: 24px;
+  --radius-chip: 16px;
+  --radius-input: 24px;
+  --radius-button: 28px;
+  --radius-card: 28px;
   --radius-large-card: 32px;
-  --radius-bottom-sheet: 32px;
+  --radius-bottom-sheet: 36px;
   --radius-progress: 9999px;
 }
 
 :root {
-  --text-primary: #4A4238;
-  --text-secondary: #70685D;
-  --text-muted: #A0988D;
-  --bg-main: 251 248 241; /* #FBF8F1 Soft Cream */
-  --surface-card: 242 235 223; /* #F2EBDF */
-  --surface-soft: 247 243 235; /* #F7F3EB */
-  --surface-alt: 230 220 205; /* #E6DCCD */
-  --primary-mint: 0 168 120; /* #00A878 Darker Mint for contrast */
+  --text-primary: #332F2A; /* Deep espresso */
+  --text-secondary: #5C554B; 
+  --text-muted: #8F867A;
+  --bg-main: 253 251 247; /* Lighter soft cream */
+  --surface-card: 255 255 255; /* Pure white for higher contrast on cream */
+  --surface-soft: 250 248 242;
+  --surface-alt: 235 227 218;
+  --primary-mint: 0 168 120;
 }
 
 @layer base {
   body {
     font-family: 'Nunito', sans-serif;
     background-color: rgb(var(--bg-main));
-    color: #4A4238; /* Dark brown/charcoal for soft contrast on cream */
+    color: var(--text-primary);
+    line-height: 1.6;
+    letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
     transition: background-color 3s ease-in-out, color 3s ease-in-out;
   }
 
   body[data-time-phase="Dawn"] {
-    --bg-main: 255 240 235; 
-    --surface-card: 255 228 220; 
-    --surface-soft: 255 235 230; 
-    --surface-alt: 245 210 200; 
-    color: #5A4444; /* darker dawn text */
-    --text-primary: #5A4444;
-    --text-secondary: #7A6060;
-    --text-muted: #A38A8A;
+    --bg-main: 253 245 242; 
+    --surface-card: 255 255 255; 
+    --surface-soft: 255 240 238; 
+    --surface-alt: 245 225 215; 
+    color: #4A3A35;
+    --text-primary: #4A3A35;
+    --text-secondary: #6B554F;
+    --text-muted: #A38C87;
   }
   body[data-time-phase="Morning"], body[data-time-phase="Midday"], body[data-time-phase="Afternoon"] {
-    --bg-main: 251 248 241; 
-    --surface-card: 242 235 223; 
-    --surface-soft: 247 243 235; 
-    --surface-alt: 230 220 205; 
-    color: #4A4238; /* darker text */
-    --text-primary: #4A4238;
-    --text-secondary: #70685D;
-    --text-muted: #A0988D;
+    --bg-main: 253 251 247; 
+    --surface-card: 255 255 255;
+    --surface-soft: 250 248 242;
+    --surface-alt: 235 227 218;
+    color: #332F2A;
+    --text-primary: #332F2A;
+    --text-secondary: #5C554B;
+    --text-muted: #8F867A;
   }
   body[data-time-phase="Sunset"] {
-    --bg-main: 255 242 230; 
-    --surface-card: 255 230 210; 
-    --surface-soft: 255 235 220; 
-    --surface-alt: 245 220 190; 
-    color: #5A4030; /* darker text */
-    --text-primary: #5A4030;
-    --text-secondary: #7C6050;
-    --text-muted: #A88F80;
+    --bg-main: 252 245 238; 
+    --surface-card: 255 255 255; 
+    --surface-soft: 250 242 235; 
+    --surface-alt: 245 225 210; 
+    color: #4A3326;
+    --text-primary: #4A3326;
+    --text-secondary: #705240;
+    --text-muted: #A38575;
   }
   body[data-time-phase="Evening"] {
-    --bg-main: 46 41 50; 
-    --surface-card: 60 55 65; 
-    --surface-soft: 55 50 60; 
-    --surface-alt: 75 70 80; 
-    color: #F7EBDD; /* bright text for night */
-    --text-primary: #F7EBDD;
-    --text-secondary: #D4C4B5;
-    --text-muted: #AFA095;
+    --bg-main: 40 37 46; 
+    --surface-card: 52 48 58; 
+    --surface-soft: 48 45 54; 
+    --surface-alt: 65 60 70; 
+    color: #F4EBE3; 
+    --text-primary: #F4EBE3;
+    --text-secondary: #CBB9AA;
+    --text-muted: #A3968A;
   }
   body[data-time-phase="Night"] {
-    --bg-main: 30 28 35; 
-    --surface-card: 45 42 50; 
-    --surface-soft: 40 38 45; 
-    --surface-alt: 60 55 65; 
-    color: #F7EBDD; /* bright text for night */
-    --text-primary: #F7EBDD;
-    --text-secondary: #D4C4B5;
-    --text-muted: #AFA095;
+    --bg-main: 24 22 28; 
+    --surface-card: 38 35 42; 
+    --surface-soft: 35 32 40; 
+    --surface-alt: 55 50 60; 
+    color: #EBE5E0; 
+    --text-primary: #EBE5E0;
+    --text-secondary: #BDB5AE;
+    --text-muted: #968F87;
   }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(247, 235, 221, 0.2);
+  background: var(--text-muted);
   border-radius: 10px;
+  opacity: 0.2;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(247, 235, 221, 0.4);
+  background: var(--text-secondary);
 }
 
 .glass {
-  background: rgba(30, 28, 25, 0.3);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 12px 32px -8px rgba(0, 0, 0, 0.04), 0 4px 12px -4px rgba(0, 0, 0, 0.02);
+}
+
+body[data-time-phase="Evening"] .glass,
+body[data-time-phase="Night"] .glass {
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 32px -8px rgba(0, 0, 0, 0.3), 0 4px 12px -4px rgba(0, 0, 0, 0.1);
 }
 
 .glass-card {
-  background: rgba(68, 59, 52, 0.45);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 16px 40px -12px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.03);
+}
+
+body[data-time-phase="Evening"] .glass-card,
+body[data-time-phase="Night"] .glass-card {
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 40px -12px rgba(0, 0, 0, 0.4), 0 8px 16px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* Base card improvements */
+.bg-surface-card {
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
+}
+body[data-time-phase="Evening"] .bg-surface-card,
+body[data-time-phase="Night"] .bg-surface-card {
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.2), 0 2px 8px -2px rgba(0, 0, 0, 0.1);
 }
 
 .bg-grain::before {

@@ -125,13 +125,15 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
       style={size ? { width: size, height: size } : {}}
       title={`${plantType} - ${stage} (${status})`}
     >
-      {/* Background container (only for Emoji mode now, SVG handles its own) */}
-      {isEmojiMode && (
-        <div 
-          className={`absolute inset-0 rounded-full transition-all duration-300 ${isLocked ? 'grayscale opacity-50' : ''}`}
-          style={{ backgroundColor: bgColor }}
-        />
-      )}
+      {/* Background container (Applies to all modes now for premium polish) */}
+      <div 
+        className={`absolute inset-0 rounded-[40%] transition-all duration-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.02)] ${isLocked ? 'grayscale opacity-50' : ''}`}
+        style={{ 
+          backgroundColor: bgColor || 'rgba(255,255,255,0.1)', 
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)'
+        }}
+      />
       
       {/* Icon Layer */}
       <motion.div 

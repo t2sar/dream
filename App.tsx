@@ -1792,7 +1792,7 @@ function App() {
           <Calendar className="w-6 h-6 text-status-healthy" />
         </div>
 
-        <div className="flex flex-col gap-10 w-full px-4 overflow-y-auto hidden-scrollbar">
+        <div className="flex flex-col gap-10 w-full px-6 md:px-8 overflow-y-auto hidden-scrollbar">
           {[
             { id: Tab.TRACKER, icon: LayoutDashboard },
             { id: Tab.PROGRESS, icon: BarChart2 },
@@ -1817,7 +1817,7 @@ function App() {
         </div>
 
         {deferredPrompt && (
-          <div className="mt-auto mb-4 w-full px-4">
+          <div className="mt-auto mb-4 w-full px-6 md:px-8">
             <button
               onClick={handleInstallClick}
               className="w-full aspect-square flex flex-col items-center justify-center gap-1 text-muted-text hover:text-status-healthy transition-colors rounded-2xl hover:bg-primary-mint/10"
@@ -1829,7 +1829,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 md:p-12 lg:p-16 min-h-screen">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen">
         {/* Garden Companions Ambient Layer */}
         <React.Suspense fallback={null}>
           {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}

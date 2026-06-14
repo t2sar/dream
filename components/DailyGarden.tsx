@@ -346,21 +346,21 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
             {new Date().toLocaleDateString('en-BD', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-surface-card rounded-2xl p-4 border border-surface-alt shadow-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="glass-card rounded-card p-5">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Droplet className="w-3.5 h-3.5 text-secondary-blue"/> Watered</div>
               <div className="text-2xl font-bold text-primary-text">{completed.length} <span className="text-sm text-secondary-text font-normal">/ {totalScheduledCount}</span></div>
             </div>
-            <div className="bg-surface-card rounded-2xl p-4 border border-surface-alt shadow-sm">
+            <div className="glass-card rounded-card p-5">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Leaf className="w-3.5 h-3.5 text-status-healthy"/> Health</div>
               <div className="text-2xl font-bold text-primary-text">{avgHealth}%</div>
               <div className="text-[11px] text-status-healthy font-bold mt-1">{healthStateMsg}</div>
             </div>
-            <div className="bg-surface-card rounded-2xl p-4 border border-surface-alt shadow-sm">
+            <div className="glass-card rounded-card p-5">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 text-status-wilting"/> At Risk</div>
               <div className="text-2xl font-bold text-primary-text">{critical.length + wilting.length}</div>
             </div>
-            <div className="bg-surface-card rounded-2xl p-4 border border-surface-alt shadow-sm">
+            <div className="glass-card rounded-card p-5">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Gift className="w-3.5 h-3.5 text-accent-peach"/> Reward</div>
               <div className="text-sm font-bold text-primary-text">
                 {isPerfectDayNow ? 'Rain Boost! 🌧️' : `${scheduled.length} more to unlock`}
@@ -602,43 +602,38 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   const [slipReason, setSlipReason] = useState('');
   const [manualQuantity, setManualQuantity] = useState('');
 
-  let cardBg = 'bg-surface-soft';
-  let cardBorder = 'border-surface-alt';
+  let cardBg = 'glass-card';
   let statusColor = 'text-status-healthy';
-  let buttonBg = 'bg-primary-mint text-primary-text border-transparent shadow-sm';
-  let buttonHover = 'hover:bg-[#a5d8bd]';
+  let buttonBg = 'bg-primary-mint text-white border-transparent shadow-sm';
+  let buttonHover = 'hover:bg-[#00c98f]';
   let iconBg = 'bg-primary-mint/20';
 
   if (isCompleted) {
-    cardBg = 'bg-status-completed/20';
-    cardBorder = 'border-status-completed/30';
-    buttonBg = 'bg-surface-card text-secondary-text shadow-sm border border-surface-alt';
+    cardBg = 'glass-card bg-status-completed/10';
+    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-white/10';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (isDanger) {
-    cardBg = 'bg-status-wilting/10';
-    cardBorder = 'border-status-wilting/30';
+    cardBg = 'glass-card bg-status-wilting/5 border-status-wilting/20';
     statusColor = 'text-status-wilting';
-    buttonBg = 'bg-status-needsCare text-primary-text border-transparent shadow-sm';
-    buttonHover = 'hover:bg-[#eacc80]';
+    buttonBg = 'bg-status-needsCare text-white border-transparent shadow-sm';
+    buttonHover = 'hover:bg-[#d4b060]';
     iconBg = 'bg-status-wilting/20';
   } else if (status === 'Resting') {
-    cardBg = 'bg-status-resting/30';
-    cardBorder = 'border-transparent';
+    cardBg = 'glass-card bg-status-resting/10';
     statusColor = 'text-status-resting';
-    buttonBg = 'bg-surface-card text-secondary-text shadow-sm border-surface-alt';
+    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border-white/10';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (canHarvest) {
-    cardBg = 'bg-accent-peach/20';
-    cardBorder = 'border-accent-peach/50';
-    buttonBg = 'bg-accent-peach text-primary-text shadow-sm border-transparent';
+    cardBg = 'glass-card bg-accent-peach/10 border-accent-peach/30';
+    buttonBg = 'bg-accent-peach text-white shadow-sm border-transparent';
     buttonHover = 'hover:bg-[#F4C5A5]';
     iconBg = 'bg-accent-peach/30';
   }
 
   return (
-    <div className={`${cardBg} border ${cardBorder} rounded-card p-5 flex flex-col justify-between group transition-all duration-700 relative h-full overflow-hidden ${justCompleted ? 'scale-[1.02] shadow-[0_0_30px_rgba(34,197,94,0.25)]' : 'hover:shadow-sm'}`}>
+    <div className={`${cardBg} rounded-card p-6 flex flex-col justify-between group transition-all duration-700 relative h-full overflow-hidden ${justCompleted ? 'scale-[1.02] shadow-[0_0_40px_rgba(34,197,94,0.3)]' : 'hover:shadow-md hover:-translate-y-0.5'}`}>
       {justCompleted && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
            <div className="absolute inset-0 bg-gradient-to-tr from-status-healthy/30 to-transparent animate-pulse duration-500" />
@@ -935,5 +930,5 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
          prevProps.habit.plantStage === nextProps.habit.plantStage &&
          prevProps.habit.plantStatus === nextProps.habit.plantStatus &&
          prevProps.habit.isArchived === nextProps.habit.isArchived &&
-         JSON.stringify(prevProps.recentHistory) === JSON.stringify(nextProps.recentHistory);
+         prevProps.recentHistoryStr === nextProps.recentHistoryStr;
 });

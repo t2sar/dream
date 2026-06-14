@@ -71,7 +71,24 @@ export const backupToDrive = async (data: any) => {
     const searchRes = await driveFetch(`https://www.googleapis.com/drive/v3/files?${searchParams}`);
     const searchData = await searchRes.json();
     
-    const fileContent = JSON.stringify(data);
+    // Safe stringify to handle unexpected circular references
+    const safeStringify = (obj: any) => {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, function(key, value) {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
+                if (value instanceof Element || (value as any)._reactName || value instanceof Event) {
+                    return undefined; 
+                }
+            }
+            return value;
+        });
+    };
+
+    const fileContent = safeStringify(data);
     const fileBlob = new Blob([fileContent], { type: 'application/json' });
 
     if (searchData.files && searchData.files.length > 0) {

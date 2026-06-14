@@ -181,12 +181,16 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
       
       // Safe stringify to handle unexpected circular references
       const safeStringify = (obj: any) => {
+        const seen = new WeakSet();
         return JSON.stringify(obj, function(key, value) {
-          if (typeof value !== 'object' || value === null) {
-            return value;
-          }
-          if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
-              return undefined; 
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+              return;
+            }
+            seen.add(value);
+            if (value instanceof Element || (value as any)._reactName || value instanceof Event) {
+                return undefined; 
+            }
           }
           return value;
         });
@@ -205,7 +209,7 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
 
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
         const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-        await setDoc(monthDocRef, JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+        await setDoc(monthDocRef, JSON.parse(safeStringify(monthLogs)), { merge: true });
       }
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
@@ -219,12 +223,16 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
   
   // Safe stringify to handle unexpected circular references
   const safeStringify = (obj: any) => {
+    const seen = new WeakSet();
     return JSON.stringify(obj, function(key, value) {
-      if (typeof value !== 'object' || value === null) {
-        return value;
-      }
-      if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
-          return undefined; 
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+        if (value instanceof Element || (value as any)._reactName || value instanceof Event) {
+            return undefined; 
+        }
       }
       return value;
     });
@@ -250,7 +258,7 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
         logsByMonth[monthPrefix][dateStr] = ids;
       }
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(safeStringify(monthLogs)), { merge: true });
       }
 
       return true; 
