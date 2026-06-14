@@ -12,7 +12,7 @@ interface MonthlyReportViewProps {
   activeRestMode?: RestMode | null;
 }
 
-export const MonthlyReportView: React.FC<MonthlyReportViewProps> = ({ logs, habits, activeRestMode }) => {
+export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({ logs, habits, activeRestMode }) => {
   const [monthsAgo, setMonthsAgo] = useState(0);
 
   const reportData = useMemo(() => {
@@ -464,4 +464,4 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = ({ logs, habi
       </div>
     </div>
   );
-};
+});

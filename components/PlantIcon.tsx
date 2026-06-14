@@ -1,8 +1,10 @@
 import React from 'react';
 import { PlantType, PlantHealthStatus, PlantStage } from '../types';
 import { PLANT_ICONS_CONFIG, PlantIconConfig } from './plantIconRegistry';
-import { PlantSvgShape } from './PlantAssets';
 import { Lock } from 'lucide-react';
+import { motion } from 'motion/react';
+
+const PlantSvgShape = React.lazy(() => import('./PlantAssets').then(m => ({ default: m.PlantSvgShape })));
 
 interface PlantIconProps {
   plantType?: PlantType;
@@ -16,9 +18,10 @@ interface PlantIconProps {
   isLocked?: boolean;
   isArchived?: boolean;
   isLegendary?: boolean;
+  health?: number; // health score out of 100
 }
 
-export const PlantIcon: React.FC<PlantIconProps> = ({ 
+export const PlantIcon: React.FC<PlantIconProps> = React.memo(({ 
   plantType = "Mango / Aam", 
   stage = "Fruiting Plant", 
   status = "Normal", 
@@ -30,6 +33,7 @@ export const PlantIcon: React.FC<PlantIconProps> = ({
   isLocked = false,
   isArchived = false,
   isLegendary = false,
+  health,
 }) => {
   if (isPrivate) {
     return (
@@ -59,34 +63,38 @@ export const PlantIcon: React.FC<PlantIconProps> = ({
   // Sprout: sprout
   // Small Plant: small leafy plant
   // Fruiting: full icon
-  let stageClass = "scale-100";
-  let opacity = "opacity-100";
+  let scaleValue = 1;
+  let opacityValue = 1;
+  let yOffset = 0;
   
   if (stage === 'Seed') {
-    stageClass = "scale-50 translate-y-4";
+    scaleValue = 0.5;
+    yOffset = 16;
   } else if (stage === 'Sprout') {
-    stageClass = "scale-75 translate-y-2";
+    scaleValue = 0.75;
+    yOffset = 8;
   } else if (stage === 'Small Plant' || stage === 'Young Plant') {
-    stageClass = "scale-90 translate-y-1";
+    scaleValue = 0.9;
+    yOffset = 4;
   }
 
   if (status === 'Dead') {
-     opacity = "opacity-30 grayscale";
+     opacityValue = 0.3;
   } else if (status === 'Critical') {
-     opacity = "opacity-80 sepia";
+     opacityValue = 0.8;
   }
 
   const renderBaseIcon = () => {
     if (stage === 'Seed') {
       return (
-        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
            <ellipse cx="32" cy="48" rx="8" ry="6" fill={primaryColor} stroke={outlineColor} strokeWidth="3" />
         </svg>
       );
     }
     if (stage === 'Sprout') {
       return (
-        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
            <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
            <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
            <circle cx="20" cy="20" r="4" fill={primaryColor} />
@@ -97,25 +105,50 @@ export const PlantIcon: React.FC<PlantIconProps> = ({
     if (isEmojiMode) {
       return <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>;
     }
-    return <PlantSvgShape config={config} className="w-full h-full" />;
+    return (
+      <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
+        <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
+      </React.Suspense>
+    );
+  };
+
+  const getGrayscaleFilter = () => {
+    if (status === 'Dead') return 'grayscale(1)';
+    if (status === 'Critical') return 'sepia(1)';
+    if (isLocked) return 'grayscale(0.5) blur(2px) brightness(0.5)';
+    return 'none';
   };
 
   return (
     <div 
-      className={`relative inline-flex items-center justify-center shrink-0 ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 ${className} overflow-visible`}
       style={size ? { width: size, height: size } : {}}
       title={`${plantType} - ${stage} (${status})`}
     >
-      {/* Background container */}
-      <div 
-        className={`absolute inset-0 rounded-full transition-all duration-300 ${isLocked ? 'grayscale opacity-50' : ''}`}
-        style={{ backgroundColor: bgColor }}
-      />
+      {/* Background container (only for Emoji mode now, SVG handles its own) */}
+      {isEmojiMode && (
+        <div 
+          className={`absolute inset-0 rounded-full transition-all duration-300 ${isLocked ? 'grayscale opacity-50' : ''}`}
+          style={{ backgroundColor: bgColor }}
+        />
+      )}
       
       {/* Icon Layer */}
-      <div className={`relative w-full h-full transition-all duration-500 ease-spring ${stageClass} ${opacity} ${isLocked ? 'blur-sm brightness-50' : ''}`}>
-         {renderBaseIcon()}
-      </div>
+      <motion.div 
+        className="relative w-full h-full flex items-center justify-center"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ 
+          scale: scaleValue, 
+          opacity: opacityValue, 
+          y: yOffset,
+          filter: getGrayscaleFilter()
+        }}
+        transition={{ type: "spring", stiffness: 120, damping: 15 }}
+      >
+         <div className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}>
+            {renderBaseIcon()}
+         </div>
+      </motion.div>
 
       {/* Lock Overlay */}
       {isLocked && (
@@ -162,4 +195,4 @@ export const PlantIcon: React.FC<PlantIconProps> = ({
       )}
     </div>
   );
-};
+});

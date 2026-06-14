@@ -8,20 +8,20 @@ export interface PlantIconConfig {
   secondaryColor?: string;
   bgColor: string;
   outlineColor: string;
-  shapeGroup: 'mango' | 'banana' | 'round' | 'oval' | 'berry' | 'cluster' | 'palm' | 'spiky' | 'star' | 'melon' | 'citrus' | 'nut' | 'fig' | 'leaf' | 'bean' | 'flower' | 'long_fruit';
+  shapeGroup: 'mango' | 'jackfruit' | 'banana' | 'coconut' | 'guava' | 'litchi' | 'papaya' | 'pineapple' | 'strawberry' | 'taal' | 'round' | 'oval' | 'berry' | 'cluster' | 'palm' | 'spiky' | 'star' | 'melon' | 'citrus' | 'nut' | 'fig' | 'leaf' | 'bean' | 'flower' | 'long_fruit';
 }
 
 export const PLANT_ICONS_CONFIG: Record<PlantType, PlantIconConfig> = {
-  "Mango / Aam": { plantTypeId: "Mango / Aam", emoji: "🥭", primaryColor: "#F7C85F", bgColor: "rgba(247, 200, 95, 0.2)", outlineColor: "#D97925", shapeGroup: "mango" },
-  "Jackfruit / Kathal": { plantTypeId: "Jackfruit / Kathal", emoji: "🍈", primaryColor: "#A1C96A", bgColor: "rgba(161, 201, 106, 0.2)", outlineColor: "#4A7A2A", shapeGroup: "spiky" },
-  "Banana / Kola": { plantTypeId: "Banana / Kola", emoji: "🍌", primaryColor: "#F9D549", bgColor: "rgba(249, 213, 73, 0.2)", outlineColor: "#D69F12", shapeGroup: "banana" },
-  "Coconut / Narikel": { plantTypeId: "Coconut / Narikel", emoji: "🥥", primaryColor: "#E2D0B4", bgColor: "rgba(226, 208, 180, 0.2)", outlineColor: "#7A6448", shapeGroup: "round" },
-  "Guava / Peyara": { plantTypeId: "Guava / Peyara", emoji: "🍐", primaryColor: "#A5D678", bgColor: "rgba(165, 214, 120, 0.2)", outlineColor: "#5B8D2F", shapeGroup: "round" },
-  "Litchi / Lichu": { plantTypeId: "Litchi / Lichu", emoji: "🍒", primaryColor: "#E55C5C", bgColor: "rgba(229, 92, 92, 0.2)", outlineColor: "#8C2323", shapeGroup: "cluster" },
-  "Papaya / Pepe": { plantTypeId: "Papaya / Pepe", emoji: "🍈", primaryColor: "#EBB15B", bgColor: "rgba(235, 177, 91, 0.2)", outlineColor: "#A6631C", shapeGroup: "oval" },
-  "Pineapple / Anaros": { plantTypeId: "Pineapple / Anaros", emoji: "🍍", primaryColor: "#E5CA49", bgColor: "rgba(229, 202, 73, 0.2)", outlineColor: "#A68615", shapeGroup: "spiky" },
-  "Strawberry": { plantTypeId: "Strawberry", emoji: "🍓", primaryColor: "#E24A4A", bgColor: "rgba(226, 74, 74, 0.2)", outlineColor: "#931717", shapeGroup: "berry" },
-  "Asian Palmyra Palm / Taal": { plantTypeId: "Asian Palmyra Palm / Taal", emoji: "🌴", primaryColor: "#574033", secondaryColor: "#FFC843", bgColor: "rgba(87, 64, 51, 0.2)", outlineColor: "#2F2119", shapeGroup: "palm" },
+  "Mango / Aam": { plantTypeId: "Mango / Aam", emoji: "🥭", primaryColor: "#FFC843", bgColor: "rgba(255, 200, 67, 0.2)", outlineColor: "#D97925", secondaryColor: "#FF7878", shapeGroup: "mango" },
+  "Jackfruit / Kathal": { plantTypeId: "Jackfruit / Kathal", emoji: "🍈", primaryColor: "#B5D97A", bgColor: "rgba(181, 217, 122, 0.2)", outlineColor: "#4A7A2A", shapeGroup: "jackfruit" },
+  "Banana / Kola": { plantTypeId: "Banana / Kola", emoji: "🍌", primaryColor: "#FFE366", bgColor: "rgba(255, 227, 102, 0.2)", outlineColor: "#D69F12", secondaryColor: "#93D979", shapeGroup: "banana" },
+  "Coconut / Narikel": { plantTypeId: "Coconut / Narikel", emoji: "🥥", primaryColor: "#A3DE9A", bgColor: "rgba(163, 222, 154, 0.2)", outlineColor: "#4A824A", shapeGroup: "coconut" },
+  "Guava / Peyara": { plantTypeId: "Guava / Peyara", emoji: "🍐", primaryColor: "#91F0AE", bgColor: "rgba(145, 240, 174, 0.2)", outlineColor: "#3F965E", shapeGroup: "guava" },
+  "Litchi / Lichu": { plantTypeId: "Litchi / Lichu", emoji: "🍒", primaryColor: "#FF8294", bgColor: "rgba(255, 130, 148, 0.2)", outlineColor: "#B83B4D", shapeGroup: "litchi" },
+  "Papaya / Pepe": { plantTypeId: "Papaya / Pepe", emoji: "🍈", primaryColor: "#FFCE6B", secondaryColor: "#B8E68C", bgColor: "rgba(255, 206, 107, 0.2)", outlineColor: "#A6631C", shapeGroup: "papaya" },
+  "Pineapple / Anaros": { plantTypeId: "Pineapple / Anaros", emoji: "🍍", primaryColor: "#FFD95C", secondaryColor: "#79C24A", bgColor: "rgba(255, 217, 92, 0.2)", outlineColor: "#A68615", shapeGroup: "pineapple" },
+  "Strawberry": { plantTypeId: "Strawberry", emoji: "🍓", primaryColor: "#FF6B82", bgColor: "rgba(255, 107, 130, 0.2)", outlineColor: "#931717", secondaryColor: "#79C24A", shapeGroup: "strawberry" },
+  "Asian Palmyra Palm / Taal": { plantTypeId: "Asian Palmyra Palm / Taal", emoji: "🌴", primaryColor: "#3D2B4A", secondaryColor: "#2F5C3B", bgColor: "rgba(61, 43, 74, 0.2)", outlineColor: "#181024", shapeGroup: "taal" },
   "Black Plum / Jam": { plantTypeId: "Black Plum / Jam", emoji: "🫐", primaryColor: "#4B326D", bgColor: "rgba(75, 50, 109, 0.2)", outlineColor: "#26153B", shapeGroup: "berry" },
   "Jujube / Boroi": { plantTypeId: "Jujube / Boroi", emoji: "🍏", primaryColor: "#ABC959", bgColor: "rgba(171, 201, 89, 0.2)", outlineColor: "#5F7623", shapeGroup: "round" },
   "Hog Plum / Amra": { plantTypeId: "Hog Plum / Amra", emoji: "🍐", primaryColor: "#81C160", bgColor: "rgba(129, 193, 96, 0.2)", outlineColor: "#3F7124", shapeGroup: "oval" },

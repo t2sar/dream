@@ -73,11 +73,22 @@ export function generateAlmanac(
   });
 
   const topHabitObj = habits.find(h => h.id === topHabitId);
+  const fruitName = topHabitObj?.plantType?.split(' / ')[0] || 'Plant';
+  
+  let summaryText = "";
+  if (fruitName === "Asian Palmyra Palm") summaryText = "You showed immense patience and discipline, standing tall like the majestic Taal tree.";
+  else if (fruitName === "Black Plum") summaryText = "Deep focus and strong steady growth marked your year, much like the rich Black Plum.";
+  else if (fruitName === "Wood Apple") summaryText = "Traditional and resilient, you weathered the seasons with the solid strength of a Wood Apple.";
+  else if (fruitName === "Star Fruit") summaryText = "Your habits shined brightly with creativity, standing out like a crisp, vibrant Star Fruit.";
+  else if (fruitName === "Dragon Fruit") summaryText = "Modern, bold, and uniquely vibrant – your growth this year was spectacular.";
+  else summaryText = `Your ${fruitName} grew steadily, reflecting your solid daily rhythm.`;
+
   const topHabit = {
     name: topHabitObj?.name || 'A forgotten habit',
-    fruit: topHabitObj?.plantType?.split(' / ')[0] || 'Plant',
+    fruit: fruitName,
     icon: topHabitObj?.icon || 'Leaf',
-    count: maxCompletions
+    count: maxCompletions,
+    summaryText
   };
 
   // Rhythm

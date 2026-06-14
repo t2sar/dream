@@ -28,7 +28,7 @@ const defaultSettings: DashboardSettings = {
 
 const SENSITIVE_CATEGORIES = ['health', 'finance', 'bad_habit', 'prayer', 'self_care', 'mood', 'journal', 'medicine'];
 
-export function SimpleGardenStatsDashboard({ habits, logs, stats, setActiveTab, userName }: SimpleGardenStatsDashboardProps) {
+export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsDashboard({ habits, logs, stats, setActiveTab, userName }: SimpleGardenStatsDashboardProps) {
   const [period, setPeriod] = useState<'this_week' | 'this_month' | 'all_time'>(defaultSettings.defaultPeriod);
 
   // Compute stats based on period
@@ -365,4 +365,4 @@ export function SimpleGardenStatsDashboard({ habits, logs, stats, setActiveTab, 
       )}
     </div>
   );
-}
+});

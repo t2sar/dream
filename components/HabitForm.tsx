@@ -1,13 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { Plus, X, Search } from "lucide-react";
 import { Button } from "./Button";
-import { Habit, PlantType } from "../types";
+import { Habit, PlantType, CustomCategory } from "../types";
 import { CATEGORIES, suggestCategory } from "../categories";
 import { PLANTS } from "../plants";
 import { PlantIcon } from "./PlantIcon";
+import { AnimatedModal } from "./AnimatedModal";
 
 interface HabitFormProps {
+  isOpen?: boolean;
   userMaxStreak: number;
+  customCategories?: CustomCategory[];
   onAdd: (
     habit: Omit<
       Habit,
@@ -27,7 +30,7 @@ interface HabitFormProps {
   onCancel: () => void;
 }
 
-export const HabitForm: React.FC<HabitFormProps> = ({ userMaxStreak, onAdd, onCancel }) => {
+export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStreak, customCategories = [], onAdd, onCancel }) => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Habit["category"]>("health");
   const [icon, setIcon] = useState("Activity");
@@ -100,26 +103,25 @@ export const HabitForm: React.FC<HabitFormProps> = ({ userMaxStreak, onAdd, onCa
   };
 
   return (
-    <div className="p-8 bg-surface-soft border border-surface-alt rounded-card mb-8 animate-in slide-in-from-top-4 fade-in duration-300 relative shadow-sm">
-
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h2 className="text-xl font-bold font-display text-primary-text tracking-wide uppercase">
-            Plant New Seed
-          </h2>
-          <p className="text-secondary-text font-bold text-[11px] uppercase tracking-wide mt-1">
-            Configure habit details
-          </p>
+    <AnimatedModal isOpen={isOpen} onClose={onCancel}>
+        <div className="flex justify-between items-center mb-8 relative z-10">
+          <div>
+            <h2 className="text-xl font-bold font-display text-primary-text tracking-wide uppercase">
+              Plant New Seed
+            </h2>
+            <p className="text-secondary-text font-bold text-[11px] uppercase tracking-wide mt-1">
+              Configure habit details
+            </p>
+          </div>
+          <button
+            onClick={onCancel}
+            className="p-1.5 text-muted-text hover:text-status-healthy transition-colors border border-transparent rounded-full hover:shadow-sm"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-        <button
-          onClick={onCancel}
-          className="p-1.5 text-muted-text hover:text-status-healthy transition-colors border border-transparent rounded-full hover:shadow-sm"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 relative z-10 max-h-[70vh] overflow-y-auto hidden-scrollbar">
         <div>
           <label className="block text-[10px] font-mono tracking-widest text-slate-400 mb-2 uppercase font-semibold">
             Habit Type
@@ -349,6 +351,9 @@ export const HabitForm: React.FC<HabitFormProps> = ({ userMaxStreak, onAdd, onCa
               <option value="learning">Continuous Learning</option>
               <option value="spirituality">Spiritual Routine</option>
               {type === 'avoid' && <option value="bad_habit_control">Bad Habit Control</option>}
+              {customCategories?.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
             </select>
           </div>
 
@@ -470,6 +475,6 @@ export const HabitForm: React.FC<HabitFormProps> = ({ userMaxStreak, onAdd, onCa
           </Button>
         </div>
       </form>
-    </div>
+    </AnimatedModal>
   );
 };

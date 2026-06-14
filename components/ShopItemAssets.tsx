@@ -1,0 +1,343 @@
+import React from 'react';
+
+export const ShopItemSvg = ({ itemId, className }: { itemId: string; className?: string }) => {
+  const TinyFace = ({ color = "#1F2937" }) => (
+    <>
+      <circle cx="28" cy="34" r="2.5" fill={color} />
+      <circle cx="36" cy="34" r="2.5" fill={color} />
+      <path d="M31 38 Q32 40 33 38" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </>
+  );
+
+  const renderShape = () => {
+    switch (itemId) {
+      // --- BACKGROUNDS ---
+      case 'bg_default':
+        return (
+          <>
+            <rect x="8" y="16" width="48" height="32" rx="4" fill="#86EFAC" stroke="#166534" strokeWidth="3" />
+            <path d="M 16 32 C 24 24, 40 24, 48 32 C 40 40, 24 40, 16 32 Z" fill="#22C55E" opacity="0.3" />
+            <circle cx="20" cy="24" r="2" fill="#166534" opacity="0.5" />
+            <circle cx="44" cy="40" r="2" fill="#166534" opacity="0.5" />
+          </>
+        );
+      case 'bg_rooftop':
+        return (
+          <>
+            <rect x="12" y="24" width="40" height="28" rx="2" fill="#CBD5E1" stroke="#334155" strokeWidth="3" />
+            <path d="M 12 24 L 20 12 L 44 12 L 52 24 Z" fill="#94A3B8" stroke="#334155" strokeWidth="3" strokeLinejoin="round" />
+            <rect x="24" y="32" width="16" height="20" fill="#64748B" />
+          </>
+        );
+      case 'bg_village':
+        return (
+          <>
+            <path d="M 8 40 L 32 16 L 56 40 L 48 40 L 48 56 L 16 56 L 16 40 Z" fill="#FEF08A" stroke="#854D0E" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 28 44 L 28 56 M 36 44 L 36 56" fill="none" stroke="#854D0E" strokeWidth="3" />
+            <circle cx="16" cy="24" r="6" fill="#4ADE80" opacity="0.8" />
+          </>
+        );
+      case 'bg_morning_sun':
+        return (
+          <>
+            <rect x="8" y="16" width="48" height="32" rx="4" fill="#FDE047" stroke="#CA8A04" strokeWidth="3" />
+            <circle cx="32" cy="32" r="10" fill="#F97316" />
+            <path d="M 32 14 L 32 8 M 32 50 L 32 56 M 14 32 L 8 32 M 50 32 L 56 32 M 18 18 L 12 12 M 46 46 L 52 52 M 46 18 L 52 12 M 18 46 L 12 52" fill="none" stroke="#F97316" strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        );
+      case 'bg_monsoon':
+        return (
+          <>
+            <rect x="8" y="16" width="48" height="32" rx="4" fill="#93C5FD" stroke="#1E3A8A" strokeWidth="3" />
+            <path d="M 24 24 Q 32 16 40 24 M 20 32 Q 28 24 36 32 M 28 40 Q 36 32 44 40" fill="none" stroke="#1E40AF" strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        );
+
+      // --- POTS ---
+      case 'pot_clay_basic':
+        return (
+          <>
+            <path d="M 16 20 C 16 20, 10 52, 20 60 C 28 66, 36 66, 44 60 C 54 52, 48 20, 48 20 Z" fill="#D97706" stroke="#78350F" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="20" rx="16" ry="6" fill="#B45309" stroke="#78350F" strokeWidth="3" />
+            <g transform="translate(0, 8)"><TinyFace color="#78350F" /></g>
+          </>
+        );
+      case 'pot_clay_colorful':
+        return (
+          <>
+            <path d="M 14 20 C 14 20, 8 52, 20 60 C 28 66, 36 66, 44 60 C 56 52, 50 20, 50 20 Z" fill="#EF4444" stroke="#7F1D1D" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="20" rx="18" ry="6" fill="#B91C1C" stroke="#7F1D1D" strokeWidth="3" />
+            <path d="M 12 36 L 52 36 M 14 44 L 50 44" fill="none" stroke="#FCD34D" strokeWidth="3" strokeLinecap="round" />
+            <g transform="translate(0, -6)"><TinyFace color="#FCD34D" /></g>
+          </>
+        );
+      case 'pot_bamboo_basket':
+        return (
+          <>
+            <path d="M 18 20 L 22 56 L 42 56 L 46 20 Z" fill="#FDE047" stroke="#A16207" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="20" rx="14" ry="4" fill="#CA8A04" stroke="#A16207" strokeWidth="3" />
+            <path d="M 20 28 L 44 28 M 21 36 L 43 36 M 21 44 L 43 44 M 22 52 L 42 52" fill="none" stroke="#A16207" strokeWidth="2" strokeLinecap="round" />
+            <path d="M 28 20 L 28 56 M 36 20 L 36 56" fill="none" stroke="#A16207" strokeWidth="2" strokeLinecap="round" />
+          </>
+        );
+      case 'pot_rooftop_tub':
+        return (
+          <>
+            <path d="M 12 24 L 16 56 L 48 56 L 52 24 Z" fill="#94A3B8" stroke="#334155" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="24" rx="20" ry="6" fill="#64748B" stroke="#334155" strokeWidth="3" />
+            <path d="M 14 36 L 50 36 M 15 46 L 49 46" fill="none" stroke="#475569" strokeWidth="3" strokeLinecap="round" />
+            <g transform="translate(0, 0)"><TinyFace color="#334155" /></g>
+          </>
+        );
+
+      // --- FENCES ---
+      case 'fence_bamboo':
+        return (
+          <>
+            <rect x="16" y="16" width="6" height="40" rx="2" fill="#FDE047" stroke="#A16207" strokeWidth="2.5" />
+            <rect x="28" y="12" width="8" height="44" rx="3" fill="#FDE047" stroke="#A16207" strokeWidth="2.5" />
+            <rect x="42" y="16" width="6" height="40" rx="2" fill="#FDE047" stroke="#A16207" strokeWidth="2.5" />
+            <path d="M 12 30 L 52 30 M 12 44 L 52 44" fill="none" stroke="#A16207" strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        );
+      case 'fence_wooden':
+        return (
+          <>
+            <path d="M 16 16 L 22 10 L 28 16 L 28 56 L 16 56 Z" fill="#D97706" stroke="#78350F" strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M 36 16 L 42 10 L 48 16 L 48 56 L 36 56 Z" fill="#D97706" stroke="#78350F" strokeWidth="2.5" strokeLinejoin="round" />
+            <rect x="12" y="28" width="40" height="8" fill="#B45309" stroke="#78350F" strokeWidth="2.5" />
+            <rect x="12" y="44" width="40" height="8" fill="#B45309" stroke="#78350F" strokeWidth="2.5" />
+          </>
+        );
+      case 'fence_clay_wall':
+        return (
+          <>
+            <path d="M 8 36 C 16 32, 24 32, 32 36 C 40 40, 48 40, 56 36 L 56 56 L 8 56 Z" fill="#9A3412" stroke="#451A03" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 8 36 L 8 44 C 16 40, 24 40, 32 44 C 40 48, 48 48, 56 44" fill="none" stroke="#EA580C" strokeWidth="2" opacity="0.3" />
+          </>
+        );
+
+      // --- DECORATIONS ---
+      case 'dec_fruit_basket':
+        return (
+          <>
+            <path d="M 16 32 C 16 32, 24 56, 32 56 C 40 56, 48 32, 48 32 Z" fill="#FBBF24" stroke="#92400E" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="32" rx="16" ry="6" fill="#D97706" stroke="#92400E" strokeWidth="3" />
+            <circle cx="28" cy="24" r="6" fill="#EF4444" stroke="#7F1D1D" strokeWidth="2.5" />
+            <circle cx="36" cy="26" r="5" fill="#A3E635" stroke="#3F6212" strokeWidth="2.5" />
+            <circle cx="22" cy="28" r="5" fill="#FDE047" stroke="#A16207" strokeWidth="2.5" />
+            <path d="M 24 16 C 32 8, 40 8, 40 16" fill="none" stroke="#92400E" strokeWidth="3" strokeLinecap="round" />
+          </>
+        );
+      case 'dec_mango_basket':
+        return (
+          <>
+            <path d="M 14 36 C 14 36, 20 56, 32 56 C 44 56, 50 36, 50 36 Z" fill="#DEB887" stroke="#8B4513" strokeWidth="3" strokeLinejoin="round" />
+            <ellipse cx="32" cy="36" rx="18" ry="6" fill="#B8860B" stroke="#8B4513" strokeWidth="3" />
+            <path d="M 28 20 C 36 12, 44 20, 38 32 C 34 38, 24 38, 22 30 C 20 24, 24 20, 28 20 Z" fill="#FFD700" stroke="#DAA520" strokeWidth="2" />
+            <path d="M 16 28 C 24 20, 32 28, 26 40 C 22 46, 12 46, 10 38 C 8 32, 12 28, 16 28 Z" fill="#FF8C00" stroke="#FF4500" strokeWidth="2" />
+            <path d="M 40 24 C 48 16, 56 24, 50 36 C 46 42, 36 42, 34 34 C 32 28, 36 24, 40 24 Z" fill="#FFD700" stroke="#DAA520" strokeWidth="2" />
+          </>
+        );
+      case 'dec_butterfly':
+        return (
+          <>
+            <path d="M 32 24 C 20 12, 12 24, 24 32 C 12 40, 20 52, 32 40 C 44 52, 52 40, 40 32 C 52 24, 44 12, 32 24 Z" fill="#A78BFA" stroke="#4C1D95" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 32 16 L 32 48" stroke="#4C1D95" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="24" cy="24" r="3" fill="#FDF4FF" />
+            <circle cx="40" cy="24" r="3" fill="#FDF4FF" />
+          </>
+        );
+      case 'dec_bird':
+        return (
+          <>
+            <path d="M 20 32 C 20 20, 36 16, 44 24 L 52 20 L 48 28 C 50 36, 40 48, 28 44 C 16 40, 16 36, 20 32 Z" fill="#60A5FA" stroke="#1E3A8A" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 24 28 C 30 28, 34 36, 40 36 C 40 36, 36 44, 28 40" fill="#3B82F6" stroke="#1E3A8A" strokeWidth="2" />
+            <circle cx="36" cy="24" r="2" fill="#1E3A8A" />
+            <path d="M 44 22 L 50 24 L 46 26" fill="#FBBF24" stroke="#B45309" strokeWidth="2" strokeLinejoin="round" />
+          </>
+        );
+      case 'dec_small_pond':
+        return (
+          <>
+            <ellipse cx="32" cy="40" rx="24" ry="12" fill="#38BDF8" stroke="#0284C7" strokeWidth="3" />
+            <path d="M 16 36 C 24 32, 28 40, 36 36" fill="none" stroke="#BAE6FD" strokeWidth="2" strokeLinecap="round" />
+            {/* Lily pad */}
+            <path d="M 40 38 A 6 3 0 1 1 50 42 A 6 3 0 0 1 40 38" fill="#4ADE80" stroke="#166534" strokeWidth="2" strokeLinejoin="round" />
+          </>
+        );
+      case 'dec_clay_lamp':
+        return (
+          <>
+            {/* Base */}
+            <path d="M 20 44 L 44 44 L 38 52 L 26 52 Z" fill="#9A3412" stroke="#451A03" strokeWidth="3" strokeLinejoin="round" />
+            {/* Top bowl */}
+            <path d="M 12 36 C 12 36, 24 48, 32 48 C 40 48, 52 36, 52 36 C 36 42, 28 42, 12 36 Z" fill="#C2410C" stroke="#451A03" strokeWidth="3" strokeLinejoin="round" />
+            {/* Flame */}
+            <path d="M 32 36 C 28 28, 28 20, 32 12 C 36 20, 36 28, 32 36 Z" fill="#FDE047" stroke="#CA8A04" strokeWidth="2.5" strokeLinejoin="round" />
+            <circle cx="32" cy="28" r="3" fill="#F97316" />
+          </>
+        );
+      case 'dec_rickshaw_sign':
+        return (
+          <>
+            <rect x="12" y="16" width="40" height="24" fill="#F43F5E" stroke="#881337" strokeWidth="3" />
+            <path d="M 12 16 L 24 28 M 52 16 L 40 28" stroke="#FCD34D" strokeWidth="2" />
+            <circle cx="32" cy="28" r="6" fill="#34D399" stroke="#064E3B" strokeWidth="2" />
+            <path d="M 20 40 L 20 56 M 44 40 L 44 56" stroke="#64748B" strokeWidth="3" strokeLinecap="round" />
+          </>
+        );
+      case 'dec_kolshi':
+        return (
+          <>
+            <circle cx="32" cy="36" r="16" fill="#B45309" stroke="#78350F" strokeWidth="3" />
+            <path d="M 26 12 L 38 12 L 36 22 L 28 22 Z" fill="#D97706" stroke="#78350F" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 26 12 C 26 8, 38 8, 38 12 Z" fill="#F59E0B" stroke="#78350F" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 20 36 C 20 44, 44 44, 44 36" fill="none" stroke="#78350F" strokeWidth="2" strokeLinecap="round" />
+          </>
+        );
+
+      // --- SEASONAL ---
+      case 'seasonal_boishakh':
+        return (
+          <>
+            <path d="M 12 20 L 52 20 M 12 24 L 52 24" stroke="#DC2626" strokeWidth="3" />
+            <path d="M 16 24 L 24 50 L 32 24 Z" fill="#EF4444" stroke="#991B1B" strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M 32 24 L 40 50 L 48 24 Z" fill="#FFFFFF" stroke="#991B1B" strokeWidth="2.5" strokeLinejoin="round" />
+          </>
+        );
+      case 'seasonal_eid_lights':
+        return (
+          <>
+            <path d="M 8 24 Q 24 36 40 24 Q 48 16 56 24" fill="none" stroke="#64748B" strokeWidth="2" />
+            <circle cx="20" cy="30" r="4" fill="#FDE047" stroke="#CA8A04" strokeWidth="2" />
+            <circle cx="32" cy="34" r="4" fill="#60A5FA" stroke="#2563EB" strokeWidth="2" />
+            <circle cx="44" cy="26" r="4" fill="#F43F5E" stroke="#E11D48" strokeWidth="2" />
+            <path d="M 20 20 L 20 26 M 32 28 L 32 30 M 44 20 L 44 22" stroke="#64748B" strokeWidth="2" />
+          </>
+        );
+      case 'seasonal_ramadan_lantern':
+        return (
+          <>
+            <path d="M 24 24 L 40 24 L 36 40 L 28 40 Z" fill="#FDE047" stroke="#A16207" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 28 16 L 36 16 L 40 24 L 24 24 Z" fill="#FCD34D" stroke="#A16207" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 32 8 L 32 16" stroke="#A16207" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="32" cy="6" r="3" fill="none" stroke="#A16207" strokeWidth="2" />
+            <path d="M 26 40 L 38 40 L 36 46 L 28 46 Z" fill="#CA8A04" stroke="#A16207" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 32 28 C 30 28, 30 36, 32 36 C 36 36, 36 28, 32 28 Z" fill="#FEF08A" />
+          </>
+        );
+      case 'seasonal_rain_cloud':
+        return (
+          <>
+            <path d="M 20 32 C 16 32, 12 28, 12 24 C 12 20, 16 16, 20 16 C 24 10, 36 10, 40 16 C 48 16, 52 24, 48 32 C 46 36, 24 36, 20 32 Z" fill="#93C5FD" stroke="#3B82F6" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 20 40 L 16 48 M 32 40 L 28 48 M 44 40 L 40 48" stroke="#60A5FA" strokeWidth="3" strokeLinecap="round" />
+          </>
+        );
+      case 'seasonal_winter_sun':
+        return (
+          <>
+            <circle cx="32" cy="32" r="14" fill="#FDE047" stroke="#CA8A04" strokeWidth="3" />
+            <g stroke="#CA8A04" strokeWidth="3" strokeLinecap="round">
+               <path d="M 32 10 L 32 4 M 32 60 L 32 54 M 10 32 L 4 32 M 60 32 L 54 32" />
+               <path d="M 16 16 L 12 12 M 48 48 L 52 52 M 48 16 L 52 12 M 16 48 L 12 52" />
+            </g>
+            <circle cx="28" cy="28" r="2" fill="#A16207" />
+            <circle cx="36" cy="28" r="2" fill="#A16207" />
+            <path d="M 28 36 Q 32 40 36 36" fill="none" stroke="#A16207" strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        );
+
+      // --- BOOSTS ---
+      case 'boost_fertilizer':
+        return (
+          <>
+            <rect x="20" y="24" width="24" height="32" rx="4" fill="#A3E635" stroke="#4D7C0F" strokeWidth="3" />
+            <path d="M 20 28 L 44 28" stroke="#4D7C0F" strokeWidth="3" />
+            <path d="M 26 24 L 28 16 M 38 24 L 36 16" stroke="#4D7C0F" strokeWidth="3" strokeLinecap="round" />
+            <path d="M 28 36 L 36 36 M 32 32 L 32 40" stroke="#166534" strokeWidth="3" strokeLinecap="round" />
+          </>
+        );
+      case 'boost_sunlight':
+        return (
+          <>
+            <circle cx="32" cy="32" r="12" fill="#FBBF24" stroke="#B45309" strokeWidth="3" />
+            <path d="M 32 12 L 32 4 M 32 60 L 32 52 M 12 32 L 4 32 M 60 32 L 52 32 M 18 18 L 12 12 M 46 46 L 52 52 M 46 18 L 52 12 M 18 46 L 12 52" stroke="#D97706" strokeWidth="3" strokeLinecap="round" />
+          </>
+        );
+      case 'boost_rain':
+        return (
+          <>
+            <path d="M 32 16 C 24 16, 20 24, 20 30 C 20 38, 30 46, 32 52 C 34 46, 44 38, 44 30 C 44 24, 40 16, 32 16 Z" fill="#38BDF8" stroke="#0284C7" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 28 26 C 28 26, 32 34, 26 38" fill="none" stroke="#BAE6FD" strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        );
+      case 'boost_recovery_water':
+        return (
+          <>
+            <rect x="24" y="24" width="16" height="28" rx="4" fill="#60A5FA" stroke="#1E3A8A" strokeWidth="3" />
+            <path d="M 28 36 L 36 36 M 32 32 L 32 40" stroke="#EFF6FF" strokeWidth="3" strokeLinecap="round" />
+            <path d="M 28 24 L 36 24 M 32 24 L 32 16 L 24 16 M 22 24 L 20 16 M 42 24 L 44 16" fill="none" stroke="#1E3A8A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </>
+        );
+      case 'boost_streak_freeze':
+        return (
+          <>
+            <path d="M 32 8 L 32 56 M 8 32 L 56 32 M 16 16 L 48 48 M 16 48 L 48 16" stroke="#93C5FD" strokeWidth="3" strokeLinecap="round" />
+            <polygon points="32,20 24,24 20,32 24,40 32,44 40,40 44,32 40,24" fill="#DBEAFE" stroke="#3B82F6" strokeWidth="3" strokeLinejoin="round" />
+            <circle cx="32" cy="32" r="6" fill="#3B82F6" />
+          </>
+        );
+      case 'boost_streak_repair':
+        return (
+          <>
+            <path d="M 16 16 L 24 16 L 36 28 L 48 28 L 48 48 L 36 48 L 24 36 L 16 36 Z" fill="#F43F5E" stroke="#9F1239" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 40 20 L 52 32 M 36 36 L 28 44" stroke="#9F1239" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="42" cy="38" r="3" fill="#FDA4AF" />
+          </>
+        );
+
+      case 'dec_nakshi_kantha':
+        return (
+          <>
+            <rect x="12" y="24" width="40" height="24" rx="2" fill="#E11D48" stroke="#881337" strokeWidth="2" />
+            <path d="M 12 28 L 52 28 M 12 32 L 52 32 M 12 36 L 52 36 M 12 40 L 52 40 M 12 44 L 52 44" stroke="#FDE047" strokeWidth="0.5" opacity="0.6" strokeDasharray="2 2" />
+            <path d="M 32 28 L 36 34 L 32 40 L 28 34 Z" fill="#FDE047" />
+          </>
+        );
+
+      case 'bg_zamindar_palace':
+        return (
+          <>
+            <rect x="8" y="24" width="48" height="32" fill="#FDE68A" stroke="#B45309" strokeWidth="3" />
+            <path d="M 8 24 L 32 8 L 56 24 Z" fill="#EF4444" stroke="#991B1B" strokeWidth="3" strokeLinejoin="round" />
+            <rect x="24" y="32" width="16" height="24" fill="#B45309" stroke="#78350F" strokeWidth="2" />
+            <path d="M 24 32 C 24 24, 40 24, 40 32" fill="#D97706" stroke="#92400E" strokeWidth="2" />
+          </>
+        );
+
+      case 'dec_golden_rickshaw':
+        return (
+          <>
+            <circle cx="20" cy="40" r="10" fill="none" stroke="#EAB308" strokeWidth="3" />
+            <circle cx="44" cy="40" r="10" fill="none" stroke="#EAB308" strokeWidth="3" />
+            <path d="M 20 40 L 44 40 L 40 20 L 24 20 Z" fill="#EF4444" stroke="#991B1B" strokeWidth="3" strokeLinejoin="round" />
+            <path d="M 24 20 C 32 10, 40 20, 32 30" fill="none" stroke="#EAB308" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="20" cy="40" r="3" fill="#EAB308" />
+            <circle cx="44" cy="40" r="3" fill="#EAB308" />
+          </>
+        );
+
+      default:
+        return (
+          <rect x="16" y="16" width="32" height="32" rx="8" fill="#4B5563" stroke="#1F2937" strokeWidth="3" />
+        );
+    }
+  };
+
+  return (
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      {renderShape()}
+    </svg>
+  );
+};

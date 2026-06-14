@@ -165,43 +165,52 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
   };
 };
 
+let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
   if (!dbInstance) return;
-  const pathForWrite = `users/${userId}`;
-  try {
-    const { logs, ...mainData } = data;
-    
-    // Safe stringify to handle unexpected circular references
-    const safeStringify = (obj: any) => {
-      return JSON.stringify(obj, function(key, value) {
-        if (typeof value !== 'object' || value === null) {
-          return value;
-        }
-        if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
-            return undefined; 
-        }
-        return value;
-      });
-    };
-    
-    const cleanMainData = JSON.parse(safeStringify(mainData));
-    await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
-
-    // Sub-collections & Pagination (Delta Updates)
-    const logsByMonth: Record<string, HabitLog> = {};
-    for (const [dateStr, ids] of Object.entries(logs || {})) {
-      const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
-      if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
-      logsByMonth[monthPrefix][dateStr] = ids;
-    }
-
-    for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-      const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-      await setDoc(monthDocRef, JSON.parse(JSON.stringify(monthLogs)), { merge: true });
-    }
-  } catch (e) {
-    handleFirestoreError(e, OperationType.WRITE, pathForWrite);
+  
+  if (saveTimeout) {
+    clearTimeout(saveTimeout);
   }
+
+  saveTimeout = setTimeout(async () => {
+    const pathForWrite = `users/${userId}`;
+    try {
+      const { logs, ...mainData } = data;
+      
+      // Safe stringify to handle unexpected circular references
+      const safeStringify = (obj: any) => {
+        return JSON.stringify(obj, function(key, value) {
+          if (typeof value !== 'object' || value === null) {
+            return value;
+          }
+          if (value instanceof Element || (value && value._reactName) || value instanceof Event) {
+              return undefined; 
+          }
+          return value;
+        });
+      };
+      
+      const cleanMainData = JSON.parse(safeStringify(mainData));
+      await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
+
+      // Sub-collections & Pagination (Delta Updates)
+      const logsByMonth: Record<string, HabitLog> = {};
+      for (const [dateStr, ids] of Object.entries(logs || {})) {
+        const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
+        if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+        logsByMonth[monthPrefix][dateStr] = ids;
+      }
+
+      for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+        const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+        await setDoc(monthDocRef, JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+    }
+  }, 1500);
 };
 
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {

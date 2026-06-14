@@ -23,10 +23,13 @@ import {
   Store,
   Archive,
   Activity,
+  Check,
+  Quote,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { format, differenceInCalendarDays, subDays, startOfWeek } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
+import { playCompletionSound } from "./audio";
 import { onAuthStateChanged, User } from "firebase/auth";
 
 import {
@@ -37,7 +40,10 @@ import {
   logout,
 } from "./services/firebase";
 
-import { Habit, HabitLog, Tab, UserStats, PlantHealthStatus, RestMode, RestModeType, RestScopeType, ShopItem } from "./types";
+import { AnimatedModal } from "./components/AnimatedModal";
+import { CustomCategoryManager } from "./components/CustomCategoryManager";
+import { DailyGoalRing } from "./components/DailyGoalRing";
+import { Habit, HabitLog, Tab, UserStats, PlantHealthStatus, RestMode, RestModeType, RestScopeType, ShopItem, CustomCategory } from "./types";
 import { getLevelFromXP, getRankFromLevel, LEVEL_THRESHOLDS } from "./levels";
 import { HabitCard } from "./components/HabitCard";
 import { HabitForm } from "./components/HabitForm";
@@ -63,9 +69,10 @@ import { SimpleGardenStatsDashboard } from "./components/SimpleGardenStatsDashbo
 import { checkBadgeUnlocks } from "./badgeUtils";
 import { ACHIEVEMENT_BADGES } from "./badgeConfig";
 import { AchievementBadge } from "./types";
-import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
+
 // Haptics utility for sensory feedback
 import { playHaptic } from "./haptics";
+import confetti from "canvas-confetti";
 import { getChallengeTemplate } from "./challengesData";
 import { CATEGORIES } from "./categories";
 import { GardenHistoryView } from "./components/GardenHistoryView";
@@ -76,6 +83,8 @@ import { GardenCompanions } from "./components/GardenCompanions";
 import { CompanionUnlockModal } from "./components/CompanionUnlockModal";
 import { OrchardModal } from "./components/OrchardModal";
 import { HarvestModal } from "./components/HarvestModal";
+import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
+import { MotivationSettings } from "./components/MotivationSettings";
 import { COMPANIONS } from "./companionsData";
 
 const MOTIVATIONAL_QUOTES = [
@@ -117,9 +126,6 @@ function App() {
   const [habits, setHabits] = useState<Habit[]>([]);
   useAndroidApp(habits);
 
-  const quote =
-    MOTIVATIONAL_QUOTES[new Date().getDate() % MOTIVATIONAL_QUOTES.length];
-
   // App State
   const [activeTab, setActiveTab] = useState<Tab>(Tab.TRACKER);
   const [reportViewMode, setReportViewMode] = useState<'weekly' | 'monthly'>('weekly');
@@ -134,9 +140,24 @@ function App() {
   const [currentAlmanacYear, setCurrentAlmanacYear] = useState<string | null>(null);
   const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<AchievementBadge[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [date] = useState(new Date());
+  const [sortType, setSortType] = useState<'health' | 'alpha' | 'recent' | 'recovery'>('recent');
+  const [date, setDate] = useState(new Date());
   const dateKey = format(date, "yyyy-MM-dd");
+
+  React.useEffect(() => {
+    // Check every minute if the date string changed to handle midnight rollover without heavy looping
+    const midnightCheckInterval = setInterval(() => {
+       const newDate = new Date();
+       if (format(newDate, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")) {
+          setDate(newDate); // triggers midnight cascade
+       }
+    }, 60000);
+    return () => clearInterval(midnightCheckInterval);
+  }, [date]);
   const [isOnline, setIsOnline] = useState<boolean>(true);
+
+  // Motivation Popup State
+  const [motivationPopup, setMotivationPopup] = useState<{ text: string, author?: string } | null>(null);
 
   // Data State
   const [logs, setLogs] = useState<HabitLog>({});
@@ -145,6 +166,7 @@ function App() {
   });
   const [dataLoading, setDataLoading] = useState(false);
   const [hasProcessedStreak, setHasProcessedStreak] = useState(false);
+  const hasShownMotivationRef = React.useRef(false);
 
   // Time of Day Synchronization
   React.useEffect(() => {
@@ -230,6 +252,9 @@ function App() {
         setHabits(data.habits || []);
         setLogs(data.logs || {});
         setExtraStats(data.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 });
+        if (data.extraStats?.accentColor) {
+           document.documentElement.style.setProperty('--primary-mint', data.extraStats.accentColor);
+        }
         setActiveRestMode(data.activeRestMode || null);
       }
       setDataLoading(false);
@@ -289,6 +314,43 @@ function App() {
     }
   }, [dataLoading, user, extraStats, habits, logs, activeRestMode, hasProcessedStreak]);
 
+  // Motivation Popup logic
+  useEffect(() => {
+    if (dataLoading || !user || !extraStats || hasShownMotivationRef.current) return;
+    hasShownMotivationRef.current = true;
+
+    setTimeout(() => {
+      let shownToday = extraStats.motivationsShownToday || 0;
+      const lastDate = extraStats.lastMotivationDate;
+
+      if (lastDate !== dateKey) {
+        shownToday = 0;
+      }
+
+      const limit = extraStats.motivationFrequencyLimit ?? 1;
+
+      if (limit === -1 || shownToday < limit) {
+        const customQuotes = extraStats.motivations || [];
+        
+        if (customQuotes.length > 0 || MOTIVATIONAL_QUOTES.length > 0) {
+          const validQuotes = customQuotes.length > 0 ? customQuotes : MOTIVATIONAL_QUOTES;
+          const chosen = validQuotes[Math.floor(Math.random() * validQuotes.length)];
+          
+          setMotivationPopup({ text: (chosen as any).quote_text || (chosen as any).text, author: (chosen as any).author });
+
+          // Update stats and sync
+          const updatedStats = {
+            ...extraStats,
+            motivationsShownToday: shownToday + 1,
+            lastMotivationDate: dateKey
+          };
+          setExtraStats(updatedStats);
+          saveUserData(user.uid, { habits, logs, extraStats: updatedStats, activeRestMode });
+        }
+      }
+    }, 2000); // 2 second delay for gentle entry after loading
+  }, [dataLoading, user, extraStats, habits, logs, activeRestMode, dateKey]);
+
   // Process missed habits once per day
   useEffect(() => {
     if (dataLoading || habits.length === 0) return;
@@ -334,6 +396,26 @@ function App() {
           changed = true;
           let newHealth = habit.plantHealth ?? 100;
           let remainingMisses = missedCount;
+          
+          let ownedFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
+          let freezesUsed = 0;
+          
+          if (ownedFreezes >= remainingMisses) {
+            freezesUsed = remainingMisses;
+            remainingMisses = 0;
+          } else {
+            freezesUsed = ownedFreezes;
+            remainingMisses -= ownedFreezes;
+          }
+          
+          if (freezesUsed > 0) {
+             const newCounts = {
+                ...(extraStats.boostItemCounts || {}),
+                'boost_streak_freeze': ownedFreezes - freezesUsed
+             };
+             setExtraStats(prev => ({ ...prev, boostItemCounts: newCounts }));
+          }
+
           let grace = habit.graceDays || 0;
 
           if (grace >= remainingMisses) {
@@ -361,7 +443,7 @@ function App() {
 
           return {
             ...habit,
-            streak: 0, 
+            streak: remainingMisses > 0 ? 0 : habit.streak,
             graceDays: grace,
             plantHealth: newHealth,
             plantStatus: status as PlantHealthStatus,
@@ -386,16 +468,16 @@ function App() {
   }, [dataLoading, dateKey]);
 
   // 3. Stats Calculation
-  const calculateStats = (): UserStats => {
-    const totalHabitsCompleted = (Object.values(logs) as string[][]).reduce(
-      (acc, curr) => acc + curr.length,
-      0,
-    );
+  const stats = React.useMemo<UserStats>(() => {
+    // Instead of recalculating from full history scan (Object.values(logs).reduce):
+    // Use the cached extraStats if it exists, or compute purely incrementally.
+    const totalHabitsCompleted = extraStats.totalHabitsCompleted || 0;
     const totalXp = (extraStats.xp || 0) + habits.reduce((acc, h) => acc + (h.xp || (h.totalCompletions || 0) * 10), 0) || totalHabitsCompleted * 10;
     const level = getLevelFromXP(totalXp);
     const rank = getRankFromLevel(level);
 
     return { 
+        ...extraStats,
         xp: totalXp, 
         level, 
         totalHabitsCompleted, 
@@ -403,9 +485,7 @@ function App() {
         perfectGardenDays: extraStats.perfectGardenDays || 0,
         plantsRevived: extraStats.plantsRevived || 0
     };
-  };
-
-  const stats = calculateStats();
+  }, [extraStats, habits]);
 
   // 4. Save to Cloud Helper
   const persistData = (newHabits: Habit[], newLogs: HabitLog, incomingStats: Partial<UserStats> = extraStats, newRestMode: RestMode | null = activeRestMode) => {
@@ -446,6 +526,15 @@ function App() {
     }
   };
 
+  // Auto-save debounced effect
+  useEffect(() => {
+    if (dataLoading || authLoading || !user) return;
+    const timeoutId = setTimeout(() => {
+      persistData(habits, logs, extraStats, activeRestMode);
+    }, 1500);
+    return () => clearTimeout(timeoutId);
+  }, [habits, logs, extraStats, activeRestMode, user, dataLoading, authLoading]);
+
   // 5. Install Prompt
   useEffect(() => {
     const handler = (e: Event) => {
@@ -460,6 +549,8 @@ function App() {
   const lastSummaryRef = React.useRef<string | null>(null);
   
   // Use refs to avoid resetting the interval on every state change
+  const lastDailyReminderRef = React.useRef('');
+
   const stateRefs = React.useRef({ user, dataLoading, habits, logs, extraStats, activeRestMode });
   useEffect(() => {
     stateRefs.current = { user, dataLoading, habits, logs, extraStats, activeRestMode };
@@ -470,65 +561,69 @@ function App() {
        const { user, dataLoading, habits, logs, extraStats, activeRestMode } = stateRefs.current;
        if (!user || dataLoading) return;
        
-       const isSummaryEnabled = extraStats.eveningSummaryEnabled !== false;
-       if (!isSummaryEnabled) return;
-       
-       const summaryTime = extraStats.eveningSummaryTime || '21:00';
-       let targetTime = summaryTime;
-       
-       if (extraStats.quietHoursStart && extraStats.quietHoursEnd) {
-         if (targetTime >= extraStats.quietHoursStart && targetTime < extraStats.quietHoursEnd) {
-           const [qH, qM] = extraStats.quietHoursStart.split(':').map(Number);
-           let nH = qH;
-           let nM = qM - 1;
-           if (nM < 0) {
-             nM = 59;
-             nH -= 1;
-           }
-           targetTime = `${nH.toString().padStart(2, '0')}:${nM.toString().padStart(2, '0')}`;
-         }
-       }
-
        const now = new Date();
        const currentHours = now.getHours().toString().padStart(2, '0');
        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
        const currentTime = `${currentHours}:${currentMinutes}`;
        const todayDateKey = format(now, 'yyyy-MM-dd');
-       
-       if (currentTime === targetTime) {
-         if (lastSummaryRef.current === todayDateKey) return; // Already sent today
+       const { sendNotification, getEveningSummaryContent } = await import('./notifications');
+
+       // ======== Evening Summary (Existing) ========
+       const isSummaryEnabled = extraStats.eveningSummaryEnabled !== false;
+       if (isSummaryEnabled) {
+         let targetTime = extraStats.eveningSummaryTime || '21:00';
          
-         const todaysHabits = habits.filter(h => {
-            if (isHabitPaused(h.id, todayDateKey, activeRestMode)) return false;
-            // In this simple model, all habits are daily if not paused
-            return true;
-         });
+         if (extraStats.quietHoursStart && extraStats.quietHoursEnd) {
+           if (targetTime >= extraStats.quietHoursStart && targetTime < extraStats.quietHoursEnd) {
+             const [qH, qM] = extraStats.quietHoursStart.split(':').map(Number);
+             let nH = qH;
+             let nM = qM - 1;
+             if (nM < 0) {
+               nM = 59;
+               nH -= 1;
+             }
+             targetTime = `${nH.toString().padStart(2, '0')}:${nM.toString().padStart(2, '0')}`;
+           }
+         }
          
-         const unfinished = todaysHabits.filter(h => {
-             const completions = logs[todayDateKey] || [];
-             return !completions.includes(h.id);
-         });
-         
-         if (unfinished.length > 0) {
-            const { getEveningSummaryContent, sendNotification } = await import('./notifications');
-            const summaryString = getEveningSummaryContent(unfinished);
-            
-            if (summaryString) {
-               const parts = summaryString.split('\n');
-               const title = parts[0] || 'Evening Garden Summary';
-               const body = parts.slice(1).join('\n') || '';
-               
-               sendNotification(title, {
-                 body,
-                 icon: '/icon.png',
-                 badge: '/icon.png'
-               });
-               
-               lastSummaryRef.current = todayDateKey;
-            }
+         if (currentTime === targetTime) {
+           if (lastSummaryRef.current !== todayDateKey) {
+             const todaysHabits = habits.filter(h => !isHabitPaused(h.id, todayDateKey, activeRestMode));
+             const unfinished = todaysHabits.filter(h => {
+                 const completions = logs[todayDateKey] || [];
+                 return !completions.includes(h.id);
+             });
+             
+             if (unfinished.length > 0) {
+                const summaryString = getEveningSummaryContent(unfinished);
+                if (summaryString) {
+                   const parts = summaryString.split('\n');
+                   const title = parts[0] || 'Evening Garden Summary';
+                   const body = parts.slice(1).join('\n') || '';
+                   sendNotification(title, { body, icon: '/icon.png', badge: '/icon.png' });
+                   lastSummaryRef.current = todayDateKey;
+                }
+             }
+           }
          }
        }
-    }, 20000); // Check every 20 seconds using the ref
+
+       // ======== Daily Reminder (New) ========
+       const isDailyReminderEnabled = extraStats.dailyReminderEnabled === true;
+       if (isDailyReminderEnabled && extraStats.dailyReminderTime) {
+          if (currentTime === extraStats.dailyReminderTime) {
+             if (lastDailyReminderRef.current !== todayDateKey) {
+                sendNotification("Time to check your garden! 🌿", { 
+                  body: "Your plants might need watering.",
+                  icon: "/icon.png",
+                  badge: "/icon.png"
+                });
+                lastDailyReminderRef.current = todayDateKey;
+             }
+          }
+       }
+
+    }, 60000); // Check every 60 seconds using the ref
     
     return () => clearInterval(interval);
   }, []);
@@ -691,6 +786,18 @@ function App() {
     let changedHabit = habits.find(h => h.id === id);
     if (!changedHabit) return;
 
+    let ownedFreezes = newExtraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
+    let usedFreeze = false;
+    
+    if (ownedFreezes > 0) {
+      usedFreeze = true;
+      newExtraStats.boostItemCounts = {
+        ...newExtraStats.boostItemCounts,
+        'boost_streak_freeze': ownedFreezes - 1
+      };
+      setExtraStats(newExtraStats);
+    }
+
     const diff = changedHabit.difficulty || 'medium';
     let healthLoss = changedHabit.type === 'avoid' ? 20 : (diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25);
     let newHealth = (changedHabit.plantHealth ?? 100) - healthLoss;
@@ -700,7 +807,7 @@ function App() {
         if (h.id !== id) return h;
         return {
            ...h,
-           streak: 0,
+           streak: usedFreeze ? h.streak : 0,
            plantHealth: newHealth,
            plantStatus: getPlantStatus(newHealth)
         };
@@ -776,10 +883,26 @@ function App() {
        });
     }
 
+    const currentDailyCoins = extraStats.dailyCoinsEarned || 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastReset = extraStats.lastCoinResetDate || todayStr;
+    
+    let activeDailyCoins = currentDailyCoins;
+    if (lastReset !== todayStr) {
+       activeDailyCoins = 0;
+    }
+    
+    let finalCoinReward = coinReward;
+    if (activeDailyCoins + finalCoinReward > 25) {
+       finalCoinReward = Math.max(0, 25 - activeDailyCoins);
+    }
+    
     const newExtraStats = {
        ...extraStats,
        xp: (extraStats.xp || 0) + xpReward,
-       coins: (extraStats.coins || 0) + coinReward,
+       coins: (extraStats.coins || 0) + finalCoinReward,
+       dailyCoinsEarned: activeDailyCoins + finalCoinReward,
+       lastCoinResetDate: todayStr,
        orchard: newOrchard
     };
     
@@ -804,28 +927,40 @@ function App() {
        playHaptic('grow');
     }
 
+    // Play sound based on fruit
+    const specialFruits = ['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'];
+    import('./audio').then(({ playCompletionSound }) => {
+       if (specialFruits.includes(habit.plantType || '')) {
+           playCompletionSound('chime');
+       } else {
+           playCompletionSound('pop');
+       }
+    });
+
     setHarvestedData({ fruitId, fruitName: fruitId.split(' / ')[0], xpReward, coinReward, habitName: habit.name });
   };
 
-  const toggleHabit = (id: string, isMini: boolean = false) => {
+  const toggleHabit = (id: string, isMini: boolean = false, customAmount?: number) => {
     const currentSlips = extraStats.slipLogs?.[dateKey] || [];
     if (currentSlips.some(s => s.id === id)) return; // Cannot complete if currently marked as slipped
 
     const habit = habits.find(h => h.id === id);
     if (!habit) return;
 
-    if (habit.scheduleType === 'quantity' && isMini && habit.quantityTarget) {
-      const currentQuantity = extraStats.quantityLogs?.[dateKey]?.[id] || 0;
-      if (currentQuantity >= habit.quantityTarget) return; // already done
+    if (habit.scheduleType === 'quantity' && habit.quantityTarget) {
+      if (isMini || customAmount !== undefined) {
+        const currentQuantity = extraStats.quantityLogs?.[dateKey]?.[id] || 0;
+        if (currentQuantity >= habit.quantityTarget) return; // already done
 
-      const newQuantity = currentQuantity + 1;
-      const newQuantityLogs = {
-        ...(extraStats.quantityLogs || {}),
-        [dateKey]: {
-          ...((extraStats.quantityLogs || {})[dateKey] || {}),
-          [id]: newQuantity
-        }
-      };
+        const addAmount = customAmount !== undefined ? customAmount : 1;
+        const newQuantity = currentQuantity + addAmount;
+        const newQuantityLogs = {
+          ...(extraStats.quantityLogs || {}),
+          [dateKey]: {
+            ...((extraStats.quantityLogs || {})[dateKey] || {}),
+            [id]: newQuantity
+          }
+        };
 
       setExtraStats(prev => {
          const updated = { ...prev, quantityLogs: newQuantityLogs };
@@ -836,6 +971,7 @@ function App() {
       if (newQuantity >= habit.quantityTarget) {
          // Auto-complete the habit!
          completeHabitFully(id);
+      }
       }
       return;
     }
@@ -852,6 +988,9 @@ function App() {
       newCompleted = currentCompleted.filter((hId) => hId !== id);
     } else {
       newCompleted = [...currentCompleted, id];
+      // Play completion sound if user preference is true or not explicitly disabled
+      const soundTheme = extraStats.completionSound || 'droplet';
+      playCompletionSound(soundTheme);
     }
 
     const newLogs = { ...logs, [dateKey]: newCompleted };
@@ -892,7 +1031,8 @@ function App() {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const tMinus1 = format(subDays(new Date(), 1), 'yyyy-MM-dd');
     const tMinus2 = format(subDays(new Date(), 2), 'yyyy-MM-dd');
-    if (targetDateKey !== tMinus1 && targetDateKey !== tMinus2) return;
+    const tMinus3 = format(subDays(new Date(), 3), 'yyyy-MM-dd');
+    if (targetDateKey !== tMinus1 && targetDateKey !== tMinus2 && targetDateKey !== tMinus3) return;
 
     let logsCopy = { ...logs };
     const currentCompleted = logsCopy[targetDateKey] || [];
@@ -909,15 +1049,27 @@ function App() {
     if (extraStats.backdateWeekStart !== weekStartFormat) currentUsed = 0;
     if (currentUsed >= 3) return;
 
-    const cost = 5;
-    let newCoins = Math.max(0, (extraStats.coins || 0) - cost);
+    let newExtraStats = { ...extraStats };
 
-    const newBackdateObj = { ...extraStats.backdatedLogs };
+    if (targetDateKey === tMinus3) {
+      // Consume streak repair item
+      const itemKey = 'boost_streak_repair';
+      const count = newExtraStats.boostItemCounts?.[itemKey] || 0;
+      if (count <= 0) return; // Cannot repair 3 days ago without item
+      newExtraStats.boostItemCounts = {
+         ...newExtraStats.boostItemCounts,
+         [itemKey]: count - 1
+      };
+    } else {
+      const cost = 5;
+      newExtraStats.coins = Math.max(0, (newExtraStats.coins || 0) - cost);
+    }
+
+    const newBackdateObj = { ...newExtraStats.backdatedLogs };
     newBackdateObj[targetDateKey] = [...(newBackdateObj[targetDateKey] || []), habitId];
 
-    const newExtraStats = {
-      ...extraStats,
-      coins: newCoins,
+    newExtraStats = {
+      ...newExtraStats,
       backdatesUsedThisWeek: currentUsed + 1,
       backdateWeekStart: weekStartFormat,
       backdatedLogs: newBackdateObj
@@ -974,6 +1126,7 @@ function App() {
 
     setLogs(newLogs);
     setHabits(updatedHabits);
+    setExtraStats(newExtraStats);
     persistData(updatedHabits, newLogs, newExtraStats);
     
     const dayName = format(new Date(targetDateKey), 'EEEE');
@@ -1125,7 +1278,8 @@ function App() {
     
     // Process extra stats
     let newExtraStats = extraStats;
-    let earnedCoins = 0;
+    let baseCoinsDelta = 0;
+    let bonusCoinsDelta = 0;
     
     let incEvening = 0;
     let incNight = 0;
@@ -1136,11 +1290,23 @@ function App() {
       const h = habits.find(h => h.id === id);
       if (h) {
         let diff = h.difficulty || 'medium';
-        earnedCoins += diff === 'easy' ? 2 : diff === 'medium' ? 4 : 7;
+        let baseAward = diff === 'easy' ? 2 : diff === 'medium' ? 4 : 6;
+        
+        let streakMultiplier = 1.0;
+        const currentStreak = h.streak || 0;
+        if (currentStreak >= 30) streakMultiplier = 2.0;
+        else if (currentStreak >= 14) streakMultiplier = 1.5;
+        else if (currentStreak >= 5) streakMultiplier = 1.2;
+        
+        baseCoinsDelta += Math.floor(baseAward * streakMultiplier);
         if (h.type === 'avoid') incResist++;
+        
+        if (h.plantStatus === 'Wilting' || h.plantStatus === 'Critical' || h.plantStatus === 'Dead') {
+           bonusCoinsDelta += 10;
+        }
       }
       if (isPerfectDayNow) {
-        earnedCoins += 10;
+        bonusCoinsDelta += 10;
         if (activeEvent && activeEvent.id === 'monsoon_festival') incRainy++;
       }
       
@@ -1152,7 +1318,19 @@ function App() {
       const h = habits.find(h => h.id === id);
       if (h) {
         let diff = h.difficulty || 'medium';
-        earnedCoins -= diff === 'easy' ? 2 : diff === 'medium' ? 4 : 7;
+        let baseAward = diff === 'easy' ? 2 : diff === 'medium' ? 4 : 6;
+        
+        let streakMultiplier = 1.0;
+        const currentStreak = h.streak || 0;
+        if (currentStreak >= 30) streakMultiplier = 2.0;
+        else if (currentStreak >= 14) streakMultiplier = 1.5;
+        else if (currentStreak >= 5) streakMultiplier = 1.2;
+        
+        baseCoinsDelta -= Math.floor(baseAward * streakMultiplier);
+
+        if (h.plantStatus === 'Wilting' || h.plantStatus === 'Critical' || h.plantStatus === 'Dead') {
+           bonusCoinsDelta -= 10;
+        }
       }
     }
     
@@ -1217,18 +1395,47 @@ function App() {
        if (matches && !updatedChallenge.completedDates.includes(dateKey)) {
           updatedChallenge.completedDates = [...updatedChallenge.completedDates, dateKey];
           challengeDailyBonus = 5; // daily challenge bonus
+          bonusCoinsDelta += 5;
        }
     }
 
-    if (extraXpGained > 0 || extraPerfectDays > 0 || extraPlantsRevived > 0 || updatedEventProgress !== eventProgress || updatedChallenge !== extraStats.activeChallenge || challengeDailyBonus > 0 || earnedCoins !== 0 || incEvening > 0 || incNight > 0 || incRainy > 0 || incResist > 0) {
+    let finalCoinsDelta = 0;
+    let currentDailyCoins = newExtraStats.dailyCoinsEarned || 0;
+    let lastReset = newExtraStats.lastCoinResetDate || dateKey;
+    
+    if (lastReset !== dateKey) {
+       currentDailyCoins = 0;
+       lastReset = dateKey;
+    }
+    
+    if (baseCoinsDelta > 0) {
+       let allowedBase = baseCoinsDelta;
+       if (currentDailyCoins + allowedBase > 25) {
+          allowedBase = Math.max(0, 25 - currentDailyCoins);
+       }
+       currentDailyCoins += allowedBase;
+       finalCoinsDelta = allowedBase + bonusCoinsDelta;
+    } else if (baseCoinsDelta < 0) {
+       currentDailyCoins = Math.max(0, currentDailyCoins + baseCoinsDelta);
+       finalCoinsDelta = baseCoinsDelta + bonusCoinsDelta;
+    } else {
+       finalCoinsDelta = bonusCoinsDelta;
+    }
+    
+    let earnedCoins = finalCoinsDelta;
+
+    if (extraXpGained > 0 || extraPerfectDays > 0 || extraPlantsRevived > 0 || updatedEventProgress !== eventProgress || updatedChallenge !== extraStats.activeChallenge || challengeDailyBonus > 0 || earnedCoins !== 0 || incEvening > 0 || incNight > 0 || incRainy > 0 || incResist > 0 || isNowCompleted !== undefined) {
        newExtraStats = {
           ...newExtraStats,
+          totalHabitsCompleted: Math.max(0, (newExtraStats.totalHabitsCompleted || 0) + (isNowCompleted ? 1 : -1)),
           xp: (newExtraStats.xp || 0) + extraXpGained + challengeDailyBonus,
           perfectGardenDays: (newExtraStats.perfectGardenDays || 0) + extraPerfectDays,
           plantsRevived: (newExtraStats.plantsRevived || 0) + extraPlantsRevived,
           eventProgress: updatedEventProgress,
           activeChallenge: updatedChallenge,
-          coins: Math.max(0, (newExtraStats.coins || 0) + earnedCoins),
+          coins: Math.max(0, (newExtraStats.coins || 0) + finalCoinsDelta),
+          dailyCoinsEarned: currentDailyCoins,
+          lastCoinResetDate: lastReset,
           eveningCompletions: Math.max(0, (newExtraStats.eveningCompletions || 0) + incEvening),
           nightCompletions: Math.max(0, (newExtraStats.nightCompletions || 0) + incNight),
           rainySeasonCompletions: Math.max(0, (newExtraStats.rainySeasonCompletions || 0) + incRainy),
@@ -1274,6 +1481,12 @@ function App() {
           playHaptic('allDone');
        } else if (didStageGrow) {
           playHaptic('grow');
+          confetti({
+             particleCount: 50,
+             spread: 60,
+             origin: { y: 0.8 },
+             colors: ['#00F5D4', '#E3A47D', '#8FCFAD']
+          });
        } else if (isProtectAction) {
           playHaptic('protect');
        } else {
@@ -1388,6 +1601,36 @@ function App() {
     const currentCoins = extraStats.coins || 0;
     if (currentCoins < item.price) return;
     
+    // Check required level
+    if (item.requiredLevel && (extraStats.level || 1) < item.requiredLevel) {
+       alert(`You need to be level ${item.requiredLevel} to buy this.`);
+       return;
+    }
+    
+    const now = new Date();
+    
+    // Check bounds for consumables
+    if (item.isConsumable) {
+       const currentCount = extraStats.boostItemCounts?.[item.id] || 0;
+       if (item.maxCapacity && currentCount >= item.maxCapacity) {
+          alert(`You can't carry more than ${item.maxCapacity} of ${item.name}.`);
+          return;
+       }
+       
+       if (item.cooldownHours) {
+          const lastPurchases = extraStats.lastPurchaseDates || {};
+          const lastDateStr = lastPurchases[item.id];
+          if (lastDateStr) {
+             const lastD = new Date(lastDateStr);
+             const diffHours = (now.getTime() - lastD.getTime()) / (1000 * 60 * 60);
+             if (diffHours < item.cooldownHours) {
+                alert(`${item.name} is on cooldown. Try again later.`);
+                return;
+             }
+          }
+       }
+    }
+    
     let newExtraStats = { 
        ...extraStats, 
        coins: currentCoins - item.price,
@@ -1399,6 +1642,12 @@ function App() {
           ...(newExtraStats.boostItemCounts || {}),
           [item.id]: (newExtraStats.boostItemCounts?.[item.id] || 0) + 1
        };
+       if (item.cooldownHours) {
+          newExtraStats.lastPurchaseDates = {
+             ...(newExtraStats.lastPurchaseDates || {}),
+             [item.id]: now.toISOString()
+          };
+       }
     } else {
        newExtraStats.ownedItemIds = [...(newExtraStats.ownedItemIds || []), item.id];
     }
@@ -1437,28 +1686,22 @@ function App() {
     persistData(habits, logs, newExtraStats);
   };
 
-  const activeHabitsList = habits.filter(h => !h.isArchived);
-  const dueHabitsList = activeHabitsList.filter(h => {
-     if (h.scheduleType === 'times_per_week' || h.scheduleType === 'anytime' || h.scheduleType === 'weekly') {
-        const completedCount = getCompletedCountThisWeek(h, logs);
-        const target = h.targetCount || 1;
-        // If it's a flexible habit and the target is already met, it shouldn't hold back a perfect day.
-        if (completedCount >= target && !logs[dateKey]?.includes(h.id)) {
-           return false; // Skip it from perfect day requirement since target is already met
-        } 
-        // If not met, and not completed today, we could require it. 
-        // But making flexible habits block a perfect day every single day is bad UX.
-        // The prompt says "Do not punish non-daily habits daily". 
-        // So let's NOT require X times per week habits for a daily perfect day unless they actually did it.
-        // So standard logic: skip them for perfect day unless they did it (or we just exclude them from blocking).
-        return false;
-     }
-     return isHabitDueOnDate(h, dateKey);
-  });
-  
-  // Also if they completed flexible habits today, they count positively, but don't block.
-  // Actually, perfect day = all habits DUE today were completed.
-  const isPerfectDayNowTopLevel = dueHabitsList.length > 0 && dueHabitsList.every((h) => (logs[dateKey] || []).includes(h.id));
+  const { activeHabitsList, dueHabitsList, isPerfectDayNowTopLevel } = React.useMemo(() => {
+    const active = habits.filter(h => !h.isArchived);
+    const due = active.filter(h => {
+       if (h.scheduleType === 'times_per_week' || h.scheduleType === 'anytime' || h.scheduleType === 'weekly') {
+          const completedCount = getCompletedCountThisWeek(h, logs);
+          const target = h.targetCount || 1;
+          if (completedCount >= target && !logs[dateKey]?.includes(h.id)) {
+             return false;
+          } 
+          return false;
+       }
+       return isHabitDueOnDate(h, dateKey);
+    });
+    const perfect = due.length > 0 && due.every((h) => (logs[dateKey] || []).includes(h.id));
+    return { activeHabitsList: active, dueHabitsList: due, isPerfectDayNowTopLevel: perfect };
+  }, [habits, logs, dateKey]);
 
   // -- Render Logic --
 
@@ -1586,17 +1829,21 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto p-6 md:p-16 min-h-screen">
+      <main className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 md:p-12 lg:p-16 min-h-screen">
         {/* Garden Companions Ambient Layer */}
-        {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}
+        <React.Suspense fallback={null}>
+          {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}
+        </React.Suspense>
 
         {/* Companion Unlock Overlay */}
-        {recentlyUnlockedCompanions.length > 0 && (
-           <CompanionUnlockModal 
-              companionIds={recentlyUnlockedCompanions}
-              onClose={() => setRecentlyUnlockedCompanions([])}
-           />
-        )}
+        <React.Suspense fallback={null}>
+          {recentlyUnlockedCompanions.length > 0 && (
+             <CompanionUnlockModal 
+                companionIds={recentlyUnlockedCompanions}
+                onClose={() => setRecentlyUnlockedCompanions([])}
+             />
+          )}
+        </React.Suspense>
 
         <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex-1">
@@ -1664,7 +1911,14 @@ function App() {
             <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
           </div>
         ) : (
-          <>
+          <React.Suspense fallback={
+            <div className="flex-1 flex flex-col gap-6 w-full animate-pulse opacity-60">
+              <div className="h-12 bg-surface-alt/40 rounded-xl w-1/3"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 {[1,2,3].map(i => <div key={i} className="h-48 bg-surface-alt/30 rounded-[24px]"></div>)}
+              </div>
+            </div>
+          }>
             {activeTab === Tab.TRACKER && (
               <div className="space-y-8">
                 {/* Weekly Report Banner (Shows on Sun/Mon) */}
@@ -1688,20 +1942,11 @@ function App() {
                   </div>
                 )}
 
-                {/* Dynamic Motivational Quote Banner */}
-                <div className="p-6 rounded-card bg-surface-soft border border-surface-alt flex gap-5 items-center relative shadow-sm">
-                  <div className="w-12 h-12 rounded-2xl bg-surface-card border border-surface-alt flex items-center justify-center text-status-healthy shrink-0 shadow-sm">
-                    <Zap className="w-6 h-6 text-status-healthy" strokeWidth={2.5} />
-                  </div>
-                  <div className="bg-primary-mint/10 p-4 rounded-2xl border border-primary-mint/20 w-full">
-                    <p className="text-sm font-medium italic text-primary-text">
-                      "{quote.text}"
-                    </p>
-                    <p className="text-[11px] text-status-healthy font-bold uppercase tracking-wide mt-1.5">
-                      {quote.author}
-                    </p>
-                  </div>
-                </div>
+                {/* Daily Goal Ring Setup */}
+                <DailyGoalRing 
+                  completed={dueHabitsList.filter(h => (logs[dateKey] || []).includes(h.id)).length} 
+                  total={dueHabitsList.length} 
+                />
 
                 {/* Active Event Banner */}
                 {activeEvent && eventProgress && (
@@ -1743,9 +1988,38 @@ function App() {
                    return null;
                 })()}
 
+                {/* Sort Dropdown */}
+                <div className="flex justify-end -mb-4 relative z-10">
+                  <select 
+                     value={sortType} 
+                     onChange={(e) => setSortType(e.target.value as any)}
+                     className="bg-surface-soft border border-surface-alt text-primary-text text-sm rounded-lg px-4 py-2 outline-none focus:border-primary-mint font-mono uppercase tracking-wider shadow-sm appearance-none cursor-pointer hover:bg-surface-alt/50 transition-colors"
+                  >
+                     <option value="recent">Sort: Recent</option>
+                     <option value="health">Sort: Health</option>
+                     <option value="recovery">Needs Recovery</option>
+                     <option value="alpha">Sort: Alphabetical</option>
+                  </select>
+                </div>
+
                 {/* Daily Garden Main View */}
                 <DailyGarden
-                  habits={activeHabitsList}
+                  habits={[...activeHabitsList].sort((a, b) => {
+                     if (sortType === 'recovery') {
+                        const aRecovery = (a.plantHealth !== undefined && a.plantHealth < 50);
+                        const bRecovery = (b.plantHealth !== undefined && b.plantHealth < 50);
+                        if (aRecovery && !bRecovery) return -1;
+                        if (!aRecovery && bRecovery) return 1;
+                        return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
+                     }
+                     if (sortType === 'health') {
+                        return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
+                     }
+                     if (sortType === 'alpha') {
+                        return a.name.localeCompare(b.name);
+                     }
+                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  })}
                   logs={logs}
                   stats={stats}
                   dateKey={dateKey}
@@ -1769,13 +2043,13 @@ function App() {
                   onBackdate={handleBackdate}
                 />
 
-                {showAddForm && (
-                  <HabitForm
-                    userMaxStreak={Math.max(0, ...habits.map((h) => h.bestStreak || 0))}
-                    onAdd={handleAddHabit}
-                    onCancel={() => setShowAddForm(false)}
-                  />
-                )}
+                <HabitForm
+                  isOpen={showAddForm}
+                  userMaxStreak={Math.max(0, ...habits.map((h) => h.bestStreak || 0))}
+                  customCategories={extraStats.customCategories || []}
+                  onAdd={handleAddHabit}
+                  onCancel={() => setShowAddForm(false)}
+                />
 
                 {showRestModeModal && (
                   <RestModeSetup
@@ -1861,7 +2135,7 @@ function App() {
                         className="flex flex-col items-center p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm"
                       >
                         <div className="w-12 h-12 text-5xl mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                          <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-12 h-12" />
+                          <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-12 h-12" />
                         </div>
                         <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize mb-1">
                           {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
@@ -2183,6 +2457,49 @@ function App() {
                      )}
                   </div>
 
+                  {/* Daily Reminder Block */}
+                  <div className="bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6 flex flex-col gap-4">
+                     <div className="flex items-center justify-between">
+                        <div>
+                           <h3 className="text-white font-bold text-sm text-balance">Daily Quick Reminder</h3>
+                           <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-[200px] leading-relaxed">A gentle nudge at a specific time</p>
+                        </div>
+                        <button 
+                           onClick={async () => {
+                              const enabled = extraStats.dailyReminderEnabled === true;
+                              const newStats = { ...extraStats, dailyReminderEnabled: !enabled };
+                              setExtraStats(newStats);
+                              persistData(habits, logs, newStats);
+                              
+                              if (!enabled && 'Notification' in window) {
+                                await Notification.requestPermission();
+                              }
+                           }}
+                           className={`w-12 h-6 rounded-full transition-colors relative ${(extraStats.dailyReminderEnabled === true) ? 'bg-cyan-500' : 'bg-slate-700'}`}
+                        >
+                           <div className={`w-4 h-4 bg-surface-card rounded-full absolute top-1 transition-transform ${(extraStats.dailyReminderEnabled === true) ? 'translate-x-7' : 'translate-x-1'}`} />
+                        </button>
+                     </div>
+                     
+                     {(extraStats.dailyReminderEnabled === true) && (
+                       <div className="flex items-center justify-between border-t border-surface-alt pt-4">
+                         <div>
+                            <p className="text-slate-400 font-mono text-[10px] tracking-wider uppercase">Reminder Time</p>
+                         </div>
+                         <input 
+                           type="time" 
+                           value={extraStats.dailyReminderTime || '09:00'} 
+                           onChange={(e) => {
+                              const newStats = { ...extraStats, dailyReminderTime: e.target.value };
+                              setExtraStats(newStats);
+                              persistData(habits, logs, newStats);
+                           }}
+                           className="bg-transparent border border-surface-alt text-white font-mono text-sm px-2 py-1 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                         />
+                       </div>
+                     )}
+                  </div>
+
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
                      <div>
                         <h3 className="text-white font-bold text-sm">Garden Matches Time of Day</h3>
@@ -2199,6 +2516,91 @@ function App() {
                      >
                         <div className={`w-4 h-4 bg-surface-card rounded-full absolute top-1 transition-transform ${(extraStats.matchTimeOfDay !== false) ? 'translate-x-7' : 'translate-x-1'}`} />
                      </button>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
+                     <div>
+                        <h3 className="text-white font-bold text-sm">Completion Sound Cue</h3>
+                        <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Audio cue on habit completion</p>
+                     </div>
+                     <select 
+                        value={extraStats.completionSound || 'droplet'}
+                        onChange={(e) => {
+                           const soundTheme = e.target.value as 'chime' | 'droplet' | 'pop' | 'none';
+                           const newStats = { ...extraStats, completionSound: soundTheme };
+                           setExtraStats(newStats);
+                           persistData(habits, logs, newStats);
+                           if (soundTheme !== 'none') {
+                              playCompletionSound(soundTheme);
+                           }
+                        }}
+                        className="bg-[#0d1017] border border-surface-alt text-white font-mono text-xs px-3 py-2 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                     >
+                        <option value="droplet">Water Droplet</option>
+                        <option value="chime">Soft Chime</option>
+                        <option value="pop">Pop</option>
+                        <option value="none">Disabled</option>
+                     </select>
+                  </div>
+
+                  <MotivationSettings 
+                    stats={extraStats}
+                    onUpdate={(newStats) => {
+                       setExtraStats(newStats as any);
+                       persistData(habits, logs, newStats as any);
+                    }}
+                    onPreview={() => {
+                       const customQuotes = extraStats.motivations || [];
+                       const validQuotes = customQuotes.length > 0 ? customQuotes : MOTIVATIONAL_QUOTES;
+                       const chosen = validQuotes[Math.floor(Math.random() * validQuotes.length)];
+                       setMotivationPopup({ text: (chosen as any).quote_text || (chosen as any).text, author: (chosen as any).author });
+                    }}
+                  />
+
+                  <CustomCategoryManager 
+                    categories={extraStats.customCategories || []}
+                    onChange={(customCategories) => {
+                       const newStats = { ...extraStats, customCategories };
+                       setExtraStats(newStats);
+                       persistData(habits, logs, newStats);
+                    }}
+                  />
+
+                  <div className="flex flex-col gap-3 bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
+                     <div>
+                        <h3 className="text-white font-bold text-sm">Accent Color Theme</h3>
+                        <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Personalize your primary color</p>
+                     </div>
+                     <div className="flex items-center gap-3">
+                        {[
+                           { name: 'Mint', value: '143 207 173', hex: '#8FCFAD' },
+                           { name: 'Rose', value: '251 113 133', hex: '#fb7185' },
+                           { name: 'Cyan', value: '34 211 238', hex: '#22d3ee' },
+                           { name: 'Amber', value: '251 191 36', hex: '#fbbf24' },
+                           { name: 'Purple', value: '192 132 252', hex: '#c084fc' }
+                        ].map((color) => (
+                           <button
+                              key={color.name}
+                              onClick={() => {
+                                 const newStats = { ...extraStats, accentColor: color.value };
+                                 document.documentElement.style.setProperty('--primary-mint', color.value);
+                                 setExtraStats(newStats);
+                                 persistData(habits, logs, newStats);
+                              }}
+                              className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center ${
+                                 (extraStats.accentColor || '143 207 173') === color.value 
+                                    ? 'border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]' 
+                                    : 'border-transparent'
+                              }`}
+                              style={{ backgroundColor: color.hex }}
+                              title={color.name}
+                           >
+                              {(extraStats.accentColor || '143 207 173') === color.value && (
+                                 <Check className="w-4 h-4 text-white drop-shadow-md" />
+                              )}
+                           </button>
+                        ))}
+                     </div>
                   </div>
 
                    {/* Recently Unlocked Badges */}
@@ -2285,68 +2687,101 @@ function App() {
                 </div>
               </div>
             )}
-          </>
+          </React.Suspense>
         )}
 
-        {showOrchard && (
-          <OrchardModal 
-             entries={extraStats.orchard || []} 
-             habits={habits}
-             onClose={() => setShowOrchard(false)} 
-          />
-        )}
+        <React.Suspense fallback={null}>
+          {showOrchard && (
+            <OrchardModal 
+               entries={extraStats.orchard || []} 
+               habits={habits}
+               onClose={() => setShowOrchard(false)} 
+            />
+          )}
 
-        {harvestedData && (
-          <HarvestModal 
-             data={harvestedData} 
-             onClose={() => setHarvestedData(null)} 
-          />
-        )}
+          {harvestedData && (
+            <HarvestModal 
+               data={harvestedData} 
+               onClose={() => setHarvestedData(null)} 
+            />
+          )}
 
-        {showAlmanac && currentAlmanacYear && (
-          <AlmanacView 
-             almanac={
-                extraStats.almanacs?.[currentAlmanacYear] || 
-                (generateAlmanac(currentAlmanacYear, logs, habits, extraStats) || {
-                   year: currentAlmanacYear,
-                   totalCheckins: 0,
-                   bestStreak: {days: 0, habitName: '', icon: ''},
-                   topHabit: {name: '', fruit: '', count: 0, icon: ''},
-                   rhythm: {label: '', percent: 0, busiestMonth: ''},
-                   harvest: {plantsGrown: 0, harvests: 0, badges: 0, companions: 0},
-                   comebacks: 0,
-                   computedAt: new Date().toISOString()
-                })
-             }
-             userName={user?.displayName || "Gardener"}
-             userRank={stats.rank}
-             onClose={() => {
-                setShowAlmanac(false);
-                // Ensure it gets saved if it was newly generated
-                if (!extraStats.almanacs || !extraStats.almanacs[currentAlmanacYear]) {
-                   const generated = generateAlmanac(currentAlmanacYear, logs, habits, extraStats);
-                   if (generated) {
-                      const newStats = {
-                         ...extraStats,
-                         almanacs: {
-                            ...(extraStats.almanacs || {}),
-                            [currentAlmanacYear]: generated
-                         }
-                      };
-                      setExtraStats(newStats);
-                      persistData(habits, logs, newStats);
-                   }
-                }
-             }}
-          />
-        )}
+          {showAlmanac && currentAlmanacYear && (
+            <AlmanacView 
+               almanac={
+                  extraStats.almanacs?.[currentAlmanacYear] || 
+                  (generateAlmanac(currentAlmanacYear, logs, habits, extraStats) || {
+                     year: currentAlmanacYear,
+                     totalCheckins: 0,
+                     bestStreak: {days: 0, habitName: '', icon: ''},
+                     topHabit: {name: '', fruit: '', count: 0, icon: ''},
+                     rhythm: {label: '', percent: 0, busiestMonth: ''},
+                     harvest: {plantsGrown: 0, harvests: 0, badges: 0, companions: 0},
+                     comebacks: 0,
+                     computedAt: new Date().toISOString()
+                  })
+               }
+               userName={user?.displayName || "Gardener"}
+               userRank={stats.rank}
+               onClose={() => {
+                  setShowAlmanac(false);
+                  if (!extraStats.almanacs || !extraStats.almanacs[currentAlmanacYear]) {
+                     const generated = generateAlmanac(currentAlmanacYear, logs, habits, extraStats);
+                     if (generated) {
+                        const newStats = {
+                           ...extraStats,
+                           almanacs: {
+                              ...(extraStats.almanacs || {}),
+                              [currentAlmanacYear]: generated
+                           }
+                        };
+                        setExtraStats(newStats);
+                        persistData(habits, logs, newStats);
+                     }
+                  }
+               }}
+            />
+          )}
 
-        {newlyUnlockedBadges.length > 0 && (
-          <BadgeUnlockModal
-             badges={newlyUnlockedBadges}
-             onClose={() => setNewlyUnlockedBadges([])}
-          />
-        )}
+          {newlyUnlockedBadges.length > 0 && (
+            <BadgeUnlockModal
+               badges={newlyUnlockedBadges}
+               onClose={() => setNewlyUnlockedBadges([])}
+            />
+          )}
+        </React.Suspense>
+        
+        <AnimatedModal 
+           isOpen={!!motivationPopup} 
+           onClose={() => setMotivationPopup(null)}
+           alignment="center"
+           className="!max-w-md mx-auto !p-0 overflow-hidden bg-surface-card border border-surface-alt shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+        >
+           {motivationPopup && (
+              <div className="relative p-8 md:p-10 text-center flex flex-col items-center justify-center min-h-[200px]">
+                 <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-[#00F5D4]/10 to-transparent pointer-events-none" />
+                 
+                 <Quote className="w-10 h-10 text-[#00F5D4]/30 mb-6 drop-shadow-[0_0_15px_rgba(0,245,212,0.2)]" />
+                 
+                 <p className="text-xl md:text-2xl font-display font-medium text-primary-text leading-relaxed text-balance relative z-10" style={{ fontFamily: "inherit" }}>
+                    {motivationPopup.text}
+                 </p>
+                 
+                 {motivationPopup.author && (
+                    <p className="mt-6 text-sm font-mono text-emerald-400 uppercase tracking-widest relative z-10">
+                       — {motivationPopup.author}
+                    </p>
+                 )}
+                 
+                 <button 
+                    onClick={() => setMotivationPopup(null)}
+                    className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition-colors z-20 hover:bg-white/5 rounded-full"
+                 >
+                    <Check className="w-5 h-5" />
+                 </button>
+              </div>
+           )}
+        </AnimatedModal>
         
         {toastMessage && (
            <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#0d1017] border border-[#00F5D4]/50 shadow-[0_10px_40px_rgba(0,245,212,0.2)] text-[#00F5D4] px-6 py-3 rounded-full font-mono text-[11px] font-bold tracking-widest flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-4">

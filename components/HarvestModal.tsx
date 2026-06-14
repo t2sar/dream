@@ -15,7 +15,16 @@ export const HarvestModal: React.FC<HarvestModalProps> = ({ data, onClose }) => 
         <div className="p-6 text-center">
           <div className="mx-auto w-24 h-24 mb-4 bg-amber-500/10 rounded-full flex items-center justify-center relative shadow-[0_0_30px_rgba(245,158,11,0.2)]">
              <div className="absolute inset-0 border border-amber-500/50 rounded-full animate-ping opacity-50" style={{ animationDuration: '3s' }} />
-             <PlantIcon plantType={data.fruitId as any} stage="Fruiting Plant" status="Normal" className="w-16 h-16 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10" />
+             <PlantIcon 
+               plantType={data.fruitId as any} 
+               stage="Fruiting Plant" 
+               status="Normal" 
+               className={`w-16 h-16 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] z-10 ${
+                 ['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'].includes(data.fruitId) 
+                   ? 'animate-[spin_4s_linear_infinite]' 
+                   : 'animate-hovering'
+               }`} 
+             />
           </div>
           
           <h2 className="text-2xl font-black font-display text-white mb-2 line-clamp-1">Harvested!</h2>

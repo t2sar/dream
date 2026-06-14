@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { UserStats, ShopItem } from '../types';
 import { SHOP_ITEMS } from '../shopData';
 import { Button } from './Button';
-import { Package, PackageOpen, Feather, ShoppingBasket, Building, Home, Sprout, Sun, CloudRain, Droplets, AlignJustify } from 'lucide-react';
+import { AnimatedModal } from './AnimatedModal';
+import { X, Coins, Package } from 'lucide-react';
+
+const ShopItemSvg = React.lazy(() => import('./ShopItemAssets').then(m => ({ default: m.ShopItemSvg })));
 
 interface GardenShopProps {
   stats: UserStats;
@@ -10,25 +13,9 @@ interface GardenShopProps {
   onEquipItem: (item: ShopItem) => void;
 }
 
-const getIcon = (name: string, className: string = "w-6 h-6") => {
-  switch (name) {
-    case 'PackageOpen': return <PackageOpen className={className} />;
-    case 'Package': return <Package className={className} />;
-    case 'AlignJustify': return <AlignJustify className={className} />;
-    case 'ShoppingBasket': return <ShoppingBasket className={className} />;
-    case 'Feather': return <Feather className={className} />;
-    case 'Building': return <Building className={className} />;
-    case 'Home': return <Home className={className} />;
-    case 'Sprout': return <Sprout className={className} />;
-    case 'Sun': return <Sun className={className} />;
-    case 'CloudRain': return <CloudRain className={className} />;
-    case 'Droplets': return <Droplets className={className} />;
-    default: return <Package className={className} />;
-  }
-};
-
 export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
   const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts'>('pots');
+  const [confirmPurchaseItem, setConfirmPurchaseItem] = useState<ShopItem | null>(null);
   
   const currentCoins = stats.coins || 0;
   const ownedItemIds = stats.ownedItemIds || [];
@@ -87,10 +74,13 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
         {filteredItems.map(item => {
           const isOwned = !item.isConsumable && ownedItemIds.includes(item.id);
           const canAfford = currentCoins >= item.price;
+          const userLvl = stats.level || 1;
+          const isLevelLocked = item.requiredLevel && userLvl < item.requiredLevel;
           
           let statusText = "";
           let buttonAction = () => {};
           let buttonStyle = "";
+          let isDisabled = false;
           let isEquipped = false;
           
           if (item.type === 'background' && stats.equippedBackgroundId === item.id) isEquipped = true;
@@ -99,9 +89,14 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           if (item.type === 'seasonal' && stats.equippedSeasonalDecorId === item.id) isEquipped = true;
           if (item.type === 'decoration' && (stats.equippedLeftDecorId === item.id || stats.equippedRightDecorId === item.id)) isEquipped = true;
           
-          if (isEquipped) {
+          if (isLevelLocked) {
+              statusText = `Req Lvl ${item.requiredLevel}`;
+              buttonStyle = "bg-slate-800 text-red-400 border border-red-500/30 opacity-50 cursor-not-allowed";
+              isDisabled = true;
+          } else if (isEquipped) {
               statusText = "Equipped";
               buttonStyle = "bg-slate-700 text-slate-400 border border-slate-600";
+              isDisabled = true;
           } else if (isOwned) {
               statusText = "Equip";
               buttonAction = () => onEquipItem(item);
@@ -112,15 +107,39 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
               buttonStyle = canAfford 
                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" 
                  : "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+              isDisabled = !canAfford;
           }
           
-          if (item.isConsumable) {
+          if (item.isConsumable && !isLevelLocked) {
               const ownedCount = stats.boostItemCounts?.[item.id] || 0;
-              statusText = `${item.price} coins`;
-              buttonAction = () => onBuyItem(item);
-              buttonStyle = canAfford 
-                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" 
-                 : "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+              let isCapped = item.maxCapacity ? ownedCount >= item.maxCapacity : false;
+              let isOnCooldown = false;
+              
+              if (item.cooldownHours) {
+                  const lastPurchases = stats.lastPurchaseDates || {};
+                  const lastDateStr = lastPurchases[item.id];
+                  if (lastDateStr) {
+                      const diffHours = (new Date().getTime() - new Date(lastDateStr).getTime()) / (1000 * 60 * 60);
+                      if (diffHours < item.cooldownHours) isOnCooldown = true;
+                  }
+              }
+
+              if (isCapped) {
+                 statusText = "Max Capacity";
+                 buttonStyle = "bg-slate-800 text-amber-500 border border-amber-500/30 opacity-60 cursor-not-allowed";
+                 isDisabled = true;
+              } else if (isOnCooldown) {
+                 statusText = "Cooldown";
+                 buttonStyle = "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+                 isDisabled = true;
+              } else {
+                 statusText = `${item.price} coins`;
+                 buttonAction = () => onBuyItem(item);
+                 buttonStyle = canAfford 
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" 
+                    : "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+                 isDisabled = !canAfford;
+              }
           }
           
           return (
@@ -131,30 +150,28 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                )}
                
                <div className="w-12 h-12 rounded-xl bg-slate-800/50 border border-surface-alt mb-3 flex items-center justify-center text-slate-400 mx-auto group-hover:scale-110 transition-transform duration-300">
-                  {getIcon(item.iconName, 'w-6 h-6')}
+                  <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin" />}>
+                     <ShopItemSvg itemId={item.id} className="w-8 h-8" />
+                  </React.Suspense>
                </div>
                <h3 className="text-sm font-bold text-white text-center mb-1 line-clamp-1 leading-tight">{item.name}</h3>
                <p className="text-[10px] text-slate-500 font-mono text-center flex-1 leading-tight line-clamp-3 mb-4">{item.description}</p>
                
                {item.isConsumable && (
-                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center mb-2">Owned: {stats.boostItemCounts?.[item.id] || 0}</div>
+                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center mb-2">Owned: {stats.boostItemCounts?.[item.id] || 0} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
                )}
                
                <button
                   onClick={() => {
-                     if (!isEquipped && (isOwned || canAfford || item.isConsumable)) {
+                     if (!isDisabled) {
                        if (isOwned && !item.isConsumable) {
                            buttonAction();
                        } else {
-                           if(canAfford) {
-                             if(confirm(`Buy ${item.name} for ${item.price} coins?`)) {
-                                buttonAction();
-                             }
-                           }
+                           setConfirmPurchaseItem(item);
                        }
                      }
                   }}
-                  disabled={isEquipped || (!isOwned && !canAfford && !item.isConsumable) || (item.isConsumable && !canAfford)}
+                  disabled={isDisabled}
                   className={`w-full py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors ${buttonStyle}`}
                >
                   {statusText}
@@ -163,6 +180,41 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           )
         })}
       </div>
+
+      <AnimatedModal isOpen={!!confirmPurchaseItem} onClose={() => setConfirmPurchaseItem(null)} alignment="bottom" className="!p-0 !max-w-md mx-auto !rounded-t-3xl !rounded-b-none overflow-hidden bg-surface-card border border-surface-alt">
+        {confirmPurchaseItem && (
+           <div className="p-6">
+             <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold font-display text-lg text-primary-text uppercase tracking-widest flex items-center gap-2">
+                  <Package className="w-5 h-5 text-amber-500" /> Confirm Purchase
+                </h3>
+                <button onClick={() => setConfirmPurchaseItem(null)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+             </div>
+             <div className="flex items-start gap-4 mb-8 bg-surface-alt/10 p-4 rounded-xl border border-surface-alt/50">
+               <div className="w-16 h-16 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center shrink-0">
+                  <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-10 h-10 text-slate-300" />
+               </div>
+               <div>
+                  <h4 className="font-bold text-white mb-1">{confirmPurchaseItem.name}</h4>
+                  <p className="text-xs font-mono text-slate-400">{confirmPurchaseItem.description}</p>
+               </div>
+             </div>
+             
+             <button
+               onClick={() => {
+                  onBuyItem(confirmPurchaseItem);
+                  setConfirmPurchaseItem(null);
+               }}
+               className="w-full py-4 bg-primary-mint text-zinc-900 font-bold font-mono tracking-widest uppercase rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-[#00d8b9] shadow-[0_0_20px_rgba(0,245,212,0.2)] active:scale-95"
+             >
+                <Coins className="w-5 h-5" />
+                Purchase for {confirmPurchaseItem.price} Coins
+             </button>
+           </div>
+        )}
+      </AnimatedModal>
 
     </div>
   );

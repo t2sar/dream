@@ -17,7 +17,7 @@ interface ProgressChartProps {
   habits: Habit[];
 }
 
-export const ProgressChart: React.FC<ProgressChartProps> = ({
+export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
   logs,
   habits,
 }) => {
@@ -80,10 +80,9 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({
         </div>
       </div>
 
-      <div className="glass p-8 rounded-none border border-white/5 h-[400px] relative">
-        <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-[#00F5D4]/40" />
-        <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-6">
-          DAILY ACTIVITY LOGS
+      <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative">
+        <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6">
+          Daily Activity Logs
         </h3>
         <ResponsiveContainer width="100%" height="80%">
           <BarChart
@@ -122,24 +121,25 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#07080a",
-                borderColor: "rgba(0, 245, 212, 0.3)",
-                borderRadius: "0px",
+                backgroundColor: "#1f232b",
+                borderColor: "#333d4f",
+                borderRadius: "16px",
                 color: "#f8fafc",
                 fontFamily: '"Google Sans", sans-serif',
                 fontSize: "10px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
-              itemStyle={{ color: "#00F5D4" }}
-              cursor={{ fill: "rgba(0, 245, 212, 0.05)" }}
+              itemStyle={{ color: "#4ade80" }}
+              cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
             />
-            <Bar dataKey="completed" radius={[0, 0, 0, 0]} maxBarSize={30}>
+            <Bar dataKey="completed" radius={[4, 4, 0, 0]} maxBarSize={30}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={
                     entry.completed >= habits.length && habits.length > 0
-                      ? "#00F5D4"
-                      : "#7B2CBF"
+                      ? "#4ade80"
+                      : "#22d3ee"
                   }
                 />
               ))}
@@ -149,4 +149,4 @@ export const ProgressChart: React.FC<ProgressChartProps> = ({
       </div>
     </div>
   );
-};
+});

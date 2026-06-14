@@ -10,7 +10,7 @@ interface GardenHistoryViewProps {
   onUpdateNote: (habitId: string, note: string) => void;
 }
 
-export const GardenHistoryView: React.FC<GardenHistoryViewProps> = ({ 
+export const GardenHistoryView: React.FC<GardenHistoryViewProps> = React.memo(({ 
   archivedHabits, 
   onRestore, 
   onDeletePermanently,
@@ -84,6 +84,7 @@ export const GardenHistoryView: React.FC<GardenHistoryViewProps> = ({
                     plantType={selectedHabit.plantType} 
                     stage={selectedHabit.plantStage} 
                     status={selectedHabit.plantStatus} 
+                    health={selectedHabit.plantHealth}
                     className="w-24 h-24 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]" 
                  />
               </div>
@@ -294,7 +295,7 @@ export const GardenHistoryView: React.FC<GardenHistoryViewProps> = ({
                  )}
                  <div className="flex items-start justify-between mb-4 w-full">
                     <div className="bg-[#07080A]/50 p-2 rounded-lg border border-surface-alt">
-                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-8 h-8 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className={`px-2 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${getArchiveTypeColor(getCalculatedArchiveType(habit))}`}>
                        {formatArchiveType(getCalculatedArchiveType(habit))}
@@ -319,4 +320,4 @@ export const GardenHistoryView: React.FC<GardenHistoryViewProps> = ({
       )}
     </div>
   );
-};
+});

@@ -7,7 +7,7 @@ interface HeatmapProps {
   days?: number;
 }
 
-export const Heatmap: React.FC<HeatmapProps> = ({ logs, days = 90 }) => {
+export const Heatmap: React.FC<HeatmapProps> = React.memo(({ logs, days = 90 }) => {
   const today = new Date();
   const startDate = addDays(today, -days);
 
@@ -20,19 +20,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({ logs, days = 90 }) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const completedCount = logs[dateStr]?.length || 0;
 
-    if (completedCount === 0) return "bg-surface-alt/5";
+    if (completedCount === 0) return "bg-surface-alt/20";
     if (completedCount <= 1)
-      return "bg-violet-950/40 border border-violet-850/40";
+      return "bg-emerald-900/40 border border-emerald-800/40";
     if (completedCount <= 3)
-      return "bg-violet-600/60 border border-violet-500/50 shadow-[0_0_6px_rgba(123,44,191,0.25)]";
-    return "bg-[#00F5D4] border border-[#00f5d4]/40 shadow-[0_0_10px_rgba(0,245,212,0.45)]";
+      return "bg-emerald-500/60 border border-emerald-400/50 shadow-[0_0_6px_rgba(16,185,129,0.25)]";
+    return "bg-[#4ade80] border border-[#4ade80]/40 shadow-[0_0_10px_rgba(74,222,128,0.45)]";
   };
 
   return (
-    <div className="glass p-8 rounded-none border border-surface-alt relative overflow-x-auto">
-      <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00F5D4]/40" />
-
-      <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-6 flex items-center gap-3">
+    <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm relative overflow-x-auto">
+      <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6 flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"
@@ -43,13 +41,13 @@ export const Heatmap: React.FC<HeatmapProps> = ({ logs, days = 90 }) => {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-cyan-400"
+          className="text-status-healthy"
         >
-          <rect x="3" y="3" width="18" height="18" rx="0" ry="0" />
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
           <line x1="3" y1="9" x2="21" y2="9" />
           <line x1="9" y1="21" x2="9" y2="9" />
         </svg>
-        CONSISTENCY HEATMAP MATRIX
+        Consistency Heatmap Matrix
       </h3>
       <div className="flex gap-1.5 min-w-max">
         {Array.from({ length: Math.ceil(dateRange.length / 7) }).map(
@@ -59,21 +57,21 @@ export const Heatmap: React.FC<HeatmapProps> = ({ logs, days = 90 }) => {
                 <div
                   key={date.toISOString()}
                   title={`${format(date, "MMM do")}: ${logs[format(date, "yyyy-MM-dd")]?.length || 0} habits`}
-                  className={`w-3.5 h-3.5 rounded-none transition-all hover:scale-125 hover:z-10 cursor-crosshair ${getIntensity(date)}`}
+                  className={`w-3.5 h-3.5 rounded-[2px] transition-all hover:scale-125 hover:z-10 cursor-crosshair ${getIntensity(date)}`}
                 />
               ))}
             </div>
           ),
         )}
       </div>
-      <div className="flex items-center gap-3 mt-6 text-[9px] uppercase tracking-widest text-slate-500 font-mono font-bold justify-end">
+      <div className="flex items-center gap-3 mt-6 text-[10px] font-bold text-muted-text uppercase tracking-widest justify-end">
         <span>Less</span>
-        <div className="w-3.5 h-3.5 rounded-none bg-surface-alt/5 border border-surface-alt" />
-        <div className="w-3.5 h-3.5 rounded-none bg-violet-950/40 border border-violet-850/40" />
-        <div className="w-3.5 h-3.5 rounded-none bg-violet-600/60 border border-violet-500/50" />
-        <div className="w-3.5 h-3.5 rounded-none bg-[#00F5D4]" />
+        <div className="w-3.5 h-3.5 rounded-[2px] bg-surface-alt/20" />
+        <div className="w-3.5 h-3.5 rounded-[2px] bg-emerald-900/40 border border-emerald-800/40" />
+        <div className="w-3.5 h-3.5 rounded-[2px] bg-emerald-500/60 border border-emerald-400/50" />
+        <div className="w-3.5 h-3.5 rounded-[2px] bg-[#4ade80]" />
         <span>More</span>
       </div>
     </div>
   );
-};
+});

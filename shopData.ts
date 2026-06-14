@@ -1,240 +1,345 @@
-import { ShopItem } from './types';
+import { ShopItem, ShopItemCategory, ShopItemTier } from './types';
 
-export const SHOP_ITEMS: ShopItem[] = [
+// The Economy Pricing Matrix
+const PRICING_MATRIX = {
+  1: { minPrice: 40, maxPrice: 80, unlockLevel: 1 },
+  2: { minPrice: 100, maxPrice: 250, unlockLevel: 5 },
+  3: { minPrice: 500, maxPrice: 900, unlockLevel: 15 } // Note: specific items might need higher levels like 25 or 35
+};
+
+const CATEGORY_MULTIPLIERS: Record<ShopItemCategory, number> = {
+  pot: 0.8,
+  decoration: 1.0,
+  boost: 1.2,
+  fence: 1.5,
+  seasonal: 1.8,
+  background: 2.0
+};
+
+// Deterministic pricing and level calculation
+function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: number, requiredLevel?: number }): ShopItem {
+  // Exception for the default free background
+  if (item.id === 'bg_default') {
+    return { ...item, price: 0, requiredLevel: 1, tier: 1 };
+  }
+
+  const tier: ShopItemTier = item.tier || 1;
+  const config = PRICING_MATRIX[tier];
+  
+  // Create deterministic pseudo-random variation based on item ID
+  let hash = 0;
+  for (let i = 0; i < item.id.length; i++) hash = (Math.imul(31, hash) + item.id.charCodeAt(i)) | 0;
+  const variation = (Math.abs(hash) % 100) / 100; // 0.0 to 1.0
+  
+  // Base calculation applying category multiplier
+  const baseAvg = (config.minPrice + config.maxPrice) / 2;
+  let calculatedPrice = baseAvg * CATEGORY_MULTIPLIERS[item.type];
+  
+  // Add variation
+  calculatedPrice = calculatedPrice * (0.8 + (variation * 0.4)); // +/- 20%
+  
+  // Round to nearest 10
+  calculatedPrice = Math.round(calculatedPrice / 10) * 10;
+  
+  // Clamp to tier boundaries
+  calculatedPrice = Math.max(config.minPrice, Math.min(config.maxPrice, calculatedPrice));
+
+  let reqLevel = item.requiredLevel ?? config.unlockLevel;
+
+  return {
+    ...item,
+    price: calculatedPrice,
+    requiredLevel: reqLevel
+  };
+}
+
+const RAW_SHOP_ITEMS: (Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: number, requiredLevel?: number })[] = [
   {
     id: 'bg_default',
     name: 'Default Green Garden',
     type: 'background',
-    price: 0,
     description: 'The standard green garden.',
     iconName: 'Layout',
+    tier: 1
   },
   {
     id: 'pot_clay_basic',
     name: 'Basic Clay Pot',
     type: 'pot',
-    price: 30,
     description: 'A simple, traditional clay pot.',
     iconName: 'PackageOpen',
+    tier: 1
   },
   {
     id: 'pot_clay_colorful',
     name: 'Colorful Clay Pot',
     type: 'pot',
-    price: 60,
     description: 'A painted pot inspired by local art.',
     iconName: 'Package',
+    tier: 1
   },
   {
     id: 'pot_bamboo_basket',
     name: 'Bamboo Basket Pot',
     type: 'pot',
-    price: 80,
     description: 'A traditional woven bamboo basket.',
     iconName: 'Archive',
+    tier: 1
   },
   {
     id: 'pot_rooftop_tub',
     name: 'Rooftop Tub',
     type: 'pot',
-    price: 100,
     description: 'A common half-drum rooftop tub.',
     iconName: 'Database',
+    tier: 1
   },
   {
     id: 'fence_bamboo',
     name: 'Bamboo Fence',
     type: 'fence',
-    price: 80,
     description: 'A traditional bamboo fence for your garden.',
     iconName: 'AlignJustify',
+    tier: 2
   },
   {
     id: 'fence_wooden',
     name: 'Wooden Fence',
     type: 'fence',
-    price: 100,
-    description: 'A sturdy wooden fence border.',
+    description: 'A sturdier border fence for the garden.',
     iconName: 'AlignJustify',
+    tier: 2
   },
   {
     id: 'fence_clay_wall',
     name: 'Clay Wall Border',
     type: 'fence',
-    price: 120,
     description: 'A low earthen wall border around the plot.',
     iconName: 'Square',
+    tier: 2
   },
   {
     id: 'dec_fruit_basket',
     name: 'Fruit Basket',
     type: 'decoration',
-    price: 70,
     description: 'A woven basket for your harvest.',
     iconName: 'ShoppingBasket',
+    tier: 1
   },
   {
     id: 'dec_mango_basket',
     name: 'Mango Basket',
     type: 'decoration',
-    price: 120,
     description: 'A basket full of ripe mangos.',
     iconName: 'Apple',
+    tier: 1
   },
   {
     id: 'dec_butterfly',
     name: 'Butterfly',
     type: 'decoration',
-    price: 90,
     description: 'A colorful butterfly visiting your garden.',
     iconName: 'Feather',
+    tier: 1
   },
   {
     id: 'dec_bird',
     name: 'Bird',
     type: 'decoration',
-    price: 90,
     description: 'A small cheerful bird.',
     iconName: 'Twitter',
+    tier: 1
   },
   {
     id: 'dec_small_pond',
     name: 'Small Pond',
     type: 'decoration',
-    price: 150,
     description: 'A small tranquil pond with water lilies.',
     iconName: 'Droplet',
+    tier: 2
   },
   {
     id: 'dec_clay_lamp',
     name: 'Clay Lamp',
     type: 'decoration',
-    price: 100,
     description: 'A glowing traditional matir prodip.',
     iconName: 'Sun',
+    tier: 1
   },
   {
     id: 'dec_rickshaw_sign',
     name: 'Rickshaw Art Sign',
     type: 'decoration',
-    price: 150,
     description: 'A colorful rickshaw art signboard.',
     iconName: 'Camera',
+    tier: 2
   },
   {
     id: 'dec_kolshi',
     name: 'Kolshi Water Pot',
     type: 'decoration',
-    price: 100,
     description: 'A rounded pitcher for carrying water.',
     iconName: 'Coffee',
+    tier: 1
   },
   {
     id: 'bg_rooftop',
     name: 'Rooftop Garden',
     type: 'background',
-    price: 150,
     description: 'A beautiful city rooftop garden background.',
     iconName: 'Building',
+    tier: 3
   },
   {
     id: 'bg_village',
     name: 'Village Garden',
     type: 'background',
-    price: 200,
     description: 'A peaceful village garden background.',
     iconName: 'Home',
+    tier: 3
   },
   {
     id: 'bg_morning_sun',
     name: 'Morning Sun Garden',
     type: 'background',
-    price: 180,
     description: 'A warm sunrise illuminating the garden.',
     iconName: 'Sun',
+    tier: 3
   },
   {
     id: 'bg_monsoon',
     name: 'Monsoon Garden',
     type: 'background',
-    price: 220,
     description: 'A lush garden during the rainy season.',
     iconName: 'CloudRain',
+    tier: 3
   },
   {
     id: 'seasonal_boishakh',
     name: 'Boishakh Banner',
     type: 'seasonal',
-    price: 300,
     description: 'A festive red and white banner.',
     iconName: 'Flag',
+    tier: 2
   },
   {
     id: 'seasonal_eid_lights',
     name: 'Eid Lights',
     type: 'seasonal',
-    price: 300,
     description: 'Sparkling festive lights.',
     iconName: 'Zap',
+    tier: 2
   },
   {
     id: 'seasonal_ramadan_lantern',
     name: 'Ramadan Lantern',
     type: 'seasonal',
-    price: 300,
     description: 'A beautiful crescent lantern.',
     iconName: 'Moon',
+    tier: 2
   },
   {
     id: 'seasonal_rain_cloud',
     name: 'Rain Cloud',
     type: 'seasonal',
-    price: 250,
     description: 'A small shower cloud hovering above.',
     iconName: 'CloudRain',
+    tier: 2
   },
   {
     id: 'seasonal_winter_sun',
     name: 'Winter Sun',
     type: 'seasonal',
-    price: 250,
     description: 'A gentle, warm winter sun.',
     iconName: 'Sun',
+    tier: 2
   },
   {
     id: 'boost_fertilizer',
     name: 'Fertilizer',
     type: 'boost',
-    price: 40,
-    description: '+20 Plant XP to one plant.',
+    description: '+20 Plant XP to one plant. (Cap: 3, 1/day)',
     iconName: 'Sprout',
     isConsumable: true,
+    maxCapacity: 3,
+    cooldownHours: 24,
+    tier: 2
   },
   {
     id: 'boost_sunlight',
     name: 'Sunlight Boost',
     type: 'boost',
-    price: 50,
-    description: '+10 Bonus XP on next habit completion.',
+    description: '+10 Bonus XP on next habit completion. (Cap: 3, 1/day)',
     iconName: 'Sun',
     isConsumable: true,
+    maxCapacity: 3,
+    cooldownHours: 24,
+    tier: 2
   },
   {
     id: 'boost_rain',
     name: 'Rain Boost',
     type: 'boost',
-    price: 60,
-    description: 'Restores +10 health to all plants today.',
+    description: 'Restores +10 health to all plants today. (Cap: 2, 1/48hrs)',
     iconName: 'CloudRain',
     isConsumable: true,
+    maxCapacity: 2,
+    cooldownHours: 48,
+    tier: 2
   },
   {
     id: 'boost_recovery_water',
     name: 'Recovery Water',
     type: 'boost',
-    price: 70,
     description: 'Adds +20 health to a wilting or critical plant.',
     iconName: 'Droplets',
     isConsumable: true,
+    tier: 2
+  },
+  {
+    id: 'boost_streak_freeze',
+    name: 'Streak Freeze',
+    type: 'boost',
+    description: 'Protects your streak for one missed habit.',
+    iconName: 'Snowflake',
+    isConsumable: true,
+    tier: 2
+  },
+  {
+    id: 'boost_streak_repair',
+    name: 'Streak Repair',
+    type: 'boost',
+    description: 'Retroactively restore a broken streak within the last 3 days.',
+    iconName: 'Wrench',
+    isConsumable: true,
+    tier: 2
+  },
+  {
+    id: 'dec_nakshi_kantha',
+    name: 'Embroidered Nakshi Kantha Mat',
+    type: 'decoration',
+    description: 'A beautiful traditional embroidered mat for the garden. Requires Level 15.',
+    iconName: 'Box',
+    tier: 3
+  },
+  {
+    id: 'bg_zamindar_palace',
+    name: 'Zamindar Palace Rooftop',
+    type: 'background',
+    description: 'A majestic historical palace rooftop view. Requires Level 25.',
+    iconName: 'Building',
+    requiredLevel: 25,
+    tier: 3
+  },
+  {
+    id: 'dec_golden_rickshaw',
+    name: 'Golden Rickshaw Art Sign',
+    type: 'decoration',
+    description: 'A premium golden rickshaw art sign. Requires Level 35.',
+    iconName: 'Star',
+    requiredLevel: 35,
+    tier: 3
   }
 ];
+
+export const SHOP_ITEMS: ShopItem[] = RAW_SHOP_ITEMS.map(applyPricingEngine);

@@ -1,0 +1,93 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Web Dependencies
+        run: npm ci || npm install
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: false
+
+      # ---------------------------------------------------------------------------------------
+      # SIGNING INSTRUCTIONS (Fallback & Local Keystore Generation)
+      # ---------------------------------------------------------------------------------------
+      # If you want GitHub to sign the APK, do the following on your local machine:
+      #
+      # 1. Generate Keystore (Terminal/Command Prompt):
+      #    keytool -genkey -v -keystore release.keystore -alias my-alias -keyalg RSA -keysize 2048 -validity 10000
+      # 
+      # 2. Convert to Base64 String:
+      #    Base64 encoding prevents whitespace and binary parsing issue in GitHub Secrets.
+      #    Mac/Linux: base64 -w 0 release.keystore > release.keystore.base64
+      #    Windows (PowerShell): [Convert]::ToBase64String([IO.File]::ReadAllBytes("release.keystore")) | Out-File -Encoding UTF8 release.keystore.base64
+      #
+      # 3. Add to GitHub Secrets (Settings > Secrets and variables > Actions > New repository secret):
+      #    - SIGNING_KEY_STORE_BASE64 : [Paste the base64 text from step 2]
+      #    - KEY_STORE_PASSWORD       : [The keystore password you chose]
+      #    - ALIAS                    : [The alias you chose, e.g., my-alias]
+      #    - KEY_PASSWORD             : [The key password you chose]
+      # ---------------------------------------------------------------------------------------
+      
+      - name: Build and Sign Release APK
+        working-directory: android
+        run: |
+          # Ensure gradlew has execution permissions
+          chmod +x ./gradlew
+          
+          # Clean preliminary step
+          ./gradlew clean
+          
+          # Check if signing keys are provided
+          if [ -n "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" ]; then
+            echo "Signing properties found, preparing keystore..."
+            echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore.jks
+            
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+              -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} \
+              -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} \
+              -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          else
+            echo "No signing secrets found. Building unsigned release APK..."
+            ./gradlew assembleRelease
+          fi
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/release/*.aab
+          retention-days: 7

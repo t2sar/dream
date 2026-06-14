@@ -16,7 +16,7 @@ interface WeeklyReportViewProps {
   activeRestMode?: RestMode | null;
 }
 
-export const WeeklyReportView: React.FC<WeeklyReportViewProps> = ({ logs, habits, stats, activeEvent, eventProgress, activeRestMode }) => {
+export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ logs, habits, stats, activeEvent, eventProgress, activeRestMode }) => {
   const [weeksAgo, setWeeksAgo] = useState(0);
 
   const reportData = useMemo(() => {
@@ -404,4 +404,4 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = ({ logs, habits
       </div>
     </div>
   );
-};
+});

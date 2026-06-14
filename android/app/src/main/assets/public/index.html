@@ -31,7 +31,7 @@
                 alt: 'rgb(var(--surface-alt) / <alpha-value>)',
               },
               primary: {
-                mint: '#8FCFAD',
+                mint: 'rgb(var(--primary-mint) / <alpha-value>)',
                 blush: '#E3A47D',
                 text: '#F7EBDD',
               },
@@ -75,6 +75,14 @@
         --surface-card: 68 59 52; /* #443B34 */
         --surface-soft: 58 51 45; /* #3A332D */
         --surface-alt: 78 69 60; /* #4E453C */
+        --primary-mint: 143 207 173; /* #8FCFAD */
+      }
+      @keyframes breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .animate-breathe {
+        animation: breathe 4s ease-in-out infinite;
       }
       body {
         font-family: 'Nunito', sans-serif;
@@ -248,7 +256,7 @@
       .animate-dive { animation: dive infinite ease-in-out; }
       .animate-perch-blink { animation: hovering infinite alternate linear; }
     </style>
-    <script type="module" crossorigin src="/assets/index-BOs8FOoG.js"></script>
+    <script type="module" crossorigin src="/assets/index-CetZm7TA.js"></script>
   </head>
   <body>
     <div id="root"></div>

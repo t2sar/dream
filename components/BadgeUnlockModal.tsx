@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AchievementBadge } from '../types';
-import * as LucideIcons from 'lucide-react';
-import { X, Award } from 'lucide-react';
+import { Sprout, Droplet, Trophy, ArrowUpRight, Leaf, Trees, Apple, Grape, Cherry, HeartHandshake, ShieldPlus, Sun, Flag, Star, Award, Crown, ShoppingCart, X } from 'lucide-react';
+import { AnimatedModal } from './AnimatedModal';
+import confetti from 'canvas-confetti';
+
+const BADGE_ICONS: Record<string, React.FC<any>> = {
+  Sprout, Droplet, Trophy, ArrowUpRight, Leaf, Trees, Apple, Grape, Cherry, HeartHandshake, ShieldPlus, Sun, Flag, Star, Award, Crown, ShoppingCart
+};
 
 interface BadgeUnlockModalProps {
   badges: AchievementBadge[];
@@ -12,9 +17,30 @@ export const BadgeUnlockModal: React.FC<BadgeUnlockModalProps> = ({ badges, onCl
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Auto-advance or close after delay if no interaction 
-    // For MVP, just let user dismiss manually since it's rewarding
-  }, []);
+    // Specialized high-density garden-themed confetti
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 25, spread: 360, ticks: 60, zIndex: 10000 };
+
+    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 40 * (timeLeft / duration);
+      confetti({
+        ...defaults, particleCount,
+        origin: { x: randomInRange(0.1, 0.9), y: randomInRange(0.1, 0.3) },
+        colors: ['#00F5D4', '#2ecc71', '#27ae60', '#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#ea8685', '#f8a5c2']
+      });
+    }, 250);
+    
+    return () => clearInterval(interval);
+  }, [currentIndex]);
 
   const handleNext = () => {
     if (currentIndex < badges.length - 1) {
@@ -27,11 +53,10 @@ export const BadgeUnlockModal: React.FC<BadgeUnlockModalProps> = ({ badges, onCl
   const badge = badges[currentIndex];
   if (!badge) return null;
 
-  const Icon = (LucideIcons as any)[badge.iconName] || Award;
+  const Icon = BADGE_ICONS[badge.iconName] || Award;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-[#000428] border border-[#00F5D4]/50 rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(0,245,212,0.15)] relative animate-in zoom-in-95 duration-500">
+    <AnimatedModal isOpen={true} onClose={onClose} className="!max-w-sm !p-0 bg-[#000428] border border-[#00F5D4]/50 rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(0,245,212,0.15)]">
         
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-surface-alt relative bg-gradient-to-r from-emerald-900/50 to-transparent">
@@ -85,7 +110,6 @@ export const BadgeUnlockModal: React.FC<BadgeUnlockModalProps> = ({ badges, onCl
              {currentIndex < badges.length - 1 ? `Next Badge (${badges.length - currentIndex - 1} more)` : 'Awesome'}
            </button>
         </div>
-      </div>
-    </div>
+    </AnimatedModal>
   );
 };

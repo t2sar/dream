@@ -48,7 +48,15 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
              </button>
              <div className="flex flex-col items-center text-center">
                 <div className="w-24 h-24 mb-4 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
-                   <PlantIcon plantType={selected.fruitId as any} stage="Fruiting Plant" status="Normal" className="w-16 h-16 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)] animate-hovering" />
+                   <PlantIcon 
+                     plantType={selected.fruitId as any} 
+                     stage="Fruiting Plant" status="Normal" 
+                     className={`w-16 h-16 animate-hovering ${
+                       ['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'].includes(selected.fruitId)
+                       ? 'drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+                       : 'drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]'
+                     }`} 
+                   />
                 </div>
                 <h3 className="text-2xl font-black font-display text-white mb-1">{selected.name}</h3>
                 <p className="text-xs font-mono text-amber-500 tracking-widest uppercase mb-6">Harvested {selected.count} {selected.count === 1 ? 'Time' : 'Times'}</p>
@@ -111,7 +119,7 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                        className="bg-black/20 border border-surface-alt rounded-2xl p-4 flex flex-col items-center hover:bg-amber-500/5 hover:border-amber-500/30 transition-all group"
                     >
                        <div className="relative w-16 h-16 mb-2 flex items-center justify-center">
-                          <PlantIcon plantType={item.fruitId as any} stage="Fruiting Plant" status="Normal" className="w-12 h-12 group-hover:scale-110 transition-transform drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]" />
+                          <PlantIcon plantType={item.fruitId as any} stage="Fruiting Plant" status="Normal" className={`w-12 h-12 group-hover:scale-110 transition-transform ${['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'].includes(item.fruitId) ? 'drop-shadow-[0_0_12px_rgba(236,72,153,0.5)] group-hover:drop-shadow-[0_0_16px_rgba(236,72,153,0.8)]' : 'drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]'}`} />
                           <div className="absolute -top-1 -right-1 bg-amber-500 text-black text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#121620]">
                              ×{item.count}
                           </div>

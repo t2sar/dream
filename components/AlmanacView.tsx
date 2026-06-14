@@ -10,7 +10,7 @@ interface AlmanacViewProps {
   userRank?: string;
 }
 
-export const AlmanacView: React.FC<AlmanacViewProps> = ({ almanac, onClose, userName = "Gardener", userRank = "Novice" }) => {
+export const AlmanacView: React.FC<AlmanacViewProps> = React.memo(({ almanac, onClose, userName = "Gardener", userRank = "Novice" }) => {
   const [currentCard, setCurrentCard] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -148,7 +148,8 @@ export const AlmanacView: React.FC<AlmanacViewProps> = ({ almanac, onClose, user
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2">Your most-watered plant</h3>
                 <h2 className="text-4xl font-display font-bold text-white mb-4 drop-shadow-md">{almanac.topHabit.name}</h2>
-                <p className="text-pink-100 font-mono tracking-widest uppercase">{almanac.topHabit.fruit} · {almanac.topHabit.count} waterings</p>
+                <p className="text-pink-100 font-mono tracking-widest uppercase mb-4">{almanac.topHabit.fruit} · {almanac.topHabit.count} waterings</p>
+                {almanac.topHabit.summaryText && <p className="text-white text-lg font-medium text-center px-4 leading-relaxed max-w-sm drop-shadow-sm">{almanac.topHabit.summaryText}</p>}
              </div>
           )}
 
@@ -215,4 +216,4 @@ export const AlmanacView: React.FC<AlmanacViewProps> = ({ almanac, onClose, user
       </div>
     </div>
   );
-};
+});

@@ -30,7 +30,7 @@ interface GardenCalendarProps {
 
 import { isHabitDueOnDate } from '../scheduleUtils';
 
-export const GardenCalendar: React.FC<GardenCalendarProps> = ({ logs, habits, activeRestMode, stats, onBackdate }) => {
+export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs, habits, activeRestMode, stats, onBackdate }) => {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [backdateMenuOpenFor, setBackdateMenuOpenFor] = useState<string | null>(null);
@@ -398,4 +398,4 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = ({ logs, habits, ac
 
     </div>
   );
-};
+});

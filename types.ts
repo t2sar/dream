@@ -88,7 +88,7 @@ export type HabitCategory =
   | 'prayer_spiritual' | 'mindfulness' | 'finance' | 'family' 
   | 'home' | 'reading' | 'creativity' | 'social' | 'self_care' 
   | 'bad_habit_control' | 'personal_growth' | 'food_nutrition' 
-  | 'hydration' | 'custom';
+  | 'hydration' | 'custom' | string;
 
 export interface Habit {
   id: string;
@@ -152,6 +152,20 @@ export interface OrchardEntry {
   lastHarvest: string;
 }
 
+export interface CustomCategory {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+}
+
+export interface UserMotivation {
+  id: string;
+  quote_text: string;
+  author?: string;
+  created_at: string;
+}
+
 export interface UserStats {
   xp: number;
   level: number;
@@ -164,6 +178,7 @@ export interface UserStats {
   coins?: number;
   badges?: string[];
   decorations?: string[];
+  customCategories?: CustomCategory[];
   eventProgress?: UserEventProgress;
   activeChallenge?: ActiveChallenge | null;
   challengeHistory?: ActiveChallenge[];
@@ -188,6 +203,9 @@ export interface UserStats {
   backdatesUsedThisWeek?: number;
   backdateWeekStart?: string;
   backdatedLogs?: Record<string, string[]>; // dateKey -> habitIds
+  lastCoinResetDate?: string; // tracks daily reset for coins
+  dailyCoinsEarned?: number; // caps daily coins to balance economy
+  lastPurchaseDates?: Record<string, string>; // tracks cooldowns for shop items
   hapticsEnabled?: boolean;
   eveningSummaryEnabled?: boolean;
   eveningSummaryTime?: string; // e.g., '21:00'
@@ -199,6 +217,11 @@ export interface UserStats {
   // Gardener's Streak
   lastLoginDate?: string;
   currentLoginStreak?: number;
+  completionSound?: 'chime' | 'droplet' | 'pop' | 'none'; // New setting
+  dailyReminderEnabled?: boolean;
+  dailyReminderTime?: string; // e.g., '09:00'
+  accentColor?: string; // e.g. '#8FCFAD'
+  streakFreezes?: number;
   // Achievement fields
   habitsCreatedCount?: number;
   challengesCompletedCount?: number;
@@ -207,6 +230,12 @@ export interface UserStats {
   plantsFruitedCount?: number;
   hardHabitsCompletedCount?: number;
   unlockedBadgeIds?: Record<string, { unlockedAt: string, rewardClaimed: boolean }>;
+  
+  // Custom Motivations
+  motivations?: UserMotivation[];
+  motivationFrequencyLimit?: number; // 1, 3, 5, or -1 for unlimited
+  motivationsShownToday?: number;
+  lastMotivationDate?: string;
 }
 
 export interface AchievementBadge {
@@ -226,7 +255,7 @@ export interface AlmanacData {
   year: string;
   totalCheckins: number;
   bestStreak: { days: number; habitName: string; icon: string };
-  topHabit: { name: string; fruit: string; count: number; icon: string };
+  topHabit: { name: string; fruit: string; count: number; icon: string; summaryText?: string };
   rhythm: { label: string; percent: number; busiestMonth: string };
   harvest: { plantsGrown: number; harvests: number; badges: number; companions: number };
   comebacks: number;
@@ -276,14 +305,20 @@ export interface MonthlyGardenReport {
 
 export type ShopItemCategory = 'pot' | 'decoration' | 'background' | 'boost' | 'fence' | 'seasonal';
 
+export type ShopItemTier = 1 | 2 | 3;
+
 export interface ShopItem {
   id: string;
   name: string;
   type: ShopItemCategory;
-  price: number;
+  price: number; // Auto-calculated via engine, but required at runtime
   description: string;
   iconName: string; // e.g., 'Leaf', 'Sun', etc., or custom SVG rendering trigger
   isConsumable?: boolean;
+  requiredLevel?: number; // Auto-calculated if tier is present
+  maxCapacity?: number;
+  cooldownHours?: number;
+  tier?: ShopItemTier;
 }
 
 export type EventQuestType = 'water_plants' | 'complete_habit' | 'perfect_day' | 'save_wilting' | 'create_habit';

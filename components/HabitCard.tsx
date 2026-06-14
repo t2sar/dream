@@ -26,7 +26,7 @@ interface HabitCardProps {
   onArchive?: (id: string) => void;
 }
 
-export const HabitCard: React.FC<HabitCardProps> = ({
+export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   habit,
   isCompleted,
   isSlipped,
@@ -182,6 +182,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
                 stage={habit.plantStage} 
                 status={habit.plantStatus} 
                 isPrivate={habit.isPrivate} 
+                health={habit.plantHealth}
                 isLegendary={habit.isLegendary} 
                 isArchived={habit.isArchived} 
                 className="w-10 h-10" 
@@ -275,4 +276,4 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       </div>
     </div>
   );
-};
+});

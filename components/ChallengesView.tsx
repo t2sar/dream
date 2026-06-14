@@ -13,7 +13,7 @@ interface ChallengesViewProps {
   onClaimChallengeReward: (challengeId: string) => void;
 }
 
-export const ChallengesView: React.FC<ChallengesViewProps> = ({ habits, stats, onJoinChallenge, onQuitChallenge, onClaimChallengeReward }) => {
+export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habits, stats, onJoinChallenge, onQuitChallenge, onClaimChallengeReward }) => {
   const [filter, setFilter] = useState<string>('all');
   const [selectedTemplate, setSelectedTemplate] = useState<ChallengeTemplate | null>(null);
 
@@ -192,4 +192,4 @@ export const ChallengesView: React.FC<ChallengesViewProps> = ({ habits, stats, o
 
     </div>
   );
-};
+});

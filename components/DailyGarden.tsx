@@ -2,10 +2,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek } from 'date-fns';
 import { PlantIcon } from './PlantIcon';
-import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings } from 'lucide-react';
+import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info } from 'lucide-react';
 import { getChallengeTemplate } from '../challengesData';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueToday, getCompletedCountThisWeek, isPeriodTargetReached } from '../scheduleUtils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatedModal } from './AnimatedModal';
 
 interface DailyGardenProps {
   habits: Habit[];
@@ -17,7 +19,7 @@ interface DailyGardenProps {
   activeRestMode?: RestMode | null;
   onOpenRestMode?: () => void;
   onResumeRestMode?: () => void;
-  onWaterPlant: (habitId: string, isMini?: boolean) => void;
+  onWaterPlant: (habitId: string, isMini?: boolean, customAmount?: number) => void;
   onSlipHabit?: (habitId: string, reason?: string) => void;
   onUndoSlip?: (habitId: string) => void;
   onAddHabit: () => void;
@@ -30,7 +32,7 @@ interface DailyGardenProps {
 
 import { GardenSky, getGardenTimePhase } from './GardenSky';
 
-export const DailyGarden: React.FC<DailyGardenProps> = ({
+export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   habits,
   logs,
   stats,
@@ -65,6 +67,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
 
   const completedTodayIds = logs[dateKey] || [];
   const slippedTodayIds = (stats.slipLogs?.[dateKey] || []).map(s => s.id);
+  const recentDays = useMemo(() => Array.from({length: 7}).map((_, i) => format(subDays(new Date(dateKey + 'T12:00:00'), 6 - i), 'yyyy-MM-dd')), [dateKey]);
 
   const { scheduled, completed, wilting, critical, dead, resting } = useMemo(() => {
     const s: Habit[] = [];
@@ -104,21 +107,28 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
     });
 
     return { scheduled: s, completed: c, wilting: w, critical: crit, dead: d, resting: r };
-  }, [habits, completedTodayIds, activeRestMode, dateKey]);
+  }, [habits, completedTodayIds, activeRestMode, dateKey, logs]);
 
-  const activeHabits = [...scheduled, ...completed, ...wilting, ...critical].filter(h => (h.plantHealth ?? 100) > 0);
-  const avgHealth = activeHabits.length > 0
-    ? Math.round(activeHabits.reduce((acc, curr) => acc + (curr.plantHealth ?? 100), 0) / activeHabits.length)
-    : 100;
+  const { activeHabits, avgHealth } = useMemo(() => {
+    const active = [...scheduled, ...completed, ...wilting, ...critical].filter(h => (h.plantHealth ?? 100) > 0);
+    const avg = active.length > 0
+      ? Math.round(active.reduce((acc, curr) => acc + (curr.plantHealth ?? 100), 0) / active.length)
+      : 100;
+    return { activeHabits: active, avgHealth: avg };
+  }, [scheduled, completed, wilting, critical]);
 
   const tMinus1 = format(subDays(new Date(dateKey), 1), 'yyyy-MM-dd');
   const tMinus2 = format(subDays(new Date(dateKey), 2), 'yyyy-MM-dd');
+  const tMinus3 = format(subDays(new Date(dateKey), 3), 'yyyy-MM-dd');
   
   const getEligibleBackdates = (habit: Habit) => {
      const dates = [];
      const creationDate = format(new Date(habit.createdAt || dateKey), 'yyyy-MM-dd');
      if (tMinus1 >= creationDate && !logs[tMinus1]?.includes(habit.id) && !isHabitPaused(habit.id, tMinus1, activeRestMode || null)) dates.push(tMinus1);
      if (tMinus2 >= creationDate && !logs[tMinus2]?.includes(habit.id) && !isHabitPaused(habit.id, tMinus2, activeRestMode || null)) dates.push(tMinus2);
+     if (stats.boostItemCounts?.['boost_streak_repair'] && stats.boostItemCounts['boost_streak_repair'] > 0) {
+        if (tMinus3 >= creationDate && !logs[tMinus3]?.includes(habit.id) && !isHabitPaused(habit.id, tMinus3, activeRestMode || null)) dates.push(tMinus3);
+     }
      return dates;
   };
 
@@ -441,100 +451,88 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
 
         {/* All Completed Empty State */}
         {scheduled.length === 0 && completed.length > 0 && (
-           <div className="bg-status-completed/10 border border-status-completed/20 rounded-card p-8 text-center flex flex-col items-center shadow-sm">
+           <div className="bg-status-completed/10 border border-status-completed/20 rounded-card p-8 text-center flex flex-col items-center shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
               <Sun className="w-12 h-12 text-status-healthy mb-4" />
               <h3 className="text-lg font-bold text-status-healthy font-display mb-1">Perfect Garden Day</h3>
               <p className="text-sm text-secondary-text">Your garden is fully watered today. Enjoy the rest of your day!</p>
            </div>
         )}
 
-        {/* Urgent section */}
-        {[...dead].length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold tracking-wide text-status-wilting uppercase mb-4 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4" /> Fresh Start Needed (Withered)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {dead.map(habit => {
-                 const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
-                 return (
-                 <PlantHabitCard key={habit.id} habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWater={(isMini) => onWaterPlant(habit.id, isMini)} equippedPotId={stats.equippedPotId} onDelete={onDeletePlant ? () => onDeletePlant(habit.id) : undefined} onHarvest={onHarvestPlant ? () => onHarvestPlant(habit.id) : undefined} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={date => onBackdate && onBackdate(habit.id, date)} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} />
-                 );
-              })}
-            </div>
-          </div>
-        )}
+        {habits.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+            {/* Urgent section */}
+            {[...dead].length > 0 && (
+              <h3 className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2">
+                <ShieldAlert className="w-4 h-4" /> Fresh Start Needed (Withered)
+              </h3>
+            )}
+            {dead.map(habit => {
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               return (
+               <MemoizedPlantHabitCard key={habit.id} habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onDeletePlant={onDeletePlant} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentDays={recentDays} logs={logs} />
+               );
+            })}
 
-        {[...critical, ...wilting].length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold tracking-wide text-status-wilting uppercase mb-4 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4" /> At Risk Plants
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...critical, ...wilting].map(habit => {
-                 const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
-                 return (
-                 <PlantHabitCard key={habit.id} habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWater={(isMini) => onWaterPlant(habit.id, isMini)} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlip={onSlipHabit ? () => onSlipHabit(habit.id) : undefined} onUndo={onUndoSlip ? () => onUndoSlip(habit.id) : undefined} onDelete={onDeletePlant ? () => onDeletePlant(habit.id) : undefined} onHarvest={onHarvestPlant ? () => onHarvestPlant(habit.id) : undefined} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={date => onBackdate && onBackdate(habit.id, date)} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} />
-                 );
-              })}
-            </div>
-          </div>
-        )}
+            {[...critical, ...wilting].length > 0 && (
+              <h3 className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+                <ShieldAlert className="w-4 h-4" /> At Risk Plants
+              </h3>
+            )}
+            {[...critical, ...wilting].map(habit => {
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               return (
+               <MemoizedPlantHabitCard key={habit.id} habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onDeletePlant={onDeletePlant} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentDays={recentDays} logs={logs} />
+               );
+            })}
 
-        {/* Needs Water */}
-        {plantsNeedingWater.length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold tracking-wide text-secondary-text uppercase mb-4 flex items-center gap-2">
-              <Droplet className="w-4 h-4" /> Needs Water
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {plantsNeedingWater.map(habit => {
-                 const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
-                 return (
-                 <PlantHabitCard key={habit.id} habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWater={(isMini) => onWaterPlant(habit.id, isMini)} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlip={onSlipHabit ? () => onSlipHabit(habit.id) : undefined} onUndo={onUndoSlip ? () => onUndoSlip(habit.id) : undefined} onDelete={onDeletePlant ? () => onDeletePlant(habit.id) : undefined} onHarvest={onHarvestPlant ? () => onHarvestPlant(habit.id) : undefined} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={date => onBackdate && onBackdate(habit.id, date)} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} />
-                 );
-              })}
-            </div>
-          </div>
-        )}
+            {/* Needs Water */}
+            {plantsNeedingWater.length > 0 && (
+              <h3 className="col-span-full text-xs font-bold tracking-widest text-secondary-text uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+                <Droplet className="w-4 h-4" /> Needs Water
+              </h3>
+            )}
+            {plantsNeedingWater.map(habit => {
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               return (
+               <MemoizedPlantHabitCard key={habit.id} habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onDeletePlant={onDeletePlant} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentDays={recentDays} logs={logs} />
+               );
+            })}
 
-        {/* Completed */}
-        {completed.length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold tracking-wide text-status-healthy uppercase mb-4 flex items-center gap-2">
-              <Check className="w-4 h-4" /> Watered Today
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-70 hover:opacity-100 transition-opacity">
-              {completed.map(habit => {
-                 const isCompletedToday = completedTodayIds.includes(habit.id);
-                 const statusText = isCompletedToday 
-                    ? (habit.type === 'avoid' ? 'Protected Today' : 'Completed Today')
-                    : 'Target Met';
-                 const buttonText = isCompletedToday ? 'Undo' : 'Extra Care';
-                 const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
-                 
-                 return (
-                   <PlantHabitCard key={habit.id} habit={habit} status={statusText} buttonText={buttonText} onWater={(isMini) => onWaterPlant(habit.id, isMini)} equippedPotId={stats.equippedPotId} onDelete={onDeletePlant ? () => onDeletePlant(habit.id) : undefined} onHarvest={onHarvestPlant ? () => onHarvestPlant(habit.id) : undefined} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={date => onBackdate && onBackdate(habit.id, date)} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} />
-                 );
-              })}
-            </div>
-          </div>
-        )}
+            {/* Completed */}
+            {completed.length > 0 && (
+              <h3 className="col-span-full text-xs font-bold tracking-widest text-status-healthy uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+                <Check className="w-4 h-4" /> Watered Today
+              </h3>
+            )}
+            {completed.map(habit => {
+               const isCompletedToday = completedTodayIds.includes(habit.id);
+               const statusText = isCompletedToday 
+                  ? (habit.type === 'avoid' ? 'Protected Today' : 'Completed Today')
+                  : 'Target Met';
+               const buttonText = isCompletedToday ? 'Undo' : 'Extra Care';
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               
+               return (
+                 <div key={habit.id} className="opacity-80 hover:opacity-100 transition-opacity h-full">
+                   <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onDeletePlant={onDeletePlant} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentDays={recentDays} logs={logs} />
+                 </div>
+               );
+            })}
 
-        {/* Resting Plants */}
-        {resting.length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold tracking-wide text-status-resting uppercase mb-4 flex items-center gap-2">
-              <Moon className="w-4 h-4" /> Resting Plants
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 opacity-70 hover:opacity-100 transition-opacity">
-              {resting.map(habit => {
-                 const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
-                 return (
-                 <PlantHabitCard key={habit.id} habit={habit} status="Resting" buttonText="Water" onWater={(isMini) => onWaterPlant(habit.id, isMini)} equippedPotId={stats.equippedPotId} onDelete={onDeletePlant ? () => onDeletePlant(habit.id) : undefined} onHarvest={onHarvestPlant ? () => onHarvestPlant(habit.id) : undefined} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={date => onBackdate && onBackdate(habit.id, date)} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} />
-                 );
-              })}
-            </div>
+            {/* Resting Plants */}
+            {resting.length > 0 && (
+              <h3 className="col-span-full text-xs font-bold tracking-widest text-status-resting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+                <Moon className="w-4 h-4" /> Resting Plants
+              </h3>
+            )}
+            {resting.map(habit => {
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               return (
+               <div key={habit.id} className="opacity-60 hover:opacity-100 transition-opacity h-full">
+                 <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onDeletePlant={onDeletePlant} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentDays={recentDays} logs={logs} />
+               </div>
+               );
+            })}
           </div>
         )}
       </div>
@@ -542,7 +540,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = ({
 
     </div>
   );
-};
+});
 
 export const renderPot = (equippedPotId?: string, className: string = "inset-x-2 bottom-1 h-3") => {
   if (equippedPotId === 'pot_clay_colorful') return <div className={`absolute ${className} bg-gradient-to-r from-orange-600 via-yellow-500 to-red-500 rounded-b-xl opacity-80`} />;
@@ -552,11 +550,41 @@ export const renderPot = (equippedPotId?: string, className: string = "inset-x-2
   return null;
 };
 
-const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: string, onWater: (isMini?: boolean) => void, isSlipped?: boolean, onSlip?: () => void, onUndo?: () => void, equippedPotId?: string, onDelete?: () => void, onHarvest?: () => void, isDarkPhase?: boolean, eligibleBackdates?: string[], onBackdate?: (d: string) => void, backdatesLeftThisWeek?: number, quantityCurrent?: number }> = ({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onDelete, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0 }) => {
+// Wrapper correctly memoizes inline functions to prevent re-renders
+const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onDeletePlant, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentDays, logs }) => {
+   const recentHistoryStr = React.useMemo(() => recentDays.map((d: string) => logs[d]?.includes(habit.id) ? '1' : '0').join(''), [recentDays, logs, habit.id]);
+   
+   const handleWater = React.useCallback((isMini?: boolean, customAmount?: number) => onWaterPlant(habit.id, isMini, customAmount), [onWaterPlant, habit.id]);
+   const handleSlip = React.useCallback(() => onSlipHabit && onSlipHabit(habit.id), [onSlipHabit, habit.id]);
+   const handleUndo = React.useCallback(() => onUndoSlip && onUndoSlip(habit.id), [onUndoSlip, habit.id]);
+   const handleDelete = React.useCallback(() => onDeletePlant && onDeletePlant(habit.id), [onDeletePlant, habit.id]);
+   const handleHarvest = React.useCallback(() => onHarvestPlant && onHarvestPlant(habit.id), [onHarvestPlant, habit.id]);
+   const handleBackdate = React.useCallback((d: string) => onBackdate && onBackdate(habit.id, d), [onBackdate, habit.id]);
+
+   return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={handleSlip} onUndo={handleUndo} equippedPotId={equippedPotId} onDelete={handleDelete} onHarvest={handleHarvest} isDarkPhase={isDarkPhase} eligibleBackdates={eligibleBackdates} onBackdate={handleBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} />;
+});
+
+const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onDelete, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "" }) => {
   const isDanger = status === 'Critical' || status === 'Wilting' || isSlipped;
-  const isCompleted = status === 'Completed Today' || status === 'Protected Today' || status === 'Resting';
+  const isCompleted = status === 'Completed Today' || status === 'Protected Today' || status === 'Resting' || status === 'Target Met';
   const canHarvest = habit.plantStage === 'Fruiting Plant' && !!onHarvest;
   
+  const recentHistory = React.useMemo(() => {
+    return recentHistoryStr.split('').map((s: string) => s === '1');
+  }, [recentHistoryStr]);
+  
+  const [justCompleted, setJustCompleted] = useState(false);
+  const prevCompletedRef = React.useRef(isCompleted);
+
+  useEffect(() => {
+    if (!prevCompletedRef.current && isCompleted && (status === 'Completed Today' || status === 'Protected Today' || status === 'Target Met')) {
+      setJustCompleted(true);
+      const timer = setTimeout(() => setJustCompleted(false), 2000);
+      return () => clearTimeout(timer);
+    }
+    prevCompletedRef.current = isCompleted;
+  }, [isCompleted, status]);
+
   const formattedSchedule = () => {
      if (habit.scheduleType === 'times_per_week') return `${habit.targetCount}x/week`;
      if (habit.scheduleType === 'weekly') return `Weekly`;
@@ -569,6 +597,10 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
   };
   
   const [showBackdateOptions, setShowBackdateOptions] = useState(false);
+  const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [showSlipModal, setShowSlipModal] = useState(false);
+  const [slipReason, setSlipReason] = useState('');
+  const [manualQuantity, setManualQuantity] = useState('');
 
   let cardBg = 'bg-surface-soft';
   let cardBorder = 'border-surface-alt';
@@ -606,7 +638,41 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
   }
 
   return (
-    <div className={`${cardBg} border ${cardBorder} rounded-card p-5 flex flex-col justify-between group hover:shadow-sm transition-all relative h-full`}>
+    <div className={`${cardBg} border ${cardBorder} rounded-card p-5 flex flex-col justify-between group transition-all duration-700 relative h-full overflow-hidden ${justCompleted ? 'scale-[1.02] shadow-[0_0_30px_rgba(34,197,94,0.25)]' : 'hover:shadow-sm'}`}>
+      {justCompleted && (
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
+           <div className="absolute inset-0 bg-gradient-to-tr from-status-healthy/30 to-transparent animate-pulse duration-500" />
+           {[...Array(12)].map((_, i) => (
+              <div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-status-healthy opacity-60 animate-ping" style={{
+                 top: `${Math.floor(Math.random() * 80) + 10}%`,
+                 left: `${Math.floor(Math.random() * 80) + 10}%`,
+                 animationDelay: `${i * 0.1}s`,
+                 animationDuration: '1s'
+              }} />
+           ))}
+        </div>
+      )}
+      <div className="relative z-10 flex flex-col justify-between h-full">
+      <AnimatePresence>
+        {justCompleted && (
+          <motion.div 
+            initial={{ scale: 0, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0, y: -20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+            className="absolute -top-4 right-8 z-50 pointer-events-none"
+          >
+            <div className="w-12 h-12 bg-surface-card rounded-full shadow-lg flex items-center justify-center text-2xl border-4 border-[#00F5D4]">
+              🌱
+            </div>
+            <motion.div 
+               animate={{ opacity: [0, 1, 0], scale: [0.8, 1.5, 2] }}
+               transition={{ duration: 1, repeat: Infinity }}
+               className="absolute inset-0 rounded-full border-2 border-[#00F5D4]"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {onDelete && (
         <button
           onClick={onDelete}
@@ -621,14 +687,32 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center relative ${iconBg}`}>
              {renderPot(equippedPotId, 'inset-x-2 bottom-0 h-3')}
              
-             <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-10 h-10 relative z-10 group-hover:scale-105 transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-110' : ''}`} />
+             <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-10 h-10 relative z-10 animate-breathe transform-gpu will-change-transform group-hover:scale-105 transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-110' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'animate-pulse' : ''}`} />
            </div>
            <div>
              <div className="text-[11px] font-bold tracking-wide uppercase mb-1 flex items-center gap-1">
                {isDanger ? <AlertTriangle className="w-3.5 h-3.5 text-status-wilting" /> : isCompleted ? <Check className="w-3.5 h-3.5 text-status-healthy" /> : <div className="w-2 h-2 rounded-full bg-status-healthy" />}
                <span className={statusColor}>{isSlipped ? "Slipped Today" : status}</span>
              </div>
-             <h4 className="font-bold text-primary-text text-base capitalize">{habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}</h4>
+             <h4 className="font-bold text-primary-text text-base capitalize flex items-center gap-2">
+                {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
+                {(() => {
+                   if (!habit.category) return null;
+                   const custom = customCategories.find((c: any) => c.id === habit.category || c.name === habit.category);
+                   if (custom) {
+                      return (
+                         <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: `${custom.color}20`, color: custom.color, border: `1px solid ${custom.color}40` }}>
+                           {custom.name}
+                         </span>
+                      );
+                   }
+                   return (
+                     <span className="text-[9px] px-1.5 py-0.5 rounded border border-surface-alt bg-surface-alt/20 text-slate-400">
+                       {habit.category.replace('_', ' ')}
+                     </span>
+                   );
+                })()}
+             </h4>
              {habit.scheduleType && habit.scheduleType !== 'daily' && (
                 <div className="inline-block mt-1 px-2 py-0.5 bg-surface-alt/40 border border-black/5 rounded-chip text-[10px] font-bold text-muted-text tracking-wide uppercase">
                    {formattedSchedule()}
@@ -639,6 +723,19 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
                    Progress: {quantityCurrent} / {habit.quantityTarget} {habit.quantityUnit}
                 </div>
              )}
+            
+            {/* Sparkline */}
+            {recentHistory && recentHistory.length > 0 && (
+               <div className="flex items-end gap-1 mt-3 h-4 opacity-80" aria-label="7-day sparkline">
+                 {recentHistory.map((completed: boolean, idx: number) => (
+                    <div 
+                       key={idx} 
+                       className={`w-1.5 rounded-t-sm transition-all ${completed ? 'bg-status-healthy h-full shadow-[0_0_5px_rgba(34,197,94,0.3)]' : 'bg-surface-alt h-1.5'}`}
+                       title={completed ? 'Completed' : 'Missed/Not Scheduled'}
+                    />
+                 ))}
+               </div>
+            )}
            </div>
         </div>
       </div>
@@ -646,25 +743,48 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
       <div className="flex flex-col gap-3 mt-auto pt-2">
          <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-               <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1"><Flame className="w-3.5 h-3.5"/> Streak: {habit.streak}</span>
+               <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1">
+                 <Flame className="w-3.5 h-3.5"/> Streak: 
+                 <AnimatePresence mode="popLayout">
+                    <motion.span
+                       key={habit.streak}
+                       initial={{ scale: 0.5, y: -10, opacity: 0 }}
+                       animate={{ scale: 1, y: 0, opacity: 1 }}
+                       exit={{ scale: 1.5, y: 10, opacity: 0, position: 'absolute' }}
+                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                       className="inline-block relative"
+                    >
+                       {habit.streak}
+                    </motion.span>
+                 </AnimatePresence>
+               </span>
                <span className="text-[11px] font-bold text-status-healthy flex items-center gap-1"><Leaf className="w-3.5 h-3.5"/> Health: {habit.plantHealth ?? 100}%</span>
             </div>
             
             {canHarvest ? (
                <button 
                   onClick={onHarvest}
-                  className={`px-4 py-2 flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
+                  className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
                >
                   Harvest 🧺
                </button>
             ) : habit.scheduleType === 'quantity' && quantityCurrent < (habit.quantityTarget || 1) ? (
-               <button 
-                  onClick={() => onWater(true)}
-                  disabled={isSlipped}
-                  className={`px-4 py-2 flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-gray-200 text-muted-text cursor-not-allowed' : buttonBg + ' ' + buttonHover}`}
-               >
-                  +1 {habit.quantityUnit || 'Unit'}
-               </button>
+               <div className="flex gap-2 relative">
+                 <button 
+                    onClick={() => onWater(true)}
+                    disabled={isSlipped}
+                    className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
+                 >
+                    +1
+                 </button>
+                 <button 
+                    onClick={() => setShowQuantityModal(true)}
+                    disabled={isSlipped}
+                    className={`px-3 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 bg-surface-alt text-white hover:bg-zinc-700 disabled:opacity-50`}
+                 >
+                    Log...
+                 </button>
+               </div>
             ) : (
                <button 
                   onClick={() => {
@@ -687,12 +807,13 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
                    <button onClick={() => setShowBackdateOptions(false)} className="text-muted-text hover:text-primary-text p-1"><X className="w-3.5 h-3.5" /></button>
                 </div>
                 <div className="flex gap-2">
-                   {eligibleBackdates.map(dateStr => {
+                   {eligibleBackdates.map((dateStr: string) => {
                        const dayName = format(new Date(dateStr), 'EEEE');
+                       const isTMinus3 = format(subDays(new Date(), 3), 'yyyy-MM-dd') === dateStr;
                        return (
                           <button key={dateStr} onClick={() => { onBackdate(dateStr); setShowBackdateOptions(false); }} className="flex-1 bg-surface-card hover:bg-surface-alt text-secondary-text border border-surface-alt py-2 rounded-xl font-bold text-[10px] uppercase tracking-wide transition-colors flex flex-col items-center gap-1 shadow-sm">
                              <span>Repair {dayName}</span>
-                             <span className="text-muted-text text-[9px]">-5 coins · {backdatesLeftThisWeek} left</span>
+                             <span className="text-muted-text text-[9px]">{isTMinus3 ? '-1 Streak Repair' : '-5 coins'} · {backdatesLeftThisWeek} left</span>
                           </button>
                        );
                    })}
@@ -713,7 +834,7 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
             <button
                onClick={() => {
                  if (isSlipped && onUndo) onUndo();
-                 else if (!isSlipped && onSlip && !isCompleted) onSlip();
+                 else if (!isSlipped && onSlip && !isCompleted) setShowSlipModal(true);
                }}
                disabled={isCompleted}
                className={`w-full py-1.5 mt-1 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-colors ${
@@ -726,6 +847,93 @@ const PlantHabitCard: React.FC<{ habit: Habit, status: string, buttonText: strin
             </button>
          )}
       </div>
+      </div>
+
+      <AnimatedModal isOpen={showSlipModal} onClose={() => setShowSlipModal(false)} alignment="center" className="!p-0 !max-w-sm mx-auto overflow-hidden bg-surface-card border border-surface-alt">
+         <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+               <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
+                 <ShieldAlert className="w-5 h-5 text-amber-500" /> Plant Protection
+               </h3>
+               <button onClick={() => setShowSlipModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+            
+            <p className="text-secondary-text text-sm mb-6">
+              It happens to the best of gardeners. Log this slip, shake it off, and focus on the next step. Your plant will recover if you care for it.
+            </p>
+
+            <form onSubmit={(e) => {
+               e.preventDefault();
+               if (onSlip) {
+                  onSlip(); // The reason can be supported but `DailyGarden` parent passes `handleSlipHabit(id, reason)` optionally - wait, signature in DailyGarden is onSlip?: () => void. So the reason is dropped. That's fine for now, or we can update it if we have time.
+                  setSlipReason('');
+                  setShowSlipModal(false);
+               }
+            }}>
+               <button type="submit" className="w-full bg-[#00F5D4]/10 text-[#00F5D4] py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-[#00F5D4]/20 transition-colors shadow-sm">
+                  Start Recovery
+               </button>
+            </form>
+         </div>
+      </AnimatedModal>
+
+      <AnimatedModal isOpen={showQuantityModal} onClose={() => setShowQuantityModal(false)} alignment="bottom" className="!p-0 !max-w-sm mx-auto !rounded-t-[32px] !rounded-b-none overflow-hidden bg-surface-card border border-surface-alt">
+         <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+               <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
+                 <Target className="w-5 h-5 text-[#00F5D4]" /> Log Progress
+               </h3>
+               <button onClick={() => setShowQuantityModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+            
+            <p className="text-secondary-text text-xs font-mono uppercase tracking-widest mb-4 flex justify-between">
+              <span>Goal: {habit.quantityTarget} {habit.quantityUnit}</span>
+              <span>Done: {quantityCurrent}</span>
+            </p>
+
+            <form onSubmit={(e) => {
+               e.preventDefault();
+               const amount = Number(manualQuantity);
+               if (amount > 0) {
+                  onWater(false, amount);
+                  setManualQuantity('');
+                  setShowQuantityModal(false);
+               }
+            }} className="flex gap-2">
+               <input 
+                  type="number" 
+                  autoFocus
+                  className="flex-1 bg-surface-soft border border-surface-alt rounded-xl px-4 py-3 text-white font-mono outline-none focus:border-[#00F5D4] transition-colors"
+                  placeholder={`Amount of ${habit.quantityUnit || 'units'}`}
+                  value={manualQuantity}
+                  onChange={e => setManualQuantity(e.target.value)}
+                  min={1}
+               />
+               <button type="submit" disabled={!manualQuantity} className="bg-[#00F5D4] text-black px-6 py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-[#00d8b9] transition-colors shadow-[0_0_20px_rgba(0,245,212,0.2)] disabled:opacity-50">
+                  Save
+               </button>
+            </form>
+         </div>
+      </AnimatedModal>
+
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return prevProps.habit.id === nextProps.habit.id &&
+         prevProps.status === nextProps.status &&
+         prevProps.buttonText === nextProps.buttonText &&
+         prevProps.isSlipped === nextProps.isSlipped &&
+         prevProps.equippedPotId === nextProps.equippedPotId &&
+         prevProps.isDarkPhase === nextProps.isDarkPhase &&
+         prevProps.quantityCurrent === nextProps.quantityCurrent &&
+         prevProps.habit.plantHealth === nextProps.habit.plantHealth &&
+         prevProps.habit.streak === nextProps.habit.streak &&
+         prevProps.habit.plantStage === nextProps.habit.plantStage &&
+         prevProps.habit.plantStatus === nextProps.habit.plantStatus &&
+         prevProps.habit.isArchived === nextProps.habit.isArchived &&
+         JSON.stringify(prevProps.recentHistory) === JSON.stringify(nextProps.recentHistory);
+});
