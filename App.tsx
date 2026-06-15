@@ -345,6 +345,8 @@ function App() {
   useEffect(() => {
     if (dataLoading || habits.length === 0) return;
     let changed = false;
+    let totalFreezesUsed = 0;
+    const initialFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
     const updatedHabits = habits.map((habit) => {
       const lastDate =
         habit.lastMissCheckedDate ||
@@ -394,23 +396,19 @@ function App() {
           let newHealth = habit.plantHealth ?? 100;
           let remainingMisses = missedCount;
           
-          let ownedFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
-          let freezesUsed = 0;
+          let availableFreezes = initialFreezes - totalFreezesUsed;
+          let freezesUsedThisHabit = 0;
           
-          if (ownedFreezes >= remainingMisses) {
-            freezesUsed = remainingMisses;
+          if (availableFreezes >= remainingMisses) {
+            freezesUsedThisHabit = remainingMisses;
             remainingMisses = 0;
           } else {
-            freezesUsed = ownedFreezes;
-            remainingMisses -= ownedFreezes;
+            freezesUsedThisHabit = availableFreezes;
+            remainingMisses -= availableFreezes;
           }
           
-          if (freezesUsed > 0) {
-             const newCounts = {
-                ...(extraStats.boostItemCounts || {}),
-                'boost_streak_freeze': ownedFreezes - freezesUsed
-             };
-             setExtraStats(prev => ({ ...prev, boostItemCounts: newCounts }));
+          if (freezesUsedThisHabit > 0) {
+             totalFreezesUsed += freezesUsedThisHabit;
           }
 
           let grace = habit.graceDays || 0;
@@ -456,10 +454,21 @@ function App() {
       return habit;
     });
 
-    if (changed) {
+    if (changed || totalFreezesUsed > 0) {
       setTimeout(() => {
+        let statsToSave = extraStats;
+        if (totalFreezesUsed > 0) {
+           statsToSave = {
+              ...extraStats,
+              boostItemCounts: {
+                 ...(extraStats.boostItemCounts || {}),
+                 'boost_streak_freeze': Math.max(0, initialFreezes - totalFreezesUsed)
+              }
+           };
+           setExtraStats(statsToSave);
+        }
         setHabits(updatedHabits);
-        persistData(updatedHabits, logs, extraStats, activeRestMode);
+        persistData(updatedHabits, logs, statsToSave, activeRestMode);
       }, 500);
     }
   }, [dataLoading, dateKey]);

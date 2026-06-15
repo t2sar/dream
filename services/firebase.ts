@@ -171,45 +171,39 @@ const lastSavedMonthHashes: Record<string, string> = {};
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
   if (!dbInstance) return;
   
-  if (saveTimeout) {
-    clearTimeout(saveTimeout);
-  }
-
-  saveTimeout = setTimeout(async () => {
-    const pathForWrite = `users/${userId}`;
+  const pathForWrite = `users/${userId}`;
+  try {
+    const { logs, ...mainData } = data;
+    
+    let cleanMainData;
     try {
-      const { logs, ...mainData } = data;
-      
-      let cleanMainData;
-      try {
-        cleanMainData = JSON.parse(JSON.stringify(mainData));
-      } catch (err) {
-        console.error("Error stringifying main data. Please ensure state does not contain DOM elements.", err);
-        return;
-      }
-      
-      await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
-
-      // Sub-collections & Pagination (Delta Updates)
-      const logsByMonth: Record<string, HabitLog> = {};
-      for (const [dateStr, ids] of Object.entries(logs || {})) {
-        const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
-        if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
-        logsByMonth[monthPrefix][dateStr] = ids;
-      }
-
-      for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        const monthHash = JSON.stringify(monthLogs);
-        if (lastSavedMonthHashes[month] !== monthHash) {
-           const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-           await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
-           lastSavedMonthHashes[month] = monthHash;
-        }
-      }
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+      cleanMainData = JSON.parse(JSON.stringify(mainData));
+    } catch (err) {
+      console.error("Error stringifying main data. Please ensure state does not contain DOM elements.", err);
+      return;
     }
-  }, 1500);
+    
+    await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
+
+    // Sub-collections & Pagination (Delta Updates)
+    const logsByMonth: Record<string, HabitLog> = {};
+    for (const [dateStr, ids] of Object.entries(logs || {})) {
+      const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
+      if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+      logsByMonth[monthPrefix][dateStr] = ids;
+    }
+
+    for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+      const monthHash = JSON.stringify(monthLogs);
+      if (lastSavedMonthHashes[month] !== monthHash) {
+         const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+         await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
+         lastSavedMonthHashes[month] = monthHash;
+      }
+    }
+  } catch (e) {
+    handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+  }
 };
 
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
