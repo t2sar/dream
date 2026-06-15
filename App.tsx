@@ -144,16 +144,7 @@ function App() {
   const [date, setDate] = useState(new Date());
   const dateKey = format(date, "yyyy-MM-dd");
 
-  React.useEffect(() => {
-    // Check every minute if the date string changed to handle midnight rollover without heavy looping
-    const midnightCheckInterval = setInterval(() => {
-       const newDate = new Date();
-       if (format(newDate, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")) {
-          setDate(newDate); // triggers midnight cascade
-       }
-    }, 60000);
-    return () => clearInterval(midnightCheckInterval);
-  }, [date]);
+  // Midnight check now unified in the main interval
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   // Motivation Popup State
@@ -177,8 +168,7 @@ function App() {
       });
     };
     updateTimePhase();
-    const interval = setInterval(updateTimePhase, 60000);
-    return () => clearInterval(interval);
+    // Subsequent updates unified in the main interval
   }, []);
 
   const activeEvent = React.useMemo(() => getActiveEvent(new Date()), []);
@@ -368,7 +358,10 @@ function App() {
         let missedCount = 0;
         let isFlexibleTargetMetForLastCycle = false;
         
-        for (let i = 1; i <= daysMissed; i++) {
+        const daysToCheck = Math.min(daysMissed, 14);
+        const autoMissedDays = daysMissed - daysToCheck;
+        
+        for (let i = 1; i <= daysToCheck; i++) {
           const checkDateStr = format(
             subDays(new Date(dateKey), i),
             "yyyy-MM-dd",
@@ -390,6 +383,10 @@ function App() {
           
           const didComplete = logs[checkDateStr]?.includes(habit.id);
           if (!didComplete && !wasProtected) missedCount++;
+        }
+
+        if (autoMissedDays > 0) {
+            missedCount += autoMissedDays;
         }
 
         if (missedCount > 0) {
@@ -562,6 +559,21 @@ function App() {
        if (!user || dataLoading) return;
        
        const now = new Date();
+       
+       // ======== Unified Midnight Check ========
+       setDate(prevDate => {
+          if (format(now, "yyyy-MM-dd") !== format(prevDate, "yyyy-MM-dd")) {
+             return now;
+          }
+          return prevDate;
+       });
+
+       // ======== Unified Time Phase Check ========
+       import('./components/GardenSky').then(({ getGardenTimePhase }) => {
+          const phase = getGardenTimePhase();
+          document.body.setAttribute('data-time-phase', phase);
+       });
+
        const currentHours = now.getHours().toString().padStart(2, '0');
        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
        const currentTime = `${currentHours}:${currentMinutes}`;

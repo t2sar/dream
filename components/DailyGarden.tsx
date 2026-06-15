@@ -65,8 +65,8 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
     else setGreeting('Late night... Your garden is sleeping soon.');
   }, [stats.matchTimeOfDay]);
 
-  const completedTodayIds = logs[dateKey] || [];
-  const slippedTodayIds = (stats.slipLogs?.[dateKey] || []).map(s => s.id);
+  const completedTodayIds = useMemo(() => logs[dateKey] || [], [logs, dateKey]);
+  const slippedTodayIds = useMemo(() => (stats.slipLogs?.[dateKey] || []).map(s => s.id), [stats.slipLogs, dateKey]);
   const recentDays = useMemo(() => Array.from({length: 7}).map((_, i) => format(subDays(new Date(dateKey + 'T12:00:00'), 6 - i), 'yyyy-MM-dd')), [dateKey]);
 
   const { scheduled, completed, wilting, critical, dead, resting } = useMemo(() => {
@@ -550,6 +550,33 @@ export const renderPot = (equippedPotId?: string, className: string = "inset-x-2
   return null;
 };
 
+const areHabitPropsEqual = (prevProps: any, nextProps: any) => {
+  if (prevProps.habit.id !== nextProps.habit.id) return false;
+  if (prevProps.habit.plantHealth !== nextProps.habit.plantHealth) return false;
+  if (prevProps.habit.plantStage !== nextProps.habit.plantStage) return false;
+  if (prevProps.habit.plantStatus !== nextProps.habit.plantStatus) return false;
+  if (prevProps.habit.category !== nextProps.habit.category) return false;
+  if (prevProps.habit.name !== nextProps.habit.name) return false;
+  if (prevProps.status !== nextProps.status) return false;
+  if (prevProps.buttonText !== nextProps.buttonText) return false;
+  if (prevProps.isSlipped !== nextProps.isSlipped) return false;
+  if (prevProps.equippedPotId !== nextProps.equippedPotId) return false;
+  if (prevProps.isDarkPhase !== nextProps.isDarkPhase) return false;
+  if (prevProps.quantityCurrent !== nextProps.quantityCurrent) return false;
+  if (prevProps.backdatesLeftThisWeek !== nextProps.backdatesLeftThisWeek) return false;
+  
+  if ((prevProps.eligibleBackdates || []).join(',') !== (nextProps.eligibleBackdates || []).join(',')) return false;
+  if ((prevProps.recentDays || []).join(',') !== (nextProps.recentDays || []).join(',')) return false;
+  
+  if (prevProps.recentDays) {
+     const prevHistory = prevProps.recentDays.map((d: string) => prevProps.logs[d]?.includes(prevProps.habit.id) ? '1' : '0').join('');
+     const nextHistory = nextProps.recentDays.map((d: string) => nextProps.logs[d]?.includes(nextProps.habit.id) ? '1' : '0').join('');
+     if (prevHistory !== nextHistory) return false;
+  }
+  
+  return true;
+};
+
 // Wrapper correctly memoizes inline functions to prevent re-renders
 const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onDeletePlant, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentDays, logs }) => {
    const recentHistoryStr = React.useMemo(() => recentDays.map((d: string) => logs[d]?.includes(habit.id) ? '1' : '0').join(''), [recentDays, logs, habit.id]);
@@ -562,7 +589,7 @@ const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, butto
    const handleBackdate = React.useCallback((d: string) => onBackdate && onBackdate(habit.id, d), [onBackdate, habit.id]);
 
    return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={handleSlip} onUndo={handleUndo} equippedPotId={equippedPotId} onDelete={handleDelete} onHarvest={handleHarvest} isDarkPhase={isDarkPhase} eligibleBackdates={eligibleBackdates} onBackdate={handleBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} />;
-});
+}, areHabitPropsEqual);
 
 const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onDelete, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "" }) => {
   const isDanger = status === 'Critical' || status === 'Wilting' || isSlipped;

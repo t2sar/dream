@@ -87,16 +87,7 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   const renderBaseIcon = () => {
     if (stage === 'Seed') {
       return (
-        <div className="relative w-full h-full">
-           <div className="absolute inset-0 opacity-20 scale-75 -translate-y-4 filter blur-[1px]">
-               {isEmojiMode ? (
-                 <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>
-               ) : (
-                 <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
-                   <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
-                 </React.Suspense>
-               )}
-           </div>
+        <div className="relative w-full h-full drop-shadow-sm">
            <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
               <ellipse cx="32" cy="48" rx="8" ry="6" fill={primaryColor} stroke={outlineColor} strokeWidth="3" />
            </svg>
@@ -105,16 +96,7 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
     }
     if (stage === 'Sprout') {
       return (
-        <div className="relative w-full h-full">
-           <div className="absolute inset-0 opacity-30 scale-90 -translate-y-2 filter blur-[0.5px]">
-               {isEmojiMode ? (
-                 <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>
-               ) : (
-                 <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
-                   <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
-                 </React.Suspense>
-               )}
-           </div>
+        <div className="relative w-full h-full drop-shadow-sm">
            <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
               <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
               <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
@@ -164,10 +146,10 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
         animate={{ 
           scale: scaleValue, 
           opacity: opacityValue, 
-          y: yOffset,
-          filter: getGrayscaleFilter()
+          y: yOffset
         }}
         transition={{ type: "spring", stiffness: 120, damping: 15 }}
+        style={{ filter: getGrayscaleFilter() }}
       >
          <div className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}>
             {renderBaseIcon()}

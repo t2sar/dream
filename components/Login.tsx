@@ -5,6 +5,7 @@ import {
   registerWithEmail,
 } from "../services/firebase";
 import { Button } from "./Button";
+import { Capacitor } from "@capacitor/core";
 import {
   Sparkles,
   ShieldCheck,
@@ -19,7 +20,8 @@ import {
 type AuthMethod = "google" | "login" | "register";
 
 export const Login: React.FC = () => {
-  const [activeMethod, setActiveMethod] = useState<AuthMethod>("google");
+  const isNative = Capacitor.isNativePlatform();
+  const [activeMethod, setActiveMethod] = useState<AuthMethod>(isNative ? "login" : "google");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -157,6 +159,18 @@ export const Login: React.FC = () => {
               <FeatureRow icon={ShieldCheck} text="Cloud Backup" />
               <FeatureRow icon={Sparkles} text="Track Your Streaks" />
             </div>
+
+            {isNative && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-none flex gap-3 text-amber-300">
+                <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500" />
+                <div className="text-[9px] font-mono uppercase leading-relaxed tracking-wider text-left">
+                  <span className="text-white font-bold">Mobile App Notice:</span>{" "}
+                  Google login popups are not supported inside Android webviews. Please use the{" "}
+                  <span className="text-[#00F5D4] font-bold">Login</span> or{" "}
+                  <span className="text-[#00F5D4] font-bold">Register</span> tabs to sync your progress using email and password.
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-none flex items-center gap-3 text-rose-300 text-[10px] font-mono uppercase tracking-widest">

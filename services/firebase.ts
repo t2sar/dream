@@ -166,6 +166,7 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 };
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+const lastSavedMonthHashes: Record<string, string> = {};
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
   if (!dbInstance) return;
@@ -179,24 +180,14 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
     try {
       const { logs, ...mainData } = data;
       
-      // Safe stringify to handle unexpected circular references
-      const safeStringify = (obj: any) => {
-        const seen = new WeakSet();
-        return JSON.stringify(obj, function(key, value) {
-          if (typeof value === 'object' && value !== null) {
-            if (seen.has(value)) {
-              return;
-            }
-            seen.add(value);
-            if (value instanceof Element || (value as any)._reactName || value instanceof Event) {
-                return undefined; 
-            }
-          }
-          return value;
-        });
-      };
+      let cleanMainData;
+      try {
+        cleanMainData = JSON.parse(JSON.stringify(mainData));
+      } catch (err) {
+        console.error("Error stringifying main data. Please ensure state does not contain DOM elements.", err);
+        return;
+      }
       
-      const cleanMainData = JSON.parse(safeStringify(mainData));
       await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
 
       // Sub-collections & Pagination (Delta Updates)
@@ -208,8 +199,12 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
       }
 
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-        await setDoc(monthDocRef, JSON.parse(safeStringify(monthLogs)), { merge: true });
+        const monthHash = JSON.stringify(monthLogs);
+        if (lastSavedMonthHashes[month] !== monthHash) {
+           const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+           await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
+           lastSavedMonthHashes[month] = monthHash;
+        }
       }
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
@@ -220,30 +215,13 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
   if (!dbInstance) return false;
   const pathForWrite = `users/${userId}`;
-  
-  // Safe stringify to handle unexpected circular references
-  const safeStringify = (obj: any) => {
-    const seen = new WeakSet();
-    return JSON.stringify(obj, function(key, value) {
-      if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return;
-        }
-        seen.add(value);
-        if (value instanceof Element || (value as any)._reactName || value instanceof Event) {
-            return undefined; 
-        }
-      }
-      return value;
-    });
-  };
 
   try {
     const userRef = doc(dbInstance, "users", userId);
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-      const cleanData = JSON.parse(safeStringify({
+      const cleanData = JSON.parse(JSON.stringify({
         habits: localHabits,
         activeRestMode: activeRestMode || null,
         createdAt: new Date().toISOString()
@@ -258,7 +236,8 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
         logsByMonth[monthPrefix][dateStr] = ids;
       }
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(safeStringify(monthLogs)), { merge: true });
+        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(JSON.stringify(monthLogs)), { merge: true });
+        lastSavedMonthHashes[month] = JSON.stringify(monthLogs);
       }
 
       return true; 

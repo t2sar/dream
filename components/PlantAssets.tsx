@@ -5,7 +5,7 @@ interface SvgProps extends React.SVGProps<SVGSVGElement> {
   config: PlantIconConfig;
 }
 
-export const PlantSvgShape: React.FC<SvgProps> = ({ config, ...props }) => {
+export const PlantSvgShape: React.FC<SvgProps> = React.memo(({ config, ...props }) => {
   const { primaryColor, secondaryColor, outlineColor, shapeGroup, bgColor } = config;
   
   // Larger Cute leaf
@@ -783,4 +783,4 @@ export const PlantSvgShape: React.FC<SvgProps> = ({ config, ...props }) => {
       {renderShape()}
     </svg>
   );
-};
+});

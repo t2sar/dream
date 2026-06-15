@@ -143,19 +143,14 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           }
           
           return (
-            <div key={item.id} className="bg-[#0A0D14] border border-surface-alt rounded-2xl p-4 flex flex-col pt-6 relative overflow-hidden group">
-               {/* Background Hint */}
-               {item.type === 'background' && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5 opacity-50 pointer-events-none" />
-               )}
-               
-               <div className="w-12 h-12 rounded-xl bg-slate-800/50 border border-surface-alt mb-3 flex items-center justify-center text-slate-400 mx-auto group-hover:scale-110 transition-transform duration-300">
+            <div key={item.id} className={`bg-surface-card border border-surface-alt rounded-2xl p-4 flex flex-col pt-6 relative overflow-hidden group ${item.type === 'background' ? 'bg-gradient-to-t from-transparent to-surface-soft' : ''}`}>
+               <div className="w-12 h-12 rounded-xl bg-surface-alt border border-surface-alt mb-3 flex items-center justify-center text-primary-text mx-auto group-hover:scale-110 transition-transform duration-300">
                   <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin" />}>
                      <ShopItemSvg itemId={item.id} className="w-8 h-8" />
                   </React.Suspense>
                </div>
-               <h3 className="text-sm font-bold text-white text-center mb-1 line-clamp-1 leading-tight">{item.name}</h3>
-               <p className="text-[10px] text-slate-500 font-mono text-center flex-1 leading-tight line-clamp-3 mb-4">{item.description}</p>
+               <h3 className="text-sm font-bold text-primary-text text-center mb-1 line-clamp-1 leading-tight">{item.name}</h3>
+               <p className="text-[10px] text-muted-text font-mono text-center flex-1 leading-tight line-clamp-3 mb-4">{item.description}</p>
                
                {item.isConsumable && (
                    <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center mb-2">Owned: {stats.boostItemCounts?.[item.id] || 0} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
