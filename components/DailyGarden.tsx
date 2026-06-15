@@ -347,20 +347,20 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="glass-card rounded-card p-5">
+            <div className="glass-card rounded-card p-4">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Droplet className="w-3.5 h-3.5 text-secondary-blue"/> Watered</div>
               <div className="text-2xl font-bold text-primary-text">{completed.length} <span className="text-sm text-secondary-text font-normal">/ {totalScheduledCount}</span></div>
             </div>
-            <div className="glass-card rounded-card p-5">
+            <div className="glass-card rounded-card p-4">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Leaf className="w-3.5 h-3.5 text-status-healthy"/> Health</div>
               <div className="text-2xl font-bold text-primary-text">{avgHealth}%</div>
               <div className="text-[11px] text-status-healthy font-bold mt-1">{healthStateMsg}</div>
             </div>
-            <div className="glass-card rounded-card p-5">
+            <div className="glass-card rounded-card p-4">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 text-status-wilting"/> At Risk</div>
               <div className="text-2xl font-bold text-primary-text">{critical.length + wilting.length}</div>
             </div>
-            <div className="glass-card rounded-card p-5">
+            <div className="glass-card rounded-card p-4">
               <div className="text-[10px] text-muted-text font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><Gift className="w-3.5 h-3.5 text-accent-peach"/> Reward</div>
               <div className="text-sm font-bold text-primary-text">
                 {isPerfectDayNow ? 'Rain Boost! 🌧️' : `${scheduled.length} more to unlock`}

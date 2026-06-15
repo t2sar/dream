@@ -1788,10 +1788,6 @@ function App() {
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 glass border-r border-surface-alt flex-col items-center py-12 z-50">
-        <div className="w-12 h-12 bg-primary-mint/20 rounded-2xl flex items-center justify-center mb-16 rotate-3 hover:rotate-12 transition-transform duration-500">
-          <Calendar className="w-6 h-6 text-status-healthy" />
-        </div>
-
         <div className="flex flex-col gap-10 w-full px-6 md:px-8 overflow-y-auto hidden-scrollbar">
           {[
             { id: Tab.TRACKER, icon: LayoutDashboard },
@@ -2680,9 +2676,6 @@ function App() {
                   </h2>
                   <p className="text-slate-500 font-mono text-[10px] leading-relaxed uppercase tracking-wider">
                     Version 3.2
-                    <br />
-                    Your data is stored in Google Cloud Firestore database.
-                    <br />
                   </p>
                 </div>
               </div>

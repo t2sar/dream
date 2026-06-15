@@ -87,18 +87,40 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   const renderBaseIcon = () => {
     if (stage === 'Seed') {
       return (
-        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
-           <ellipse cx="32" cy="48" rx="8" ry="6" fill={primaryColor} stroke={outlineColor} strokeWidth="3" />
-        </svg>
+        <div className="relative w-full h-full">
+           <div className="absolute inset-0 opacity-20 scale-75 -translate-y-4 filter blur-[1px]">
+               {isEmojiMode ? (
+                 <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>
+               ) : (
+                 <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
+                   <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
+                 </React.Suspense>
+               )}
+           </div>
+           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
+              <ellipse cx="32" cy="48" rx="8" ry="6" fill={primaryColor} stroke={outlineColor} strokeWidth="3" />
+           </svg>
+        </div>
       );
     }
     if (stage === 'Sprout') {
       return (
-        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
-           <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
-           <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
-           <circle cx="20" cy="20" r="4" fill={primaryColor} />
-        </svg>
+        <div className="relative w-full h-full">
+           <div className="absolute inset-0 opacity-30 scale-90 -translate-y-2 filter blur-[0.5px]">
+               {isEmojiMode ? (
+                 <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>
+               ) : (
+                 <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
+                   <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
+                 </React.Suspense>
+               )}
+           </div>
+           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
+              <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
+              <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
+              <circle cx="20" cy="20" r="4" fill={primaryColor} />
+           </svg>
+        </div>
       );
     }
 

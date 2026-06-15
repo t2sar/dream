@@ -390,20 +390,41 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                   placeholder="Search mango, dalim..."
                   value={plantSearch}
                   onChange={(e) => setPlantSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') e.preventDefault();
+                  }}
                   className="w-full bg-[#07080A] border border-white/15 rounded-full pl-9 pr-4 py-2 text-xs text-white font-mono focus:border-primary-mint focus:outline-none transition-all placeholder:text-slate-700"
                 />
               </div>
             </div>
+            
+            {/* Active Selection Preview */}
+            <div className="mb-4 p-4 border border-primary-mint/40 bg-primary-mint/5 flex items-center gap-4 rounded-xl">
+               <div className="w-14 h-14 shrink-0 flex items-center justify-center bg-surface-soft rounded-xl shadow-inner">
+                  <PlantIcon plantType={plantType} stage="Mature Plant" status="Healthy" className="w-10 h-10" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-primary-mint mb-1">Current Selection</p>
+                  <p className="text-sm font-bold text-primary-text leading-tight w-full">
+                     {PLANTS.find(p => p.type === plantType)?.englishName || plantType}
+                     <span className="text-secondary-text font-normal ml-2 text-sm">
+                        ({PLANTS.find(p => p.type === plantType)?.banglaName})
+                     </span>
+                  </p>
+               </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredPlants.map((plant) => {
                 const isLocked = userMaxStreak < plant.unlockStreak;
                 const isSelected = plantType === plant.type;
                 
                 return (
-                  <div 
+                  <button 
+                    type="button"
                     key={plant.type}
                     onClick={() => !isLocked && setPlantType(plant.type)}
-                    className={`p-3 border rounded-card flex items-start gap-3 transition-colors ${
+                    className={`p-3 border rounded-card flex items-start gap-3 transition-colors text-left w-full ${
                       isLocked ? 'border-surface-alt opacity-50 cursor-not-allowed bg-surface-alt' :
                       isSelected ? 'border-primary-mint bg-primary-mint/10 cursor-pointer shadow-sm' :
                       'border-surface-alt hover:border-primary-mint/50 cursor-pointer bg-surface-card'
@@ -436,7 +457,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                         )}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
