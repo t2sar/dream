@@ -71,6 +71,17 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     rewardCoins: 20
   },
   {
+    badgeId: '21_day_nature_master',
+    title: '21-Day Nature Master',
+    description: 'Maintain any habit streak for 21 days.',
+    category: 'Streak',
+    iconName: 'Sparkles',
+    conditionType: 'streak_reached',
+    targetValue: 21,
+    rewardXP: 150,
+    rewardCoins: 35
+  },
+  {
     badgeId: '30_day_fruit_grower',
     title: '30-Day Fruit Grower',
     description: 'Maintain any habit streak for 30 days.',

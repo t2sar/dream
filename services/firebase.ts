@@ -7,7 +7,8 @@ import {
   AuthError,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { 
   getFirestore, 
@@ -322,3 +323,21 @@ export const registerWithEmail = async (email: string, password: string, display
     throw new Error(error.message || "Failed to sign up.");
   }
 };
+
+export const resetPassword = async (email: string) => {
+  if (!apiKey || !authInstance) {
+    throw new Error("Missing FIREBASE_API_KEY. Please set it in your Environment Variables (.env).");
+  }
+  try {
+    await sendPasswordResetEmail(authInstance, email);
+  } catch (error: any) {
+    const code = error.code;
+    if (code === 'auth/user-not-found') {
+      throw new Error("No account found with this email address.");
+    }
+    if (code === 'auth/invalid-email') {
+      throw new Error("Invalid email format.");
+    }
+    throw new Error(error.message || "Failed to send password reset email.");
+  }
+};

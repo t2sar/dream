@@ -123,6 +123,7 @@ export interface Habit {
   revivalCount?: number;
   totalScheduledCount?: number;
   isFreshStart?: boolean;
+  isGolden?: boolean;
   
   // Flexible Scheduling
   scheduleType?: 'daily' | 'specific_days' | 'times_per_week' | 'weekly' | 'monthly' | 'custom_interval' | 'quantity' | 'anytime';

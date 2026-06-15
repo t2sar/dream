@@ -109,7 +109,9 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
       relative overflow-hidden group
       p-6 rounded-none border transition-all duration-500 bg-[#0d1017]/40
       ${
-        isCompleted
+        habit.isGolden 
+          ? `border-amber-400/50 shadow-[0_0_30px_-5px_rgba(251,191,36,0.3)] bg-amber-900/10`
+          : isCompleted
           ? `border-white/20 shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)]`
           : "border-white/5 hover:border-white/10 hover:bg-[#121620]/40"
       }
@@ -124,6 +126,9 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           <div className="flex flex-col gap-2">
             <button
               onClick={() => {
+                if ("vibrate" in navigator) {
+                  navigator.vibrate(50);
+                }
                 if (isSlipped && undoSlip) undoSlip(habit.id);
                 // Can't toggle complete if currently slipped without undoing first, but we handle that logic in parent maybe or here
                 if (!isSlipped) onToggle(habit.id);
@@ -158,6 +163,9 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
             {habit.type === 'avoid' && (
                <button
                  onClick={() => {
+                   if ("vibrate" in navigator) {
+                     navigator.vibrate(50);
+                   }
                    if (isSlipped && undoSlip) {
                       undoSlip(habit.id);
                    } else if (!isSlipped && onSlip && !isCompleted) {
@@ -185,6 +193,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 health={habit.plantHealth}
                 isLegendary={habit.isLegendary} 
                 isArchived={habit.isArchived} 
+                isGolden={habit.isGolden}
                 className="w-10 h-10" 
               />
               <h3
@@ -232,13 +241,40 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
               </span>
 
               {habit.streak > 0 && (
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 flex items-center gap-1.5">
-                  <Flame
-                    className={`w-3.5 h-3.5 fill-current ${isCompleted ? "animate-pulse" : ""}`}
-                  />
-                  {habit.streak} Day Streak
-                </span>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 flex items-center gap-1.5">
+                    <Flame
+                      className={`w-3.5 h-3.5 fill-current ${isCompleted ? "animate-pulse" : ""}`}
+                    />
+                    {habit.streak} Day Streak
+                  </span>
+                  {(() => {
+                    const tiers = [5, 14, 21, 30];
+                    const nextTier = tiers.find(t => t > habit.streak);
+                    if (!nextTier) return null;
+                    const prevTier = [...tiers].reverse().find(t => t <= habit.streak) || 0;
+                    const progress = Math.max(0, habit.streak - prevTier);
+                    const required = nextTier - prevTier;
+                    const percent = (progress / required) * 100;
+                    
+                    return (
+                      <div className="flex items-center gap-1.5 w-full pr-2">
+                        <div className="flex-1 bg-black/60 h-1.5 rounded-full overflow-hidden border border-white/10 min-w-[50px]">
+                           <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${percent}%` }} />
+                        </div>
+                        <span className="text-[8px] font-mono text-slate-500">Tier {nextTier}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
               )}
+
+              {habit.bestStreak && habit.bestStreak > 0 ? (
+                <span className="text-[10px] font-mono uppercase tracking-widest text-indigo-400 flex items-center gap-1.5 border border-indigo-500/20 bg-indigo-500/5 px-2 py-0.5 rounded-sm" title="Peak Consistency">
+                  <Crown className="w-3 h-3" />
+                  Best: {habit.bestStreak}
+                </span>
+              ) : null}
             </div>
           </div>
         </div>

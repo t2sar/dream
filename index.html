@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#09090B" />
+    <meta name="theme-color" content="#FDFBF7" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="t2sar dream">
@@ -26,7 +26,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Splash Screen (replaced by React on mount) -->
+      <div id="splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgb(253,251,247);font-family:'Nunito',sans-serif;color:#332F2A;text-align:center;padding:2rem;">
+        <div style="font-size:3.5rem;margin-bottom:1rem;animation:pulse 2s ease-in-out infinite;">🌱</div>
+        <h1 style="font-size:1.25rem;font-weight:700;margin:0 0 0.25rem 0;letter-spacing:-0.02em;">t2sar dream</h1>
+        <p style="font-size:0.75rem;color:#8F867A;margin:0;">Loading your garden...</p>
+      </div>
+      <style>
+        @keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }
+      </style>
+    </div>
     <script type="module" src="/index.tsx"></script>
     <script>
       // Service worker disabled for dev

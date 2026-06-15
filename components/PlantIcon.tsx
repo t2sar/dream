@@ -19,6 +19,7 @@ interface PlantIconProps {
   isArchived?: boolean;
   isLegendary?: boolean;
   health?: number; // health score out of 100
+  isGolden?: boolean;
 }
 
 export const PlantIcon: React.FC<PlantIconProps> = React.memo(({ 
@@ -34,6 +35,7 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   isArchived = false,
   isLegendary = false,
   health,
+  isGolden = false,
 }) => {
   if (isPrivate) {
     return (
@@ -117,6 +119,7 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   };
 
   const getGrayscaleFilter = () => {
+    if (isGolden) return 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) sepia(1) saturate(3) hue-rotate(-30deg) brightness(1.2)';
     if (status === 'Dead') return 'grayscale(1)';
     if (status === 'Critical') return 'sepia(1)';
     if (isLocked) return 'grayscale(0.5) blur(2px) brightness(0.5)';
@@ -131,9 +134,9 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
     >
       {/* Background container (Applies to all modes now for premium polish) */}
       <div 
-        className={`absolute inset-0 rounded-[40%] transition-all duration-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.02)] ${isLocked ? 'grayscale opacity-50' : ''}`}
+        className={`absolute inset-0 rounded-[40%] transition-all duration-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.02)] ${isLocked ? 'grayscale opacity-50' : ''} ${isGolden ? 'bg-amber-300/30 ring-2 ring-amber-400 animate-pulse' : ''}`}
         style={{ 
-          backgroundColor: bgColor || 'rgba(255,255,255,0.1)', 
+          backgroundColor: isGolden ? 'rgba(255, 215, 0, 0.3)' : (bgColor || 'rgba(255,255,255,0.1)'), 
           backdropFilter: 'blur(4px)',
           WebkitBackdropFilter: 'blur(4px)'
         }}
@@ -194,9 +197,14 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
            <svg viewBox="0 0 10 10" className="w-2.5 h-2.5" fill="none"><circle cx="5" cy="5" r="3" fill="#FFF"/></svg>
         </div>
       )}
-      {isLegendary && (
+      {isLegendary && !isGolden && (
         <div className="absolute -top-1 -left-1 bg-amber-400 rounded-full p-0.5 border border-surface-card shadow-sm animate-pulse">
            <svg viewBox="0 0 10 10" className="w-3 h-3" fill="none"><path d="M5 1L6 4L9 5L6 6L5 9L4 6L1 5L4 4L5 1Z" fill="#FFF"/></svg>
+        </div>
+      )}
+      {isGolden && (
+        <div className="absolute -top-2 -right-2 text-xl drop-shadow-md animate-bounce" style={{ animationDuration: '2s' }}>
+           ✨
         </div>
       )}
     </div>

@@ -58,6 +58,8 @@ import { MonthlyReportView } from "./components/MonthlyReportView";
 import { GardenCalendar } from "./components/GardenCalendar";
 import { ChallengesView } from "./components/ChallengesView";
 import { GardenShop } from "./components/GardenShop";
+import { ConfirmDialog } from "./components/ConfirmDialog";
+import { OnboardingWizard } from "./components/OnboardingWizard";
 import { RestModeSetup } from "./components/RestModeSetup";
 import { isDateInRestMode, isHabitPaused } from "./restModeUtils";
 import { AlmanacView } from "./components/AlmanacView";
@@ -138,6 +140,7 @@ function App() {
   const [showOrchard, setShowOrchard] = useState(false);
   const [showAlmanac, setShowAlmanac] = useState(false);
   const [currentAlmanacYear, setCurrentAlmanacYear] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean, title: string, message: string, confirmText?: string, cancelText?: string, secondaryActionText?: string, onConfirm: () => void, onSecondaryAction?: () => void, variant?: 'danger' | 'warning' | 'info' }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<AchievementBadge[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [sortType, setSortType] = useState<'health' | 'alpha' | 'recent' | 'recovery'>('recent');
@@ -185,11 +188,11 @@ function App() {
   // Install Prompt
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastData, setToastData] = useState<{message: string, action?: {label: string, onClick: () => void}} | null>(null);
 
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 4000);
+  const showToast = (message: string, action?: {label: string, onClick: () => void}) => {
+    setToastData({message, action});
+    setTimeout(() => setToastData(null), 5000);
   };
 
 
@@ -246,6 +249,20 @@ function App() {
            document.documentElement.style.setProperty('--primary-mint', data.extraStats.accentColor);
         }
         setActiveRestMode(data.activeRestMode || null);
+      } else {
+        // Offline fallback: load from localStorage
+        try {
+          const cached = localStorage.getItem('t2sar_offline_cache');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            setHabits(parsed.habits || []);
+            setLogs(parsed.logs || {});
+            setExtraStats(parsed.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 });
+            setActiveRestMode(parsed.activeRestMode || null);
+          }
+        } catch (e) {
+          console.error('Failed to load offline cache:', e);
+        }
       }
       setDataLoading(false);
     });
@@ -525,10 +542,32 @@ function App() {
       setExtraStats(statsToSave);
       setNewlyUnlockedBadges(prev => [...prev, ...unlockedBadges]);
       playHaptic('allDone');
+
+      // Special visual badge unlock trigger for milestones
+      unlockedBadges.forEach(badge => {
+        if (badge.badgeId === '21_day_nature_master' || badge.badgeId === '30_day_fruit_grower') {
+           showToast(`🔥 Epic Milestone: ${badge.title} Unlocked!`, {
+              label: "Awesome!",
+              onClick: () => {}
+           });
+        }
+      });
     }
 
     if (user) {
       saveUserData(user.uid, { habits: newHabits, logs: newLogs, extraStats: statsToSave, activeRestMode: newRestMode });
+    }
+
+    // Offline fallback: always persist to localStorage
+    try {
+      localStorage.setItem('t2sar_offline_cache', JSON.stringify({
+        habits: newHabits,
+        logs: newLogs,
+        extraStats: statsToSave,
+        activeRestMode: newRestMode
+      }));
+    } catch (e) {
+      console.error('Failed to save offline cache:', e);
     }
   };
 
@@ -702,27 +741,62 @@ function App() {
     if (!habitToDel) return;
     
     if (!isPermanentArchiveDelete) {
-       const choice = prompt("Delete or archive this plant?\nType 'archive' to save it in Garden History and keep its journey, or 'delete' to remove entirely.");
-       if (choice?.toLowerCase() === 'archive') {
-          const updatedHabits = habits.map(h => h.id === id ? { 
-             ...h, 
-             isArchived: true, 
-             archivedAt: new Date().toISOString(),
-             archiveType: 'manual_archive' as const 
-          } : h);
-          setHabits(updatedHabits);
-          persistData(updatedHabits, logs);
-          return;
-       } else if (choice?.toLowerCase() !== 'delete') {
-          return;
-       }
+       setConfirmDialog({
+         isOpen: true,
+         title: 'Delete or Archive?',
+         message: 'You can archive this plant to save it in your Garden History, or delete it entirely.',
+         confirmText: 'Delete',
+         secondaryActionText: 'Archive',
+         variant: 'danger',
+         onConfirm: () => {
+            const updatedHabits = habits.filter((h) => h.id !== id);
+            setHabits(updatedHabits);
+            persistData(updatedHabits, logs);
+            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+         },
+         onSecondaryAction: () => {
+            const updatedHabits = habits.map(h => h.id === id ? { 
+               ...h, 
+               isArchived: true, 
+               archivedAt: new Date().toISOString(),
+               archiveType: 'manual_archive' as const 
+            } : h);
+            setHabits(updatedHabits);
+            persistData(updatedHabits, logs);
+            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+         }
+       });
+       return;
     } else {
-       if (!confirm("Permanently delete this archived plant? This cannot be undone.")) return;
+       setConfirmDialog({
+         isOpen: true,
+         title: 'Permanently Delete?',
+         message: 'This will permanently delete this archived plant. This cannot be undone.',
+         confirmText: 'Delete Forever',
+         variant: 'danger',
+         onConfirm: () => {
+            const updatedHabits = habits.filter((h) => h.id !== id);
+            setHabits(updatedHabits);
+            persistData(updatedHabits, logs);
+            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+         }
+       });
+       return;
     }
+  };
 
-    const updatedHabits = habits.filter((h) => h.id !== id);
-    setHabits(updatedHabits);
-    persistData(updatedHabits, logs);
+  const handleExportData = () => {
+    const dataToExport = { habits, logs, extraStats };
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `garden-backup-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Garden data exported successfully!");
   };
 
   const restoreArchivedHabit = (id: string, asNewSeed: boolean) => {
@@ -1019,6 +1093,13 @@ function App() {
     // Optimistic Update locally
     setLogs(newLogs);
     updateStreak(id, !isCompleted, newLogs);
+    
+    if (!isCompleted) {
+       showToast("Plant Watered!", {
+          label: "Undo",
+          onClick: () => completeHabitFully(id)
+       });
+    }
   };
 
   const getPlantStage = (xp: number, totalCompletions: number): Habit["plantStage"] => {
@@ -1166,6 +1247,8 @@ function App() {
     let isPerfectDayNow = false;
     let didStageGrow = false;
     let isProtectAction = false;
+    let playThirtyDaySound = false;
+    let playGoldenAnimation = false;
 
     const updatedHabits = habits.map((h) => {
       if (h.id !== id) return h;
@@ -1208,6 +1291,7 @@ function App() {
         if (tempNewStreak === 14) extraXpGained += 50;
         if (tempNewStreak === 30) extraXpGained += 100;
         
+
         // Stage check
         const oldStage = h.plantStage || 'Seed';
         const newTempXp = (h.xp || 0) + xpGain;
@@ -1254,8 +1338,18 @@ function App() {
 
       let newGraceDays = h.graceDays || 0;
       if (isNowCompleted && newStreak === 7) newGraceDays++;
-      if (isNowCompleted && newStreak === 30) newGraceDays += 2;
+      if (isNowCompleted && newStreak === 30) {
+         newGraceDays += 2;
+         playThirtyDaySound = true;
+      }
       newGraceDays = Math.min(newGraceDays, 5);
+
+      let becomesGolden = false;
+      if (isNowCompleted && newStreak === 100 && !h.isGolden) {
+          becomesGolden = true;
+          newXp += 500;
+          playGoldenAnimation = true;
+      }
 
       return {
         ...h,
@@ -1269,6 +1363,7 @@ function App() {
         graceDays: newGraceDays,
         isRevived: h.isRevived || isRevivedNow,
         revivalCount: newRevivalCount,
+        isGolden: h.isGolden || becomesGolden,
       };
     });
 
@@ -1514,6 +1609,25 @@ function App() {
           playHaptic('water');
        }
     }
+    
+    if (playThirtyDaySound) {
+       import('./audio').then(({ playCompletionSound }) => {
+          playCompletionSound('chime');
+       });
+    }
+
+    if (playGoldenAnimation) {
+       showToast("✨ 100 Day Streak! Your plant mutated into a Golden variant! ✨");
+       confetti({
+          particleCount: 200,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ['#FFD700', '#FFA500', '#FFFF00']
+       });
+       import('./audio').then(({ playCompletionSound }) => {
+          playCompletionSound('chime');
+       });
+    }
 
     persistData(updatedHabits, currentLogs, newExtraStats);
   };
@@ -1736,6 +1850,39 @@ function App() {
 
   if (!user) {
     return <Login />;
+  }
+
+  // Show onboarding if they have no habits and haven't dismissed it
+  if (!dataLoading && habits.length === 0 && !localStorage.getItem('t2sar_onboarding_done')) {
+    return (
+      <OnboardingWizard onComplete={(name, category, plantType) => {
+        const newHabit: Habit = {
+          id: uuidv4(),
+          name,
+          category,
+          plantType,
+          type: "build",
+          streak: 0,
+          bestStreak: 0,
+          totalCompletions: 0,
+          xp: 0,
+          plantStage: "Seed",
+          plantHealth: 100,
+          plantStatus: "Healthy",
+          lastMissCheckedDate: format(new Date(), "yyyy-MM-dd"),
+          graceDays: 0,
+          createdAt: new Date().toISOString(),
+          color: "emerald",
+          icon: "Sprout",
+        };
+        const updatedHabits = [newHabit];
+        const newStats = { ...extraStats, habitsCreatedCount: (extraStats.habitsCreatedCount || 0) + 1 };
+        setExtraStats(newStats);
+        setHabits(updatedHabits);
+        persistData(updatedHabits, logs, newStats);
+        localStorage.setItem('t2sar_onboarding_done', 'true');
+      }} />
+    );
   }
 
   return (
@@ -2691,6 +2838,22 @@ function App() {
                   </Button>
                 </div>
 
+                <div className="glass p-8 rounded-none border border-surface-alt relative mb-6">
+                  <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4">
+                    DATA & BACKUP
+                  </h2>
+                  <p className="text-slate-500 font-mono text-[10px] leading-relaxed uppercase tracking-wider mb-6">
+                    Export your entire garden history as a JSON file. Keep it safe!
+                  </p>
+                  <Button
+                    onClick={handleExportData}
+                    className="w-full py-4 text-xs font-mono tracking-widest uppercase bg-zinc-800 text-slate-300 hover:text-white hover:bg-zinc-700 border-zinc-700 rounded-none transition-all flex items-center justify-center gap-3"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export Garden Data
+                  </Button>
+                </div>
+
                 <div className="glass p-8 rounded-none border border-surface-alt relative">
                   <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4">
                     SYSTEM SETTINGS
@@ -2797,11 +2960,38 @@ function App() {
            )}
         </AnimatedModal>
         
-        {toastMessage && (
-           <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#0d1017] border border-[#00F5D4]/50 shadow-[0_10px_40px_rgba(0,245,212,0.2)] text-[#00F5D4] px-6 py-3 rounded-full font-mono text-[11px] font-bold tracking-widest flex items-center gap-3 z-50 animate-in fade-in slide-in-from-bottom-4">
-               {toastMessage}
-           </div>
-        )}
+        {toastData && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 whitespace-nowrap">
+          <div className="flex items-center gap-2">
+            {toastData.message.includes("XP") ? <Zap className="w-4 h-4 text-[#00F5D4]" /> : <Check className="w-4 h-4 text-[#00F5D4]" />}
+            <span>{toastData.message}</span>
+          </div>
+          {toastData.action && (
+            <button 
+              onClick={() => {
+                toastData.action!.onClick();
+                setToastData(null);
+              }}
+              className="ml-2 pl-3 border-l border-white/20 text-[#00F5D4] font-bold uppercase tracking-wider hover:text-white transition-colors text-xs"
+            >
+              {toastData.action.label}
+            </button>
+          )}
+        </div>
+      )}
+
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          secondaryActionText={confirmDialog.secondaryActionText}
+          variant={confirmDialog.variant}
+          onConfirm={confirmDialog.onConfirm}
+          onSecondaryAction={confirmDialog.onSecondaryAction}
+          onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        />
       </main>
     </div>
   );
