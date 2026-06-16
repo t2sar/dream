@@ -90,7 +90,7 @@ export const MotivationSettings: React.FC<MotivationSettingsProps> = ({ stats, o
   };
 
   return (
-    <div className="bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6 flex flex-col gap-4">
+    <div className="bg-surface-alt/5 p-4 rounded-3xl border border-surface-alt mb-6 flex flex-col gap-4">
       <div className="flex items-center justify-between">
          <div>
             <h3 className="text-primary-text font-bold text-sm text-balance">Cloud-Synced Motivations</h3>

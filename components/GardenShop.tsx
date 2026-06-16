@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserStats, ShopItem } from '../types';
 import { SHOP_ITEMS } from '../shopData';
+import { COMPANIONS } from '../companionsData';
 import { Button } from './Button';
 import { AnimatedModal } from './AnimatedModal';
 import { X, Coins, Package } from 'lucide-react';
@@ -15,7 +16,7 @@ interface GardenShopProps {
 }
 
 export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
-  const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts' | 'seeds'>('seeds');
+  const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts' | 'seeds' | 'companions'>('seeds');
   const [confirmPurchaseItem, setConfirmPurchaseItem] = useState<ShopItem | null>(null);
   
   const currentCoins = stats.coins || 0;
@@ -58,7 +59,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
 
       {/* Tabs */}
       <div className="flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 no-scrollbar">
-        {['seeds', 'pots', 'decorations', 'fences', 'seasonal', 'backgrounds', 'boosts'].map(tab => (
+        {['seeds', 'pots', 'decorations', 'fences', 'seasonal', 'backgrounds', 'boosts', 'companions'].map(tab => (
            <button
              key={tab}
              onClick={() => setActiveTab(tab as any)}
@@ -72,8 +73,33 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
       </div>
 
       {/* Item Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {filteredItems.map(item => {
+      {activeTab === 'companions' ? (
+        <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative mt-8 shadow-sm">
+          <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-8">
+            {stats.companions?.length || 0} / {COMPANIONS.length} Discovered
+          </p>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {COMPANIONS.map(comp => {
+              const isUnlocked = stats.companions?.some(c => c.id === comp.id);
+              return (
+                <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all`}>
+                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card text-2xl shadow-sm' : 'bg-surface-alt text-xl grayscale'}`}>
+                    {isUnlocked ? '🐦‍⬛' : '❓'}
+                  </div>
+                  <h4 className="font-bold text-primary-text text-sm mb-0.5">{isUnlocked ? comp.name : '???'}</h4>
+                  <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{isUnlocked ? comp.banglaName : 'Unknown'}</h5>
+                  <p className="text-[11px] text-secondary-text leading-tight md:block hidden">
+                    {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : 'Condition locked'}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {filteredItems.map(item => {
           const isOwned = !item.isConsumable && ownedItemIds.includes(item.id);
           const canAfford = currentCoins >= item.price;
           const userLvl = stats.level || 1;
@@ -202,7 +228,8 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
             </div>
           )
         })}
-      </div>
+        </div>
+      )}
 
       <AnimatedModal isOpen={!!confirmPurchaseItem} onClose={() => setConfirmPurchaseItem(null)} alignment="bottom" className="!p-0 !max-w-md mx-auto !rounded-t-3xl !rounded-b-none overflow-hidden bg-surface-card border border-surface-alt">
         {confirmPurchaseItem && (

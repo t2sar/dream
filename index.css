@@ -1,41 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;800&family=Poppins:wght@500;600;800&family=Quicksand:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  /* Playful Organic Modernism Palette - Light */
+  --bg-base: #FDFBF7;
+  --primary-anchor: #1C1B1F;
+  --surface: #FFFFFF;
+  --surface-soft: #FDFBF7;
+  --surface-alt: #F4EDE4;
+
+  --accent-coral: #E57C5D;
+  --accent-mustard: #F4C447;
+  --accent-seafoam: #4EADA0;
+  --accent-periwinkle: #7F91F0;
+  --accent-blush: #F5B3BE;
+
+  --text-secondary: #4A4A4A;
+  --text-muted: #737373;
+}
+
+body[data-time-phase="Evening"],
+body[data-time-phase="Night"],
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Playful Organic Modernism Palette - Dark */
+    --bg-base: #1A1C1E;
+    --primary-anchor: #FDFBF7; /* Invert anchor text to light cream */
+    --surface: #242629;
+    --surface-soft: #1A1C1E;
+    --surface-alt: #2D3035;
+
+    --text-secondary: #A0A5AE;
+    --text-muted: #6E747C;
+  }
+}
+
 @theme {
-  /* Playful Organic Modernism Palette */
-  --color-background-main: #FDFBF7;
-  --color-primary-anchor: #1C1B1F;
-  --color-accent-coral: #E57C5D;
-  --color-accent-mustard: #F4C447;
-  --color-accent-seafoam: #4EADA0;
-  --color-accent-periwinkle: #7F91F0;
-  --color-accent-blush: #F5B3BE;
+  --color-background-main: var(--bg-base);
+  --color-primary-anchor: var(--primary-anchor);
+  --color-accent-coral: var(--accent-coral);
+  --color-accent-mustard: var(--accent-mustard);
+  --color-accent-seafoam: var(--accent-seafoam);
+  --color-accent-periwinkle: var(--accent-periwinkle);
+  --color-accent-blush: var(--accent-blush);
 
   /* Legacy variable mappings (fallback to semantic colors) */
-  --color-surface-card: #FFFFFF;
-  --color-surface-soft: #FDFBF7;
-  --color-surface-alt: #F4EDE4;
-  --color-primary-text: #1C1B1F;
-  --color-secondary-text: #4A4A4A;
-  --color-muted-text: #737373;
-  --color-primary-mint: #4EADA0;
-  --color-secondary-blue: #7F91F0;
-  --color-primary-blush: #F5B3BE;
-  --color-accent-peach: #E57C5D;
-  --color-status-excellent: #4EADA0;
-  --color-status-healthy: #4EADA0;
-  --color-status-needsCare: #F4C447;
-  --color-status-wilting: #E57C5D;
-  --color-status-critical: #E57C5D;
-  --color-status-resting: #7F91F0;
-  --color-status-protected: #4EADA0;
-  --color-status-completed: #4EADA0;
+  --color-surface-card: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-alt: var(--surface-alt);
+  --color-primary-text: var(--primary-anchor);
+  --color-secondary-text: var(--text-secondary);
+  --color-muted-text: var(--text-muted);
+  --color-primary-mint: var(--accent-seafoam);
+  --color-secondary-blue: var(--accent-periwinkle);
+  --color-primary-blush: var(--accent-blush);
+  --color-accent-peach: var(--accent-coral);
+
+  
+  --color-status-excellent: var(--color-accent-seafoam);
+  --color-status-healthy: var(--color-accent-seafoam);
+  --color-status-needsCare: var(--color-accent-mustard);
+  --color-status-wilting: var(--color-accent-coral);
+  --color-status-critical: var(--color-accent-coral);
+  --color-status-resting: var(--color-accent-periwinkle);
+  --color-status-protected: var(--color-accent-seafoam);
+  --color-status-completed: var(--color-accent-seafoam);
 
   /* Friendly Typography */
-  --font-sans: 'Nunito', 'Poppins', 'Quicksand', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Nunito', 'Poppins', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Nunito', 'Poppins', ui-sans-serif, system-ui, sans-serif;
-  --font-weight-body: 500;
+  --font-sans: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
+  --font-weight-body: 600;
   --font-weight-label: 600;
   --font-weight-display: 800;
 
@@ -49,7 +84,7 @@
   --radius-3xl: 50px;
   --radius-full: 9999px;
   
-  --radius-card: 24px;
+  --radius-card: 32px;
   --radius-large-card: 32px;
   --radius-surface: 32px;
   --radius-dialog: 32px;
@@ -62,9 +97,9 @@
   /* Elevations - Floating Depth (Diffused Shadows) */
   --shadow-none: 0 0 0 rgba(0,0,0,0);
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08); /* 8% opacity, blur 16dp, Y 4dp */
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08); 
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.10); 
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
 }
 
 @layer base {

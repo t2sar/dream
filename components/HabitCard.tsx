@@ -135,7 +135,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 if (!isSlipped) onToggle(habit.id);
               }}
               className={`
-                relative w-12 h-12 rounded-none flex items-center justify-center transition-all duration-500 group/btn border
+                relative w-12 h-12 rounded-3xl flex items-center justify-center transition-all duration-500 group/btn border
                 ${
                   isCompleted
                     ? habit.type === 'avoid' ? "bg-emerald-500/20 shadow-[0_0_25px_rgba(16,185,129,0.45)] border-emerald-500 text-emerald-400 scale-105" : "bg-blue-500/20 shadow-[0_0_25px_rgba(59,130,246,0.45)] border-blue-500 text-blue-400 scale-105"

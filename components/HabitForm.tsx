@@ -160,7 +160,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none transition-all placeholder:text-slate-700"
+            className="w-full bg-background-main border border-surface-alt rounded-3xl px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none transition-all placeholder:text-slate-700"
             placeholder={type === 'build' ? "e.g. Daily Meditation" : "e.g. No Sugar"}
           />
           {type === 'avoid' && (

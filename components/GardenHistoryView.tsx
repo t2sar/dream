@@ -71,7 +71,7 @@ export const GardenHistoryView: React.FC<GardenHistoryViewProps> = React.memo(({
           <ArrowLeft className="w-4 h-4" /> Back to Garden History
         </button>
 
-        <div className="glass p-8 rounded-none border border-surface-alt relative mb-6 overflow-hidden">
+        <div className="glass p-8 rounded-3xl border border-surface-alt relative mb-6 overflow-hidden">
            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-3xl rounded-full" />
            <div className="flex flex-col md:flex-row gap-8 relative z-10">
               <div className="flex-shrink-0 flex items-center justify-center bg-surface-alt/5 w-48 h-56 rounded-2xl border border-surface-alt relative overflow-hidden group">

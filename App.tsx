@@ -2325,41 +2325,41 @@ function App() {
       </div>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 glass-card rounded-[32px] z-50 flex justify-between items-center px-6 text-xs font-medium text-muted-text overflow-x-auto gap-2">
+      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-16 bg-primary-anchor text-surface-soft shadow-xl rounded-full z-50 flex justify-between items-center px-6 text-xs font-medium overflow-x-auto gap-2">
         <button
           onClick={() => setActiveTab(Tab.TRACKER)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.TRACKER ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.TRACKER ? "text-primary-mint scale-110 drop-shadow-md" : "text-surface-soft/60 hover:text-surface-soft"}`}
         >
           <LayoutDashboard className="w-5 h-5" />
         </button>
         <button
           onClick={() => setActiveTab(Tab.PROGRESS)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.PROGRESS ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.PROGRESS ? "text-primary-mint scale-110 drop-shadow-md" : "text-surface-soft/60 hover:text-surface-soft"}`}
         >
           <BarChart2 className="w-5 h-5" />
         </button>
         <button
           onClick={() => setActiveTab(Tab.SHOP)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SHOP ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SHOP ? "text-primary-mint scale-110 drop-shadow-md" : "text-surface-soft/60 hover:text-surface-soft"}`}
         >
           <Store className="w-5 h-5" />
         </button>
         <button
           onClick={() => setActiveTab(Tab.STATS)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.STATS ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.STATS ? "text-primary-mint scale-110 drop-shadow-md" : "text-surface-soft/60 hover:text-surface-soft"}`}
         >
           <Activity className="w-5 h-5" />
         </button>
         <button
           onClick={() => setActiveTab(Tab.SETTINGS)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SETTINGS ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.SETTINGS ? "text-primary-mint scale-110 drop-shadow-md" : "text-surface-soft/60 hover:text-surface-soft"}`}
         >
           <Settings className="w-5 h-5" />
         </button>
       </nav>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 glass border-r border-surface-alt flex-col items-center py-12 z-50">
+      <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 bg-primary-anchor text-surface-soft shadow-xl border-r border-surface-alt/10 flex-col items-center py-12 z-50 rounded-r-[32px]">
         <div className="flex flex-col gap-10 w-full px-6 md:px-8 overflow-y-auto hidden-scrollbar">
           {[
             { id: Tab.TRACKER, icon: LayoutDashboard },
@@ -2371,7 +2371,7 @@ function App() {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${activeTab === item.id ? "bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm" : "text-muted-text hover:text-secondary-text hover:bg-surface-alt/50"}`}
+              className={`w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${activeTab === item.id ? "bg-surface-soft/10 text-primary-mint shadow-sm scale-110" : "text-surface-soft/60 hover:text-surface-soft hover:bg-surface-soft/5"}`}
             >
               <item.icon className="w-6 h-6" />
             </button>
@@ -2382,7 +2382,7 @@ function App() {
           <div className="mt-auto mb-4 w-full px-6 md:px-8">
             <button
               onClick={handleInstallClick}
-              className="w-full aspect-square flex flex-col items-center justify-center gap-1 text-muted-text hover:text-status-healthy transition-colors rounded-2xl hover:bg-primary-mint/10"
+              className="w-full aspect-square flex flex-col items-center justify-center gap-1 text-surface-soft/60 hover:text-primary-mint transition-colors rounded-2xl hover:bg-surface-soft/10"
             >
               <Download className="w-5 h-5" />
             </button>
@@ -2533,7 +2533,7 @@ function App() {
                              setCurrentAlmanacYear(year);
                              setShowAlmanac(true);
                           }}
-                          className="w-full max-w-sm mb-6 p-4 rounded-none bg-gradient-to-r from-emerald-900 to-[#000428] border border-emerald-500/30 cursor-pointer hover:scale-[1.02] transition-transform shadow-lg group relative overflow-hidden"
+                          className="w-full max-w-sm mb-6 p-4 rounded-3xl bg-gradient-to-r from-emerald-900 to-[#000428] border border-emerald-500/30 cursor-pointer hover:scale-[1.02] transition-transform shadow-lg group relative overflow-hidden"
                         >
                           <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                           <div className="flex items-center gap-4">
@@ -2735,41 +2735,11 @@ function App() {
             )}
 
             {activeTab === Tab.SHOP && (
-              <div className="space-y-8">
-                <GardenShop 
-                   stats={stats}
-                   onBuyItem={handleBuyItem}
-                   onEquipItem={handleEquipItem}
-                />
-
-                {/* Companions Album Showcase */}
-                <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative mt-8 shadow-sm">
-                  <h3 className="text-xl font-display font-bold text-primary-text mb-1 flex items-center gap-2">
-                    Garden Companions
-                  </h3>
-                  <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-8">
-                    {extraStats.companions?.length || 0} / {COMPANIONS.length} Discovered
-                  </p>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {COMPANIONS.map(comp => {
-                      const isUnlocked = extraStats.companions?.some(c => c.id === comp.id);
-                      return (
-                        <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all`}>
-                          <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card text-2xl shadow-sm' : 'bg-surface-alt text-xl grayscale'}`}>
-                            {isUnlocked ? '🐦‍⬛' : '❓'}
-                          </div>
-                          <h4 className="font-bold text-primary-text text-sm mb-0.5">{isUnlocked ? comp.name : '???'}</h4>
-                          <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{isUnlocked ? comp.banglaName : 'Unknown'}</h5>
-                          <p className="text-[11px] text-secondary-text leading-tight">
-                            {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : 'Condition locked'}
-                          </p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
+              <GardenShop 
+                 stats={stats}
+                 onBuyItem={handleBuyItem}
+                 onEquipItem={handleEquipItem}
+              />
             )}
 
             {activeTab === Tab.STATS && (
