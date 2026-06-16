@@ -113,7 +113,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
 
     // Simple approximations for MVP period data
     const xpEarned = period === 'all_time' ? (stats.xp || 0) : Math.round((completedInPeriod / lifetimeCompleted) * (stats.xp || 0) || completedInPeriod * 10);
-    const coinsEarned = period === 'all_time' ? (stats.coins || 0) : Math.round((completedInPeriod / lifetimeCompleted) * (stats.coins || 0) || completedInPeriod * 2);
+    const coinsEarned = period === 'all_time' ? Math.floor(stats.coins || 0) : Math.round((completedInPeriod / lifetimeCompleted) * (stats.coins || 0) || completedInPeriod * 2);
 
     return {
       id: `summary-${period}-${Date.now()}`,
@@ -135,7 +135,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
       gardenHealthLabel: healthLabel,
       xpEarned,
       coinsEarned,
-      currentCoinBalance: stats.coins || 0,
+      currentCoinBalance: Math.floor(stats.coins || 0),
       plantsGrownCount: period === 'all_time' ? (stats.plantsFruitedCount || 0) : (stats.plantsFruitedCount ? Math.min(stats.plantsFruitedCount, 2) : 0),
       plantsRecoveredCount: period === 'all_time' ? (stats.plantsRevived || 0) : (stats.plantsRevived ? Math.min(stats.plantsRevived, 1) : 0),
       perfectGardenDays: period === 'all_time' ? (stats.perfectGardenDays || 0) : (stats.perfectGardenDays ? Math.min(stats.perfectGardenDays, completedInPeriod > 0 ? 1 : 0) : 0),

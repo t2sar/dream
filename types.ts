@@ -237,6 +237,7 @@ export interface UserStats {
   motivationFrequencyLimit?: number; // 1, 3, 5, or -1 for unlimited
   motivationsShownToday?: number;
   lastMotivationDate?: string;
+  lastWeeklyCelebrationWeek?: string;
 }
 
 export interface AchievementBadge {
@@ -304,7 +305,7 @@ export interface MonthlyGardenReport {
   supportiveMessage: string;
 }
 
-export type ShopItemCategory = 'pot' | 'decoration' | 'background' | 'boost' | 'fence' | 'seasonal';
+export type ShopItemCategory = 'pot' | 'decoration' | 'background' | 'boost' | 'fence' | 'seasonal' | 'seed';
 
 export type ShopItemTier = 1 | 2 | 3;
 

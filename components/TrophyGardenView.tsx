@@ -48,13 +48,13 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
         <div className="glass p-8 rounded-none border border-surface-alt relative mb-6 overflow-hidden">
            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-3xl rounded-full" />
            <div className="flex flex-col md:flex-row gap-8 relative z-10">
-              <div className="flex-shrink-0 flex items-center justify-center bg-surface-alt/5 w-40 h-40 rounded-2xl border border-surface-alt">
+              <div className="flex-shrink-0 flex items-center justify-center bg-surface-alt/5 w-48 h-48 rounded-2xl border border-surface-alt">
                  <PlantIcon 
                     plantType={selectedHabit.plantType} 
                     stage={selectedHabit.plantStage} 
                     status={selectedHabit.plantStatus} 
                     health={selectedHabit.plantHealth}
-                    className="w-24 h-24 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]" 
+                    className="w-32 h-32 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]" 
                  />
               </div>
               <div className="flex-1">
@@ -214,7 +214,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
               >
                  <div className="flex items-start justify-between mb-4 w-full">
                     <div className="bg-[#07080A]/50 p-2 rounded-lg border border-surface-alt">
-                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-8 h-8 group-hover:scale-110 transition-transform" />
+                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-16 h-16 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className={`px-2 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${getArchiveTypeColor(habit.archiveType)}`}>
                        {formatArchiveType(habit.archiveType)}

@@ -1,0 +1,2309 @@
+import React from 'react';
+
+export interface PlantSvgProps {
+  primaryColor?: string;
+  secondaryColor?: string;
+  outlineColor?: string;
+}
+
+export type PlantSvgRenderer = React.FC<PlantSvgProps>;
+
+export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
+  'Mango / Aam': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Canopy Back */}
+        <path d="M 50 10 C 80 10, 95 35, 85 60 C 95 65, 90 85, 70 90 C 65 100, 35 100, 30 90 C 10 85, 5 65, 15 60 C 5 35, 20 10, 50 10 Z" fill="#3A752C" />
+        {/* Trunk */}
+        <path d="M 50 50 Q 45 80 40 100 L 60 100 Q 55 80 50 50" fill="#8B5A2B" />
+        <path d="M 43 100 Q 46 70 50 50 Q 54 70 57 100" fill="none" stroke="#5C3A21" strokeWidth="2" opacity="0.6"/>
+        {/* Pot */}
+        <path d="M 30 95 Q 50 105 70 95 L 65 115 Q 50 120 35 115 Z" fill="#C15C3D" />
+        <path d="M 25 85 L 75 85 L 70 95 Q 50 105 30 95 Z" fill="#DB7052" />
+        {/* Canopy Front */}
+        <path d="M 50 10 C 80 10, 95 35, 85 60 C 95 65, 90 85, 70 90 C 65 100, 35 100, 30 90 C 10 85, 5 65, 15 60 C 5 35, 20 10, 50 10 Z" fill="#4B8B3B" />
+        {/* Mangoes */}
+        <g fill="#FFC843" stroke="#D97925" strokeWidth="1.5">
+          <circle cx="35" cy="40" r="5" />
+          <circle cx="65" cy="45" r="5" />
+          <circle cx="50" cy="25" r="5" />
+          <circle cx="25" cy="65" r="5" />
+          <circle cx="75" cy="70" r="5" />
+          <circle cx="50" cy="75" r="5" />
+        </g>
+      </g>
+    </svg>
+  ),
+  'Banana / Kola': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Trunk */}
+        <path d="M 40 100 Q 45 60 50 35 Q 55 60 60 100" fill="#8FD5A6" />
+        <path d="M 45 100 Q 48 60 50 35 Q 52 60 55 100" fill="none" stroke="#4A824A" strokeWidth="1.5" />
+        {/* Leaves */}
+        <path d="M 50 40 Q 15 25 5 50 Q 15 65 35 50" fill="#4B8B3B" />
+        <path d="M 50 45 Q 85 30 95 55 Q 85 70 65 55" fill="#4B8B3B" />
+        <path d="M 50 25 Q 15 5 10 25 Q 20 35 40 30" fill="#6A9F4B" />
+        <path d="M 50 30 Q 80 5 90 30 Q 80 45 60 35" fill="#6A9F4B" />
+        <path d="M 50 20 Q 25 -15 45 -30 Q 55 -15 50 20" fill="#8BCB52" />
+        {/* Banana Bunch */}
+        <path d="M 55 50 L 60 70 Q 65 75 70 65 L 70 55" fill="#FFE366" stroke="#D69F12" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M 50 50 L 53 72 Q 58 78 63 68 L 60 55" fill="#FFC843" stroke="#D69F12" strokeWidth="1.5" strokeLinejoin="round" />
+        <path d="M 45 50 L 45 70 Q 48 75 53 65 L 50 55" fill="#FFE366" stroke="#D69F12" strokeWidth="1.5" strokeLinejoin="round" />
+        {/* Pot */}
+        <path d="M 35 85 L 65 85 L 60 115 Q 50 120 40 115 Z" fill="#4A4A4A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#5C5C5C" />
+      </g>
+    </svg>
+  ),
+  'Jackfruit / Kathal': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Massive Tree Canopy */}
+        <path d="M 50 5 C 80 5, 100 25, 90 55 C 95 80, 75 90, 50 90 C 25 90, 5 80, 10 55 C 0 25, 20 5, 50 5 Z" fill="#2E5A1C" />
+        <path d="M 50 10 C 75 10, 90 25, 80 50 C 85 70, 65 80, 50 80 C 35 80, 15 70, 20 50 C 10 25, 25 10, 50 10 Z" fill="#3D7A25" />
+        {/* Thick Trunk */}
+        <path d="M 45 100 Q 45 40 50 30 Q 55 40 55 100" fill="#6B4226" />
+        {/* Jackfruits growing directly on the trunk */}
+        {/* Main jackfruit */}
+        <ellipse cx="40" cy="65" rx="8" ry="14" fill="#88A825" stroke="#5C7A14" strokeWidth="1.5" />
+        {/* Texture bumps on Jackfruit */}
+        <path d="M 36 60 L 38 62 L 40 60 M 36 65 L 38 67 L 40 65 M 36 70 L 38 72 L 40 70" stroke="#5C7A14" strokeWidth="1.5" opacity="0.6" strokeLinecap="round" />
+        
+        {/* Second Jackfruit */}
+        <ellipse cx="62" cy="75" rx="7" ry="12" fill="#99BD2E" stroke="#5C7A14" strokeWidth="1.5" />
+        <path d="M 58 70 L 60 72 L 62 70 M 58 75 L 60 77 L 62 75 M 58 80 L 60 82 L 62 80" stroke="#5C7A14" strokeWidth="1.5" opacity="0.6" strokeLinecap="round" />
+
+        {/* Small young Jackfruit */}
+        <ellipse cx="42" cy="50" rx="5" ry="8" fill="#AADD33" stroke="#5C7A14" strokeWidth="1" />
+
+        {/* Pot */}
+        <path d="M 30 95 Q 50 105 70 95 L 65 115 Q 50 120 35 115 Z" fill="#8C533E" />
+        <path d="M 25 85 L 75 85 L 70 95 Q 50 100 30 95 Z" fill="#A86A53" />
+      </g>
+    </svg>
+  ),
+  'Guava / Peyara': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Foliage Back */}
+        <path d="M 50 15 C 75 15, 90 35, 80 60 C 85 75, 65 85, 50 85 C 35 85, 15 75, 20 60 C 10 35, 25 15, 50 15 Z" fill="#75A642" />
+        
+        {/* Branching Trunk */}
+        <path d="M 50 100 L 50 60 L 35 45 M 50 60 L 65 40 M 50 60 L 50 35" fill="none" stroke="#876747" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Foliage Front Leaves (distinct ovate shapes) */}
+        <path d="M 35 45 C 20 35, 25 20, 35 25 C 45 30, 40 45, 35 45 Z" fill="#8BC64F" />
+        <path d="M 65 40 C 80 30, 75 15, 65 20 C 55 25, 60 40, 65 40 Z" fill="#8BC64F" />
+        <path d="M 50 35 C 35 25, 40 10, 50 15 C 60 20, 55 35, 50 35 Z" fill="#8BC64F" />
+        <path d="M 25 60 C 10 50, 15 35, 25 40 C 35 45, 30 60, 25 60 Z" fill="#8BC64F" />
+        <path d="M 75 60 C 90 50, 85 35, 75 40 C 65 45, 70 60, 75 60 Z" fill="#8BC64F" />
+        
+        {/* Guavas */}
+        <circle cx="30" cy="50" r="7" fill="#C5E663" stroke="#89A83E" strokeWidth="1.5" />
+        <path d="M 30 57 v 2" stroke="#4A611C" strokeWidth="1" /> {/* Flower remnant */}
+        
+        <circle cx="70" cy="45" r="8" fill="#D3F571" stroke="#89A83E" strokeWidth="1.5" />
+        <path d="M 70 53 v 2" stroke="#4A611C" strokeWidth="1" />
+        
+        <circle cx="50" cy="30" r="6" fill="#B4D64D" stroke="#89A83E" strokeWidth="1.5" />
+        <path d="M 50 36 v 2" stroke="#4A611C" strokeWidth="1" />
+        
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 118 40 115 Z" fill="#4B6673" />
+        <path d="M 30 85 L 70 85 L 65 95 L 35 95 Z" fill="#628596" />
+      </g>
+    </svg>
+  ),
+  'Papaya / Pepe': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="papayaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4CAF50" />
+          <stop offset="50%" stopColor="#8BC34A" />
+          <stop offset="100%" stopColor="#FFC107" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Tall straight trunk */}
+        <path d="M 45 100 L 45 40 Q 50 35 55 40 L 55 100 Z" fill="#6D9951" />
+        
+        {/* Leaves Crown Base */}
+        <path d="M 50 40 L 25 30 M 50 40 L 40 15 M 50 40 L 60 15 M 50 40 L 75 30" stroke="#7CB342" strokeWidth="3" strokeLinecap="round" />
+        
+        {/* Large clustered lobed leaves */}
+        <path d="M 25 30 C 15 35, 10 20, 25 20 C 30 15, 35 25, 25 30 Z" fill="#558B2F" />
+        <path d="M 40 15 C 30 10, 45 0, 50 10 C 55 0, 60 10, 50 15 Z" fill="#558B2F" />
+        <path d="M 60 15 C 50 10, 65 0, 70 10 C 75 0, 80 10, 70 15 Z" fill="#558B2F" />
+        <path d="M 75 30 C 65 35, 60 25, 75 20 C 80 15, 90 20, 75 30 Z" fill="#558B2F" />
+
+        {/* Cluster of Papayas at the top trunk */}
+        {/* Back papayas */}
+        <path d="M 40 45 C 30 45, 35 60, 45 60 C 50 45, 45 45, 40 45 Z" fill="url(#papayaGrad)" />
+        <path d="M 60 45 C 70 45, 65 60, 55 60 C 50 45, 55 45, 60 45 Z" fill="url(#papayaGrad)" />
+        {/* Front papayas */}
+        <path d="M 45 40 C 35 40, 40 65, 50 65 C 60 65, 65 40, 55 40 C 50 40, 45 40, 45 40 Z" fill="url(#papayaGrad)" />
+        <path d="M 50 40 C 42 40, 45 55, 50 55 C 55 55, 58 40, 50 40 Z" fill="#FFB300" opacity="0.8" />
+        
+        {/* Pot */}
+        <path d="M 40 95 L 60 95 L 55 115 L 45 115 Z" fill="#5D4037" />
+        <path d="M 35 85 L 65 85 L 60 95 L 40 95 Z" fill="#795548" />
+      </g>
+    </svg>
+  ),
+  'Litchi / Lichu': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Dark green dense canopy */}
+        <path d="M 50 15 C 85 15, 95 40, 80 65 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 65 C 5 40, 15 15, 50 15 Z" fill="#2E6930" />
+        
+        {/* Trunk */}
+        <path d="M 45 100 L 45 60 L 55 60 L 55 100 Z" fill="#7D6653" />
+        
+        {/* Clusters of red litchis */}
+        <g fill="#E53935">
+          <circle cx="35" cy="45" r="4" /><circle cx="39" cy="48" r="4.5" /><circle cx="31" cy="49" r="4.5" />
+          <circle cx="65" cy="35" r="4" /><circle cx="69" cy="38" r="4.5" /><circle cx="61" cy="39" r="4.5" />
+          <circle cx="55" cy="65" r="4" /><circle cx="59" cy="68" r="4.5" /><circle cx="51" cy="69" r="4.5" />
+          <circle cx="25" cy="60" r="4" /><circle cx="29" cy="63" r="4.5" /><circle cx="21" cy="64" r="4.5" />
+          <circle cx="75" cy="55" r="4" /><circle cx="79" cy="58" r="4.5" /><circle cx="71" cy="59" r="4.5" />
+        </g>
+        
+        {/* Texture/bumps on litchis */}
+        <g fill="#FFAAAA" opacity="0.5">
+           <circle cx="34" cy="44" r="1"/><circle cx="38" cy="47" r="1.5"/><circle cx="30" cy="48" r="1.5"/>
+           <circle cx="64" cy="34" r="1"/><circle cx="68" cy="37" r="1.5"/><circle cx="60" cy="38" r="1.5"/>
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#8C533E" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#A86A53" />
+      </g>
+    </svg>
+  ),
+  'Date Palm / Khejur': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Textured Island shape */}
+        <path d="M 20 95 Q 50 85 80 95 Q 90 110 50 115 Q 10 110 20 95 Z" fill="#D2B48C" />
+        <path d="M 25 100 Q 50 90 75 100 Q 80 108 50 110 Q 20 108 25 100 Z" fill="#E6C280" />
+
+        {/* Scaly Trunk */}
+        <path d="M 45 95 Q 48 50 45 40 L 55 40 Q 52 50 55 95 Z" fill="#A0522D" />
+        <path d="M 45 80 L 55 85 M 46 70 L 54 75 M 45 60 L 55 65 M 46 50 L 54 55 M 45 88 L 54 92 M 45 42 L 55 45" stroke="#663300" strokeWidth="2" />
+        
+        {/* Sweeping Fronds Back */}
+        <path d="M 50 40 Q 20 10 5 40 Q 20 30 50 40" fill="#4B8B3B" />
+        <path d="M 50 40 Q 80 10 95 40 Q 80 30 50 40" fill="#4B8B3B" />
+        <path d="M 50 40 Q 30 0 10 20 Q 30 10 50 40" fill="#559944" />
+        <path d="M 50 40 Q 70 0 90 20 Q 70 10 50 40" fill="#559944" />
+        <path d="M 50 40 Q 50 5 30 5 Q 45 15 50 40" fill="#66AA55" />
+        <path d="M 50 40 Q 50 5 70 5 Q 55 15 50 40" fill="#66AA55" />
+        
+        {/* Front Fronds descending */}
+        <path d="M 50 40 Q 30 80 15 60 Q 35 65 50 40" fill="#559944" />
+        <path d="M 50 40 Q 70 80 85 60 Q 65 65 50 40" fill="#559944" />
+        
+        {/* Hanging Clusters of Dates */}
+        <path d="M 48 40 L 45 55 M 50 40 L 50 58 M 52 40 L 55 55" stroke="#D9A05B" strokeWidth="2" strokeLinecap="round" />
+        <ellipse cx="45" cy="55" rx="3.5" ry="6" fill="#8B4513" />
+        <ellipse cx="43" cy="52" rx="3.5" ry="6" fill="#A0522D" />
+        <ellipse cx="47" cy="58" rx="3.5" ry="6" fill="#8B4513" />
+        
+        <ellipse cx="50" cy="58" rx="3.5" ry="6" fill="#8B4513" />
+        <ellipse cx="48" cy="55" rx="3.5" ry="6" fill="#A0522D" />
+        <ellipse cx="52" cy="62" rx="3.5" ry="6" fill="#8B4513" />
+
+        <ellipse cx="55" cy="55" rx="3.5" ry="6" fill="#8B4513" />
+        <ellipse cx="57" cy="52" rx="3.5" ry="6" fill="#A0522D" />
+        <ellipse cx="53" cy="58" rx="3.5" ry="6" fill="#8B4513" />
+      </g>
+    </svg>
+  ),
+  'Wax Apple / Jamrul': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="jamrulGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FAFAFA" />
+          <stop offset="50%" stopColor="#EAF8E6" />
+          <stop offset="100%" stopColor="#D2F0C9" />
+        </linearGradient>
+        <linearGradient id="jamrulPinkGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFF0F5" />
+          <stop offset="50%" stopColor="#FFD1DC" />
+          <stop offset="100%" stopColor="#FFB6C1" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft Canopy */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#6A9F4B" />
+        {/* Back Leaves */}
+        <path d="M 50 20 C 70 20, 80 35, 75 50 C 75 60, 65 65, 50 65 C 35 65, 25 60, 25 50 C 20 35, 30 20, 50 20 Z" fill="#8BCB52" />
+        
+        {/* Trunk */}
+        <path d="M 45 100 L 45 60 L 55 60 L 55 100 Z" fill="#755E4C" />
+        
+        {/* Bell-shaped Wax Apples (White/Green) */}
+        {/* Fruit 1 */}
+        <g transform="translate(30, 45)">
+          {/* Stem */}
+          <path d="M 8 -5 L 10 2" stroke="#5C3A21" strokeWidth="1.5" />
+          {/* Bell Shape */}
+          <path d="M 10 0 C 15 0, 18 10, 20 16 C 22 22, 16 26, 10 26 C 4 26, -2 22, 0 16 C 2 10, 5 0, 10 0 Z" fill="url(#jamrulGrad)" />
+          {/* Bottom Fold */}
+          <path d="M 5 26 C 8 23, 12 23, 15 26" fill="none" stroke="#A9D39E" strokeWidth="1" />
+        </g>
+        
+        {/* Fruit 2 (Pink variant) */}
+        <g transform="translate(65, 40) scale(0.9)">
+          <path d="M 8 -5 L 10 2" stroke="#5C3A21" strokeWidth="1.5" />
+          <path d="M 10 0 C 15 0, 18 10, 20 16 C 22 22, 16 26, 10 26 C 4 26, -2 22, 0 16 C 2 10, 5 0, 10 0 Z" fill="url(#jamrulPinkGrad)" />
+          <path d="M 5 26 C 8 23, 12 23, 15 26" fill="none" stroke="#E695A5" strokeWidth="1" />
+        </g>
+
+        {/* Fruit 3 */}
+        <g transform="translate(45, 60) scale(1.1)">
+          <path d="M 8 -5 L 10 2" stroke="#5C3A21" strokeWidth="1.5" />
+          <path d="M 10 0 C 15 0, 18 10, 20 16 C 22 22, 16 26, 10 26 C 4 26, -2 22, 0 16 C 2 10, 5 0, 10 0 Z" fill="url(#jamrulGrad)" />
+          <path d="M 5 26 C 8 23, 12 23, 15 26" fill="none" stroke="#A9D39E" strokeWidth="1" />
+        </g>
+        
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6A8B88" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#8BB5B1" />
+      </g>
+    </svg>
+  ),
+  'Coconut / Narikel': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Trunk leaning right */}
+        <path d="M 40 100 Q 55 60 50 30 L 56 28 Q 63 60 48 100" fill="#9C7756" />
+        <path d="M 40 95 L 49 98 M 43 85 L 52 88 M 47 75 L 56 78 M 48 65 L 57 68 M 49 55 L 58 58 M 50 45 L 58 48" stroke="#684A31" strokeWidth="2" strokeLinecap="round" />
+        
+        {/* Crown of Fronds */}
+        <path d="M 53 30 Q 80 15 95 35 Q 80 25 53 30" fill="#6A9F4B" />
+        <path d="M 53 30 Q 85 5 75 10 Q 70 15 53 30" fill="#8BCB52" />
+        <path d="M 53 30 Q 80 40 85 65 Q 70 50 53 30" fill="#558A38" />
+        <path d="M 53 30 Q 30 5 10 15 Q 25 15 53 30" fill="#8BCB52" />
+        <path d="M 53 30 Q 15 15 5 35 Q 20 25 53 30" fill="#6A9F4B" />
+        <path d="M 53 30 Q 25 40 15 65 Q 35 50 53 30" fill="#558A38" />
+        <path d="M 53 30 Q 50 0 45 -5 Q 55 5 53 30" fill="#6A9F4B" />
+        <path d="M 53 30 Q 60 0 65 -5 Q 55 5 53 30" fill="#6A9F4B" />
+        
+        {/* Coconuts clustered at the base of fronds */}
+        <circle cx="50" cy="35" r="5" fill="#4CAF50" stroke="#2E7D32" strokeWidth="1" />
+        <circle cx="56" cy="38" r="4.5" fill="#66BB6A" stroke="#2E7D32" strokeWidth="1" />
+        <circle cx="45" cy="38" r="5" fill="#4CAF50" stroke="#2E7D32" strokeWidth="1" />
+        <circle cx="53" cy="42" r="4" fill="#81C784" stroke="#2E7D32" strokeWidth="1" />
+        
+        {/* Island/Pot */}
+        <path d="M 25 95 Q 50 85 75 95 L 70 115 Q 50 120 30 115 Z" fill="#D4BB8C" />
+        <path d="M 20 85 Q 50 80 80 85 L 75 95 Q 50 90 25 95 Z" fill="#EBD6AD" />
+      </g>
+    </svg>
+  ),
+  'Pineapple / Anaros': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="pineapplePattern" x="0" y="0" width="8" height="12" patternUnits="userSpaceOnUse">
+          <path d="M 4 0 L 8 6 L 4 12 L 0 6 Z" fill="#F4D03F" stroke="#D4AC0D" strokeWidth="1" />
+        </pattern>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Broad spiky leaves emerging from pot */}
+        <path d="M 50 85 Q 20 60 10 30 Q 30 65 50 85" fill="#4B8B3B" />
+        <path d="M 50 85 Q 80 60 90 30 Q 70 65 50 85" fill="#4B8B3B" />
+        <path d="M 50 85 Q 30 55 15 45 Q 35 70 50 85" fill="#6A9F4B" />
+        <path d="M 50 85 Q 70 55 85 45 Q 65 70 50 85" fill="#6A9F4B" />
+        
+        {/* Spiky crown of pineapple */}
+        <path d="M 50 35 Q 30 10 20 0 Q 35 25 50 35" fill="#4B8B3B" />
+        <path d="M 50 35 Q 70 10 80 0 Q 65 25 50 35" fill="#4B8B3B" />
+        <path d="M 50 35 Q 40 5 35 -5 Q 45 20 50 35" fill="#6A9F4B" />
+        <path d="M 50 35 Q 60 5 65 -5 Q 55 20 50 35" fill="#6A9F4B" />
+        <path d="M 50 35 Q 50 5 50 -10 Q 55 15 50 35" fill="#8BCB52" />
+        
+        {/* Pineapple body */}
+        <ellipse cx="50" cy="55" rx="18" ry="25" fill="url(#pineapplePattern)" />
+        <ellipse cx="50" cy="55" rx="18" ry="25" fill="none" stroke="#B7950B" strokeWidth="1.5" />
+        
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#4A4A4A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#5C5C5C" />
+      </g>
+    </svg>
+  ),
+  'Black Plum / Jam': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Dark Dense Canopy */}
+        <path d="M 45 10 C 75 10, 95 30, 85 60 C 90 80, 65 90, 50 85 C 30 90, 5 75, 15 55 C 5 25, 20 10, 45 10 Z" fill="#3D5A42" />
+        <path d="M 50 20 C 75 15, 85 30, 75 55 C 80 70, 60 80, 50 75 C 35 80, 20 70, 25 55 C 15 35, 30 20, 50 20 Z" fill="#4E7A53" />
+        
+        {/* Branching Trunk */}
+        <path d="M 50 100 L 50 65 L 35 50 M 50 65 L 65 45 M 50 65 L 50 35" fill="none" stroke="#5C473A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Clusters of Black Plums (Oval Dark Purple) */}
+        <g fill="#311B47" stroke="#1A0D28" strokeWidth="1">
+          <ellipse cx="30" cy="50" rx="3" ry="5" transform="rotate(15 30 50)" />
+          <ellipse cx="33" cy="54" rx="3.5" ry="5" transform="rotate(-15 33 54)" />
+          <ellipse cx="27" cy="53" rx="3" ry="4.5" transform="rotate(30 27 53)" />
+
+          <ellipse cx="70" cy="45" rx="3.5" ry="5" transform="rotate(20 70 45)" />
+          <ellipse cx="67" cy="48" rx="3" ry="4.5" transform="rotate(-10 67 48)" />
+
+          <ellipse cx="50" cy="40" rx="3.5" ry="5" transform="rotate(5 50 40)" />
+          <ellipse cx="54" cy="43" rx="3" ry="4.5" transform="rotate(-20 54 43)" />
+          <ellipse cx="48" cy="45" rx="3" ry="4.5" transform="rotate(25 48 45)" />
+          
+          <ellipse cx="60" cy="65" rx="3.5" ry="5" transform="rotate(40 60 65)" />
+          <ellipse cx="64" cy="70" rx="3" ry="4.5" transform="rotate(-5 64 70)" />
+          
+          <ellipse cx="38" cy="75" rx="3.5" ry="5" transform="rotate(10 38 75)" />
+          <ellipse cx="42" cy="78" rx="3" ry="4.5" transform="rotate(-15 42 78)" />
+        </g>
+        
+        {/* Highlight on plums */}
+        <g fill="#613E85">
+          <circle cx="29" cy="48" r="1" /><circle cx="32" cy="52" r="1.5" /><circle cx="26" cy="51" r="1" />
+          <circle cx="69" cy="43" r="1.5" /><circle cx="66" cy="46" r="1" />
+          <circle cx="49" cy="38" r="1" /><circle cx="53" cy="41" r="1" /><circle cx="47" cy="43" r="1" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#66727A" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#75828A" />
+      </g>
+    </svg>
+  ),
+  'Jujube / Boroi': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="boroiGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#DDE667" />
+          <stop offset="60%" stopColor="#B3C425" />
+          <stop offset="100%" stopColor="#E0653B" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Thorny winding branches */}
+        <path d="M 50 100 Q 55 70 45 55 Q 35 40 25 30" fill="none" stroke="#8F786C" strokeWidth="4" strokeLinecap="round" />
+        <path d="M 48 75 Q 60 65 70 50 Q 80 40 85 25" fill="none" stroke="#8F786C" strokeWidth="4" strokeLinecap="round" />
+        <path d="M 46 60 Q 50 45 55 35 Q 60 20 50 10" fill="none" stroke="#8F786C" strokeWidth="3" strokeLinecap="round" />
+        <path d="M 33 45 Q 25 50 15 55" fill="none" stroke="#8F786C" strokeWidth="2" strokeLinecap="round" />
+        <path d="M 64 58 Q 75 60 85 65" fill="none" stroke="#8F786C" strokeWidth="2" strokeLinecap="round" />
+
+        {/* Sparse small oval leaves */}
+        <g fill="#A5C748">
+          <ellipse cx="25" cy="30" rx="3" ry="6" transform="rotate(45 25 30)" />
+          <ellipse cx="35" cy="40" rx="3" ry="6" transform="rotate(-20 35 40)" />
+          <ellipse cx="15" cy="55" rx="3" ry="6" transform="rotate(20 15 55)" />
+          <ellipse cx="70" cy="50" rx="3" ry="6" transform="rotate(60 70 50)" />
+          <ellipse cx="85" cy="25" rx="3" ry="6" transform="rotate(-30 85 25)" />
+          <ellipse cx="55" cy="35" rx="3" ry="6" transform="rotate(15 55 35)" />
+          <ellipse cx="50" cy="10" rx="3" ry="6" transform="rotate(80 50 10)" />
+          <ellipse cx="85" cy="65" rx="3" ry="6" transform="rotate(-60 85 65)" />
+          <ellipse cx="64" cy="58" rx="3" ry="6" transform="rotate(5 64 58)" />
+          <ellipse cx="33" cy="45" rx="3" ry="6" transform="rotate(-70 33 45)" />
+          
+          <ellipse cx="40" cy="55" rx="3" ry="6" transform="rotate(30 40 55)" />
+          <ellipse cx="60" cy="45" rx="3" ry="6" transform="rotate(-40 60 45)" />
+        </g>
+        
+        {/* Jujube fruits (Boroi) - small ovals dropping down */}
+        <ellipse cx="30" cy="36" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="20" cy="50" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="40" cy="48" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        
+        <ellipse cx="75" cy="42" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="80" cy="30" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        
+        <ellipse cx="58" cy="25" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="48" cy="18" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="55" cy="42" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        
+        <ellipse cx="82" cy="70" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+        <ellipse cx="66" cy="64" rx="4" ry="5.5" fill="url(#boroiGrad)" stroke="#A08C1E" strokeWidth="0.5" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#A17E65" />
+        <path d="M 30 85 L 70 85 L 65 95 L 35 95 Z" fill="#8C6E57" />
+      </g>
+    </svg>
+  ),
+  'Hog Plum / Amra': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Soft airy canopy */}
+        <path d="M 50 10 C 80 15, 90 40, 75 65 C 80 80, 60 85, 50 85 C 35 85, 15 80, 20 65 C 5 40, 20 15, 50 10 Z" fill="#78AC4E" />
+        
+        {/* Sub-clusters of leaves for pinnate look */}
+        <circle cx="30" cy="35" r="15" fill="#88C458" />
+        <circle cx="70" cy="35" r="15" fill="#88C458" />
+        <circle cx="50" cy="25" r="16" fill="#88C458" />
+        <circle cx="25" cy="60" r="12" fill="#88C458" />
+        <circle cx="75" cy="60" r="12" fill="#88C458" />
+        <circle cx="50" cy="70" r="14" fill="#88C458" />
+        
+        <circle cx="45" cy="45" r="12" fill="#9DD96A" />
+        <circle cx="65" cy="50" r="12" fill="#9DD96A" />
+        
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#A89487" />
+        <path d="M 46 75 L 54 77 M 46 85 L 54 87 M 46 95 L 54 97" stroke="#7A685D" strokeWidth="1" />
+        
+        {/* Hog Plums (Pale Green Ovals hanging individually) */}
+        <g fill="#D3EAA5" stroke="#8CA859" strokeWidth="1.5">
+           {/* Left cluster */}
+           <path d="M 30 50 v 8" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="30" cy="62" rx="4.5" ry="7" />
+           <path d="M 25 45 L 23 52" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="22" cy="58" rx="4.5" ry="7" transform="rotate(15 22 58)" />
+           
+           {/* Center cluster */}
+           <path d="M 50 65 v 10" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="50" cy="78" rx="5" ry="7.5" />
+           <path d="M 45 68 L 42 75" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="40" cy="81" rx="5" ry="7.5" transform="rotate(25 40 81)" />
+           <path d="M 55 68 L 58 75" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="60" cy="81" rx="5" ry="7.5" transform="rotate(-25 60 81)" />
+
+           {/* Right cluster */}
+           <path d="M 70 45 v 8" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="70" cy="58" rx="4.5" ry="7" />
+           <path d="M 75 40 L 78 48" stroke="#7A685D" strokeWidth="1.5" />
+           <ellipse cx="79" cy="54" rx="4.5" ry="7" transform="rotate(-15 79 54)" />
+        </g>
+        
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#697672" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#586360" />
+      </g>
+    </svg>
+  ),
+  'Wood Apple / Bel': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="belGrad" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+          <stop offset="0%" stopColor="#DECFAD" />
+          <stop offset="70%" stopColor="#C2AE7E" />
+          <stop offset="100%" stopColor="#9C8754" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Tree Canopy */}
+        <path d="M 50 10 C 85 10, 95 35, 80 60 C 90 75, 65 85, 50 85 C 30 85, 10 75, 20 60 C 5 35, 15 10, 50 10 Z" fill="#6B9643" />
+        
+        {/* Highlight shapes mirroring trifoliate leaves (clusters of 3) */}
+        <path d="M 30 30 Q 35 25 40 30 Q 35 35 30 30 Z" fill="#8AC257" />
+        <path d="M 38 22 Q 43 17 48 22 Q 43 27 38 22 Z" fill="#8AC257" />
+        <path d="M 40 32 Q 45 27 50 32 Q 45 37 40 32 Z" fill="#8AC257" />
+
+        <path d="M 60 40 Q 65 35 70 40 Q 65 45 60 40 Z" fill="#8AC257" />
+        <path d="M 68 32 Q 73 27 78 32 Q 73 37 68 32 Z" fill="#8AC257" />
+        <path d="M 70 42 Q 75 37 80 42 Q 75 47 70 42 Z" fill="#8AC257" />
+        
+        <path d="M 25 60 Q 30 55 35 60 Q 30 65 25 60 Z" fill="#8AC257" />
+        <path d="M 33 52 Q 38 47 43 52 Q 38 57 33 52 Z" fill="#8AC257" />
+        <path d="M 35 62 Q 40 57 45 62 Q 40 67 35 62 Z" fill="#8AC257" />
+        
+        {/* Trunk & distinct branches */}
+        <path d="M 50 100 L 50 70 M 50 70 L 35 55 M 50 70 L 65 50" fill="none" stroke="#A69485" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Large Round Wood Apples (Bel) */}
+        <circle cx="35" cy="55" r="7" fill="url(#belGrad)" stroke="#78663A" strokeWidth="1" />
+        <path d="M 35 58 v 1" stroke="#524220" strokeWidth="1.5" strokeLinecap="round" />
+        
+        <circle cx="65" cy="50" r="8" fill="url(#belGrad)" stroke="#78663A" strokeWidth="1" />
+        <path d="M 65 54 v 1" stroke="#524220" strokeWidth="1.5" strokeLinecap="round" />
+        
+        <circle cx="50" cy="35" r="6" fill="url(#belGrad)" stroke="#78663A" strokeWidth="1" />
+        <path d="M 50 38 v 1" stroke="#524220" strokeWidth="1.5" strokeLinecap="round" />
+        
+        <circle cx="20" cy="40" r="5.5" fill="url(#belGrad)" stroke="#78663A" strokeWidth="1" />
+        <path d="M 20 43 v 1" stroke="#524220" strokeWidth="1.5" strokeLinecap="round" />
+        
+        <circle cx="75" cy="65" r="6.5" fill="url(#belGrad)" stroke="#78663A" strokeWidth="1" />
+        <path d="M 75 68 v 1" stroke="#524220" strokeWidth="1.5" strokeLinecap="round" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#916454" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#A87766" />
+      </g>
+    </svg>
+  ),
+  'Star Fruit / Kamranga': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="starFruitGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#F9E77F" />
+          <stop offset="25%" stopColor="#EACC58" />
+          <stop offset="50%" stopColor="#F9E77F" />
+          <stop offset="75%" stopColor="#EACC58" />
+          <stop offset="100%" stopColor="#F9E77F" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft Canopy */}
+        <path d="M 50 15 C 80 10, 95 30, 85 55 C 90 75, 70 85, 50 85 C 30 85, 10 75, 15 55 C 5 30, 20 10, 50 15 Z" fill="#75A83E" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#8CCB48" />
+
+        {/* Trunk */}
+        <path d="M 50 100 L 50 65 L 40 50 M 50 65 L 60 50" fill="none" stroke="#7A6A58" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Star Fruits (Oval with ribbed shading, dangling) */}
+        <path d="M 35 50 C 35 60, 32 65, 35 68 C 38 65, 35 60, 35 50 Z" fill="url(#starFruitGrad)" stroke="#B3931D" strokeWidth="0.5" />
+        <path d="M 33 50 L 33 65 M 37 50 L 37 65" stroke="#D1B23E" strokeWidth="1" strokeLinecap="round" />
+
+        <g transform="translate(30, -5)">
+          <path d="M 35 50 C 35 60, 32 65, 35 68 C 38 65, 35 60, 35 50 Z" fill="url(#starFruitGrad)" stroke="#B3931D" strokeWidth="0.5" />
+          <path d="M 33 50 L 33 65 M 37 50 L 37 65" stroke="#D1B23E" strokeWidth="1" strokeLinecap="round" />
+        </g>
+
+        <g transform="translate(-15, 5)">
+          <path d="M 35 50 C 35 60, 32 65, 35 68 C 38 65, 35 60, 35 50 Z" fill="url(#starFruitGrad)" stroke="#B3931D" strokeWidth="0.5" />
+          <path d="M 33 50 L 33 65 M 37 50 L 37 65" stroke="#D1B23E" strokeWidth="1" strokeLinecap="round" />
+        </g>
+        
+        <g transform="translate(15, 10)">
+          <path d="M 35 50 C 35 60, 32 65, 35 68 C 38 65, 35 60, 35 50 Z" fill="url(#starFruitGrad)" stroke="#B3931D" strokeWidth="0.5" />
+          <path d="M 33 50 L 33 65 M 37 50 L 37 65" stroke="#D1B23E" strokeWidth="1" strokeLinecap="round" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#5F767A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#758B91" />
+      </g>
+    </svg>
+  ),
+  'Indian Gooseberry / Amloki': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="amlokiGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#D4EFA5" />
+          <stop offset="80%" stopColor="#A2C959" />
+          <stop offset="100%" stopColor="#7E9E45" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft textured canopy */}
+        <path d="M 50 10 C 85 10, 95 30, 80 55 C 85 75, 65 85, 50 80 C 35 85, 15 75, 20 55 C 5 30, 15 10, 50 10 Z" fill="#6B8A31" />
+        <path d="M 50 15 C 80 15, 85 30, 75 50 C 80 65, 60 75, 50 70 C 40 75, 20 65, 25 50 C 15 30, 20 15, 50 15 Z" fill="#83A344" />
+
+        {/* Trunk */}
+        <path d="M 45 100 L 45 65 L 55 65 L 55 100 Z" fill="#8C7D6B" />
+
+        {/* Clustered translucent green berries */}
+        <g stroke="#647831" strokeWidth="0.5">
+          <circle cx="35" cy="40" r="4.5" fill="url(#amlokiGrad)" />
+          <circle cx="30" cy="44" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="38" cy="46" r="4" fill="url(#amlokiGrad)" />
+
+          <circle cx="65" cy="35" r="4.5" fill="url(#amlokiGrad)" />
+          <circle cx="60" cy="39" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="68" cy="41" r="4" fill="url(#amlokiGrad)" />
+
+          <circle cx="50" cy="50" r="4.5" fill="url(#amlokiGrad)" />
+          <circle cx="45" cy="54" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="55" cy="54" r="4" fill="url(#amlokiGrad)" />
+          
+          <circle cx="25" cy="55" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="75" cy="55" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="40" cy="65" r="4" fill="url(#amlokiGrad)" />
+          <circle cx="60" cy="65" r="4" fill="url(#amlokiGrad)" />
+        </g>
+
+        {/* Light rib lines on the berries */}
+        <g stroke="#91AD53" strokeWidth="0.5" opacity="0.6">
+           <path d="M 35 36 v 8 M 30 40 v 8 M 38 42 v 8" />
+           <path d="M 65 31 v 8 M 60 35 v 8 M 68 37 v 8" />
+           <path d="M 50 46 v 8 M 45 50 v 8 M 55 50 v 8" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#8A7A71" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#A19188" />
+      </g>
+    </svg>
+  ),
+  'Lemon / Lebu': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0, 0)">
+        {/* Canopy */}
+        <path d="M 50 15 C 75 15, 90 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 10 35, 25 15, 50 15 Z" fill="#4A8240" />
+        {/* Ovate textured leaves */}
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#609E55" />
+
+        {/* Trunk */}
+        <path d="M 47 100 L 47 65 L 53 65 L 53 100 Z" fill="#918776" />
+
+        {/* Oval Lemon Fruits */}
+        <g fill="#F4E050" stroke="#CCB923" strokeWidth="1">
+           {/* Lemon shapes with nub at the end */}
+           <path d="M 30 40 C 25 45, 35 55, 40 50 C 45 45, 35 35, 30 40 Z" />
+           <path d="M 68 35 C 63 40, 73 50, 78 45 C 83 40, 73 30, 68 35 Z" transform="scale(-1, 1) translate(-146, 0)" />
+           
+           <path d="M 25 60 C 20 65, 30 75, 35 70 C 40 65, 30 55, 25 60 Z" />
+           <path d="M 75 60 C 70 65, 80 75, 85 70 C 90 65, 80 55, 75 60 Z" transform="scale(-1, 1) translate(-160, 0)" />
+           
+           <path d="M 50 55 C 45 60, 55 70, 60 65 C 65 60, 55 50, 50 55 Z" />
+           
+           <path d="M 45 30 C 40 35, 50 45, 55 40 C 60 35, 50 25, 45 30 Z" transform="scale(-1, 1) translate(-100, 0)" />
+        </g>
+        
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#587E8F" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#6996AA" />
+      </g>
+    </svg>
+  ),
+  'Orange / Komola': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="orangeGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#FFBA66" />
+          <stop offset="70%" stopColor="#EA8E3A" />
+          <stop offset="100%" stopColor="#C96B1E" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Canopy */}
+        <path d="M 50 10 C 80 10, 95 30, 85 55 C 90 75, 70 85, 50 85 C 30 85, 10 75, 15 55 C 5 30, 20 10, 50 10 Z" fill="#3E7535" />
+        <path d="M 50 20 C 70 15, 80 30, 75 45 C 75 55, 60 65, 50 65 C 40 65, 25 55, 25 45 C 20 30, 30 15, 50 20 Z" fill="#5E9646" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#807262" />
+
+        {/* Oranges */}
+        <circle cx="35" cy="40" r="6" fill="url(#orangeGrad)" stroke="#B56721" strokeWidth="1" />
+        <path d="M 35 34 v 2" stroke="#25421D" strokeWidth="1.5" />
+        
+        <circle cx="65" cy="35" r="6" fill="url(#orangeGrad)" stroke="#B56721" strokeWidth="1" />
+        <path d="M 65 29 v 2" stroke="#25421D" strokeWidth="1.5" />
+        
+        <circle cx="75" cy="60" r="5.5" fill="url(#orangeGrad)" stroke="#B56721" strokeWidth="1" />
+        <path d="M 75 54 v 2" stroke="#25421D" strokeWidth="1.5" />
+        
+        <circle cx="25" cy="55" r="6" fill="url(#orangeGrad)" stroke="#B56721" strokeWidth="1" />
+        <path d="M 25 49 v 2" stroke="#25421D" strokeWidth="1.5" />
+
+        <circle cx="50" cy="55" r="6" fill="url(#orangeGrad)" stroke="#B56721" strokeWidth="1" />
+        <path d="M 50 49 v 2" stroke="#25421D" strokeWidth="1.5" />
+        
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#755B3F" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#917351" />
+      </g>
+    </svg>
+  ),
+  'Pomegranate / Dalim': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="dalimGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#EA626A" />
+          <stop offset="70%" stopColor="#D1454F" />
+          <stop offset="100%" stopColor="#9C272F" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Shrub-like Canopy */}
+        <path d="M 50 15 C 80 15, 90 35, 75 60 C 80 80, 60 85, 50 85 C 40 85, 20 80, 25 60 C 10 35, 20 15, 50 15 Z" fill="#568A42" />
+        
+        {/* Trunk branching out */}
+        <path d="M 50 100 L 50 70 M 50 70 L 35 50 M 50 70 L 65 50" fill="none" stroke="#8A7669" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Pomegranates */}
+        {/* Intact Fruit */}
+        <g transform="translate(30, 45)">
+          <circle cx="0" cy="0" r="7" fill="url(#dalimGrad)" />
+          {/* Crown */}
+          <path d="M -3 -6 L -4 -10 L 0 -8 L 4 -10 L 3 -6 Z" fill="#9C272F" />
+        </g>
+        
+        {/* Split/Opened Fruit showing ruby red seeds */}
+        <g transform="translate(68, 40) rotate(-15)">
+          <circle cx="0" cy="0" r="7.5" fill="url(#dalimGrad)" />
+          <path d="M -3 -6 L -4 -10 L 0 -8 L 4 -10 L 3 -6 Z" fill="#9C272F" />
+          {/* Split opening exposing seeds */}
+          <path d="M -2 1 C -4 4, 0 8, 4 6 C 6 3, 4 -2, 1 -1 Z" fill="#FCCBCF" />
+          <g fill="#A6001B">
+            <circle cx="0" cy="2" r="1" /><circle cx="2" cy="1" r="1.5" />
+            <circle cx="-1" cy="4" r="1.5" /><circle cx="2" cy="4" r="1" />
+            <circle cx="1" cy="6" r="1" />
+          </g>
+        </g>
+        
+        {/* Another intact fruit */}
+        <g transform="translate(50, 65) rotate(20)">
+          <circle cx="0" cy="0" r="6" fill="url(#dalimGrad)" />
+          <path d="M -2.5 -5 L -3 -8 L 0 -6 L 3 -8 L 2.5 -5 Z" fill="#9C272F" />
+        </g>
+        
+        <g transform="translate(25, 65) rotate(-30)">
+          <circle cx="0" cy="0" r="5" fill="url(#dalimGrad)" />
+          <path d="M -2 -4 L -3 -7 L 0 -5 L 3 -7 L 2 -4 Z" fill="#9C272F" />
+        </g>
+
+        {/* Small Red Flowers */}
+        <path d="M 45 40 L 48 35 L 50 40 Z" fill="#FF5252" />
+        <path d="M 60 55 L 63 50 L 65 55 Z" fill="#FF5252" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#5F524A" />
+        <path d="M 30 85 L 70 85 L 65 95 L 35 95 Z" fill="#786B62" />
+      </g>
+    </svg>
+  ),
+  'Custard Apple / Ata': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="ataGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#A3D977" />
+          <stop offset="70%" stopColor="#7A9E53" />
+          <stop offset="100%" stopColor="#557535" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft Canopy */}
+        <path d="M 45 10 C 80 5, 95 30, 85 55 C 90 80, 65 85, 50 85 C 30 85, 5 75, 15 55 C 5 30, 20 10, 45 10 Z" fill="#699E4B" />
+        <path d="M 50 20 C 70 15, 80 30, 75 45 C 75 55, 60 65, 50 65 C 40 65, 25 55, 25 45 C 20 30, 30 15, 50 20 Z" fill="#7CBA58" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#807262" />
+
+        {/* Bumpy Custard Apples (Ata) */}
+        {/* Main Ata 1 */}
+        <g transform="translate(35, 55)">
+          <path d="M 0 -8 C 6 -8, 8 -2, 8 0 C 8 6, 4 8, 0 8 C -4 8, -8 6, -8 0 C -8 -2, -6 -8, 0 -8 Z" fill="url(#ataGrad)" stroke="#4A6330" strokeWidth="1" />
+          {/* Bumpy texture scale outlines */}
+          <g stroke="#557535" strokeWidth="0.5" fill="none">
+             <path d="M -3 -4 C -2 -6, 0 -6, 1 -4 C 1 -2, -2 -2, -3 -4 Z" />
+             <path d="M 1 -4 C 2 -6, 4 -6, 5 -4 C 5 -2, 2 -2, 1 -4 Z" />
+             <path d="M -4 -1 C -3 -3, -1 -3, 0 -1 C 0 1, -3 1, -4 -1 Z" />
+             <path d="M 0 -1 C 1 -3, 3 -3, 4 -1 C 4 1, 1 1, 0 -1 Z" />
+             <path d="M -2 2 C -1 0, 1 0, 2 2 C 2 4, -1 4, -2 2 Z" />
+          </g>
+        </g>
+        
+        {/* Main Ata 2 */}
+        <g transform="translate(65, 45)">
+          <path d="M 0 -8 C 6 -8, 8 -2, 8 0 C 8 6, 4 8, 0 8 C -4 8, -8 6, -8 0 C -8 -2, -6 -8, 0 -8 Z" fill="url(#ataGrad)" stroke="#4A6330" strokeWidth="1" />
+          <g stroke="#557535" strokeWidth="0.5" fill="none">
+             <path d="M -3 -4 C -2 -6, 0 -6, 1 -4 C 1 -2, -2 -2, -3 -4 Z" />
+             <path d="M 1 -4 C 2 -6, 4 -6, 5 -4 C 5 -2, 2 -2, 1 -4 Z" />
+             <path d="M -4 -1 C -3 -3, -1 -3, 0 -1 C 0 1, -3 1, -4 -1 Z" />
+             <path d="M 0 -1 C 1 -3, 3 -3, 4 -1 C 4 1, 1 1, 0 -1 Z" />
+             <path d="M -2 2 C -1 0, 1 0, 2 2 C 2 4, -1 4, -2 2 Z" />
+          </g>
+        </g>
+        
+        <g transform="translate(50, 35) scale(0.8)">
+          <path d="M 0 -8 C 6 -8, 8 -2, 8 0 C 8 6, 4 8, 0 8 C -4 8, -8 6, -8 0 C -8 -2, -6 -8, 0 -8 Z" fill="url(#ataGrad)" stroke="#4A6330" strokeWidth="1" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#806259" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#99786E" />
+      </g>
+    </svg>
+  ),
+  'Strawberry': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="strawberryGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FF94A4" />
+          <stop offset="60%" stopColor="#FF6B82" />
+          <stop offset="100%" stopColor="#C92E46" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Shrubby trifoliate ground leaves */}
+        <path d="M 50 85 Q 30 65 15 70 Q 30 85 50 85" fill="#5F9E3C" />
+        <path d="M 50 85 Q 70 65 85 70 Q 70 85 50 85" fill="#5F9E3C" />
+        <path d="M 50 85 Q 20 50 30 40 Q 40 60 50 85" fill="#75C24A" />
+        <path d="M 50 85 Q 80 50 70 40 Q 60 60 50 85" fill="#75C24A" />
+        <path d="M 50 85 Q 40 30 50 20 Q 60 30 50 85" fill="#88DF56" />
+
+        {/* Strawberry Fruits */}
+        {/* Main front strawberry */}
+        <g transform="translate(50, 75)">
+          <path d="M -8 -8 C -12 2, -4 12, 0 16 C 4 12, 12 2, 8 -8 C 4 -12, -4 -12, -8 -8 Z" fill="url(#strawberryGrad)" />
+          {/* Seeds */}
+          <g fill="#FFD700">
+             <circle cx="0" cy="-2" r="0.5"/><circle cx="-4" cy="2" r="0.5"/><circle cx="4" cy="2" r="0.5"/>
+             <circle cx="-2" cy="7" r="0.5"/><circle cx="2" cy="7" r="0.5"/><circle cx="0" cy="11" r="0.5"/>
+          </g>
+          {/* Calyx */}
+          <path d="M 0 -10 L -4 -12 L -2 -8 L -6 -6 L -2 -4 L 0 0 L 2 -4 L 6 -6 L 2 -8 L 4 -12 Z" fill="#3D7A19" />
+          {/* Stem */}
+          <path d="M 0 -10 Q -5 -20 -10 -20" fill="none" stroke="#75C24A" strokeWidth="1.5" />
+        </g>
+        
+        {/* Left strawberry */}
+        <g transform="translate(25, 65) rotate(-20) scale(0.8)">
+          <path d="M -8 -8 C -12 2, -4 12, 0 16 C 4 12, 12 2, 8 -8 C 4 -12, -4 -12, -8 -8 Z" fill="url(#strawberryGrad)" />
+          <g fill="#FFD700">
+             <circle cx="0" cy="-2" r="0.5"/><circle cx="-4" cy="2" r="0.5"/><circle cx="4" cy="2" r="0.5"/>
+             <circle cx="-2" cy="7" r="0.5"/><circle cx="2" cy="7" r="0.5"/><circle cx="0" cy="11" r="0.5"/>
+          </g>
+          <path d="M 0 -10 L -4 -12 L -2 -8 L -6 -6 L -2 -4 L 0 0 L 2 -4 L 6 -6 L 2 -8 L 4 -12 Z" fill="#3D7A19" />
+          <path d="M 0 -10 Q 5 -20 15 -15" fill="none" stroke="#75C24A" strokeWidth="1.5" />
+        </g>
+        
+        {/* Right strawberry */}
+        <g transform="translate(75, 55) rotate(15) scale(0.9)">
+          <path d="M -8 -8 C -12 2, -4 12, 0 16 C 4 12, 12 2, 8 -8 C 4 -12, -4 -12, -8 -8 Z" fill="url(#strawberryGrad)" />
+          <g fill="#FFD700">
+             <circle cx="0" cy="-2" r="0.5"/><circle cx="-4" cy="2" r="0.5"/><circle cx="4" cy="2" r="0.5"/>
+             <circle cx="-2" cy="7" r="0.5"/><circle cx="2" cy="7" r="0.5"/><circle cx="0" cy="11" r="0.5"/>
+          </g>
+          <path d="M 0 -10 L -4 -12 L -2 -8 L -6 -6 L -2 -4 L 0 0 L 2 -4 L 6 -6 L 2 -8 L 4 -12 Z" fill="#3D7A19" />
+          <path d="M 0 -10 Q -5 -20 -15 -15" fill="none" stroke="#75C24A" strokeWidth="1.5" />
+        </g>
+
+        {/* Small White Flowers */}
+        <g transform="translate(35, 35)">
+           <circle cx="0" cy="0" r="2" fill="#FFD700" />
+           <circle cx="-3" cy="-3" r="2.5" fill="#FFF" />
+           <circle cx="3" cy="-3" r="2.5" fill="#FFF" />
+           <circle cx="-3" cy="3" r="2.5" fill="#FFF" />
+           <circle cx="3" cy="3" r="2.5" fill="#FFF" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 Q 50 90 65 95 L 60 115 Q 50 120 40 115 Z" fill="#806259" />
+        <path d="M 30 85 Q 50 80 70 85 L 65 95 Q 50 90 35 95 Z" fill="#99786E" />
+      </g>
+    </svg>
+  ),
+  'Asian Palmyra Palm / Taal': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="taalGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#41304F" />
+          <stop offset="70%" stopColor="#3D2B4A" />
+          <stop offset="100%" stopColor="#25182E" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Palm Island */}
+        <path d="M 15 95 Q 50 85 85 95 L 75 115 Q 50 120 25 115 Z" fill="#C2D681" />
+        <path d="M 10 85 Q 50 80 90 85 L 85 95 Q 50 90 15 95 Z" fill="#A4BE58" />
+
+        {/* Straight tall robust trunk */}
+        <path d="M 45 95 L 45 40 Q 50 35 55 40 L 55 95 Z" fill="#5E4E41" />
+        <path d="M 45 80 L 55 80 M 45 70 L 55 70 M 45 60 L 55 60 M 45 50 L 55 50" stroke="#4A3D31" strokeWidth="1.5" />
+        
+        {/* Massive fan-shaped fronds (palmate) */}
+        <path d="M 50 35 L 20 15 A 40 40 0 0 1 80 15 Z" fill="#2E5433" />
+        <path d="M 50 35 L 15 30 A 40 40 0 0 1 85 30 Z" fill="#3D6B42" />
+        <path d="M 50 35 L 25 55 A 40 40 0 0 0 75 55 Z" fill="#4B8250" />
+        
+        {/* Frond fan ribs */}
+        <g stroke="#325937" strokeWidth="1">
+           <path d="M 50 35 L 30 15 M 50 35 L 40 10 M 50 35 L 50 8 M 50 35 L 60 10 M 50 35 L 70 15" />
+           <path d="M 50 35 L 20 30 M 50 35 L 30 50 M 50 35 L 70 50 M 50 35 L 80 30" />
+        </g>
+        
+        {/* Taal clusters (Large dark purple fruits) */}
+        <circle cx="42" cy="40" r="5.5" fill="url(#taalGrad)" stroke="#181024" strokeWidth="1" />
+        <circle cx="58" cy="40" r="5.5" fill="url(#taalGrad)" stroke="#181024" strokeWidth="1" />
+        <circle cx="50" cy="45" r="5.5" fill="url(#taalGrad)" stroke="#181024" strokeWidth="1" />
+        <circle cx="46" cy="48" r="5" fill="url(#taalGrad)" stroke="#181024" strokeWidth="1" />
+        <circle cx="54" cy="48" r="5" fill="url(#taalGrad)" stroke="#181024" strokeWidth="1" />
+      </g>
+    </svg>
+  ),
+  'Watermelon / Tormuj': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="tormujGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#8FCB7E" />
+          <stop offset="60%" stopColor="#5EA152" />
+          <stop offset="100%" stopColor="#306B26" />
+        </radialGradient>
+        <pattern id="tormujStripe" x="0" y="0" width="8" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+          <path d="M 0 0 V 40 M 3 0 V 40" stroke="#25511D" strokeWidth="1.5" opacity="0.6" strokeDasharray="3 2" />
+          <path d="M 6 0 V 40" stroke="#377028" strokeWidth="1" opacity="0.5" />
+        </pattern>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Trailing Vines over ground/pot border */}
+        <path d="M 50 85 Q 20 75 10 90 Q 20 110 50 100" fill="none" stroke="#68A34F" strokeWidth="3" />
+        <path d="M 50 85 Q 80 80 90 95 Q 70 110 50 105" fill="none" stroke="#68A34F" strokeWidth="3" />
+        
+        {/* Large broad lobed leaves */}
+        <path d="M 25 80 C 15 70, 20 90, 10 85 C 10 95, 25 95, 25 80 Z" fill="#4C8A36" />
+        <path d="M 80 85 C 90 75, 85 95, 95 90 C 95 100, 80 100, 80 85 Z" fill="#4C8A36" />
+        <path d="M 35 100 C 25 105, 40 115, 30 115 C 45 120, 45 105, 35 100 Z" fill="#5CA842" />
+        <path d="M 65 100 C 75 105, 60 115, 70 115 C 55 120, 55 105, 65 100 Z" fill="#5CA842" />
+        
+        {/* Main Watermelons */}
+        <g transform="translate(50, 75)">
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujGrad)" />
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujStripe)" />
+          <path d="M -18 0 Q -22 0 -22 4" fill="none" stroke="#68A34F" strokeWidth="1.5" />
+        </g>
+
+        <g transform="translate(20, 95) scale(0.6) rotate(30)">
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujGrad)" />
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujStripe)" />
+        </g>
+        
+        <g transform="translate(80, 95) scale(0.7) rotate(-20)">
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujGrad)" />
+          <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#tormujStripe)" />
+        </g>
+
+        {/* Small yellow flowers */}
+        <circle cx="40" cy="98" r="2.5" fill="#F4DE61" />
+        <circle cx="70" cy="85" r="2.5" fill="#F4DE61" />
+
+        {/* Island Base */}
+        <path d="M 20 85 Q 50 75 80 85 Q 90 95 50 100 Q 10 95 20 85 Z" fill="#755B49" style={{ mixBlendMode: 'multiply' }} opacity="0.4" />
+      </g>
+    </svg>
+  ),
+  'Melon / Bangi': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bangiGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#FFF2B8" />
+          <stop offset="60%" stopColor="#EDDB91" />
+          <stop offset="100%" stopColor="#CCA941" />
+        </radialGradient>
+        <pattern id="bangiNet" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M 0 0 L 6 0 M 0 6 L 0 0" stroke="#CCA941" strokeWidth="0.5" opacity="0.6" />
+        </pattern>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Trailing Vines over ground/pot border */}
+        <path d="M 50 85 Q 30 70 15 85 Q 25 105 50 95" fill="none" stroke="#75A83E" strokeWidth="3" />
+        <path d="M 50 85 Q 70 70 85 85 Q 75 105 50 95" fill="none" stroke="#75A83E" strokeWidth="3" />
+        
+        {/* Soft rounded leaves */}
+        <circle cx="25" cy="75" r="8" fill="#88C458" />
+        <circle cx="75" cy="75" r="8" fill="#88C458" />
+        <circle cx="35" cy="95" r="7" fill="#88C458" />
+        <circle cx="65" cy="95" r="7" fill="#88C458" />
+        
+        {/* Main Bangi Melon */}
+        <g transform="translate(50, 75)">
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiGrad)" />
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiNet)" />
+          {/* Vertical ribbed lines typical of Bangi */}
+          <path d="M -8 -15.5 Q -12 0 -8 15.5 M 8 -15.5 Q 12 0 8 15.5 M 0 -18 L 0 18" stroke="#CCA941" strokeWidth="1" opacity="0.5" />
+          <path d="M 0 -18 Q -4 -22 -8 -20" fill="none" stroke="#75A83E" strokeWidth="1.5" />
+        </g>
+
+        {/* Small Bangi */}
+        <g transform="translate(25, 90) scale(0.6) rotate(-15)">
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiGrad)" />
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiNet)" />
+          <path d="M -8 -15.5 Q -12 0 -8 15.5 M 8 -15.5 Q 12 0 8 15.5 M 0 -18 L 0 18" stroke="#CCA941" strokeWidth="1" opacity="0.5" />
+        </g>
+
+        <g transform="translate(70, 95) scale(0.5) rotate(25)">
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiGrad)" />
+          <ellipse cx="0" cy="0" rx="16" ry="18" fill="url(#bangiNet)" />
+          <path d="M -8 -15.5 Q -12 0 -8 15.5 M 8 -15.5 Q 12 0 8 15.5 M 0 -18 L 0 18" stroke="#CCA941" strokeWidth="1" opacity="0.5" />
+        </g>
+
+        {/* Island Base */}
+        <path d="M 20 85 Q 50 75 80 85 Q 90 95 50 100 Q 10 95 20 85 Z" fill="#7A6855" style={{ mixBlendMode: 'multiply' }} opacity="0.4" />
+      </g>
+    </svg>
+  ),
+  'Tamarind / Tetul': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="tetulGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#A37C52" />
+          <stop offset="100%" stopColor="#6E4C2A" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Fine pinnate-like airy canopy */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#6A9E4D" />
+        
+        {/* Sub-clusters adding texture */}
+        <circle cx="35" cy="30" r="12" fill="#80B55E" />
+        <circle cx="65" cy="35" r="14" fill="#80B55E" />
+        <circle cx="50" cy="25" r="15" fill="#80B55E" />
+        <circle cx="30" cy="60" r="10" fill="#80B55E" />
+        <circle cx="70" cy="65" r="11" fill="#80B55E" />
+        <circle cx="50" cy="70" r="13" fill="#80B55E" />
+
+        {/* Thin branching trunk */}
+        <path d="M 47 100 L 47 65 M 47 65 L 35 55 M 47 65 L 60 50 M 53 100 L 53 65" fill="none" stroke="#665343" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Tamarind Pods (curved brown bumpy strings) hanging down */}
+        <g fill="url(#tetulGrad)" stroke="#4A3118" strokeWidth="0.5">
+          {/* Pod 1 */}
+          <path d="M 30 55 C 30 60, 25 65, 28 68 C 30 70, 26 73, 28 75 C 30 77, 28 80, 30 82 C 32 80, 31 77, 33 75 C 31 73, 34 70, 32 68 C 34 65, 30 60, 30 55 Z" />
+          <path d="M 31 55 v -5" stroke="#4A3118" fill="none" />
+          
+          {/* Pod 2 */}
+          <path d="M 45 45 C 47 50, 42 55, 45 58 C 47 61, 44 64, 46 66 C 45 68, 47 70, 45 72 C 43 70, 44 68, 43 66 C 44 64, 42 61, 43 58 C 42 55, 47 50, 45 45 Z" />
+          
+          {/* Pod 3 */}
+          <path d="M 70 50 C 68 55, 73 60, 71 63 C 69 66, 73 69, 71 72 C 69 74, 72 77, 70 79 C 68 77, 69 74, 68 72 C 69 69, 67 66, 68 63 C 67 60, 68 55, 70 50 Z" />
+          
+          {/* Pod 4 */}
+          <path d="M 25 35 C 23 40, 28 45, 26 48 C 24 51, 27 54, 25 56 C 23 54, 25 51, 23 48 C 24 45, 23 40, 25 35 Z" />
+          
+          {/* Pod 5 */}
+          <path d="M 60 70 C 58 75, 62 80, 60 83 C 58 86, 61 89, 59 92 C 57 89, 59 86, 57 83 C 58 80, 58 75, 60 70 Z" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#806C59" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#99836E" />
+      </g>
+    </svg>
+  ),
+  'Indian Olive / Jolpai': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="jolpaiGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#AEE06C" />
+          <stop offset="70%" stopColor="#75A63C" />
+          <stop offset="100%" stopColor="#4A7022" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft medium canopy */}
+        <path d="M 50 15 C 80 15, 90 35, 75 60 C 80 80, 60 85, 50 85 C 40 85, 20 80, 25 60 C 10 35, 20 15, 50 15 Z" fill="#5F8C43" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#74A355" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#6E625A" />
+        
+        {/* Jolpai Olives - Smooth light green ovals */}
+        <g fill="url(#jolpaiGrad)" stroke="#4A7022" strokeWidth="1">
+          <ellipse cx="35" cy="45" rx="3.5" ry="5.5" transform="rotate(15 35 45)" />
+          <ellipse cx="38" cy="48" rx="3.5" ry="5.5" transform="rotate(-15 38 48)" />
+          
+          <ellipse cx="65" cy="40" rx="3.5" ry="5.5" transform="rotate(25 65 40)" />
+          <ellipse cx="68" cy="44" rx="3.5" ry="5.5" transform="rotate(-10 68 44)" />
+          
+          <ellipse cx="50" cy="55" rx="3.5" ry="5.5" transform="rotate(5 50 55)" />
+          <ellipse cx="54" cy="58" rx="3.5" ry="5.5" transform="rotate(-25 54 58)" />
+          
+          <ellipse cx="28" cy="65" rx="3.5" ry="5.5" transform="rotate(35 28 65)" />
+          <ellipse cx="72" cy="60" rx="3.5" ry="5.5" transform="rotate(-30 72 60)" />
+          
+          <ellipse cx="45" cy="35" rx="3.5" ry="5.5" transform="rotate(20 45 35)" />
+        </g>
+        
+        {/* Tiny stems linking them */}
+        <g stroke="#375218" strokeWidth="0.5">
+           <path d="M 36.5 40 L 35 45 M 36.5 40 L 38 48" />
+           <path d="M 66 35 L 65 40 M 66 35 L 68 44" />
+           <path d="M 52 50 L 50 55 M 52 50 L 54 58" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#5F6D6E" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#75898A" />
+      </g>
+    </svg>
+  ),
+  'Burmese Grape / Lotkon': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="lotkonGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FFF2A8" />
+          <stop offset="70%" stopColor="#E2C44F" />
+          <stop offset="100%" stopColor="#BA9724" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Rounded canopy */}
+        <path d="M 50 10 C 80 15, 90 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 10 35, 20 15, 50 10 Z" fill="#3B6B37" />
+        
+        {/* Distinctive central trunk and internal branches where Lotkon grows */}
+        <path d="M 50 100 L 50 40 M 40 50 L 50 65 M 60 45 L 50 60" fill="none" stroke="#614B3A" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Lotkon Clusters (growing directly on trunk and large branches) */}
+        {/* Cluster 1: Main trunk middle */}
+        <g fill="url(#lotkonGrad)" stroke="#8A7220" strokeWidth="0.5">
+          <circle cx="47" cy="55" r="4.5" />
+          <circle cx="53" cy="53" r="4" />
+          <circle cx="50" cy="58" r="4" />
+          <circle cx="45" cy="62" r="4.5" />
+          <circle cx="52" cy="64" r="4" />
+          <circle cx="49" cy="50" r="4.5" />
+        </g>
+        
+        {/* Cluster 2: Left branch */}
+        <g fill="url(#lotkonGrad)" stroke="#8A7220" strokeWidth="0.5">
+          <circle cx="42" cy="48" r="4" />
+          <circle cx="38" cy="52" r="4.5" />
+          <circle cx="44" cy="54" r="4" />
+        </g>
+        
+        {/* Cluster 3: Right branch */}
+        <g fill="url(#lotkonGrad)" stroke="#8A7220" strokeWidth="0.5">
+          <circle cx="58" cy="45" r="4" />
+          <circle cx="55" cy="48" r="4" />
+          <circle cx="60" cy="50" r="4.5" />
+          <circle cx="63" cy="43" r="4" />
+        </g>
+
+        {/* Cluster 4: Lower trunk */}
+        <g fill="url(#lotkonGrad)" stroke="#8A7220" strokeWidth="0.5">
+          <circle cx="48" cy="70" r="4" />
+          <circle cx="52" cy="72" r="4.5" />
+          <circle cx="49" cy="76" r="4" />
+        </g>
+
+        {/* Front Leaves covering partially */}
+        <path d="M 30 70 C 40 60, 45 75, 30 80 Z" fill="#4B8246" />
+        <path d="M 70 65 C 60 55, 55 70, 70 75 Z" fill="#4B8246" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#8A6E58" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#A38873" />
+      </g>
+    </svg>
+  ),
+  'Elephant Apple / Chalta': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="chaltaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#C4DE6E" />
+          <stop offset="70%" stopColor="#9AB547" />
+          <stop offset="100%" stopColor="#6C822C" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft, somewhat sparse canopy with very large leaves */}
+        <path d="M 45 10 C 80 10, 95 30, 85 55 C 90 75, 70 85, 50 85 C 30 85, 10 75, 15 55 C 5 30, 20 10, 45 10 Z" fill="#6E8F35" />
+        
+        {/* Large distinctive ridged leaves */}
+        <path d="M 30 25 C 40 15, 50 25, 45 35 C 35 45, 25 35, 30 25 Z" fill="#87AC45" />
+        <path d="M 65 30 C 75 20, 85 30, 80 40 C 70 50, 60 40, 65 30 Z" fill="#87AC45" />
+        <path d="M 25 55 C 35 45, 45 55, 40 65 C 30 75, 20 65, 25 55 Z" fill="#87AC45" />
+        <path d="M 75 60 C 85 50, 95 60, 90 70 C 80 80, 70 70, 75 60 Z" fill="#87AC45" />
+        <path d="M 50 45 C 60 35, 70 45, 65 55 C 55 65, 45 55, 50 45 Z" fill="#87AC45" />
+
+        {/* Trunk */}
+        <path d="M 47 100 L 47 65 L 53 65 L 53 100 Z" fill="#756A5C" />
+
+        {/* Elephant Apples (Chalta) - large layered scaly/sepal form */}
+        <g transform="translate(35, 45)">
+          <circle cx="0" cy="0" r="8" fill="url(#chaltaGrad)" />
+          {/* Overlapping thick sepals forming the fruit */}
+          <path d="M -8 0 C -8 6, -3 9, 0 8 C -3 5, -4 0, -8 0 Z" fill="#819C34" />
+          <path d="M 8 0 C 8 6, 3 9, 0 8 C 3 5, 4 0, 8 0 Z" fill="#A8C452" />
+          <path d="M -5 -6 C -2 -9, 3 -7, 4 -4 C 1 -5, -2 -3, -5 -6 Z" fill="#C0E055" />
+          <path d="M -4 4 C 0 9, 5 7, 6 4 C 3 6, 0 5, -4 4 Z" fill="#819C34" />
+        </g>
+        
+        <g transform="translate(68, 55) scale(0.9)">
+          <circle cx="0" cy="0" r="8" fill="url(#chaltaGrad)" />
+          <path d="M -8 0 C -8 6, -3 9, 0 8 C -3 5, -4 0, -8 0 Z" fill="#819C34" />
+          <path d="M 8 0 C 8 6, 3 9, 0 8 C 3 5, 4 0, 8 0 Z" fill="#A8C452" />
+          <path d="M -5 -6 C -2 -9, 3 -7, 4 -4 C 1 -5, -2 -3, -5 -6 Z" fill="#C0E055" />
+          <path d="M -4 4 C 0 9, 5 7, 6 4 C 3 6, 0 5, -4 4 Z" fill="#819C34" />
+        </g>
+        
+        <g transform="translate(50, 70) scale(0.8)">
+          <circle cx="0" cy="0" r="8" fill="url(#chaltaGrad)" />
+          <path d="M -8 0 C -8 6, -3 9, 0 8 C -3 5, -4 0, -8 0 Z" fill="#819C34" />
+          <path d="M 8 0 C 8 6, 3 9, 0 8 C 3 5, 4 0, 8 0 Z" fill="#A8C452" />
+          <path d="M -5 -6 C -2 -9, 3 -7, 4 -4 C 1 -5, -2 -3, -5 -6 Z" fill="#C0E055" />
+          <path d="M -4 4 C 0 9, 5 7, 6 4 C 3 6, 0 5, -4 4 Z" fill="#819C34" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#5A665A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#6F7D6F" />
+      </g>
+    </svg>
+  ),
+  'Monkey Jack / Deua': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="deuaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#E5DA79" />
+          <stop offset="70%" stopColor="#C1AC4D" />
+          <stop offset="100%" stopColor="#8C7929" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Coarse large leaves canopy */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#527038" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#6A8F4A" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#695546" />
+
+        {/* Monkey Jack / Deua Fruits (yellowish/brownish irregular lobed fruit) */}
+        <g transform="translate(35, 50)">
+          <path d="M 0 -7 C 5 -8, 8 -3, 6 2 C 7 6, 3 8, 0 7 C -5 8, -8 4, -7 0 C -8 -4, -5 -8, 0 -7 Z" fill="url(#deuaGrad)" stroke="#7A6A23" strokeWidth="1" />
+          <circle cx="-2" cy="-2" r="1" fill="#8C7929" opacity="0.6"/>
+          <circle cx="2" cy="1" r="1.5" fill="#8C7929" opacity="0.6"/>
+          <circle cx="-1" cy="3" r="1" fill="#8C7929" opacity="0.6"/>
+        </g>
+        
+        <g transform="translate(68, 45) scale(0.9) rotate(30)">
+          <path d="M 0 -7 C 5 -8, 8 -3, 6 2 C 7 6, 3 8, 0 7 C -5 8, -8 4, -7 0 C -8 -4, -5 -8, 0 -7 Z" fill="url(#deuaGrad)" stroke="#7A6A23" strokeWidth="1" />
+          <circle cx="-2" cy="-2" r="1" fill="#8C7929" opacity="0.6"/>
+          <circle cx="2" cy="1" r="1.5" fill="#8C7929" opacity="0.6"/>
+          <circle cx="-1" cy="3" r="1" fill="#8C7929" opacity="0.6"/>
+        </g>
+        
+        <g transform="translate(50, 65) scale(1.1) rotate(-15)">
+          <path d="M 0 -7 C 5 -8, 8 -3, 6 2 C 7 6, 3 8, 0 7 C -5 8, -8 4, -7 0 C -8 -4, -5 -8, 0 -7 Z" fill="url(#deuaGrad)" stroke="#7A6A23" strokeWidth="1" />
+          <circle cx="-2" cy="-2" r="1" fill="#8C7929" opacity="0.6"/>
+          <circle cx="2" cy="1" r="1.5" fill="#8C7929" opacity="0.6"/>
+          <circle cx="-1" cy="3" r="1" fill="#8C7929" opacity="0.6"/>
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#696955" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#828269" />
+      </g>
+    </svg>
+  ),
+  'Rose Apple / Golap Jam': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="golapJamGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FFF0F5" />
+          <stop offset="60%" stopColor="#EAC2E4" />
+          <stop offset="100%" stopColor="#BD85B5" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Canopy */}
+        <path d="M 50 15 C 80 15, 90 35, 75 60 C 80 80, 60 85, 50 85 C 40 85, 20 80, 25 60 C 10 35, 20 15, 50 15 Z" fill="#648A45" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#7DB058" />
+
+        {/* Trunk */}
+        <path d="M 47 100 L 47 65 L 53 65 L 53 100 Z" fill="#7D6D65" />
+
+        {/* Rose Apples (Roundish light pink with a distinct calyx depression) */}
+        <g transform="translate(35, 45)">
+          <circle cx="0" cy="0" r="5.5" fill="url(#golapJamGrad)" />
+          {/* Calyx at bottom */}
+          <path d="M -1 5 L 0 4 L 1 5 Z" fill="#9E6496" />
+        </g>
+        
+        <g transform="translate(65, 40) scale(1.1)">
+          <circle cx="0" cy="0" r="5.5" fill="url(#golapJamGrad)" />
+          <path d="M -1 5 L 0 4 L 1 5 Z" fill="#9E6496" />
+        </g>
+        
+        <g transform="translate(50, 65)">
+          <circle cx="0" cy="0" r="5.5" fill="url(#golapJamGrad)" />
+          <path d="M -1 5 L 0 4 L 1 5 Z" fill="#9E6496" />
+        </g>
+        
+        <g transform="translate(25, 60) scale(0.9)">
+          <circle cx="0" cy="0" r="5.5" fill="url(#golapJamGrad)" />
+          <path d="M -1 5 L 0 4 L 1 5 Z" fill="#9E6496" />
+        </g>
+        
+        <g transform="translate(75, 60) scale(1)">
+          <circle cx="0" cy="0" r="5.5" fill="url(#golapJamGrad)" />
+          <path d="M -1 5 L 0 4 L 1 5 Z" fill="#9E6496" />
+        </g>
+
+        {/* Light pink blossoms */}
+        <circle cx="45" cy="35" r="3" fill="#FFE5F6" />
+        <circle cx="55" cy="50" r="2.5" fill="#FFE5F6" />
+        <circle cx="35" cy="70" r="3" fill="#FFE5F6" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#7D6F72" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#918184" />
+      </g>
+    </svg>
+  ),
+  'Sapodilla / Sofeda': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sofedaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#D4B494" />
+          <stop offset="70%" stopColor="#B5926B" />
+          <stop offset="100%" stopColor="#876847" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Canopy */}
+        <path d="M 50 15 C 80 15, 90 35, 75 60 C 80 80, 60 85, 50 85 C 40 85, 20 80, 25 60 C 10 35, 20 15, 50 15 Z" fill="#6A9641" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#7CBD4B" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#6E625A" />
+
+        {/* Sofeda Fruits (Pale brownish/sandy round-oval) */}
+        <g transform="translate(35, 45)">
+          <ellipse cx="0" cy="0" rx="5" ry="6" fill="url(#sofedaGrad)" />
+          {/* Stem/Calyx bit */}
+          <path d="M 0 -6 L 0 -8" stroke="#5C4D3C" strokeWidth="1" />
+        </g>
+        
+        <g transform="translate(65, 40) scale(1.1)">
+          <ellipse cx="0" cy="0" rx="5" ry="6" fill="url(#sofedaGrad)" />
+          <path d="M 0 -6 L 0 -8" stroke="#5C4D3C" strokeWidth="1" />
+        </g>
+        
+        <g transform="translate(50, 65)">
+          <ellipse cx="0" cy="0" rx="5" ry="6" fill="url(#sofedaGrad)" />
+          <path d="M 0 -6 L 0 -8" stroke="#5C4D3C" strokeWidth="1" />
+        </g>
+
+        <g transform="translate(25, 60) scale(0.9)">
+          <ellipse cx="0" cy="0" rx="5" ry="6" fill="url(#sofedaGrad)" />
+          <path d="M 0 -6 L 0 -8" stroke="#5C4D3C" strokeWidth="1" />
+        </g>
+        
+        <g transform="translate(75, 60) scale(0.95)">
+          <ellipse cx="0" cy="0" rx="5" ry="6" fill="url(#sofedaGrad)" />
+          <path d="M 0 -6 L 0 -8" stroke="#5C4D3C" strokeWidth="1" />
+        </g>
+
+        {/* Scruffy Texture Dots */}
+        <g fill="#A38161" opacity="0.6">
+          <circle cx="34" cy="46" r="0.5"/><circle cx="36" cy="44" r="0.5"/>
+          <circle cx="64" cy="41" r="0.5"/><circle cx="66" cy="39" r="0.5"/>
+          <circle cx="49" cy="66" r="0.5"/><circle cx="51" cy="64" r="0.5"/>
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#695C55" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#827269" />
+      </g>
+    </svg>
+  ),
+  'Pomelo / Batabi Lebu': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="pomeloGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#D8F097" />
+          <stop offset="70%" stopColor="#B1D164" />
+          <stop offset="100%" stopColor="#82A62C" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Broad Citrus Canopy */}
+        <path d="M 50 10 C 85 10, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 15 10, 50 10 Z" fill="#4B7A27" />
+        <path d="M 50 20 C 75 15, 85 30, 75 50 C 75 65, 60 70, 50 70 C 40 70, 25 65, 25 50 C 20 30, 30 15, 50 20 Z" fill="#669C36" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#75675A" />
+
+        {/* Large Round Light Green/Yellow Pomelos */}
+        <g transform="translate(35, 50)">
+           <circle cx="0" cy="0" r="9" fill="url(#pomeloGrad)" />
+           {/* Slight citrus dimple/texture at bottom */}
+           <path d="M -2 7 Q 0 8 2 7" fill="none" stroke="#82A62C" strokeWidth="1" opacity="0.6" />
+        </g>
+
+        <g transform="translate(68, 45) scale(0.9)">
+           <circle cx="0" cy="0" r="9" fill="url(#pomeloGrad)" />
+           <path d="M -2 7 Q 0 8 2 7" fill="none" stroke="#82A62C" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(25, 65) scale(0.8)">
+           <circle cx="0" cy="0" r="9" fill="url(#pomeloGrad)" />
+           <path d="M -2 7 Q 0 8 2 7" fill="none" stroke="#82A62C" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(50, 65) scale(1.1)">
+           <circle cx="0" cy="0" r="9" fill="url(#pomeloGrad)" />
+           <path d="M -2 7 Q 0 8 2 7" fill="none" stroke="#82A62C" strokeWidth="1" opacity="0.6" />
+        </g>
+
+        {/* Leaves overlapping some fruits slightly */}
+        <path d="M 30 45 C 35 40, 42 45, 38 52 C 32 50, 30 48, 30 45 Z" fill="#669C36" />
+        <path d="M 45 60 C 50 55, 57 60, 53 67 C 47 65, 45 63, 45 60 Z" fill="#669C36" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#64736E" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#7D8F88" />
+      </g>
+    </svg>
+  ),
+  'Malta / Malta': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="maltaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FFD87A" />
+          <stop offset="70%" stopColor="#EDB941" />
+          <stop offset="100%" stopColor="#C49321" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Dense rounded canopy */}
+        <path d="M 50 15 C 75 15, 90 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 10 35, 25 15, 50 15 Z" fill="#4B823E" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#60A14E" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#756A5B" />
+
+        {/* Malta Oranges (Yellow-Orange, slightly oval) */}
+        <g transform="translate(35, 45) rotate(10)">
+           <circle cx="0" cy="0" r="6" fill="url(#maltaGrad)" />
+           {/* Typical circular navel-like indention mapping */}
+           <path d="M -1 5 Q 0 6 1 5" fill="none" stroke="#C49321" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(65, 40) rotate(-15) scale(0.9)">
+           <circle cx="0" cy="0" r="6" fill="url(#maltaGrad)" />
+           <path d="M -1 5 Q 0 6 1 5" fill="none" stroke="#C49321" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(50, 65) rotate(5)">
+           <circle cx="0" cy="0" r="6.5" fill="url(#maltaGrad)" />
+           <path d="M -1 5 Q 0 6 1 5" fill="none" stroke="#C49321" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(25, 60) rotate(-20) scale(0.8)">
+           <circle cx="0" cy="0" r="6" fill="url(#maltaGrad)" />
+           <path d="M -1 5 Q 0 6 1 5" fill="none" stroke="#C49321" strokeWidth="1" opacity="0.6" />
+        </g>
+        
+        <g transform="translate(75, 60) rotate(25) scale(0.9)">
+           <circle cx="0" cy="0" r="6" fill="url(#maltaGrad)" />
+           <path d="M -1 5 Q 0 6 1 5" fill="none" stroke="#C49321" strokeWidth="1" opacity="0.6" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#916454" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#A87766" />
+      </g>
+    </svg>
+  ),
+  'Dragon Fruit / Dragon Fol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="dragonGrad" cx="40%" cy="40%" r="60%">
+          <stop offset="0%" stopColor="#FA5C93" />
+          <stop offset="70%" stopColor="#DE4377" />
+          <stop offset="100%" stopColor="#A62050" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Cactus segments (slender, wavy, green) */}
+        <path d="M 50 100 Q 40 60 55 20 Q 60 10 50 5 Q 35 30 45 70 Q 50 90 50 100" fill="#69943C" />
+        <path d="M 48 85 Q 30 65 25 35 Q 23 25 28 20 Q 40 40 42 70" fill="#52782A" />
+        <path d="M 52 80 Q 75 60 80 40 Q 82 30 78 25 Q 65 45 55 75" fill="#7DB046" />
+        <path d="M 55 45 Q 85 45 90 25 Q 92 18 85 15 Q 75 35 55 40" fill="#52782A" />
+        <path d="M 45 55 Q 15 50 10 30 Q 8 20 15 18 Q 30 35 48 45" fill="#69943C" />
+
+        {/* Dragon Fruits (Vibrant Pink/Magenta with Green Scales) */}
+        {/* Right fruit */}
+        <g transform="translate(75, 45) scale(0.9)">
+          <ellipse cx="0" cy="0" rx="9" ry="12" fill="url(#dragonGrad)" />
+          {/* Scales (Greenish-yellow tipped) */}
+          <path d="M -8 2 Q -12 0 -12 -4 Q -10 -2 -8 0" fill="#9CC240" />
+          <path d="M 8 2 Q 12 0 12 -4 Q 10 -2 8 0" fill="#9CC240" />
+          <path d="M -5 -4 Q -8 -6 -8 -10 Q -6 -8 -5 -6" fill="#9CC240" />
+          <path d="M 5 -4 Q 8 -6 8 -10 Q 6 -8 5 -6" fill="#9CC240" />
+          <path d="M 0 -8 Q 0 -12 -3 -16 Q 2 -14 0 -10" fill="#9CC240" />
+          <path d="M 0 6 Q 0 12 3 16 Q -2 14 0 10" fill="#9CC240" />
+          <path d="M -6 8 Q -10 10 -10 14 Q -8 12 -6 10" fill="#9CC240" />
+          <path d="M 6 8 Q 10 10 10 14 Q 8 12 6 10" fill="#9CC240" />
+        </g>
+        
+        {/* Left fruit */}
+        <g transform="translate(25, 40) scale(1) rotate(-15)">
+          <ellipse cx="0" cy="0" rx="9" ry="12" fill="url(#dragonGrad)" />
+          {/* Scales */}
+          <path d="M -8 2 Q -12 0 -12 -4 Q -10 -2 -8 0" fill="#9CC240" />
+          <path d="M 8 2 Q 12 0 12 -4 Q 10 -2 8 0" fill="#9CC240" />
+          <path d="M -5 -4 Q -8 -6 -8 -10 Q -6 -8 -5 -6" fill="#9CC240" />
+          <path d="M 5 -4 Q 8 -6 8 -10 Q 6 -8 5 -6" fill="#9CC240" />
+          <path d="M 0 -8 Q 0 -12 -3 -16 Q 2 -14 0 -10" fill="#9CC240" />
+          <path d="M 0 6 Q 0 12 3 16 Q -2 14 0 10" fill="#9CC240" />
+          <path d="M -6 8 Q -10 10 -10 14 Q -8 12 -6 10" fill="#9CC240" />
+          <path d="M 6 8 Q 10 10 10 14 Q 8 12 6 10" fill="#9CC240" />
+        </g>
+        
+        {/* Center top fruit */}
+        <g transform="translate(52, 20) scale(0.8) rotate(20)">
+          <ellipse cx="0" cy="0" rx="9" ry="12" fill="url(#dragonGrad)" />
+          {/* Scales */}
+          <path d="M -8 2 Q -12 0 -12 -4 Q -10 -2 -8 0" fill="#9CC240" />
+          <path d="M 8 2 Q 12 0 12 -4 Q 10 -2 8 0" fill="#9CC240" />
+          <path d="M -5 -4 Q -8 -6 -8 -10 Q -6 -8 -5 -6" fill="#9CC240" />
+          <path d="M 5 -4 Q 8 -6 8 -10 Q 6 -8 5 -6" fill="#9CC240" />
+          <path d="M 0 -8 Q 0 -12 -3 -16 Q 2 -14 0 -10" fill="#9CC240" />
+        </g>
+
+        {/* Cacti spines/thorns */}
+        <g stroke="#C2D681" strokeWidth="0.5" fill="none">
+           <path d="M 48 50 L 46 48 M 48 50 L 45 52 M 48 50 L 49 47" />
+           <path d="M 52 70 L 55 68 M 52 70 L 53 72 M 52 70 L 50 71" />
+           <path d="M 33 45 L 30 43 M 33 45 L 31 47 M 33 45 L 35 44" />
+           <path d="M 70 35 L 72 33 M 70 35 L 71 38 M 70 35 L 68 34" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#5F6D6E" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#75898A" />
+      </g>
+    </svg>
+  ),
+  'Rambutan / Rambutan': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="rambutanGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FA7376" />
+          <stop offset="60%" stopColor="#E24F53" />
+          <stop offset="100%" stopColor="#A82329" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Canopy */}
+        <path d="M 50 10 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 10 Z" fill="#366B33" />
+        
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#806859" />
+
+        {/* Clustered Rambutans (Red with wiry hair outcroppings) */}
+        <g stroke="#91E655" strokeWidth="0.5" fill="none" opacity="0.8">
+           {/* Hairs for cluster 1 (Center) */}
+           <path d="M 50 40 Q 45 35 46 32 M 50 40 Q 55 35 54 32 M 50 40 Q 42 40 40 38 M 50 40 Q 58 40 60 38 M 50 40 Q 45 45 46 48 M 50 40 Q 55 45 54 48" />
+           <path d="M 56 45 Q 60 40 62 40 M 56 45 Q 60 50 62 50 M 56 45 Q 52 50 52 52" />
+           <path d="M 44 45 Q 40 40 38 40 M 44 45 Q 40 50 38 50 M 44 45 Q 48 50 48 52" />
+           
+           <path d="M 35 60 Q 30 55 28 55 M 35 60 Q 30 65 28 65 M 35 60 Q 40 55 42 55 M 35 60 Q 40 65 42 65" />
+           <path d="M 65 60 Q 70 55 72 55 M 65 60 Q 70 65 72 65 M 65 60 Q 60 55 58 55 M 65 60 Q 60 65 58 65" />
+        </g>
+        
+        <g fill="url(#rambutanGrad)">
+          <circle cx="50" cy="40" r="5" />
+          <circle cx="56" cy="45" r="5" />
+          <circle cx="44" cy="45" r="5" />
+          <circle cx="50" cy="49" r="5" />
+          
+          <circle cx="35" cy="60" r="5" />
+          <circle cx="30" cy="64" r="5" />
+          <circle cx="40" cy="64" r="5" />
+          
+          <circle cx="65" cy="60" r="5" />
+          <circle cx="70" cy="64" r="5" />
+          <circle cx="60" cy="64" r="5" />
+        </g>
+
+        {/* Rambutan wire hairs overlaid */}
+        <g stroke="#9CCB48" strokeWidth="0.5" fill="none" opacity="0.9">
+           <path d="M 50 40 Q 48 38 48 36 M 50 40 Q 52 38 52 36" />
+           <path d="M 56 45 Q 58 43 59 42 M 56 45 Q 54 48 54 50" />
+           <path d="M 44 45 Q 42 43 41 42 M 44 45 Q 46 48 46 50" />
+           <path d="M 50 49 Q 52 52 53 53 M 50 49 Q 48 52 47 53" />
+           
+           <path d="M 35 60 Q 35 57 36 56 M 35 60 Q 35 63 36 64" />
+           <path d="M 65 60 Q 65 57 64 56 M 65 60 Q 65 63 64 64" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#806253" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#997765" />
+      </g>
+    </svg>
+  ),
+  'Longan / Ashfol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="longanGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#DFCDA3" />
+          <stop offset="60%" stopColor="#CBAA77" />
+          <stop offset="100%" stopColor="#A3824E" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Shrubby Canopy */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#6A9941" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#82BA53" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#A89F95" />
+        <path d="M 46 75 L 54 75 M 46 85 L 54 85" stroke="#7D756D" strokeWidth="1" />
+
+        {/* Grape-like dense clusters of Longans (Tans/Light browns) */}
+        {/* Main Cluster */}
+        <g fill="url(#longanGrad)" stroke="#7E5C2A" strokeWidth="0.5">
+          <circle cx="50" cy="40" r="4" />
+          <circle cx="45" cy="42" r="4" />
+          <circle cx="55" cy="42" r="4" />
+          <circle cx="48" cy="46" r="4" />
+          <circle cx="52" cy="46" r="4" />
+          <circle cx="50" cy="50" r="4" />
+        </g>
+        
+        {/* Left Cluster */}
+        <g fill="url(#longanGrad)" stroke="#7E5C2A" strokeWidth="0.5">
+          <circle cx="28" cy="55" r="4" />
+          <circle cx="24" cy="58" r="4" />
+          <circle cx="32" cy="58" r="4" />
+          <circle cx="28" cy="62" r="4" />
+        </g>
+        
+        {/* Right Cluster */}
+        <g fill="url(#longanGrad)" stroke="#7E5C2A" strokeWidth="0.5">
+          <circle cx="72" cy="50" r="4" />
+          <circle cx="68" cy="54" r="4" />
+          <circle cx="76" cy="54" r="4" />
+          <circle cx="72" cy="58" r="4" />
+        </g>
+
+        {/* Stems to clusters */}
+        <g stroke="#91714B" strokeWidth="1">
+          <path d="M 50 30 L 50 36 M 50 34 L 45 38 M 50 34 L 55 38" />
+          <path d="M 28 48 L 28 51" />
+          <path d="M 72 43 L 72 46" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6DA698" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#88C7B8" />
+      </g>
+    </svg>
+  ),
+  'Grape / Angur': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="angurGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#CA83D9" />
+          <stop offset="60%" stopColor="#8B4B9A" />
+          <stop offset="100%" stopColor="#4D2157" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Vine trellis-like structure instead of standard trunk */}
+        <path d="M 40 100 L 40 30 M 60 100 L 60 30 M 30 50 L 70 50 M 30 70 L 70 70 M 20 30 L 80 30" stroke="#7A685D" strokeWidth="2" strokeLinecap="round" />
+
+        {/* Vine leaves winding around trellis */}
+        <path d="M 40 100 Q 20 80 40 60 Q 60 40 40 20" fill="none" stroke="#68A34F" strokeWidth="2.5" />
+        <path d="M 60 100 Q 80 80 60 60 Q 40 40 60 20" fill="none" stroke="#68A34F" strokeWidth="2.5" />
+        
+        {/* Vine Maple-like leaves */}
+        <g fill="#4B8A34">
+          <path d="M 40 60 L 30 55 L 25 65 Z" />
+          <path d="M 60 60 L 70 55 L 75 65 Z" />
+          <path d="M 40 40 L 30 35 L 25 45 Z" />
+          <path d="M 60 40 L 70 35 L 75 45 Z" />
+          <path d="M 50 20 L 40 10 L 60 10 Z" />
+        </g>
+        <g fill="#61AE46">
+          <path d="M 40 60 L 35 50 L 45 50 Z" />
+          <path d="M 60 60 L 55 50 L 65 50 Z" />
+          <path d="M 40 40 L 35 30 L 45 30 Z" />
+          <path d="M 60 40 L 55 30 L 65 30 Z" />
+        </g>
+
+        {/* Grape Bunches (Oval/round deep purples cascading downwards) */}
+        {/* Center Bunch */}
+        <g fill="url(#angurGrad)" stroke="#472152" strokeWidth="0.5">
+          {/* Stem */}
+          <path d="M 50 20 L 50 25" stroke="#7A685D" strokeWidth="1" />
+          {/* Top layer */}
+          <ellipse cx="46" cy="28" rx="3.5" ry="4" /><ellipse cx="54" cy="28" rx="3.5" ry="4" /><ellipse cx="50" cy="28" rx="3.5" ry="4" />
+          {/* Middle layer */}
+          <ellipse cx="48" cy="34" rx="3.5" ry="4" /><ellipse cx="52" cy="34" rx="3.5" ry="4" /><ellipse cx="50" cy="31" rx="3.5" ry="4" />
+          {/* Bottom layer */}
+          <ellipse cx="50" cy="38" rx="3.5" ry="4" />
+        </g>
+        
+        {/* Left Bunch */}
+        <g fill="url(#angurGrad)" stroke="#472152" strokeWidth="0.5" transform="translate(-18, 20)">
+          <path d="M 50 20 L 50 25" stroke="#7A685D" strokeWidth="1" />
+          <ellipse cx="46" cy="28" rx="3.5" ry="4" /><ellipse cx="54" cy="28" rx="3.5" ry="4" /><ellipse cx="50" cy="28" rx="3.5" ry="4" />
+          <ellipse cx="48" cy="34" rx="3.5" ry="4" /><ellipse cx="52" cy="34" rx="3.5" ry="4" /><ellipse cx="50" cy="31" rx="3.5" ry="4" />
+          <ellipse cx="50" cy="38" rx="3.5" ry="4" />
+        </g>
+        
+        {/* Right Bunch */}
+        <g fill="url(#angurGrad)" stroke="#472152" strokeWidth="0.5" transform="translate(18, 30)">
+          <path d="M 50 20 L 50 25" stroke="#7A685D" strokeWidth="1" />
+          <ellipse cx="46" cy="28" rx="3.5" ry="4" /><ellipse cx="54" cy="28" rx="3.5" ry="4" /><ellipse cx="50" cy="28" rx="3.5" ry="4" />
+          <ellipse cx="48" cy="34" rx="3.5" ry="4" /><ellipse cx="52" cy="34" rx="3.5" ry="4" /><ellipse cx="50" cy="31" rx="3.5" ry="4" />
+          <ellipse cx="50" cy="38" rx="3.5" ry="4" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 30 95 L 70 95 L 65 115 Q 50 120 35 115 Z" fill="#916A46" />
+        <path d="M 25 85 L 75 85 L 70 95 L 30 95 Z" fill="#A87C54" />
+      </g>
+    </svg>
+  ),
+  'Fig / Dumur': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="dumurGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#9C6684" />
+          <stop offset="70%" stopColor="#673D54" />
+          <stop offset="100%" stopColor="#301A26" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Canopy with distinct lobed fig leaves */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#5A8A4A" />
+        
+        {/* Detailed lobed leaves overlaying canopy edges */}
+        <path d="M 25 40 C 20 30, 30 20, 35 30 C 45 20, 50 35, 40 40 C 45 50, 30 55, 25 40 Z" fill="#6EB057" />
+        <path d="M 75 40 C 80 30, 70 20, 65 30 C 55 20, 50 35, 60 40 C 55 50, 70 55, 75 40 Z" fill="#6EB057" />
+        <path d="M 50 20 C 40 10, 60 10, 50 20 Z" fill="#6EB057" />
+        <path d="M 30 70 C 20 60, 35 55, 40 65 C 45 75, 30 80, 30 70 Z" fill="#6EB057" />
+        <path d="M 70 70 C 80 60, 65 55, 60 65 C 55 75, 70 80, 70 70 Z" fill="#6EB057" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#807D78" />
+
+        {/* Teardrop-shaped Figs directly clustered on branches/trunk intersections */}
+        {/* Left Fig */}
+        <g transform="translate(40, 55)">
+          <path d="M 0 -8 C 5 -8, 8 0, 6 6 C 4 10, -4 10, -6 6 C -8 0, -5 -8, 0 -8 Z" fill="url(#dumurGrad)" stroke="#2E1523" strokeWidth="0.5" />
+          <path d="M -1 9 L 1 9 M 0 8 L 0 10" stroke="#FFD1A6" strokeWidth="0.5" /> {/* Fig ostiole/eye at bottom */}
+        </g>
+        
+        {/* Right Fig */}
+        <g transform="translate(60, 50) rotate(15)">
+          <path d="M 0 -8 C 5 -8, 8 0, 6 6 C 4 10, -4 10, -6 6 C -8 0, -5 -8, 0 -8 Z" fill="url(#dumurGrad)" stroke="#2E1523" strokeWidth="0.5" />
+          <path d="M -1 9 L 1 9 M 0 8 L 0 10" stroke="#FFD1A6" strokeWidth="0.5" />
+        </g>
+        
+        {/* Top Fig */}
+        <g transform="translate(50, 35) rotate(-10) scale(0.9)">
+          <path d="M 0 -8 C 5 -8, 8 0, 6 6 C 4 10, -4 10, -6 6 C -8 0, -5 -8, 0 -8 Z" fill="url(#dumurGrad)" stroke="#2E1523" strokeWidth="0.5" />
+          <path d="M -1 9 L 1 9 M 0 8 L 0 10" stroke="#FFD1A6" strokeWidth="0.5" />
+        </g>
+        
+        {/* Lower Left Fig */}
+        <g transform="translate(32, 65) rotate(-25) scale(0.8)">
+          <path d="M 0 -8 C 5 -8, 8 0, 6 6 C 4 10, -4 10, -6 6 C -8 0, -5 -8, 0 -8 Z" fill="url(#dumurGrad)" stroke="#2E1523" strokeWidth="0.5" />
+          <path d="M -1 9 L 1 9 M 0 8 L 0 10" stroke="#FFD1A6" strokeWidth="0.5" />
+        </g>
+
+        {/* Lower Right Fig */}
+        <g transform="translate(68, 65) rotate(20) scale(0.9)">
+          <path d="M 0 -8 C 5 -8, 8 0, 6 6 C 4 10, -4 10, -6 6 C -8 0, -5 -8, 0 -8 Z" fill="url(#dumurGrad)" stroke="#2E1523" strokeWidth="0.5" />
+          <path d="M -1 9 L 1 9 M 0 8 L 0 10" stroke="#FFD1A6" strokeWidth="0.5" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6E626B" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#877A85" />
+      </g>
+    </svg>
+  ),
+  'Mulberry / Toot Fol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="tootGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#E26194" />
+          <stop offset="60%" stopColor="#C13E78" />
+          <stop offset="100%" stopColor="#801C49" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft Shrubby Canopy */}
+        <path d="M 50 15 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 15 Z" fill="#6A9E41" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#88C458" />
+
+        {/* Stem/Trunk */}
+        <path d="M 47 100 L 47 65 L 53 65 L 53 100 Z" fill="#807567" />
+
+        {/* Long aggregated mulberry clusters */}
+        <g stroke="#91305C" strokeWidth="0.5">
+           {/* Center Cluster */}
+           <g transform="translate(50, 45) scale(0.9)">
+             <path d="M 0 -2 L 0 -8" stroke="#88C458" strokeWidth="1" />
+             <circle cx="-1.5" cy="0" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="2" cy="0" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="0" cy="3" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="-2" cy="5" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="1.5" cy="6" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="0" cy="9" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="-1" cy="11.5" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="1" cy="12" r="2.5" fill="url(#tootGrad)" />
+             <circle cx="0" cy="14" r="2" fill="url(#tootGrad)" />
+           </g>
+           
+           {/* Left Cluster */}
+           <g transform="translate(30, 50) rotate(15) scale(0.8)">
+             <path d="M 0 -2 L 0 -8" stroke="#88C458" strokeWidth="1" />
+             <circle cx="-1.5" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="2" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="3" r="2.5" fill="url(#tootGrad)" /><circle cx="-2" cy="5" r="2.5" fill="url(#tootGrad)" /><circle cx="1.5" cy="6" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="9" r="2.5" fill="url(#tootGrad)" /><circle cx="-1" cy="11.5" r="2.5" fill="url(#tootGrad)" /><circle cx="1" cy="12" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="14" r="2" fill="url(#tootGrad)" />
+           </g>
+           
+           {/* Right Cluster */}
+           <g transform="translate(70, 50) rotate(-15) scale(0.85)">
+             <path d="M 0 -2 L 0 -8" stroke="#88C458" strokeWidth="1" />
+             <circle cx="-1.5" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="2" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="3" r="2.5" fill="url(#tootGrad)" /><circle cx="-2" cy="5" r="2.5" fill="url(#tootGrad)" /><circle cx="1.5" cy="6" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="9" r="2.5" fill="url(#tootGrad)" /><circle cx="-1" cy="11.5" r="2.5" fill="url(#tootGrad)" /><circle cx="1" cy="12" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="14" r="2" fill="url(#tootGrad)" />
+           </g>
+           
+           {/* Lower Cluster */}
+           <g transform="translate(40, 65) rotate(5) scale(0.9)">
+             <path d="M 0 -2 L 0 -8" stroke="#88C458" strokeWidth="1" />
+             <circle cx="-1.5" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="2" cy="0" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="3" r="2.5" fill="url(#tootGrad)" /><circle cx="-2" cy="5" r="2.5" fill="url(#tootGrad)" /><circle cx="1.5" cy="6" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="9" r="2.5" fill="url(#tootGrad)" /><circle cx="-1" cy="11.5" r="2.5" fill="url(#tootGrad)" /><circle cx="1" cy="12" r="2.5" fill="url(#tootGrad)" /><circle cx="0" cy="14" r="2" fill="url(#tootGrad)" />
+           </g>
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6B5161" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#826677" />
+      </g>
+    </svg>
+  ),
+  'Bengal Currant / Karamcha': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="karamchaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FFA6B8" />
+          <stop offset="60%" stopColor="#D63A5C" />
+          <stop offset="100%" stopColor="#8C132D" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Bushy canopy */}
+        <path d="M 50 10 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 10 Z" fill="#427845" />
+        
+        {/* Small spiky branch structures visible */}
+        <path d="M 48 100 L 48 65 L 52 65 L 52 100 Z" fill="#695B52" />
+        <path d="M 50 80 L 40 70 M 50 70 L 60 60 M 50 50 L 35 45 M 50 40 L 65 35" stroke="#695B52" strokeWidth="2" strokeLinecap="round" />
+        <path d="M 40 70 L 35 75 M 60 60 L 65 55 M 35 45 L 30 40 M 65 35 L 70 30" stroke="#695B52" strokeWidth="0.5" /> {/* Spines */}
+
+        {/* Scatted bright pinkish red berries with white edge dots */}
+        <g stroke="#91142F" strokeWidth="0.5">
+          <circle cx="35" cy="40" r="4" fill="url(#karamchaGrad)" /><circle cx="35" cy="40" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          <circle cx="38" cy="45" r="4.5" fill="url(#karamchaGrad)" /><circle cx="38" cy="45" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          
+          <circle cx="65" cy="38" r="4" fill="url(#karamchaGrad)" /><circle cx="65" cy="38" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          <circle cx="60" cy="35" r="4" fill="url(#karamchaGrad)" /><circle cx="60" cy="35" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          
+          <circle cx="50" cy="55" r="4" fill="url(#karamchaGrad)" /><circle cx="50" cy="55" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          <circle cx="45" cy="60" r="4.5" fill="url(#karamchaGrad)" /><circle cx="45" cy="60" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          <circle cx="56" cy="58" r="4" fill="url(#karamchaGrad)" /><circle cx="56" cy="58" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          
+          <circle cx="30" cy="65" r="4" fill="url(#karamchaGrad)" /><circle cx="30" cy="65" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+          <circle cx="72" cy="58" r="4" fill="url(#karamchaGrad)" /><circle cx="72" cy="58" r="1.5" fill="#FFA6B8" opacity="0.6"/>
+        </g>
+
+        {/* Small leaves */}
+        <path d="M 33 35 Q 36 32 38 35 Q 35 38 33 35 Z" fill="#6BB06F" />
+        <path d="M 62 32 Q 65 29 67 32 Q 64 35 62 32 Z" fill="#6BB06F" />
+        <path d="M 45 52 Q 48 49 50 52 Q 47 55 45 52 Z" fill="#6BB06F" />
+        <path d="M 28 60 Q 31 57 33 60 Q 30 63 28 60 Z" fill="#6BB06F" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#786B61" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#918478" />
+      </g>
+    </svg>
+  ),
+  'Phalsa / Falsa': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="falsaGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#A882BC" />
+          <stop offset="60%" stopColor="#4A3258" />
+          <stop offset="100%" stopColor="#1A0D21" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Irregular Shrub Canopy */}
+        <path d="M 50 10 C 80 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 20 15, 50 10 Z" fill="#5F8C43" />
+        
+        {/* Soft, slightly fuzzy leaves */}
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#75A656" />
+
+        {/* Stem */}
+        <path d="M 48 100 L 48 65 L 52 65 L 52 100 Z" fill="#6B6256" />
+
+        {/* Many tiny dark purple berries grouped tightly in small clusters */}
+        <g stroke="#261033" strokeWidth="0.2">
+           <g transform="translate(45, 45)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="4" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+           
+           <g transform="translate(30, 50)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="4" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+           
+           <g transform="translate(65, 40)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="4" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+           
+           <g transform="translate(55, 65)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="4" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+           
+           <g transform="translate(75, 55)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="-3" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+
+           <g transform="translate(25, 65)">
+             <circle cx="0" cy="0" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="3" cy="-2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="-3" cy="2" r="2.5" fill="url(#falsaGrad)" />
+             <circle cx="0" cy="4" r="2.5" fill="url(#falsaGrad)" />
+           </g>
+        </g>
+
+        {/* Small Yellowish Flowers of Phalsa */}
+        <g fill="#DBCE63">
+          <circle cx="42" cy="52" r="1.5" />
+          <circle cx="60" cy="48" r="1.5" />
+          <circle cx="50" cy="62" r="1.5" />
+          <circle cx="35" cy="58" r="1.5" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6B6269" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#80767E" />
+      </g>
+    </svg>
+  ),
+  'Passion Fruit / Passion Fol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="passionGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#CA7BB7" />
+          <stop offset="60%" stopColor="#8C3C7B" />
+          <stop offset="100%" stopColor="#4A163E" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Vining structure spreading across */}
+        <path d="M 50 100 L 50 70 M 50 70 Q 20 60 20 30 M 50 70 Q 80 60 80 30 M 20 30 Q 50 20 80 30" fill="none" stroke="#68A34F" strokeWidth="2.5" />
+        
+        {/* Curled tendrils */}
+        <path d="M 30 45 C 20 40, 25 30, 35 35 C 40 40, 30 50, 30 45" fill="none" stroke="#68A34F" strokeWidth="1" />
+        <path d="M 70 45 C 80 40, 75 30, 65 35 C 60 40, 70 50, 70 45" fill="none" stroke="#68A34F" strokeWidth="1" />
+        <path d="M 50 35 C 40 30, 45 20, 55 25 C 60 30, 50 40, 50 35" fill="none" stroke="#68A34F" strokeWidth="1" />
+
+        {/* Trilobed leaves */}
+        <g fill="#42803D">
+          <path d="M 20 30 C 15 20, 10 25, 15 35 C 10 40, 15 45, 20 40 C 25 45, 30 40, 25 35 Z" />
+          <path d="M 80 30 C 85 20, 90 25, 85 35 C 90 40, 85 45, 80 40 C 75 45, 70 40, 75 35 Z" />
+          <path d="M 50 25 C 45 15, 40 20, 45 30 C 40 35, 45 40, 50 35 C 55 40, 60 35, 55 30 Z" />
+          <path d="M 35 60 C 30 50, 25 55, 30 65 C 25 70, 30 75, 35 70 C 40 75, 45 70, 40 65 Z" />
+          <path d="M 65 60 C 60 50, 55 55, 60 65 C 55 70, 60 75, 65 70 C 70 75, 75 70, 70 65 Z" />
+        </g>
+
+        {/* Intricate Passion Flowers */}
+        <g transform="translate(60, 20) scale(0.6)">
+           <circle cx="0" cy="0" r="10" fill="#EAC358" />
+           <path d="M -15 0 L 15 0 M 0 -15 L 0 15 M -10 -10 L 10 10 M -10 10 L 10 -10" stroke="#8C3C7B" strokeWidth="2" />
+           <circle cx="0" cy="0" r="4" fill="#68A34F" />
+           <circle cx="0" cy="0" r="1.5" fill="#FFF" />
+        </g>
+        <g transform="translate(30, 50) scale(0.6)">
+           <circle cx="0" cy="0" r="10" fill="#EAC358" />
+           <path d="M -15 0 L 15 0 M 0 -15 L 0 15 M -10 -10 L 10 10 M -10 10 L 10 -10" stroke="#8C3C7B" strokeWidth="2" />
+           <circle cx="0" cy="0" r="4" fill="#68A34F" />
+           <circle cx="0" cy="0" r="1.5" fill="#FFF" />
+        </g>
+
+        {/* Passion Fruits (Deep Purple/Plum round) */}
+        <g stroke="#4A163E" strokeWidth="0.5">
+          <circle cx="40" cy="35" r="5" fill="url(#passionGrad)" />
+          <circle cx="70" cy="45" r="5" fill="url(#passionGrad)" />
+          <circle cx="50" cy="55" r="5" fill="url(#passionGrad)" />
+          <circle cx="25" cy="40" r="5" fill="url(#passionGrad)" />
+          <circle cx="75" cy="65" r="5" fill="url(#passionGrad)" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6B5968" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#806E7D" />
+      </g>
+    </svg>
+  ),
+  'Avocado / Avocado': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="avoGrad" cx="35%" cy="65%" r="65%">
+          <stop offset="0%" stopColor="#4A752F" />
+          <stop offset="70%" stopColor="#2E4A1D" />
+          <stop offset="100%" stopColor="#1B2E0F" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Soft Oval Canopy */}
+        <path d="M 50 10 C 85 10, 95 40, 80 65 C 85 85, 65 90, 50 90 C 35 90, 15 85, 20 65 C 5 40, 15 10, 50 10 Z" fill="#4B7A27" />
+        <path d="M 50 20 C 75 15, 85 35, 75 55 C 75 70, 60 75, 50 75 C 40 75, 25 70, 25 55 C 20 35, 30 15, 50 20 Z" fill="#669C36" />
+
+        {/* Stem */}
+        <path d="M 46 100 L 46 75 L 54 75 L 54 100 Z" fill="#756A5B" />
+
+        {/* Avocados (Dark green/blackish oval/pear shape) */}
+        <g transform="translate(35, 45)">
+           <path d="M 0 -8 C 4 -8, 6 2, 7 5 C 8 10, 3 12, 0 12 C -3 12, -8 10, -7 5 C -6 2, -4 -8, 0 -8 Z" fill="url(#avoGrad)" stroke="#1B2E0F" strokeWidth="0.5" />
+           <path d="M -1 -8 L 0 -11 L 1 -8" fill="#756A5B" />
+        </g>
+        
+        <g transform="translate(65, 40) scale(1.1)">
+           <path d="M 0 -8 C 4 -8, 6 2, 7 5 C 8 10, 3 12, 0 12 C -3 12, -8 10, -7 5 C -6 2, -4 -8, 0 -8 Z" fill="url(#avoGrad)" stroke="#1B2E0F" strokeWidth="0.5" />
+           <path d="M -1 -8 L 0 -11 L 1 -8" fill="#756A5B" />
+        </g>
+        
+        <g transform="translate(50, 65)">
+           <path d="M 0 -8 C 4 -8, 6 2, 7 5 C 8 10, 3 12, 0 12 C -3 12, -8 10, -7 5 C -6 2, -4 -8, 0 -8 Z" fill="url(#avoGrad)" stroke="#1B2E0F" strokeWidth="0.5" />
+           <path d="M -1 -8 L 0 -11 L 1 -8" fill="#756A5B" />
+        </g>
+        
+        <g transform="translate(25, 60) scale(0.9) rotate(-15)">
+           <path d="M 0 -8 C 4 -8, 6 2, 7 5 C 8 10, 3 12, 0 12 C -3 12, -8 10, -7 5 C -6 2, -4 -8, 0 -8 Z" fill="url(#avoGrad)" stroke="#1B2E0F" strokeWidth="0.5" />
+           <path d="M -1 -8 L 0 -11 L 1 -8" fill="#756A5B" />
+        </g>
+
+        <g transform="translate(75, 60) scale(0.9) rotate(15)">
+           <path d="M 0 -8 C 4 -8, 6 2, 7 5 C 8 10, 3 12, 0 12 C -3 12, -8 10, -7 5 C -6 2, -4 -8, 0 -8 Z" fill="url(#avoGrad)" stroke="#1B2E0F" strokeWidth="0.5" />
+           <path d="M -1 -8 L 0 -11 L 1 -8" fill="#756A5B" />
+        </g>
+
+        {/* Small cluster of pale yellowish flowers */}
+        <circle cx="45" cy="35" r="1.5" fill="#D4C76C" />
+        <circle cx="42" cy="32" r="1.5" fill="#D4C76C" />
+        <circle cx="48" cy="33" r="1.5" fill="#D4C76C" />
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#606655" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#767D69" />
+      </g>
+    </svg>
+  ),
+  'Bilimbi / Bilimbi': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bilimbiGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#A8D662" />
+          <stop offset="50%" stopColor="#85B54A" />
+          <stop offset="100%" stopColor="#5D8230" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Slender sparse tree */}
+        <path d="M 50 15 C 75 15, 80 40, 70 65 C 75 80, 60 85, 50 85 C 40 85, 25 80, 30 65 C 20 40, 25 15, 50 15 Z" fill="#5F8C43" />
+        
+        {/* Central trunk going straight up, Bilimbis grow directly on it */}
+        <path d="M 47 100 L 47 20 M 53 100 L 53 20" fill="none" stroke="#6E625A" strokeWidth="6" strokeLinecap="round" />
+        <path d="M 50 60 L 35 45 M 50 40 L 65 30 M 50 80 L 60 65" fill="none" stroke="#6E625A" strokeWidth="4" strokeLinecap="round" />
+
+        {/* Bilimbi Fruits (Crisp Green, Cylindrical straight fruits clustering on trunk) */}
+        {/* Main Trunk clusters */}
+        <g stroke="#44651D" strokeWidth="0.5">
+          {/* Cluster 1 */}
+          <path d="M 45 65 Q 40 65 40 75 Q 45 75 45 65 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 55 60 Q 60 60 60 70 Q 55 70 55 60 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 48 55 Q 43 55 43 65 Q 48 65 48 55 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 52 50 Q 57 50 57 60 Q 52 60 52 50 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 47 45 Q 42 45 42 55 Q 47 55 47 45 Z" fill="url(#bilimbiGrad)" />
+          
+          {/* Branch Clusters */}
+          <path d="M 40 50 Q 36 50 36 58 Q 40 58 40 50 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 36 44 Q 32 44 32 52 Q 36 52 36 44 Z" fill="url(#bilimbiGrad)" />
+          
+          <path d="M 58 35 Q 62 35 62 43 Q 58 43 58 35 Z" fill="url(#bilimbiGrad)" />
+          <path d="M 62 30 Q 66 30 66 38 Q 62 38 62 30 Z" fill="url(#bilimbiGrad)" />
+        </g>
+        
+        {/* Little deep red/magenta flowers of Bilimbi on the trunk */}
+        <g fill="#A81845">
+          <circle cx="48" cy="70" r="1" />
+          <circle cx="50" cy="72" r="1.5" />
+          <circle cx="46" cy="60" r="1" />
+          <circle cx="54" cy="45" r="1.5" />
+          <circle cx="52" cy="40" r="1" />
+        </g>
+
+        {/* Small pinnate leaf tufts */}
+        <path d="M 30 25 L 35 30 L 30 35 Z" fill="#88C458" />
+        <path d="M 70 20 L 65 25 L 70 30 Z" fill="#88C458" />
+        <path d="M 25 50 L 30 55 L 25 60 Z" fill="#88C458" />
+        
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6E6B62" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#87847A" />
+      </g>
+    </svg>
+  ),
+  'Cashew Fruit / Kaju Fol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="kajuFruitGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stopColor="#FA6E6E" />
+          <stop offset="60%" stopColor="#D84A4A" />
+          <stop offset="100%" stopColor="#A32B2B" />
+        </radialGradient>
+        <radialGradient id="kajuNutGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#A8947C" />
+          <stop offset="70%" stopColor="#897151" />
+          <stop offset="100%" stopColor="#54432E" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Broad spreading canopy */}
+        <path d="M 50 15 C 85 15, 95 35, 80 60 C 85 80, 65 85, 50 85 C 35 85, 15 80, 20 60 C 5 35, 15 15, 50 15 Z" fill="#5F8C43" />
+        <path d="M 50 25 C 75 20, 85 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 25 20, 50 25 Z" fill="#7CBD4B" />
+
+        {/* Stem */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#75675A" />
+
+        {/* Cashew Apples + Nuts */}
+        {/* Left */}
+        <g transform="translate(35, 45)">
+           <path d="M 0 -12 C 6 -12, 8 -2, 6 4 C 4 8, -4 8, -6 4 C -8 -2, -6 -12, 0 -12 Z" fill="url(#kajuFruitGrad)" stroke="#A32B2B" strokeWidth="0.5" />
+           <path d="M -1 6 C -4 8, -4 12, 0 14 C 4 12, 4 8, 1 6 Z" fill="url(#kajuNutGrad)" stroke="#54432E" strokeWidth="0.5" />
+        </g>
+        
+        {/* Right */}
+        <g transform="translate(68, 40) scale(1.1) rotate(10)">
+           <path d="M 0 -12 C 6 -12, 8 -2, 6 4 C 4 8, -4 8, -6 4 C -8 -2, -6 -12, 0 -12 Z" fill="url(#kajuFruitGrad)" stroke="#A32B2B" strokeWidth="0.5" />
+           <path d="M -1 6 C -4 8, -4 12, 0 14 C 4 12, 4 8, 1 6 Z" fill="url(#kajuNutGrad)" stroke="#54432E" strokeWidth="0.5" />
+        </g>
+        
+        {/* Center */}
+        <g transform="translate(50, 65) rotate(-10)">
+           <path d="M 0 -12 C 6 -12, 8 -2, 6 4 C 4 8, -4 8, -6 4 C -8 -2, -6 -12, 0 -12 Z" fill="url(#kajuFruitGrad)" stroke="#A32B2B" strokeWidth="0.5" />
+           <path d="M -1 6 C -4 8, -4 12, 0 14 C 4 12, 4 8, 1 6 Z" fill="url(#kajuNutGrad)" stroke="#54432E" strokeWidth="0.5" />
+        </g>
+        
+        {/* Far Left */}
+        <g transform="translate(20, 60) scale(0.9) rotate(-20)">
+           <path d="M 0 -12 C 6 -12, 8 -2, 6 4 C 4 8, -4 8, -6 4 C -8 -2, -6 -12, 0 -12 Z" fill="url(#kajuFruitGrad)" stroke="#A32B2B" strokeWidth="0.5" />
+           <path d="M -1 6 C -4 8, -4 12, 0 14 C 4 12, 4 8, 1 6 Z" fill="url(#kajuNutGrad)" stroke="#54432E" strokeWidth="0.5" />
+        </g>
+        
+        {/* Far Right */}
+        <g transform="translate(80, 60) scale(0.9) rotate(20)">
+           <path d="M 0 -12 C 6 -12, 8 -2, 6 4 C 4 8, -4 8, -6 4 C -8 -2, -6 -12, 0 -12 Z" fill="url(#kajuFruitGrad)" stroke="#A32B2B" strokeWidth="0.5" />
+           <path d="M -1 6 C -4 8, -4 12, 0 14 C 4 12, 4 8, 1 6 Z" fill="url(#kajuNutGrad)" stroke="#54432E" strokeWidth="0.5" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#6E5A5A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#876F6F" />
+      </g>
+    </svg>
+  ),
+  'Breadfruit / Ruti Fol': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="rutiGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#C4DE6E" />
+          <stop offset="60%" stopColor="#9FB351" />
+          <stop offset="100%" stopColor="#6C802B" />
+        </radialGradient>
+        <pattern id="rutiTexture" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M 0 0 L 4 0 M 0 4 L 0 0" stroke="#6C802B" strokeWidth="0.5" opacity="0.4" />
+          <circle cx="2" cy="2" r="0.5" fill="#6C802B" opacity="0.6"/>
+        </pattern>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Large distinctive deeply lobed leaves */}
+        <path d="M 50 40 C 40 20, 20 10, 20 30 C 20 40, 30 40, 30 60 C 20 60, 10 70, 20 80 C 30 80, 40 70, 50 80 Z" fill="#5A8A3A" />
+        <path d="M 50 40 C 60 20, 80 10, 80 30 C 80 40, 70 40, 70 60 C 80 60, 90 70, 80 80 C 70 80, 60 70, 50 80 Z" fill="#5A8A3A" />
+        <path d="M 50 20 C 40 0, 60 0, 50 20 Z" fill="#5A8A3A" />
+        
+        <path d="M 50 50 C 45 40, 35 35, 35 45 C 35 50, 40 50, 40 60 C 35 60, 30 65, 35 70 C 40 70, 45 65, 50 70 Z" fill="#75A84F" />
+        <path d="M 50 50 C 55 40, 65 35, 65 45 C 65 50, 60 50, 60 60 C 65 60, 70 65, 65 70 C 60 70, 55 65, 50 70 Z" fill="#75A84F" />
+
+        {/* Stem */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#807869" />
+
+        {/* Large Spiky/Textured Breadfruits */}
+        <g transform="translate(35, 45)">
+           <circle cx="0" cy="0" r="9" fill="url(#rutiGrad)" />
+           <circle cx="0" cy="0" r="9" fill="url(#rutiTexture)" />
+           <path d="M 0 -9 L 0 -12" stroke="#4B6615" strokeWidth="1.5" />
+        </g>
+        
+        <g transform="translate(65, 55) scale(1.1)">
+           <circle cx="0" cy="0" r="9" fill="url(#rutiGrad)" />
+           <circle cx="0" cy="0" r="9" fill="url(#rutiTexture)" />
+           <path d="M 0 -9 L 0 -12" stroke="#4B6615" strokeWidth="1.5" />
+        </g>
+
+        <g transform="translate(50, 75) scale(0.9)">
+           <circle cx="0" cy="0" r="9" fill="url(#rutiGrad)" />
+           <circle cx="0" cy="0" r="9" fill="url(#rutiTexture)" />
+           <path d="M 0 -9 L 0 -12" stroke="#4B6615" strokeWidth="1.5" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#66665A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#7D7D6F" />
+      </g>
+    </svg>
+  ),
+  'Indian Persimmon / Gab': (props) => (
+    <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gabGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#D96F63" />
+          <stop offset="60%" stopColor="#A63D31" />
+          <stop offset="100%" stopColor="#6E1F16" />
+        </radialGradient>
+      </defs>
+      <g transform="translate(0, 0)">
+        {/* Rounded tidy canopy */}
+        <path d="M 50 15 C 80 15, 90 35, 75 60 C 80 80, 60 85, 50 85 C 40 85, 20 80, 25 60 C 10 35, 20 15, 50 15 Z" fill="#477335" />
+        <path d="M 50 25 C 70 20, 80 35, 75 50 C 75 60, 60 70, 50 70 C 40 70, 25 60, 25 50 C 20 35, 30 20, 50 25 Z" fill="#5F9444" />
+
+        {/* Trunk */}
+        <path d="M 46 100 L 46 65 L 54 65 L 54 100 Z" fill="#6E5C5A" />
+
+        {/* Gab Fruits (Fuzzy, deep reddish/brown round fruits) */}
+        {/* Center */}
+        <g transform="translate(35, 45)">
+           <circle cx="0" cy="0" r="6" fill="url(#gabGrad)" />
+           {/* Calyx closely attached */}
+           <path d="M -3 -3 L 0 -5 L 3 -3 L 2 -1 L -2 -1 Z" fill="#A38243" />
+        </g>
+        
+        {/* Right */}
+        <g transform="translate(65, 40) scale(1.1)">
+           <circle cx="0" cy="0" r="6" fill="url(#gabGrad)" />
+           <path d="M -3 -3 L 0 -5 L 3 -3 L 2 -1 L -2 -1 Z" fill="#A38243" />
+        </g>
+        
+        {/* Lower center */}
+        <g transform="translate(50, 65)">
+           <circle cx="0" cy="0" r="6" fill="url(#gabGrad)" />
+           <path d="M -3 -3 L 0 -5 L 3 -3 L 2 -1 L -2 -1 Z" fill="#A38243" />
+        </g>
+        
+        {/* Far Left */}
+        <g transform="translate(25, 60) scale(0.9)">
+           <circle cx="0" cy="0" r="6" fill="url(#gabGrad)" />
+           <path d="M -3 -3 L 0 -5 L 3 -3 L 2 -1 L -2 -1 Z" fill="#A38243" />
+        </g>
+        
+        {/* Far Right */}
+        <g transform="translate(75, 60) scale(0.9)">
+           <circle cx="0" cy="0" r="6" fill="url(#gabGrad)" />
+           <path d="M -3 -3 L 0 -5 L 3 -3 L 2 -1 L -2 -1 Z" fill="#A38243" />
+        </g>
+
+        {/* Pot */}
+        <path d="M 35 95 L 65 95 L 60 115 Q 50 120 40 115 Z" fill="#695A5A" />
+        <path d="M 30 85 L 70 85 L 65 95 Q 50 100 35 95 Z" fill="#827070" />
+      </g>
+    </svg>
+  ),
+};

@@ -1,1 +1,44 @@
-node_modules
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production / Builds
+/dist
+/dist-ssr
+/build
+.node-dist
+
+# Testing
+/coverage
+
+# Android-specific ignores
+android/app/build/
+android/.gradle/
+android/build/
+.gradle/
+captures/
+**/*.iml
+.idea/
+**/local.properties
+**/GeneratedPluginRegistrant.java
+
+# Logs and databases
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+*.sqlite
+
+# Environment keys and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.backup
+.env.*.local
+
+# Operating System files
+.DS_Store
+Thumbs.db

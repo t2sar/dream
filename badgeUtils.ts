@@ -9,7 +9,7 @@ export interface BadgeUnlockResult {
 export function checkBadgeUnlocks(stats: Partial<UserStats>): BadgeUnlockResult {
   const unlockedBadges: AchievementBadge[] = [];
   const currentUnlocked = stats.unlockedBadgeIds || {};
-  let newStats = { ...stats };
+  const newStats = { ...stats };
   
   let xpGained = 0;
   let coinsGained = 0;

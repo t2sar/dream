@@ -1,4 +1,0 @@
-const a=e=>{const n=e.length;if(n===0)return null;const t=["Shondha nemeche — your garden's waiting 🌙","The evening is here. Some plants need you. 🌱","A quiet evening reminder for your garden. 🌿","Take a moment for your plants before the day ends. ✨"],o=t[Math.floor(Math.random()*t.length)];if(n===1)return`${o}
-One plant is still waiting for water today: ${e[0].name}`;if(n>=2&&n<=3){const i=e.map(r=>r.name).join(", ");return`${o}
-${n} plants are waiting for you: ${i}`}else return`${o}
-${n} plants are waiting for water today. Even one counts.`},c=(e,n)=>{if("Notification"in window&&Notification.permission==="granted")try{const t=new Notification(e,n);t.onclick=function(){window.focus(),this.close()}}catch{navigator.serviceWorker.ready.then(o=>{o.showNotification(e,n)})}};export{a as getEveningSummaryContent,c as sendNotification};

@@ -13,6 +13,7 @@ import { Habit } from "../types";
 import { CATEGORIES } from "../categories";
 import { PlantIcon } from "./PlantIcon";
 import * as LucideIcons from "lucide-react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 interface HabitCardProps {
   habit: Habit;
@@ -107,7 +108,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     <div
       className={`
       relative overflow-hidden group
-      p-6 rounded-none border transition-all duration-500 bg-[#0d1017]/40
+      p-8 rounded-none border transition-all duration-500 bg-[#0d1017]/40
       ${
         habit.isGolden 
           ? `border-amber-400/50 shadow-[0_0_30px_-5px_rgba(251,191,36,0.3)] bg-amber-900/10`
@@ -118,7 +119,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     `}
     >
       <div
-        className={`absolute -top-24 -right-24 w-52 h-52 rounded-full blur-[100px] transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-30 bg-cyan-400" : "opacity-0"}`}
+        className={`absolute -top-24 -right-24 w-52 h-52 rounded-full transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-[0.03] bg-cyan-400 mix-blend-screen" : "opacity-0"}`}
       />
 
       <div className="flex items-center justify-between relative z-10">
@@ -184,7 +185,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           </div>
 
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-5 mb-3">
               <PlantIcon 
                 plantType={habit.plantType} 
                 stage={habit.plantStage} 
@@ -194,10 +195,10 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 isLegendary={habit.isLegendary} 
                 isArchived={habit.isArchived} 
                 isGolden={habit.isGolden}
-                className="w-10 h-10" 
+                className="w-20 h-20" 
               />
               <h3
-                className={`font-display text-xl tracking-tight font-medium transition-colors duration-300 ${isCompleted ? "text-white" : "text-slate-200"}`}
+                className={`font-display text-2xl tracking-tight font-medium transition-colors duration-300 ${isCompleted ? "text-white" : "text-slate-200"}`}
               >
                 {habit.name}
               </h3>
@@ -241,14 +242,105 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
               </span>
 
               {habit.streak > 0 && (
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 flex items-center gap-1.5">
-                    <Flame
-                      className={`w-3.5 h-3.5 fill-current ${isCompleted ? "animate-pulse" : ""}`}
-                    />
-                    {habit.streak} Day Streak
-                  </span>
-                  {(() => {
+                <div className="flex flex-col gap-1.5 relative">
+                  <span className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 p-1 rounded-sm relative ${
+                    habit.streak >= 30 ? 'text-red-400 bg-red-950/20 border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]' :
+                    habit.streak >= 21 ? 'text-amber-400 bg-amber-950/20 border border-amber-500/20 shadow-[0_0_8px_rgba(245,158,11,0.15)]' :
+                    habit.streak >= 14 ? 'text-orange-400 bg-orange-950/15 border border-orange-500/15 shadow-[0_0_6px_rgba(249,115,22,0.1)]' :
+                    habit.streak >= 5 ? 'text-yellow-500 bg-yellow-950/10 border border-yellow-500/10' :
+                    'text-amber-500'
+                  }`}>
+                    <div className="relative">
+                      <Flame
+                        className={`w-3.5 h-3.5 fill-current ${isCompleted ? "animate-pulse" : ""}`}
+                      />
+                      {/* Sparks/Fire Particles for Multiplier Tiers */}
+                      {habit.streak >= 5 && (
+                        <svg className="absolute inset-0 pointer-events-none overflow-visible w-full h-full" viewBox="0 0 24 24">
+                          <g style={{ willChange: 'transform, opacity' }}>
+                            <circle cx="-2" cy="-4" r="2" fill="#FBBF24" className="animate-bounce opacity-70" style={{ animationDuration: '0.8s' }} />
+                            <circle cx="2" cy="-10" r="2" fill="#F97316" className="animate-ping opacity-90" style={{ animationDuration: '1.2s' }} />
+                            <circle cx="8" cy="-6" r="2" fill="#FACC15" className="animate-bounce opacity-80" style={{ animationDuration: '1.5s' }} />
+                          </g>
+                        </svg>
+                      )}
+                    </div>
+                    <span>{habit.streak} Day Streak</span>
+                    
+                    {/* Tooltip trigger */}
+                    <Tooltip.Provider delayDuration={200}>
+                       <Tooltip.Root>
+                          <Tooltip.Trigger asChild>
+                             <div className="relative inline-block cursor-help ml-0.5 pointer-events-auto">
+                                <LucideIcons.HelpCircle className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 transition-colors" />
+                             </div>
+                          </Tooltip.Trigger>
+                          <Tooltip.Portal>
+                             <Tooltip.Content 
+                                sideOffset={5} 
+                                className="w-56 p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-150 normal-case tracking-normal text-left"
+                             >
+                               <p className="text-[10px] font-mono text-slate-300 uppercase tracking-wider mb-2 border-b border-white/5 pb-1">
+                                  🔥 Streak Multipliers
+                               </p>
+                               <div className="space-y-1 text-[9px] font-mono text-slate-400">
+                                  <div className="flex justify-between">
+                                     <span>5 Days:</span>
+                                     <span className="text-emerald-400">1.2x Payout</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                     <span>14 Days:</span>
+                                     <span className="text-emerald-400">2.0x Payout</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                     <span>21 Days:</span>
+                                     <span className="text-[#00F5D4]">3.0x Payout</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                     <span>30+ Days:</span>
+                                     <span className="text-amber-400 font-bold">5.0x Payout</span>
+                                  </div>
+                               </div>
+                               {(() => {
+                                  // Calculate next field preview
+                                  const currentStreak = habit.streak;
+                                  let nextThreshold = 5;
+                                  let currentMult = "1.0x";
+                                  let nextMult = "1.2x";
+                                  
+                                  if (currentStreak >= 30) {
+                                     return (
+                                        <div className="mt-2 pt-1 border-t border-white/5 text-[9px] font-mono text-amber-400">
+                                           Ultimate 5.0x reward tier reached!
+                                        </div>
+                                     );
+                                  } else if (currentStreak >= 21) {
+                                     nextThreshold = 30;
+                                     currentMult = "3.0x";
+                                     nextMult = "5.0x";
+                                  } else if (currentStreak >= 14) {
+                                     nextThreshold = 21;
+                                     currentMult = "2.0x";
+                                     nextMult = "3.0x";
+                                  } else if (currentStreak >= 5) {
+                                     nextThreshold = 14;
+                                     currentMult = "1.2x";
+                                     nextMult = "2.0x";
+                                  }
+                                  
+                                  const diff = nextThreshold - currentStreak;
+                                  return (
+                                     <div className="mt-2 pt-2 border-t border-white/5 text-[9px] font-mono leading-tight text-slate-300">
+                                        Next bonus in <strong className="text-amber-400 font-bold">{diff} {diff === 1 ? 'day' : 'days'}</strong> (At {nextThreshold} days: <span className="text-emerald-400 font-semibold">{currentMult} → {nextMult} multiplier</span>)
+                                     </div>
+                                  );
+                               })()}
+                             </Tooltip.Content>
+                          </Tooltip.Portal>
+                       </Tooltip.Root>
+                    </Tooltip.Provider>
+                   </span>
+                   {(() => {
                     const tiers = [5, 14, 21, 30];
                     const nextTier = tiers.find(t => t > habit.streak);
                     if (!nextTier) return null;

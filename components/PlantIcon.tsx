@@ -3,8 +3,8 @@ import { PlantType, PlantHealthStatus, PlantStage } from '../types';
 import { PLANT_ICONS_CONFIG, PlantIconConfig } from './plantIconRegistry';
 import { Lock } from 'lucide-react';
 import { motion } from 'motion/react';
-
-const PlantSvgShape = React.lazy(() => import('./PlantAssets').then(m => ({ default: m.PlantSvgShape })));
+// import { PlantSvgShape } from './PlantAssets';
+const PlantSvgShape = React.lazy(() => import('./PlantAssets').then(module => ({ default: module.PlantSvgShape })));
 
 interface PlantIconProps {
   plantType?: PlantType;
@@ -61,23 +61,20 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   const isEmojiMode = styleMode === 'Emoji' || !config.shapeGroup;
   
   // Decide Stage rendering
-  // Seed: small seed 
+  // Seed: small emoji/icon
   // Sprout: sprout
   // Small Plant: small leafy plant
   // Fruiting: full icon
-  let scaleValue = 1;
+  let scaleValue = 1.0;
   let opacityValue = 1;
-  let yOffset = 0;
+  const yOffset = 0;
   
   if (stage === 'Seed') {
-    scaleValue = 0.5;
-    yOffset = 16;
-  } else if (stage === 'Sprout') {
     scaleValue = 0.75;
-    yOffset = 8;
+  } else if (stage === 'Sprout') {
+    scaleValue = 0.85;
   } else if (stage === 'Small Plant' || stage === 'Young Plant') {
-    scaleValue = 0.9;
-    yOffset = 4;
+    scaleValue = 0.95;
   }
 
   if (status === 'Dead') {
@@ -89,62 +86,76 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   const renderBaseIcon = () => {
     if (stage === 'Seed') {
       return (
-        <div className="relative w-full h-full drop-shadow-sm">
-           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
-              <ellipse cx="32" cy="48" rx="8" ry="6" fill={primaryColor} stroke={outlineColor} strokeWidth="3" />
-           </svg>
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="text-[2.25em] drop-shadow-sm opacity-90 saturate-50">{emoji}</span>
         </div>
       );
     }
     if (stage === 'Sprout') {
       return (
-        <div className="relative w-full h-full drop-shadow-sm">
-           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible absolute inset-0 z-10">
-              <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
-              <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="3" strokeLinecap="round" />
-              <circle cx="20" cy="20" r="4" fill={primaryColor} />
+        <div className="w-full h-full flex items-center justify-center drop-shadow-sm">
+           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
+              <path d="M32 48 Q32 30 20 20 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="4" strokeLinecap="round" />
+              <path d="M32 48 Q32 20 44 24 Q32 30 32 48" fill="none" stroke={outlineColor} strokeWidth="4" strokeLinecap="round" />
+              <circle cx="20" cy="20" r="5" fill={primaryColor} />
            </svg>
         </div>
       );
     }
 
     if (isEmojiMode) {
-      return <div className="text-3xl leading-none flex items-center justify-center h-full w-full">{emoji}</div>;
+      return <div className="text-[3em] leading-none flex items-center justify-center h-full w-full">{emoji}</div>;
     }
     return (
-      <React.Suspense fallback={<div className="w-8 h-8 rounded-full border-2 border-surface-alt border-t-primary-mint animate-spin" />}>
-        <PlantSvgShape config={config} className="w-full h-full overflow-visible" />
+      <React.Suspense fallback={<div className="w-6 h-6 rounded-full border-2 border-emerald-500/30 border-t-emerald-500 animate-spin" />}>
+        <PlantSvgShape config={config} isGolden={isGolden} className="w-full h-full overflow-visible" />
       </React.Suspense>
     );
   };
 
   const getGrayscaleFilter = () => {
-    if (isGolden) return 'drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) sepia(1) saturate(3) hue-rotate(-30deg) brightness(1.2)';
     if (status === 'Dead') return 'grayscale(1)';
     if (status === 'Critical') return 'sepia(1)';
     if (isLocked) return 'grayscale(0.5) blur(2px) brightness(0.5)';
     return 'none';
   };
 
+  // Convert the plant's primary color to an rgba string for the subtle glow
+  // Or just use the original primary color string
+  const glowColor = primaryColor || '#8af';
+
   return (
     <div 
       className={`relative inline-flex items-center justify-center shrink-0 ${className} overflow-visible`}
-      style={size ? { width: size, height: size } : {}}
+      style={{ ...(size ? { width: size } : {}), aspectRatio: '3/4', height: 'auto' }}
       title={`${plantType} - ${stage} (${status})`}
     >
-      {/* Background container (Applies to all modes now for premium polish) */}
+      {/* Background container: Premium Midnight Glass Display Case */}
       <div 
-        className={`absolute inset-0 rounded-[40%] transition-all duration-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.02)] ${isLocked ? 'grayscale opacity-50' : ''} ${isGolden ? 'bg-amber-300/30 ring-2 ring-amber-400 animate-pulse' : ''}`}
+        className={`absolute inset-x-0 bottom-0 top-[15%] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${isLocked ? 'opacity-50' : ''} ${isGolden ? 'ring-1 ring-amber-500/50' : ''}`}
         style={{ 
-          backgroundColor: isGolden ? 'rgba(255, 215, 0, 0.3)' : (bgColor || 'rgba(255,255,255,0.1)'), 
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)'
+          background: 'rgba(0, 0, 0, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderRadius: '24px' // Smooth rounded corners
+        }}
+      />
+
+      {/* Inner Glow to match the fruit color */}
+      <div 
+        className="absolute inset-x-0 bottom-0 top-[15%] rounded-[24px] opacity-30 mix-blend-screen pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at center, ${glowColor} 0%, transparent 70%)`,
+          filter: 'blur(12px)',
         }}
       />
       
-      {/* Icon Layer */}
+      {/* Grounding Shadow (Elliptical shadow under the pot) */}
+      <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[60%] h-[12%] bg-black/60 blur-[6px] rounded-[100%] pointer-events-none" />
+
+      {/* Icon Layer (Strictly bounded inside the container) */}
       <motion.div 
-        className="relative w-full h-full flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center p-[8%]"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ 
           scale: scaleValue, 
@@ -152,9 +163,11 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
           y: yOffset
         }}
         transition={{ type: "spring", stiffness: 120, damping: 15 }}
-        style={{ filter: getGrayscaleFilter() }}
       >
-         <div className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}>
+         <div 
+            className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}
+            style={{ filter: getGrayscaleFilter(), willChange: 'transform', transformOrigin: 'bottom center' }}
+         >
             {renderBaseIcon()}
          </div>
       </motion.div>

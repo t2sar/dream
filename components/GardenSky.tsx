@@ -72,10 +72,12 @@ export const GardenSky: React.FC<GardenSkyProps> = ({ enabled, extraFireflies = 
     return fireflyData.slice(0, count).map((data, i) => (
       <div 
         key={i} 
-        className="absolute w-1.5 h-1.5 bg-yellow-300 rounded-full blur-[1px] animate-[pulse_4s_ease-in-out_infinite]"
+        className="absolute w-2 h-2 animate-[pulse_4s_ease-in-out_infinite]"
         style={{
           left: data.left,
           top: data.top,
+          background: 'radial-gradient(circle, #fde047 0%, transparent 80%)',
+          willChange: 'transform, opacity',
           opacity: 0, // Handled by CSS keyframes or we just let Tailwind pulse do the fading
           animationDuration: data.animationDuration,
           animationDelay: data.animationDelay
@@ -111,14 +113,14 @@ export const GardenSky: React.FC<GardenSkyProps> = ({ enabled, extraFireflies = 
       {/* Clouds */}
       {(phase === 'Morning' || phase === 'Midday') && !reducedMotion && (
         <>
-          <div className="absolute top-[15%] left-[10%] w-32 h-8 bg-surface-alt/20 blur-md rounded-full" style={{ animation: 'slideRight 120s linear infinite' }} />
-          <div className="absolute top-[25%] left-[60%] w-24 h-6 bg-surface-alt/10 blur-md rounded-full" style={{ animation: 'slideRight 150s linear infinite -40s' }} />
+          <div className="absolute top-[15%] left-[10%] w-32 h-8 bg-surface-alt/20 blur-md rounded-full" style={{ animation: 'slideRight 120s linear infinite', willChange: 'transform' }} />
+          <div className="absolute top-[25%] left-[60%] w-24 h-6 bg-surface-alt/10 blur-md rounded-full" style={{ animation: 'slideRight 150s linear infinite -40s', willChange: 'transform' }} />
         </>
       )}
 
       {/* Birds */}
       {phase === 'Sunset' && !reducedMotion && (
-        <div className="absolute top-[30%] opacity-0 animate-[flyAcross_25s_linear_forwards] flex gap-2">
+        <div className="absolute top-[30%] opacity-0 animate-[flyAcross_25s_linear_forwards] flex gap-2" style={{ willChange: 'transform' }}>
            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black/60"><path d="M1 4C1 4 3 1 6 4C9 1 11 4 11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black/60 mt-1"><path d="M1 4C1 4 3 1 6 4C9 1 11 4 11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
            <svg width="10" height="6" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-black/60 -mt-1"><path d="M1 4C1 4 3 1 6 4C9 1 11 4 11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>

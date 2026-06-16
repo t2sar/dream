@@ -19,7 +19,8 @@ import {
   enableIndexedDbPersistence,
   initializeFirestore,
   CACHE_SIZE_UNLIMITED,
-  collection
+  collection,
+  disableNetwork
 } from "firebase/firestore";
 import { Habit, HabitLog } from "../types";
 import firebaseConfig from "../firebase-applet-config.json";
@@ -37,6 +38,52 @@ let app: any = null;
 let authInstance: any = null;
 let dbInstance: any = null;
 
+export let isQuotaExceeded = false;
+try {
+  isQuotaExceeded = localStorage.getItem("firestore_quota_exceeded") === "true";
+} catch (e) {}
+
+export const enterOfflineMode = async () => {
+  if (!dbInstance) return;
+  if (isQuotaExceeded) return; // Prevent multiple calls
+  try {
+    isQuotaExceeded = true;
+    localStorage.setItem("firestore_quota_exceeded", "true");
+    console.warn("Firestore quota exceeded/exhausted. Switching to Offline Mode.");
+    await disableNetwork(dbInstance);
+  } catch (e) {
+    console.error("Failed to disable Firestore network:", e);
+  }
+};
+
+// Intercept console messages to catch Firebase SDK's internal background sync quota errors
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+
+const filterFirestoreQuotaLog = (msg: string) => {
+  if (typeof msg === 'string' && (msg.includes('resource-exhausted') || msg.includes('Quota exceeded') || msg.includes('Quota limit exceeded') || msg.includes('Using maximum backoff delay'))) {
+    enterOfflineMode();
+    return true; // Should filter
+  }
+  return false;
+};
+
+console.error = function (...args) {
+  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  originalConsoleError.apply(console, args);
+};
+
+console.warn = function (...args) {
+  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  originalConsoleWarn.apply(console, args);
+};
+
+console.log = function (...args) {
+  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  originalConsoleLog.apply(console, args);
+};
+
 const configToUse = firebaseConfig.apiKey ? firebaseConfig : (firebaseConfig as any).default;
 if (configToUse && configToUse.apiKey) {
   configToUse.apiKey = configToUse.apiKey.trim();
@@ -49,9 +96,20 @@ if (apiKey && apiKey.length > 10) {
 
     dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
-    enableIndexedDbPersistence(dbInstance).catch((err) => {
-        console.debug('Persistence disabled:', err.code);
-    });
+    try {
+      enableIndexedDbPersistence(dbInstance).catch((err) => {
+          console.debug('Persistence disabled asynchronously:', err.code);
+      });
+    } catch (persistErr) {
+      console.debug('Persistence disabled synchronously:', persistErr);
+    }
+
+    if (isQuotaExceeded) {
+      console.warn("Firestore quota was previously exceeded. Initializing Firestore in Offline Mode.");
+      disableNetwork(dbInstance).catch((e) => {
+        console.error("Failed to enter offline mode during initialization:", e);
+      });
+    }
   } catch (e) {
     console.error("Firebase init error", e);
   }
@@ -93,6 +151,13 @@ interface FirestoreErrorInfo {
 }
 
 function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errObj = error as any;
+  if (errObj?.code === 'resource-exhausted' || (errObj?.message && errObj.message.includes('Quota exceeded'))) {
+    console.warn("Firestore quota limit exceeded detected in handleFirestoreError. Switching to offline mode.");
+    enterOfflineMode();
+    return;
+  }
+
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -119,14 +184,14 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 }
 
 export const subscribeToUserData = (userId: string, onUpdate: (data: any) => void) => {
-  if (!dbInstance) {
+  if (!dbInstance || isQuotaExceeded) {
     onUpdate(null);
     return () => {};
   }
   const pathForGetDocs = `users/${userId}`;
   
   let currentData: any = null;
-  let currentLogs: any = {};
+  const currentLogs: any = {};
   let isFirstDocFetch = true;
   
   const notifyUpdate = () => {
@@ -138,7 +203,10 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
     }
   };
 
-  const unsubDoc = onSnapshot(doc(dbInstance, "users", userId), (docSnap) => {
+  let unsubDoc: () => void = () => {};
+  let unsubLogs: () => void = () => {};
+
+  unsubDoc = onSnapshot(doc(dbInstance, "users", userId), (docSnap) => {
     if (docSnap.exists()) {
       currentData = docSnap.data();
       if (!isFirstDocFetch) notifyUpdate();
@@ -147,17 +215,29 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
       onUpdate(null);
     }
   }, (error) => {
-    handleFirestoreError(error, OperationType.GET, pathForGetDocs);
+    if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
+      enterOfflineMode();
+      onUpdate(null);
+      unsubDoc();
+    } else {
+      handleFirestoreError(error, OperationType.GET, pathForGetDocs);
+    }
   });
 
-  const unsubLogs = onSnapshot(collection(dbInstance, "users", userId, "logs"), (collSnap) => {
+  unsubLogs = onSnapshot(collection(dbInstance, "users", userId, "logs"), (collSnap) => {
     collSnap.docChanges().forEach((change) => {
       // Each doc is a YYYY-MM record
       Object.assign(currentLogs, change.doc.data());
     });
     if (currentData && !isFirstDocFetch) notifyUpdate();
   }, (error) => {
-    handleFirestoreError(error, OperationType.LIST, `${pathForGetDocs}/logs`);
+    if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
+      enterOfflineMode();
+      onUpdate(null);
+      unsubLogs();
+    } else {
+      handleFirestoreError(error, OperationType.LIST, `${pathForGetDocs}/logs`);
+    }
   });
 
   return () => {
@@ -167,48 +247,68 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 };
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingData: any = null;
+let pendingUpdatesPromise: Promise<void> | null = null;
+let pendingUpdatesResolve: (() => void) | null = null;
 const lastSavedMonthHashes: Record<string, string> = {};
 
-export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }) => {
-  if (!dbInstance) return;
+export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }): Promise<void> => {
+  if (!dbInstance || isQuotaExceeded) return;
   
-  const pathForWrite = `users/${userId}`;
-  try {
-    const { logs, ...mainData } = data;
-    
-    let cleanMainData;
-    try {
-      cleanMainData = JSON.parse(JSON.stringify(mainData));
-    } catch (err) {
-      console.error("Error stringifying main data. Please ensure state does not contain DOM elements.", err);
-      return;
-    }
-    
-    await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
-
-    // Sub-collections & Pagination (Delta Updates)
-    const logsByMonth: Record<string, HabitLog> = {};
-    for (const [dateStr, ids] of Object.entries(logs || {})) {
-      const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
-      if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
-      logsByMonth[monthPrefix][dateStr] = ids;
-    }
-
-    for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-      const monthHash = JSON.stringify(monthLogs);
-      if (lastSavedMonthHashes[month] !== monthHash) {
-         const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-         await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
-         lastSavedMonthHashes[month] = monthHash;
-      }
-    }
-  } catch (e) {
-    handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+  pendingData = data;
+  
+  if (!pendingUpdatesPromise) {
+    pendingUpdatesPromise = new Promise((resolve) => {
+      pendingUpdatesResolve = resolve;
+    });
   }
+
+  if (saveTimeout) clearTimeout(saveTimeout);
+  
+  saveTimeout = setTimeout(async () => {
+    const dataToSave = pendingData;
+    pendingData = null;
+    const pathForWrite = `users/${userId}`;
+    try {
+      const { logs, ...mainData } = dataToSave;
+      
+      const cleanMainData = mainData;
+      
+      await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
+
+      const logsByMonth: Record<string, HabitLog> = {};
+      for (const [dateStr, ids] of Object.entries(logs || {}) as [string, string[]][]) {
+        const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
+        if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+        logsByMonth[monthPrefix][dateStr] = ids;
+      }
+
+      for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+        const monthHash = JSON.stringify(monthLogs);
+        if (lastSavedMonthHashes[month] !== monthHash) {
+           const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+           await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
+           lastSavedMonthHashes[month] = monthHash;
+        }
+      }
+    } catch (e: any) {
+      if (e?.code === 'resource-exhausted' || (e?.message && e.message.includes('Quota exceeded'))) {
+        await enterOfflineMode();
+      } else {
+        handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+      }
+    } finally {
+      if (pendingUpdatesResolve) pendingUpdatesResolve();
+      pendingUpdatesPromise = null;
+      pendingUpdatesResolve = null;
+    }
+  }, 10000); // 10 seconds debounce to save quota
+
+  return pendingUpdatesPromise;
 };
 
 export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
-  if (!dbInstance) return false;
+  if (!dbInstance || isQuotaExceeded) return false;
   const pathForWrite = `users/${userId}`;
 
   try {
@@ -216,29 +316,34 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
     const snapshot = await getDoc(userRef);
 
     if (!snapshot.exists()) {
-      const cleanData = JSON.parse(JSON.stringify({
+      const cleanData = {
         habits: localHabits,
         activeRestMode: activeRestMode || null,
         createdAt: new Date().toISOString()
-      }));
+      };
       await setDoc(userRef, cleanData);
 
       // Save initial logs to subcollections
       const logsByMonth: Record<string, HabitLog> = {};
-      for (const [dateStr, ids] of Object.entries(localLogs || {})) {
+      for (const [dateStr, ids] of Object.entries(localLogs || {}) as [string, string[]][]) {
         const monthPrefix = dateStr.substring(0, 7);
         if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
         logsByMonth[monthPrefix][dateStr] = ids;
       }
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(JSON.stringify(monthLogs)), { merge: true });
-        lastSavedMonthHashes[month] = JSON.stringify(monthLogs);
+        const monthHash = JSON.stringify(monthLogs);
+        await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(monthHash), { merge: true });
+        lastSavedMonthHashes[month] = monthHash;
       }
 
       return true; 
     }
     return false; 
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
+      await enterOfflineMode();
+      return false;
+    }
     // Only bubble up if it's a permission error, else it's a sync error over network
     if (error instanceof Error && error.message.toLowerCase().includes('missing or insufficient permissions')) {
         handleFirestoreError(error, OperationType.WRITE, pathForWrite);

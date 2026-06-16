@@ -11,7 +11,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'habit_created_count',
     targetValue: 1,
     rewardXP: 10,
-    rewardCoins: 2
+    rewardCoins: 40
   },
   {
     badgeId: 'first_water',
@@ -22,7 +22,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'habit_completed_count',
     targetValue: 1,
     rewardXP: 20,
-    rewardCoins: 5
+    rewardCoins: 100
   },
   {
     badgeId: 'first_perfect_day',
@@ -33,7 +33,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'perfect_garden_days',
     targetValue: 1,
     rewardXP: 30,
-    rewardCoins: 10
+    rewardCoins: 200
   },
 
   // Streak
@@ -57,7 +57,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'streak_reached',
     targetValue: 7,
     rewardXP: 50,
-    rewardCoins: 10
+    rewardCoins: 200
   },
   {
     badgeId: '14_day_garden_builder',
@@ -68,7 +68,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'streak_reached',
     targetValue: 14,
     rewardXP: 100,
-    rewardCoins: 20
+    rewardCoins: 400
   },
   {
     badgeId: '21_day_nature_master',
@@ -90,7 +90,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'streak_reached',
     targetValue: 30,
     rewardXP: 200,
-    rewardCoins: 50
+    rewardCoins: 1000
   },
 
   // Plant
@@ -103,7 +103,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'plant_fruiting_count',
     targetValue: 1,
     rewardXP: 100,
-    rewardCoins: 25
+    rewardCoins: 500
   },
   {
     badgeId: 'fruit_garden_starter',
@@ -114,7 +114,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'plant_fruiting_count',
     targetValue: 3,
     rewardXP: 150,
-    rewardCoins: 40
+    rewardCoins: 800
   },
 
   // Recovery
@@ -127,7 +127,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'plant_saved_count',
     targetValue: 1,
     rewardXP: 30,
-    rewardCoins: 10
+    rewardCoins: 200
   },
   {
     badgeId: 'recovery_hero',
@@ -138,7 +138,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'plant_saved_count',
     targetValue: 3,
     rewardXP: 60,
-    rewardCoins: 15
+    rewardCoins: 300
   },
 
   // Daily Garden
@@ -151,7 +151,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'perfect_garden_days',
     targetValue: 7,
     rewardXP: 150,
-    rewardCoins: 40
+    rewardCoins: 800
   },
 
   // Challenge
@@ -164,7 +164,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'challenge_completed_count',
     targetValue: 1,
     rewardXP: 50,
-    rewardCoins: 10
+    rewardCoins: 200
   },
 
   // Level
@@ -177,7 +177,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'level_reached',
     targetValue: 5,
     rewardXP: 50,
-    rewardCoins: 20
+    rewardCoins: 400
   },
   {
     badgeId: 'level_10_garden_helper',
@@ -188,7 +188,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'level_reached',
     targetValue: 10,
     rewardXP: 100,
-    rewardCoins: 30
+    rewardCoins: 600
   },
   {
     badgeId: 'level_20_garden_keeper',
@@ -199,7 +199,7 @@ export const ACHIEVEMENT_BADGES: AchievementBadge[] = [
     conditionType: 'level_reached',
     targetValue: 20,
     rewardXP: 200,
-    rewardCoins: 50
+    rewardCoins: 1000
   },
 
   // Shop

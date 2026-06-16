@@ -29,8 +29,6 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
   level,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [hoveredShard, setHoveredShard] = useState<string | null>(null);
-  const [shockwaveRadius, setShockwaveRadius] = useState<number | null>(null);
   const mouseRef = useRef({
     x: 0,
     y: 0,
@@ -49,7 +47,23 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
 
   // Track the previous completed count to detect the exact milestone moment for the dopaminergic "Lock-In Snap"
   const prevCompletedCountRef = useRef(completedCount);
-  const [isSnapping, setIsSnapping] = useState(false);
+  const stateRef = useRef({
+    habits,
+    completedHabitIds,
+    level,
+    completionRatio,
+    isFullComplete,
+    isSnapping: false,
+    shockwaveRadius: null as number | null
+  });
+
+  useEffect(() => {
+    stateRef.current.habits = habits;
+    stateRef.current.completedHabitIds = completedHabitIds;
+    stateRef.current.level = level;
+    stateRef.current.completionRatio = completionRatio;
+    stateRef.current.isFullComplete = isFullComplete;
+  }, [habits, completedHabitIds, level, completionRatio, isFullComplete]);
 
   useEffect(() => {
     if (
@@ -58,29 +72,14 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
       prevCompletedCountRef.current < totalHabits
     ) {
       // Trigger Lock-in Snap!
-      setIsSnapping(true);
-      setShockwaveRadius(10);
+      stateRef.current.isSnapping = true;
+      stateRef.current.shockwaveRadius = 10;
       setTimeout(() => {
-        setIsSnapping(false);
+        stateRef.current.isSnapping = false;
       }, 1500);
     }
     prevCompletedCountRef.current = completedCount;
   }, [completedCount, totalHabits]);
-
-  // Expand shockwave
-  useEffect(() => {
-    if (shockwaveRadius !== null) {
-      const interval = setInterval(() => {
-        setShockwaveRadius((prev) => {
-          if (prev === null || prev > 405) {
-            return null;
-          }
-          return prev + 12;
-        });
-      }, 16);
-      return () => clearInterval(interval);
-    }
-  }, [shockwaveRadius]);
 
   // Define octahedron vertices for a beautiful crystalline sculpture
   const baseVertices: Point3D[] = [
@@ -141,12 +140,19 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
     // Touch/Mouse deflections state
     const deflectionInertia = faceIndices.map(() => ({ x: 0, y: 0 }));
 
+    let resizeTicking = false;
     const handleResize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      canvas.width = (rect?.width || 400) * window.devicePixelRatio;
-      canvas.height = 360 * window.devicePixelRatio;
-      canvas.style.width = "100%";
-      canvas.style.height = "360px";
+      if (!resizeTicking) {
+        requestAnimationFrame(() => {
+          const rect = canvas.parentElement?.getBoundingClientRect();
+          canvas.width = (rect?.width || 400) * window.devicePixelRatio;
+          canvas.height = 360 * window.devicePixelRatio;
+          canvas.style.width = "100%";
+          canvas.style.height = "360px";
+          resizeTicking = false;
+        });
+        resizeTicking = true;
+      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -185,6 +191,13 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
 
     // Main animation loop
     const render = () => {
+      const { habits, completedHabitIds, completionRatio, isFullComplete, isSnapping, shockwaveRadius } = stateRef.current;
+      
+      if (stateRef.current.shockwaveRadius !== null) {
+        stateRef.current.shockwaveRadius += 12;
+        if (stateRef.current.shockwaveRadius > 405) stateRef.current.shockwaveRadius = null;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const width = canvas.width;
       const height = canvas.height;
@@ -516,14 +529,7 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
       canvas.removeEventListener("touchmove", onTouchMove);
       canvas.removeEventListener("touchend", onMouseLeave);
     };
-  }, [
-    habits,
-    completedHabitIds,
-    completionRatio,
-    isFullComplete,
-    isSnapping,
-    shockwaveRadius,
-  ]);
+  }, []);
 
   const activeStatusText = isFullComplete
     ? "STATUS: HARMONIZED // MONOLITH RESPLENDENT"

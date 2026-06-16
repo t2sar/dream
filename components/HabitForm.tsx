@@ -10,6 +10,7 @@ import { AnimatedModal } from "./AnimatedModal";
 interface HabitFormProps {
   isOpen?: boolean;
   userMaxStreak: number;
+  ownedSeeds?: string[];
   customCategories?: CustomCategory[];
   onAdd: (
     habit: Omit<
@@ -30,7 +31,7 @@ interface HabitFormProps {
   onCancel: () => void;
 }
 
-export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStreak, customCategories = [], onAdd, onCancel }) => {
+export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStreak, ownedSeeds = [], customCategories = [], onAdd, onCancel }) => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Habit["category"]>("health");
   const [icon, setIcon] = useState("Activity");
@@ -400,8 +401,8 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             
             {/* Active Selection Preview */}
             <div className="mb-4 p-4 border border-primary-mint/40 bg-primary-mint/5 flex items-center gap-4 rounded-xl">
-               <div className="w-14 h-14 shrink-0 flex items-center justify-center bg-surface-soft rounded-xl shadow-inner">
-                  <PlantIcon plantType={plantType} stage="Mature Plant" status="Healthy" className="w-10 h-10" />
+               <div className="w-20 h-20 shrink-0 flex items-center justify-center relative">
+                  <PlantIcon plantType={plantType} stage="Mature Plant" status="Healthy" className="w-20 h-20" />
                </div>
                <div>
                   <p className="text-[10px] font-mono uppercase tracking-widest text-primary-mint mb-1">Current Selection</p>
@@ -416,39 +417,52 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredPlants.map((plant) => {
-                const isLocked = userMaxStreak < plant.unlockStreak;
+                const isStarter = plant.type === 'Mango / Aam';
+                const isOwned = isStarter || ownedSeeds.includes(`seed_${plant.type}`);
+                const isLocked = !isOwned;
+                const requiresStreak = userMaxStreak < plant.unlockStreak;
                 const isSelected = plantType === plant.type;
+                
+                let lockMsg = "";
+                if (isLocked) {
+                   if (requiresStreak) lockMsg = `Reach ${plant.unlockStreak} Day Streak to Unlock in Shop`;
+                   else lockMsg = "Buy seed in garden shop";
+                }
                 
                 return (
                   <button 
                     type="button"
                     key={plant.type}
                     onClick={() => !isLocked && setPlantType(plant.type)}
-                    className={`p-3 border rounded-card flex items-start gap-3 transition-colors text-left w-full ${
+                    className={`p-3 border rounded-card flex flex-col items-start gap-3 transition-colors text-left w-full ${
                       isLocked ? 'border-surface-alt opacity-50 cursor-not-allowed bg-surface-alt' :
                       isSelected ? 'border-primary-mint bg-primary-mint/10 cursor-pointer shadow-sm' :
                       'border-surface-alt hover:border-primary-mint/50 cursor-pointer bg-surface-card'
                     }`}
                   >
-                    <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-surface-soft rounded-lg">
-                       <PlantIcon plantType={plant.type} stage="Mature Plant" status="Healthy" className="w-8 h-8" />
+                    <div className="flex items-start gap-4 w-full">
+                       <div className="w-14 h-14 flex-shrink-0 flex items-center justify-center relative">
+                          <PlantIcon plantType={plant.type} stage="Mature Plant" status="Healthy" className="w-14 h-14" />
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <div className="flex justify-between items-start">
+                           <h4 className="text-sm font-bold text-primary-text leading-tight truncate">
+                             {plant.englishName}
+                           </h4>
+                         </div>
+                         <p className="text-[11px] text-status-healthy font-bold uppercase tracking-wide mt-0.5">
+                           {plant.banglaName}
+                         </p>
+                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-sm font-bold text-primary-text leading-tight truncate">
-                          {plant.englishName}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-status-healthy font-bold uppercase tracking-wide mt-0.5">
-                        {plant.banglaName}
-                      </p>
+                    <div>
                       <p className="text-[11px] text-secondary-text mt-1.5 leading-snug line-clamp-2">
                         {plant.description}
                       </p>
                       <div className="mt-2 text-[9px] font-mono uppercase tracking-widest">
                         {isLocked ? (
                           <span className="text-rose-400 flex items-center gap-1">
-                            🔒 Locked until {plant.unlockStreak}-day streak
+                            🔒 {lockMsg}
                           </span>
                         ) : (
                           <span className="text-slate-500">

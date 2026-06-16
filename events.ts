@@ -10,7 +10,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '06-01',
     endDate: '06-14',
     rewardXP: 100,
-    rewardCoins: 30,
+    rewardCoins: 600,
     rewardBadgeId: 'aam_season_gardener',
     rewardDecorationId: 'mango_basket',
     quests: [
@@ -46,7 +46,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '07-01',
     endDate: '07-14',
     rewardXP: 80,
-    rewardCoins: 20,
+    rewardCoins: 400,
     rewardBadgeId: 'rain_garden_keeper',
     rewardDecorationId: 'rain_cloud',
     quests: [
@@ -82,7 +82,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '12-15',
     endDate: '12-31',
     rewardXP: 100,
-    rewardCoins: 25,
+    rewardCoins: 500,
     rewardBadgeId: 'winter_morning_gardener',
     rewardDecorationId: 'winter_sun',
     quests: [
@@ -119,7 +119,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '04-14',
     endDate: '04-21',
     rewardXP: 120,
-    rewardCoins: 30,
+    rewardCoins: 600,
     rewardBadgeId: 'new_year_planter',
     rewardDecorationId: 'boishakh_banner',
     quests: [
@@ -154,7 +154,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '11-01',
     endDate: '11-14',
     rewardXP: 100,
-    rewardCoins: 25,
+    rewardCoins: 500,
     rewardBadgeId: 'focus_garden_student',
     rewardDecorationId: 'study_book',
     quests: [
@@ -191,7 +191,7 @@ export const EVENTS: SeasonalEvent[] = [
     startDate: '05-01',
     endDate: '05-07',
     rewardXP: 80,
-    rewardCoins: 20,
+    rewardCoins: 400,
     rewardBadgeId: 'hydration_badge',
     rewardDecorationId: 'coconut_water',
     quests: [

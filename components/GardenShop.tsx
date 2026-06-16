@@ -4,6 +4,7 @@ import { SHOP_ITEMS } from '../shopData';
 import { Button } from './Button';
 import { AnimatedModal } from './AnimatedModal';
 import { X, Coins, Package } from 'lucide-react';
+import { PlantIcon } from './PlantIcon';
 
 const ShopItemSvg = React.lazy(() => import('./ShopItemAssets').then(m => ({ default: m.ShopItemSvg })));
 
@@ -14,7 +15,7 @@ interface GardenShopProps {
 }
 
 export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
-  const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts'>('pots');
+  const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts' | 'seeds'>('seeds');
   const [confirmPurchaseItem, setConfirmPurchaseItem] = useState<ShopItem | null>(null);
   
   const currentCoins = stats.coins || 0;
@@ -27,6 +28,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
     if (activeTab === 'seasonal') return item.type === 'seasonal';
     if (activeTab === 'backgrounds') return item.type === 'background';
     if (activeTab === 'boosts') return item.type === 'boost';
+    if (activeTab === 'seeds') return item.type === 'seed';
     return true;
   });
 
@@ -34,12 +36,12 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
     <div className="space-y-6 pb-20 fade-in animate-in duration-500">
       
       {/* Coin Balance Header */}
-      <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-3xl p-6 flex items-center justify-between">
+      <div className="bg-surface-card border border-surface-alt rounded-3xl p-6 flex items-center justify-between shadow-sm">
         <div>
-           <div className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase italic">Your Pouch</div>
-           <h2 className="text-2xl font-bold font-display text-white mt-1 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-[10px] text-yellow-900 font-bold border border-yellow-500 shadow-sm shadow-yellow-500/50">C</span>
-              {currentCoins}
+           <div className="text-[10px] font-bold tracking-widest text-status-healthy uppercase italic">Your Pouch</div>
+           <h2 className="text-2xl font-bold font-display text-primary-text mt-1 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-status-needsCare flex items-center justify-center text-[10px] text-white font-bold border border-white/20 shadow-sm">C</span>
+              {Math.floor(currentCoins)}
            </h2>
         </div>
         <button 
@@ -48,7 +50,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                    onEquipItem({ id: 'reset', type: 'boost', price: 0, name: '', description: '', iconName: '' } as ShopItem);
                }
            }}
-           className="px-3 py-1 bg-slate-800/50 text-slate-400 rounded-lg text-xs font-mono border border-slate-700 hover:text-white"
+           className="px-3 py-1 bg-surface-alt/50 text-secondary-text rounded-lg text-xs font-bold border border-surface-alt hover:text-primary-text transition-colors"
         >
            Reset Garden
         </button>
@@ -56,12 +58,12 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
 
       {/* Tabs */}
       <div className="flex overflow-x-auto pb-2 -mx-4 px-4 gap-2 no-scrollbar">
-        {['pots', 'decorations', 'fences', 'seasonal', 'backgrounds', 'boosts'].map(tab => (
+        {['seeds', 'pots', 'decorations', 'fences', 'seasonal', 'backgrounds', 'boosts'].map(tab => (
            <button
              key={tab}
              onClick={() => setActiveTab(tab as any)}
-             className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-colors whitespace-nowrap ${
-               activeTab === tab ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 border border-emerald-400/50' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-transparent'
+             className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap border ${
+               activeTab === tab ? 'bg-primary-mint text-white border-transparent shadow-sm' : 'bg-surface-card text-secondary-text hover:text-primary-text border-surface-alt focus:outline-none focus:ring-2 focus:ring-primary-mint/50 flex-shrink-0'
              }`}
            >
              {tab}
@@ -75,7 +77,22 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           const isOwned = !item.isConsumable && ownedItemIds.includes(item.id);
           const canAfford = currentCoins >= item.price;
           const userLvl = stats.level || 1;
-          const isLevelLocked = item.requiredLevel && userLvl < item.requiredLevel;
+          const userMaxStreak = stats.bestDailyGardenStreak || 0;
+          
+          let isLevelLocked = false;
+          let lockReason = "";
+          if (item.type === 'seed') {
+             // For seeds, we store the required streak in requiredLevel temporarily
+             if (item.requiredLevel && userMaxStreak < item.requiredLevel) {
+                 isLevelLocked = true;
+                 lockReason = `Req ${item.requiredLevel}-Day Streak`;
+             }
+          } else {
+             if (item.requiredLevel && userLvl < item.requiredLevel) {
+                 isLevelLocked = true;
+                 lockReason = `Req Lvl ${item.requiredLevel}`;
+             }
+          }
           
           let statusText = "";
           let buttonAction = () => {};
@@ -88,31 +105,32 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           if (item.type === 'fence' && stats.equippedFenceId === item.id) isEquipped = true;
           if (item.type === 'seasonal' && stats.equippedSeasonalDecorId === item.id) isEquipped = true;
           if (item.type === 'decoration' && (stats.equippedLeftDecorId === item.id || stats.equippedRightDecorId === item.id)) isEquipped = true;
+          if (item.type === 'seed' && isOwned) isEquipped = true; // "Equipped" for seeds just means "Owned/Unlocked for planting"
           
           if (isLevelLocked) {
-              statusText = `Req Lvl ${item.requiredLevel}`;
-              buttonStyle = "bg-slate-800 text-red-400 border border-red-500/30 opacity-50 cursor-not-allowed";
+              statusText = lockReason;
+              buttonStyle = "bg-status-critical/10 text-status-critical border border-status-critical/30 opacity-50 cursor-not-allowed";
               isDisabled = true;
           } else if (isEquipped) {
-              statusText = "Equipped";
-              buttonStyle = "bg-slate-700 text-slate-400 border border-slate-600";
+              statusText = item.type === 'seed' ? "Unlocked" : "Equipped";
+              buttonStyle = "bg-surface-alt/50 text-muted-text border border-surface-alt";
               isDisabled = true;
           } else if (isOwned) {
               statusText = "Equip";
               buttonAction = () => onEquipItem(item);
-              buttonStyle = "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30";
+              buttonStyle = "bg-secondary-blue/10 text-secondary-blue border border-secondary-blue/30 hover:bg-secondary-blue/20";
           } else {
               statusText = `${item.price} coins`;
               buttonAction = () => onBuyItem(item);
               buttonStyle = canAfford 
-                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" 
-                 : "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+                 ? "bg-primary-mint/10 text-primary-mint border border-primary-mint/30 hover:bg-primary-mint/20" 
+                 : "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
               isDisabled = !canAfford;
           }
           
           if (item.isConsumable && !isLevelLocked) {
               const ownedCount = stats.boostItemCounts?.[item.id] || 0;
-              let isCapped = item.maxCapacity ? ownedCount >= item.maxCapacity : false;
+              const isCapped = item.maxCapacity ? ownedCount >= item.maxCapacity : false;
               let isOnCooldown = false;
               
               if (item.cooldownHours) {
@@ -126,34 +144,43 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
 
               if (isCapped) {
                  statusText = "Max Capacity";
-                 buttonStyle = "bg-slate-800 text-amber-500 border border-amber-500/30 opacity-60 cursor-not-allowed";
+                 buttonStyle = "bg-status-needsCare/10 text-status-needsCare border border-status-needsCare/30 opacity-60 cursor-not-allowed";
                  isDisabled = true;
               } else if (isOnCooldown) {
                  statusText = "Cooldown";
-                 buttonStyle = "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+                 buttonStyle = "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
                  isDisabled = true;
               } else {
                  statusText = `${item.price} coins`;
                  buttonAction = () => onBuyItem(item);
                  buttonStyle = canAfford 
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" 
-                    : "bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed";
+                    ? "bg-primary-mint/10 text-primary-mint border border-primary-mint/30 hover:bg-primary-mint/20" 
+                    : "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
                  isDisabled = !canAfford;
               }
           }
           
           return (
-            <div key={item.id} className={`bg-surface-card border border-surface-alt rounded-2xl p-4 flex flex-col pt-6 relative overflow-hidden group ${item.type === 'background' ? 'bg-gradient-to-t from-transparent to-surface-soft' : ''}`}>
-               <div className="w-12 h-12 rounded-xl bg-surface-alt border border-surface-alt mb-3 flex items-center justify-center text-primary-text mx-auto group-hover:scale-110 transition-transform duration-300">
-                  <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin" />}>
-                     <ShopItemSvg itemId={item.id} className="w-8 h-8" />
+            <div key={item.id} className="bg-[#0A0D14] border border-surface-alt rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-hidden group">
+               {/* Background Hint */}
+               {item.type === 'background' && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5 opacity-50 pointer-events-none" />
+               )}
+               
+               <div className="w-20 mb-3 mx-auto relative group-hover:scale-105 transition-transform duration-300">
+                  <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin mx-auto" />}>
+                     {item.type === 'seed' ? (
+                        <PlantIcon plantType={item.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-full" />
+                     ) : (
+                        <ShopItemSvg itemId={item.id} className="w-full" />
+                     )}
                   </React.Suspense>
                </div>
-               <h3 className="text-sm font-bold text-primary-text text-center mb-1 line-clamp-1 leading-tight">{item.name}</h3>
-               <p className="text-[10px] text-muted-text font-mono text-center flex-1 leading-tight line-clamp-3 mb-4">{item.description}</p>
+               <h3 className="text-sm font-bold text-white text-center line-clamp-1 leading-tight">{item.name}</h3>
+               <p className="text-[10px] text-slate-500 font-mono text-center leading-tight line-clamp-3">{item.description}</p>
                
                {item.isConsumable && (
-                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center mb-2">Owned: {stats.boostItemCounts?.[item.id] || 0} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
+                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center">Owned: {stats.boostItemCounts?.[item.id] || 0} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
                )}
                
                <button
@@ -188,8 +215,12 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                 </button>
              </div>
              <div className="flex items-start gap-4 mb-8 bg-surface-alt/10 p-4 rounded-xl border border-surface-alt/50">
-               <div className="w-16 h-16 rounded-xl bg-slate-800 border border-slate-600 flex items-center justify-center shrink-0">
-                  <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-10 h-10 text-slate-300" />
+               <div className="w-24 shrink-0 relative flex items-center justify-center">
+                  {confirmPurchaseItem.type === 'seed' ? (
+                      <PlantIcon plantType={confirmPurchaseItem.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-full" />
+                   ) : (
+                      <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-full" />
+                   )}
                </div>
                <div>
                   <h4 className="font-bold text-white mb-1">{confirmPurchaseItem.name}</h4>

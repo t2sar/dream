@@ -69,9 +69,9 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
       
       let scheduled = 0;
       let completedCount = 0;
-      let completedHabits: Habit[] = [];
-      let missedHabits: Habit[] = [];
-      let slippedHabits: Habit[] = [];
+      const completedHabits: Habit[] = [];
+      const missedHabits: Habit[] = [];
+      const slippedHabits: Habit[] = [];
 
       let allHabitsPaused = true;
 

@@ -1,10 +1,10 @@
 import { ShopItem, ShopItemCategory, ShopItemTier } from './types';
 
-// The Economy Pricing Matrix
+// The Economy Pricing Matrix (Rebalanced for 120-Day challenging model, x20)
 const PRICING_MATRIX = {
-  1: { minPrice: 40, maxPrice: 80, unlockLevel: 1 },
-  2: { minPrice: 100, maxPrice: 250, unlockLevel: 5 },
-  3: { minPrice: 500, maxPrice: 900, unlockLevel: 15 } // Note: specific items might need higher levels like 25 or 35
+  1: { minPrice: 1600, maxPrice: 3000, unlockLevel: 1 },
+  2: { minPrice: 4000, maxPrice: 8000, unlockLevel: 5 },
+  3: { minPrice: 24000, maxPrice: 50000, unlockLevel: 15 }
 };
 
 const CATEGORY_MULTIPLIERS: Record<ShopItemCategory, number> = {
@@ -12,15 +12,28 @@ const CATEGORY_MULTIPLIERS: Record<ShopItemCategory, number> = {
   decoration: 1.0,
   boost: 1.2,
   fence: 1.5,
+  seed: 1.0, 
   seasonal: 1.8,
   background: 2.0
 };
 
 // Deterministic pricing and level calculation
 function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: number, requiredLevel?: number }): ShopItem {
-  // Exception for the default free background
+  // Hardcoded premium exceptions
   if (item.id === 'bg_default') {
     return { ...item, price: 0, requiredLevel: 1, tier: 1 };
+  }
+  if (item.id === 'dec_nakshi_kantha') {
+     return { ...item, price: 24000, requiredLevel: 15, tier: 3 };
+  }
+  if (item.id === 'bg_zamindar_palace') {
+     return { ...item, price: 36000, requiredLevel: 25, tier: 3 };
+  }
+  if (item.id === 'dec_golden_rickshaw') {
+     return { ...item, price: 50000, requiredLevel: 35, tier: 3 };
+  }
+  if (item.price !== undefined) {
+     return { ...item, price: item.price, requiredLevel: item.requiredLevel || 1 } as ShopItem;
   }
 
   const tier: ShopItemTier = item.tier || 1;
@@ -44,7 +57,7 @@ function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { 
   // Clamp to tier boundaries
   calculatedPrice = Math.max(config.minPrice, Math.min(config.maxPrice, calculatedPrice));
 
-  let reqLevel = item.requiredLevel ?? config.unlockLevel;
+  const reqLevel = item.requiredLevel ?? config.unlockLevel;
 
   return {
     ...item,
@@ -342,4 +355,44 @@ const RAW_SHOP_ITEMS: (Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: num
   }
 ];
 
-export const SHOP_ITEMS: ShopItem[] = RAW_SHOP_ITEMS.map(applyPricingEngine);
+export const BASE_SHOP_ITEMS: ShopItem[] = RAW_SHOP_ITEMS.map(applyPricingEngine);
+
+import { PLANTS } from './plants';
+
+export const SEED_SHOP_ITEMS: ShopItem[] = PLANTS.map(plant => {
+  let tier: ShopItemTier = 1;
+  let price = 600; // base generic
+  
+  if (plant.unlockStreak <= 10) {
+    tier = 1;
+  } else if (plant.unlockStreak <= 24) {
+    tier = 2;
+  } else {
+    tier = 3;
+  }
+
+  // deterministic price based on string
+  let hash = 0;
+  for (let i = 0; i < plant.type.length; i++) hash = (Math.imul(31, hash) + plant.type.charCodeAt(i)) | 0;
+  const variation = (Math.abs(hash) % 100) / 100;
+
+  if (tier === 1) price = 400 + variation * 400; // 400-800
+  else if (tier === 2) price = 1000 + variation * 1000; // 1000-2000
+  else price = 3000 + variation * 2000; // 3000-5000
+
+  price = Math.round(price / 10) * 10;
+
+  return {
+    id: `seed_${plant.type}`,
+    name: `${plant.englishName} Seed`,
+    type: 'seed',
+    description: plant.description,
+    price: price,
+    iconName: 'Leaf',
+    isConsumable: false,
+    requiredLevel: plant.unlockStreak, // Unlock depends on streak locally, seeds are always "visible" or require their unlock Streak
+    tier: tier
+  } as ShopItem;
+});
+
+export const SHOP_ITEMS: ShopItem[] = [...BASE_SHOP_ITEMS, ...SEED_SHOP_ITEMS];

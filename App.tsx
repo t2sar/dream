@@ -27,7 +27,7 @@ import {
   Quote,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { format, differenceInCalendarDays, subDays, startOfWeek } from "date-fns";
+import { format, differenceInCalendarDays, subDays, startOfWeek, endOfWeek, subWeeks, isWithinInterval, parseISO, eachDayOfInterval } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { playCompletionSound } from "./audio";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -89,6 +89,8 @@ import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
 import { MotivationSettings } from "./components/MotivationSettings";
 import { COMPANIONS } from "./companionsData";
 
+const APP_START_TIME = Date.now();
+
 const MOTIVATIONAL_QUOTES = [
   {
     text: "Consistency is what transforms average into excellence.",
@@ -120,6 +122,61 @@ const MOTIVATIONAL_QUOTES = [
   },
 ];
 
+function checkWeeklyConsistencyThreeWeeks(habits: Habit[], logs: HabitLog, referenceDate: Date): boolean {
+  if (habits.length === 0) return false;
+  
+  // Checking last 3 weeks: Week 0 (current), Week 1 (previous), Week 2 (2 weeks ago)
+  const weeks = [0, 1, 2].map(num => {
+    const ref = subWeeks(referenceDate, num);
+    const start = startOfWeek(ref, { weekStartsOn: 1 });
+    const end = endOfWeek(ref, { weekStartsOn: 1 });
+    return { start, end };
+  });
+
+  const activeHabits = habits.filter(h => !h.isArchived);
+  if (activeHabits.length === 0) return false;
+
+  // For each week, let's check if the target was met for ALL active habits
+  for (const week of weeks) {
+    let weekSuccess = true;
+    let checkedAny = false;
+    
+    for (const h of activeHabits) {
+      // Check if habit was created after this week ended. If so, ignore it for this week's check.
+      if (h.createdAt && new Date(h.createdAt) > week.end) {
+        continue;
+      }
+      
+      checkedAny = true;
+      // Calculate completed times for h inside the week's interval
+      let completionsInWeek = 0;
+      const daysInWeek = eachDayOfInterval({ start: week.start, end: week.end });
+      daysInWeek.forEach(logDate => {
+        const dateStr = format(logDate, "yyyy-MM-dd");
+        if (logs[dateStr] && logs[dateStr].includes(h.id)) {
+           completionsInWeek++;
+        }
+      });
+      
+      const target = h.scheduleType === 'weekly' ? 1 
+                   : (h.scheduleType === 'times_per_week' || h.scheduleType === 'anytime' ? (h.targetCount || 1)
+                   : (h.scheduleType === 'specific_days' ? (h.scheduleDays || []).length
+                   : 5)); // 5 days for daily as a standard
+      
+      if (completionsInWeek < target) {
+        weekSuccess = false;
+        break;
+      }
+    }
+    
+    if (!checkedAny || !weekSuccess) {
+      return false; // This week failed
+    }
+  }
+  
+  return true;
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -147,11 +204,58 @@ function App() {
   const [date, setDate] = useState(new Date());
   const dateKey = format(date, "yyyy-MM-dd");
 
-  // Midnight check now unified in the main interval
+  React.useEffect(() => {
+    // Throttled background side-effects loop (time updates, midnight rollover)
+    // Only runs heavily when idle or unfocused, reducing battery consumption
+    const runChecks = () => {
+       const newDate = new Date();
+       if (format(newDate, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")) {
+          setDate(newDate); // triggers midnight cascade
+       }
+       import('./components/GardenSky').then(({ getGardenTimePhase }) => {
+          const phase = getGardenTimePhase();
+          if (document.body.getAttribute('data-time-phase') !== phase) {
+             document.body.setAttribute('data-time-phase', phase);
+          }
+       });
+    };
+    
+    runChecks();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') requestAnimationFrame(runChecks);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    const handleFocus = () => requestAnimationFrame(runChecks);
+    window.addEventListener('focus', handleFocus);
+
+    const loop = () => {
+       requestAnimationFrame(runChecks);
+    };
+    
+    // Scans every 5 minutes instead of 1 minute loops
+    const interval = setInterval(loop, 5 * 60000);
+
+    return () => {
+       document.removeEventListener('visibilitychange', handleVisibilityChange);
+       window.removeEventListener('focus', handleFocus);
+       clearInterval(interval);
+    };
+  }, [date]);
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   // Motivation Popup State
   const [motivationPopup, setMotivationPopup] = useState<{ text: string, author?: string } | null>(null);
+  const [massiveCoinPopup, setMassiveCoinPopup] = useState<number | null>(null);
+  const [weeklyCelebrationData, setWeeklyCelebrationData] = useState<{
+     activePlants: number;
+     maturePlants: number;
+     totalHabitsCompleted: number;
+     currentLevel: number;
+     coinReward: number;
+     xpReward: number;
+  } | null>(null);
 
   // Data State
   const [logs, setLogs] = useState<HabitLog>({});
@@ -161,18 +265,6 @@ function App() {
   const [dataLoading, setDataLoading] = useState(false);
   const [hasProcessedStreak, setHasProcessedStreak] = useState(false);
   const hasShownMotivationRef = React.useRef(false);
-
-  // Time of Day Synchronization
-  React.useEffect(() => {
-    const updateTimePhase = () => {
-      import('./components/GardenSky').then(({ getGardenTimePhase }) => {
-         const phase = getGardenTimePhase();
-         document.body.setAttribute('data-time-phase', phase);
-      });
-    };
-    updateTimePhase();
-    // Subsequent updates unified in the main interval
-  }, []);
 
   const activeEvent = React.useMemo(() => getActiveEvent(new Date()), []);
   const eventProgress = extraStats.eventProgress?.eventId === activeEvent?.id 
@@ -186,7 +278,7 @@ function App() {
       } : undefined);
 
   // Install Prompt
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [toastData, setToastData] = useState<{message: string, action?: {label: string, onClick: () => void}} | null>(null);
 
@@ -362,8 +454,6 @@ function App() {
   useEffect(() => {
     if (dataLoading || habits.length === 0) return;
     let changed = false;
-    let totalFreezesUsed = 0;
-    const initialFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
     const updatedHabits = habits.map((habit) => {
       const lastDate =
         habit.lastMissCheckedDate ||
@@ -375,12 +465,9 @@ function App() {
 
       if (daysMissed > 0) {
         let missedCount = 0;
-        let isFlexibleTargetMetForLastCycle = false;
+        const isFlexibleTargetMetForLastCycle = false;
         
-        const daysToCheck = Math.min(daysMissed, 14);
-        const autoMissedDays = daysMissed - daysToCheck;
-        
-        for (let i = 1; i <= daysToCheck; i++) {
+        for (let i = 1; i <= daysMissed; i++) {
           const checkDateStr = format(
             subDays(new Date(dateKey), i),
             "yyyy-MM-dd",
@@ -404,28 +491,28 @@ function App() {
           if (!didComplete && !wasProtected) missedCount++;
         }
 
-        if (autoMissedDays > 0) {
-            missedCount += autoMissedDays;
-        }
-
         if (missedCount > 0) {
           changed = true;
           let newHealth = habit.plantHealth ?? 100;
           let remainingMisses = missedCount;
           
-          let availableFreezes = initialFreezes - totalFreezesUsed;
-          let freezesUsedThisHabit = 0;
+          const ownedFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
+          let freezesUsed = 0;
           
-          if (availableFreezes >= remainingMisses) {
-            freezesUsedThisHabit = remainingMisses;
+          if (ownedFreezes >= remainingMisses) {
+            freezesUsed = remainingMisses;
             remainingMisses = 0;
           } else {
-            freezesUsedThisHabit = availableFreezes;
-            remainingMisses -= availableFreezes;
+            freezesUsed = ownedFreezes;
+            remainingMisses -= ownedFreezes;
           }
           
-          if (freezesUsedThisHabit > 0) {
-             totalFreezesUsed += freezesUsedThisHabit;
+          if (freezesUsed > 0) {
+             const newCounts = {
+                ...(extraStats.boostItemCounts || {}),
+                'boost_streak_freeze': ownedFreezes - freezesUsed
+             };
+             setExtraStats(prev => ({ ...prev, boostItemCounts: newCounts }));
           }
 
           let grace = habit.graceDays || 0;
@@ -471,21 +558,10 @@ function App() {
       return habit;
     });
 
-    if (changed || totalFreezesUsed > 0) {
+    if (changed) {
       setTimeout(() => {
-        let statsToSave = extraStats;
-        if (totalFreezesUsed > 0) {
-           statsToSave = {
-              ...extraStats,
-              boostItemCounts: {
-                 ...(extraStats.boostItemCounts || {}),
-                 'boost_streak_freeze': Math.max(0, initialFreezes - totalFreezesUsed)
-              }
-           };
-           setExtraStats(statsToSave);
-        }
         setHabits(updatedHabits);
-        persistData(updatedHabits, logs, statsToSave, activeRestMode);
+        persistData(updatedHabits, logs, extraStats, activeRestMode);
       }, 500);
     }
   }, [dataLoading, dateKey]);
@@ -513,7 +589,7 @@ function App() {
   // 4. Save to Cloud Helper
   const persistData = (newHabits: Habit[], newLogs: HabitLog, incomingStats: Partial<UserStats> = extraStats, newRestMode: RestMode | null = activeRestMode) => {
     // Verify badges using a dynamically constructed full stats object
-    const totalCompleted = (Object.values(newLogs) as string[][]).reduce((acc, curr) => acc + curr.length, 0);
+    const totalCompleted = newHabits.reduce((acc, h) => acc + (h.totalCompletions || 0), 0);
     const totalXp = (incomingStats.xp || 0) + newHabits.reduce((acc, h) => acc + (h.xp || (h.totalCompletions || 0) * 10), 0) || totalCompleted * 10;
     const computedLevel = Math.floor(Math.sqrt(totalXp / 100)) + 1; // Assuming getLevelFromXP logic fallback if needed
     
@@ -521,7 +597,7 @@ function App() {
     const fullLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(totalXp) : computedLevel;
     
     // Check badges before saving
-    let statsToSave = { ...incomingStats };
+    const statsToSave = { ...incomingStats };
     const statsForCheck = {
       ...statsToSave,
       totalHabitsCompleted: totalCompleted,
@@ -540,18 +616,40 @@ function App() {
         coins: newStats.coins
       });
       setExtraStats(statsToSave);
-      setNewlyUnlockedBadges(prev => [...prev, ...unlockedBadges]);
-      playHaptic('allDone');
+      
+      try {
+        const locallyShownBadges = JSON.parse(localStorage.getItem('t2sar_shown_badges') || '[]');
+        const actualNewBadges = unlockedBadges.filter(b => !locallyShownBadges.includes(b.badgeId));
+        
+        // Suppress popups during initial hydration (first 5 seconds)
+        const isHydrationLoad = Date.now() - APP_START_TIME < 5000;
+        
+        if (actualNewBadges.length > 0) {
+           localStorage.setItem('t2sar_shown_badges', JSON.stringify([
+              ...locallyShownBadges, 
+              ...actualNewBadges.map(b => b.badgeId)
+           ]));
+           
+           if (!isHydrationLoad) {
+             setNewlyUnlockedBadges(prev => [...prev, ...actualNewBadges]);
+             playHaptic('allDone');
 
-      // Special visual badge unlock trigger for milestones
-      unlockedBadges.forEach(badge => {
-        if (badge.badgeId === '21_day_nature_master' || badge.badgeId === '30_day_fruit_grower') {
-           showToast(`🔥 Epic Milestone: ${badge.title} Unlocked!`, {
-              label: "Awesome!",
-              onClick: () => {}
-           });
+             // Special visual badge unlock trigger for milestones
+             actualNewBadges.forEach(badge => {
+               if (badge.badgeId === '21_day_nature_master' || badge.badgeId === '30_day_fruit_grower') {
+                  showToast(`🔥 Epic Milestone: ${badge.title} Unlocked!`, {
+                     label: "Awesome!",
+                     onClick: () => {}
+                  });
+               }
+             });
+           }
         }
-      });
+      } catch (e) {
+        if (Date.now() - APP_START_TIME >= 5000) {
+           setNewlyUnlockedBadges(prev => [...prev, ...unlockedBadges]);
+        }
+      }
     }
 
     if (user) {
@@ -571,13 +669,28 @@ function App() {
     }
   };
 
-  // Auto-save debounced effect
+  const lastStateHash = React.useRef<string>('');
+  const throttleTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (dataLoading || authLoading || !user) return;
-    const timeoutId = setTimeout(() => {
-      persistData(habits, logs, extraStats, activeRestMode);
-    }, 1500);
-    return () => clearTimeout(timeoutId);
+    
+    const currentHash = JSON.stringify({ h: habits, l: logs, s: extraStats, r: activeRestMode });
+    if (currentHash === lastStateHash.current) return;
+    
+    if (!throttleTimeoutRef.current) {
+        lastStateHash.current = currentHash;
+        persistData(habits, logs, extraStats, activeRestMode);
+        throttleTimeoutRef.current = setTimeout(() => {
+            throttleTimeoutRef.current = null;
+            // Also commit any trailing changes that occurred during the throttle window
+            const latestHash = JSON.stringify({ h: stateRefs.current.habits, l: stateRefs.current.logs, s: stateRefs.current.extraStats, r: stateRefs.current.activeRestMode });
+            if (latestHash !== lastStateHash.current) {
+               lastStateHash.current = latestHash;
+               persistData(stateRefs.current.habits, stateRefs.current.logs, stateRefs.current.extraStats, stateRefs.current.activeRestMode);
+            }
+        }, 15000); // 15 seconds aggressive throttle
+    }
   }, [habits, logs, extraStats, activeRestMode, user, dataLoading, authLoading]);
 
   // 5. Install Prompt
@@ -607,21 +720,6 @@ function App() {
        if (!user || dataLoading) return;
        
        const now = new Date();
-       
-       // ======== Unified Midnight Check ========
-       setDate(prevDate => {
-          if (format(now, "yyyy-MM-dd") !== format(prevDate, "yyyy-MM-dd")) {
-             return now;
-          }
-          return prevDate;
-       });
-
-       // ======== Unified Time Phase Check ========
-       import('./components/GardenSky').then(({ getGardenTimePhase }) => {
-          const phase = getGardenTimePhase();
-          document.body.setAttribute('data-time-phase', phase);
-       });
-
        const currentHours = now.getHours().toString().padStart(2, '0');
        const currentMinutes = now.getMinutes().toString().padStart(2, '0');
        const currentTime = `${currentHours}:${currentMinutes}`;
@@ -800,7 +898,7 @@ function App() {
   };
 
   const restoreArchivedHabit = (id: string, asNewSeed: boolean) => {
-    let updatedHabits = [...habits];
+    const updatedHabits = [...habits];
     const index = updatedHabits.findIndex(h => h.id === id);
     if (index === -1) return;
 
@@ -878,10 +976,10 @@ function App() {
     // Optimistic Update locally
     setExtraStats(newExtraStats);
 
-    let changedHabit = habits.find(h => h.id === id);
+    const changedHabit = habits.find(h => h.id === id);
     if (!changedHabit) return;
 
-    let ownedFreezes = newExtraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
+    const ownedFreezes = newExtraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
     let usedFreeze = false;
     
     if (ownedFreezes > 0) {
@@ -894,7 +992,7 @@ function App() {
     }
 
     const diff = changedHabit.difficulty || 'medium';
-    let healthLoss = changedHabit.type === 'avoid' ? 20 : (diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25);
+    const healthLoss = changedHabit.type === 'avoid' ? 20 : (diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25);
     let newHealth = (changedHabit.plantHealth ?? 100) - healthLoss;
     newHealth = Math.max(0, newHealth);
 
@@ -927,11 +1025,11 @@ function App() {
      };
      setExtraStats(newExtraStats);
 
-     let changedHabit = habits.find(h => h.id === id);
+     const changedHabit = habits.find(h => h.id === id);
      if (!changedHabit) return;
 
      const diff = changedHabit.difficulty || 'medium';
-     let healthGain = changedHabit.type === 'avoid' ? 20 : (diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25);
+     const healthGain = changedHabit.type === 'avoid' ? 20 : (diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25);
      let newHealth = (changedHabit.plantHealth ?? 100) + healthGain;
      newHealth = Math.min(100, newHealth);
 
@@ -955,11 +1053,11 @@ function App() {
 
     const diff = habit.difficulty || 'medium';
     const xpReward = diff === 'easy' ? 30 : diff === 'medium' ? 50 : diff === 'hard' ? 80 : 120;
-    const coinReward = diff === 'easy' ? 20 : diff === 'medium' ? 35 : diff === 'hard' ? 50 : 80;
+    const coinReward = diff === 'easy' ? 400 : diff === 'medium' ? 700 : diff === 'hard' ? 1000 : 1600;
     
     const newOrchard = [...(extraStats.orchard || [])];
     const fruitId = habit.plantType || 'Unknown';
-    let existingIndex = newOrchard.findIndex(o => o.fruitId === fruitId && o.habitId === habit.id);
+    const existingIndex = newOrchard.findIndex(o => o.fruitId === fruitId && o.habitId === habit.id);
     const nowStr = new Date().toISOString();
     
     if (existingIndex >= 0) {
@@ -1136,7 +1234,7 @@ function App() {
     const tMinus3 = format(subDays(new Date(), 3), 'yyyy-MM-dd');
     if (targetDateKey !== tMinus1 && targetDateKey !== tMinus2 && targetDateKey !== tMinus3) return;
 
-    let logsCopy = { ...logs };
+    const logsCopy = { ...logs };
     const currentCompleted = logsCopy[targetDateKey] || [];
     if (currentCompleted.includes(habitId)) return;
 
@@ -1180,9 +1278,9 @@ function App() {
     const newLogs = { ...logsCopy, [targetDateKey]: [...currentCompleted, habitId] };
 
     // Calculate partial XP and health for backdating
-    let diff = habit.difficulty || 'medium';
-    let rawXpGain = diff === 'easy' ? 8 : diff === 'medium' ? 12 : 18;
-    let xpGain = Math.ceil(rawXpGain / 2);
+    const diff = habit.difficulty || 'medium';
+    const rawXpGain = diff === 'easy' ? 8 : diff === 'medium' ? 12 : 18;
+    const xpGain = Math.ceil(rawXpGain / 2);
 
     let healthGain = diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25;
     if (habit.type === 'avoid') {
@@ -1194,11 +1292,11 @@ function App() {
     let checkDate = new Date();
     // Count days backward from today
     while (true) {
-        let dStr = format(checkDate, 'yyyy-MM-dd');
+        const dStr = format(checkDate, 'yyyy-MM-dd');
         if (dStr < creationDate) break;
         
-        let completed = newLogs[dStr]?.includes(habit.id);
-        let protectedDay = isHabitPaused(habit.id, dStr, activeRestMode);
+        const completed = newLogs[dStr]?.includes(habit.id);
+        const protectedDay = isHabitPaused(habit.id, dStr, activeRestMode);
         
         if (completed) {
             newStreak++;
@@ -1261,8 +1359,8 @@ function App() {
         (h.totalCompletions || 0) + (isNowCompleted ? 1 : -1);
       newTotalCompletions = Math.max(0, newTotalCompletions);
 
-      let diff = h.difficulty || 'medium';
-      let xpGain = diff === 'easy' ? 8 : diff === 'medium' ? 12 : 18;
+      const diff = h.difficulty || 'medium';
+      const xpGain = diff === 'easy' ? 8 : diff === 'medium' ? 12 : 18;
       
       let isRevivedNow = false;
       let newRevivalCount = h.revivalCount || 0;
@@ -1285,7 +1383,7 @@ function App() {
           newRevivalCount += 1;
         }
 
-        let tempNewStreak = h.streak + 1;
+        const tempNewStreak = h.streak + 1;
         if (tempNewStreak === 3) extraXpGained += 10;
         if (tempNewStreak === 7) extraXpGained += 25;
         if (tempNewStreak === 14) extraXpGained += 50;
@@ -1327,7 +1425,7 @@ function App() {
       } else {
          newStreak = isNowCompleted ? h.streak + 1 : Math.max(0, h.streak - 1);
       }
-      let newBestStreak = Math.max(h.bestStreak || 0, newStreak);
+      const newBestStreak = Math.max(h.bestStreak || 0, newStreak);
 
       let healthGain = diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25;
       if (h.type === 'avoid') {
@@ -1405,24 +1503,28 @@ function App() {
     if (isNowCompleted) {
       const h = habits.find(h => h.id === id);
       if (h) {
-        let diff = h.difficulty || 'medium';
-        let baseAward = diff === 'easy' ? 2 : diff === 'medium' ? 4 : 6;
+        const diff = h.difficulty || 'medium';
+        const baseAward = diff === 'easy' ? 10 : diff === 'medium' ? 20 : 40;
         
         let streakMultiplier = 1.0;
         const currentStreak = h.streak || 0;
-        if (currentStreak >= 30) streakMultiplier = 2.0;
-        else if (currentStreak >= 14) streakMultiplier = 1.5;
+        if (currentStreak >= 30) {
+           streakMultiplier = 5.0;
+           setMassiveCoinPopup(Math.floor(baseAward * streakMultiplier));
+        }
+        else if (currentStreak >= 21) streakMultiplier = 3.0;
+        else if (currentStreak >= 14) streakMultiplier = 2.0;
         else if (currentStreak >= 5) streakMultiplier = 1.2;
         
         baseCoinsDelta += Math.floor(baseAward * streakMultiplier);
         if (h.type === 'avoid') incResist++;
         
         if (h.plantStatus === 'Wilting' || h.plantStatus === 'Critical' || h.plantStatus === 'Dead') {
-           bonusCoinsDelta += 10;
+           bonusCoinsDelta += 20;
         }
       }
       if (isPerfectDayNow) {
-        bonusCoinsDelta += 10;
+        bonusCoinsDelta += 40;
         if (activeEvent && activeEvent.id === 'monsoon_festival') incRainy++;
       }
       
@@ -1433,30 +1535,31 @@ function App() {
     } else {
       const h = habits.find(h => h.id === id);
       if (h) {
-        let diff = h.difficulty || 'medium';
-        let baseAward = diff === 'easy' ? 2 : diff === 'medium' ? 4 : 6;
+        const diff = h.difficulty || 'medium';
+        const baseAward = diff === 'easy' ? 10 : diff === 'medium' ? 20 : 40;
         
         let streakMultiplier = 1.0;
         const currentStreak = h.streak || 0;
-        if (currentStreak >= 30) streakMultiplier = 2.0;
-        else if (currentStreak >= 14) streakMultiplier = 1.5;
+        if (currentStreak >= 30) streakMultiplier = 5.0;
+        else if (currentStreak >= 21) streakMultiplier = 3.0;
+        else if (currentStreak >= 14) streakMultiplier = 2.0;
         else if (currentStreak >= 5) streakMultiplier = 1.2;
         
         baseCoinsDelta -= Math.floor(baseAward * streakMultiplier);
 
         if (h.plantStatus === 'Wilting' || h.plantStatus === 'Critical' || h.plantStatus === 'Dead') {
-           bonusCoinsDelta -= 10;
+           bonusCoinsDelta -= 20;
         }
       }
     }
     
     // Process Active Event Quests
     let updatedEventProgress = eventProgress;
-    let eventCompletedJustNow = false;
-    let eventCoinsGained = 0;
-    let eventXpGained = 0;
-    let eventBadgeGained: string | null = null;
-    let eventDecorationGained: string | null = null;
+    const eventCompletedJustNow = false;
+    const eventCoinsGained = 0;
+    const eventXpGained = 0;
+    const eventBadgeGained: string | null = null;
+    const eventDecorationGained: string | null = null;
 
     if (activeEvent && isNowCompleted && updatedEventProgress && !updatedEventProgress.isCompleted) {
        const habitObj = habits.find(h => h.id === id);
@@ -1494,7 +1597,7 @@ function App() {
        }
     }
 
-    let updatedChallenge = extraStats.activeChallenge ? { ...extraStats.activeChallenge } : null;
+    const updatedChallenge = extraStats.activeChallenge ? { ...extraStats.activeChallenge } : null;
     let challengeDailyBonus = 0;
 
     if (updatedChallenge && isNowCompleted && updatedChallenge.status === 'active') {
@@ -1510,8 +1613,8 @@ function App() {
        
        if (matches && !updatedChallenge.completedDates.includes(dateKey)) {
           updatedChallenge.completedDates = [...updatedChallenge.completedDates, dateKey];
-          challengeDailyBonus = 5; // daily challenge bonus
-          bonusCoinsDelta += 5;
+          challengeDailyBonus = 1; // daily challenge XP bonus
+          bonusCoinsDelta += 20;   // daily challenge Coin bonus
        }
     }
 
@@ -1525,10 +1628,7 @@ function App() {
     }
     
     if (baseCoinsDelta > 0) {
-       let allowedBase = baseCoinsDelta;
-       if (currentDailyCoins + allowedBase > 25) {
-          allowedBase = Math.max(0, 25 - currentDailyCoins);
-       }
+       const allowedBase = baseCoinsDelta;
        currentDailyCoins += allowedBase;
        finalCoinsDelta = allowedBase + bonusCoinsDelta;
     } else if (baseCoinsDelta < 0) {
@@ -1538,7 +1638,7 @@ function App() {
        finalCoinsDelta = bonusCoinsDelta;
     }
     
-    let earnedCoins = finalCoinsDelta;
+    const earnedCoins = finalCoinsDelta;
 
     if (extraXpGained > 0 || extraPerfectDays > 0 || extraPlantsRevived > 0 || updatedEventProgress !== eventProgress || updatedChallenge !== extraStats.activeChallenge || challengeDailyBonus > 0 || earnedCoins !== 0 || incEvening > 0 || incNight > 0 || incRainy > 0 || incResist > 0 || isNowCompleted !== undefined) {
        newExtraStats = {
@@ -1584,6 +1684,39 @@ function App() {
        
        // Note: We need a state variable to show unlock modal
        setRecentlyUnlockedCompanions(prev => [...prev, ...newComps.map(c => c.id)]);
+    }
+
+    // Weekly Consistency Check
+    if (isNowCompleted) {
+       const today = new Date();
+       const currentWeekStart = format(startOfWeek(today, { weekStartsOn: 1 }), "yyyy-MM-dd");
+       if (newExtraStats.lastWeeklyCelebrationWeek !== currentWeekStart) {
+          const metConsistency = checkWeeklyConsistencyThreeWeeks(updatedHabits, currentLogs, today);
+          if (metConsistency) {
+             newExtraStats = {
+                ...newExtraStats,
+                lastWeeklyCelebrationWeek: currentWeekStart,
+                coins: (newExtraStats.coins || 0) + 500, // reward 500 coins for 3-weeks consistency!
+                xp: (newExtraStats.xp || 0) + 200,      // reward 200 XP!
+             };
+             
+             // Prepare growth summary
+             const activeCount = updatedHabits.filter(h => !h.isArchived).length;
+             const matureCount = updatedHabits.filter(h => !h.isArchived && (h.plantStage === 'Mature Plant' || h.plantStage === 'Fruiting Plant')).length;
+             const totalCompletedCount = (newExtraStats.totalHabitsCompleted || 0);
+             const currentLvl = newExtraStats.level || stats.level || 1;
+             
+             // Trigger modal
+             setWeeklyCelebrationData({
+                activePlants: activeCount,
+                maturePlants: matureCount,
+                totalHabitsCompleted: totalCompletedCount,
+                currentLevel: currentLvl,
+                coinReward: 500,
+                xpReward: 200,
+             });
+          }
+       }
     }
 
     if (newExtraStats !== extraStats) {
@@ -1766,7 +1899,7 @@ function App() {
        }
     }
     
-    let newExtraStats = { 
+    const newExtraStats = { 
        ...extraStats, 
        coins: currentCoins - item.price,
        shopPurchasesCount: (extraStats.shopPurchasesCount || 0) + 1
@@ -1792,7 +1925,7 @@ function App() {
   };
 
   const handleEquipItem = (item: ShopItem) => {
-    let newExtraStats = { ...extraStats };
+    const newExtraStats = { ...extraStats };
     if (item.id === 'reset') {
        newExtraStats.equippedBackgroundId = undefined;
        newExtraStats.equippedPotId = undefined;
@@ -1837,6 +1970,69 @@ function App() {
     const perfect = due.length > 0 && due.every((h) => (logs[dateKey] || []).includes(h.id));
     return { activeHabitsList: active, dueHabitsList: due, isPerfectDayNowTopLevel: perfect };
   }, [habits, logs, dateKey]);
+
+  // Stable handlers for performance
+  const handlersRef = React.useRef({
+     toggleHabit,
+     handleSlipHabit,
+     undoSlipHabit,
+     deleteHabit,
+     handleHarvestPlant,
+     handleBackdate
+  });
+  
+  React.useEffect(() => {
+    handlersRef.current = {
+      toggleHabit,
+      handleSlipHabit,
+      undoSlipHabit,
+      deleteHabit,
+      handleHarvestPlant,
+      handleBackdate
+    };
+  });
+
+  const stableToggleHabit = React.useCallback((id: string, isM?: boolean, amt?: number) => handlersRef.current.toggleHabit(id, isM, amt), []);
+  const stableHandleSlipHabit = React.useCallback((id: string, r?: string) => handlersRef.current.handleSlipHabit(id, r), []);
+  const stableUndoSlipHabit = React.useCallback((id: string) => handlersRef.current.undoSlipHabit(id), []);
+  const stableDeleteHabit = React.useCallback((id: string) => handlersRef.current.deleteHabit(id), []);
+  const stableHarvestPlant = React.useCallback((id: string) => handlersRef.current.handleHarvestPlant(id), []);
+  const stableBackdate = React.useCallback((id: string, d: string) => handlersRef.current.handleBackdate(id, d), []);
+
+  const almanacEligibility = React.useMemo(() => {
+    const year = getAlmanacYear(date);
+    if (!year) return false;
+    if (extraStats.almanacs?.[year]) return true;
+    let count = 0;
+    for (const key in logs) {
+       if (key.startsWith(year)) count++;
+       if (count >= 10) return true;
+    }
+    return false;
+  }, [logs, date, extraStats.almanacs]);
+
+  const sortedActiveHabits = React.useMemo(() => {
+    return [...activeHabitsList].sort((a, b) => {
+       if (sortType === 'recovery') {
+          const aRecovery = (a.plantHealth !== undefined && a.plantHealth < 50);
+          const bRecovery = (b.plantHealth !== undefined && b.plantHealth < 50);
+          if (aRecovery && !bRecovery) return -1;
+          if (!aRecovery && bRecovery) return 1;
+          return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
+       }
+       if (sortType === 'health') {
+          return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
+       }
+       if (sortType === 'alpha') {
+          return a.name.localeCompare(b.name);
+       }
+       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [activeHabitsList, sortType]);
+
+  const filteredTrackerHabits = React.useMemo(() => {
+    return categoryFilter === 'all' ? habits : habits.filter((h) => h.category === categoryFilter);
+  }, [categoryFilter, habits]);
 
   // -- Render Logic --
 
@@ -2124,10 +2320,7 @@ function App() {
                 {/* Almanac Banner */}
                 {isAlmanacSeason(date) && (() => {
                    const year = getAlmanacYear(date);
-                   const existingAlmanac = extraStats.almanacs?.[year];
-                   // Check eligibility - rough estimate if not yet generated
-                   const count = Object.keys(logs).filter(k => k.startsWith(year + '-')).length;
-                   if (count >= 10 || existingAlmanac) {
+                   if (almanacEligibility) {
                       return (
                         <div 
                           onClick={() => {
@@ -2168,22 +2361,7 @@ function App() {
 
                 {/* Daily Garden Main View */}
                 <DailyGarden
-                  habits={[...activeHabitsList].sort((a, b) => {
-                     if (sortType === 'recovery') {
-                        const aRecovery = (a.plantHealth !== undefined && a.plantHealth < 50);
-                        const bRecovery = (b.plantHealth !== undefined && b.plantHealth < 50);
-                        if (aRecovery && !bRecovery) return -1;
-                        if (!aRecovery && bRecovery) return 1;
-                        return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
-                     }
-                     if (sortType === 'health') {
-                        return (a.plantHealth ?? 100) - (b.plantHealth ?? 100);
-                     }
-                     if (sortType === 'alpha') {
-                        return a.name.localeCompare(b.name);
-                     }
-                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                  })}
+                  habits={sortedActiveHabits}
                   logs={logs}
                   stats={stats}
                   dateKey={dateKey}
@@ -2196,20 +2374,21 @@ function App() {
                     setActiveRestMode(updatedMode);
                     persistData(habits, logs, extraStats, updatedMode);
                   }}
-                  onWaterPlant={(id) => toggleHabit(id)}
-                  onSlipHabit={handleSlipHabit}
-                  onUndoSlip={undoSlipHabit}
+                  onWaterPlant={stableToggleHabit}
+                  onSlipHabit={stableHandleSlipHabit}
+                  onUndoSlip={stableUndoSlipHabit}
                   onAddHabit={() => setShowAddForm(true)}
                   isPerfectDayNow={isPerfectDayNowTopLevel}
-                  onDeletePlant={deleteHabit}
-                  onHarvestPlant={handleHarvestPlant}
+                  onDeletePlant={stableDeleteHabit}
+                  onHarvestPlant={stableHarvestPlant}
                   onOpenOrchard={() => setShowOrchard(true)}
-                  onBackdate={handleBackdate}
+                  onBackdate={stableBackdate}
                 />
 
                 <HabitForm
                   isOpen={showAddForm}
                   userMaxStreak={Math.max(0, ...habits.map((h) => h.bestStreak || 0))}
+                  ownedSeeds={extraStats.ownedItemIds?.filter(id => id.startsWith('seed_')) || []}
                   customCategories={extraStats.customCategories || []}
                   onAdd={handleAddHabit}
                   onCancel={() => setShowAddForm(false)}
@@ -2293,28 +2472,28 @@ function App() {
                     })}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    {(categoryFilter === 'all' ? habits : habits.filter(h => h.category === categoryFilter)).map((habit) => (
+                    {filteredTrackerHabits.map((habit) => (
                       <div
                         key={habit.id}
-                        className="flex flex-col items-center p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm"
+                        className="grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm"
                       >
-                        <div className="w-12 h-12 text-5xl mb-3 flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 text-5xl mb-2 transform group-hover:scale-110 transition-transform">
                           <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-12 h-12" />
                         </div>
-                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize mb-1">
+                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize">
                           {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
                         </h3>
-                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 mt-1 w-full">
+                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full">
                           <Flame className="w-3.5 h-3.5" />
                           Streak: {habit.streak} days
                         </div>
-                        <div className="text-[10px] text-secondary-text font-bold text-center w-full mt-1">
+                        <div className="text-[10px] text-secondary-text font-bold text-center w-full">
                           Status: {habit.plantStatus || 'Healthy'}
                         </div>
                       </div>
                     ))}
                   </div>
-                  {(categoryFilter === 'all' ? habits : habits.filter(h => h.category === categoryFilter)).length === 0 && (
+                  {filteredTrackerHabits.length === 0 && (
                     <div className="text-center text-muted-text text-sm py-10 font-bold uppercase tracking-wide">
                       Your garden is empty. Plant a new seed today.
                     </div>
@@ -2960,6 +3139,102 @@ function App() {
            )}
         </AnimatedModal>
         
+        <AnimatedModal 
+           isOpen={!!massiveCoinPopup} 
+           onClose={() => setMassiveCoinPopup(null)}
+           alignment="center"
+           className="!max-w-md mx-auto !p-0 overflow-hidden bg-surface-card border border-amber-400/20 shadow-[0_20px_60px_rgba(251,191,36,0.15)]"
+        >
+           {massiveCoinPopup !== null && (
+              <div className="relative p-10 text-center flex flex-col items-center justify-center min-h-[240px]">
+                 <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-amber-400/20 to-transparent pointer-events-none" />
+                 
+                 <div className="w-20 h-20 bg-amber-400/20 rounded-full flex items-center justify-center mb-6 animate-bounce relative z-10 mx-auto border border-amber-400/30">
+                    <span className="text-4xl drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🪙</span>
+                 </div>
+                 
+                 <h2 className="text-4xl md:text-5xl font-display font-bold text-amber-400 drop-shadow-md mb-4 relative z-10">
+                    +{massiveCoinPopup} Coins!
+                 </h2>
+                 
+                 <p className="text-sm font-mono text-amber-200/80 uppercase tracking-widest relative z-10 bg-amber-400/10 px-4 py-2 rounded-full border border-amber-400/20">
+                    30+ Day Streak Bonus
+                 </p>
+                 
+                 <button 
+                    onClick={() => setMassiveCoinPopup(null)}
+                    className="absolute top-4 right-4 p-2 text-amber-400/50 hover:text-amber-400 transition-colors z-20 hover:bg-amber-400/10 rounded-full"
+                 >
+                    <Check className="w-5 h-5" />
+                 </button>
+              </div>
+           )}
+        </AnimatedModal>
+
+        <AnimatedModal 
+           isOpen={!!weeklyCelebrationData} 
+           onClose={() => setWeeklyCelebrationData(null)}
+           alignment="center"
+           className="!max-w-md mx-auto !p-0 overflow-hidden bg-surface-card border border-[#00F5D4]/20 shadow-[0_20px_60px_rgba(0,245,212,0.15)]"
+        >
+           {weeklyCelebrationData !== null && (
+              <div className="relative p-8 text-center flex flex-col items-center justify-center min-h-[360px]">
+                 <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#00F5D4]/10 to-transparent pointer-events-none" />
+                 
+                 <div className="w-20 h-20 bg-[#00F5D4]/10 rounded-full flex items-center justify-center mb-6 animate-pulse relative z-10 mx-auto border border-[#00F5D4]/20">
+                    <span className="text-4xl drop-shadow-[0_0_20px_rgba(0,245,212,0.8)]">🌟</span>
+                 </div>
+                 
+                 <h2 className="text-2xl md:text-3xl font-display font-medium text-white tracking-tight text-center leading-snug mb-2 relative z-10">
+                    Weekly Consistency!
+                 </h2>
+                 <p className="text-xs text-slate-400 max-w-xs mx-auto mb-6 relative z-10 font-mono uppercase tracking-wider">
+                    3 Consecutive Weeks Achieved
+                 </p>
+                 
+                 <div className="w-full bg-[#0A0D14] border border-surface-alt rounded-2xl p-4 text-left space-y-3 mb-6 relative z-10">
+                    <h3 className="text-[10px] font-mono tracking-widest text-[#00F5D4] uppercase italic mb-2 border-b border-surface-alt pb-1">
+                       GARDEN GROWTH REPORT
+                    </h3>
+                    <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-400">🏡 Active Plants</span>
+                       <span className="font-bold text-slate-200">{weeklyCelebrationData.activePlants}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-400">🌳 Mature & Fruiting</span>
+                       <span className="font-bold text-[#00F5D4]">{weeklyCelebrationData.maturePlants}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-400">💧 Total Completions</span>
+                       <span className="font-bold text-emerald-400">{weeklyCelebrationData.totalHabitsCompleted}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                       <span className="text-slate-400">🏆 Gardener Level</span>
+                       <span className="font-bold text-amber-400">{weeklyCelebrationData.currentLevel}</span>
+                    </div>
+                 </div>
+
+                 <div className="w-full flex gap-3 mb-6 relative z-10">
+                    <div className="flex-1 bg-yellow-400/10 border border-yellow-400/20 rounded-xl p-3 text-center">
+                       <p className="text-xs font-mono text-yellow-500 uppercase tracking-wider mb-1">COINS AWARDED</p>
+                       <p className="text-lg font-bold text-yellow-400">+{weeklyCelebrationData.coinReward}</p>
+                    </div>
+                    <div className="flex-1 bg-cyan-400/10 border border-cyan-400/20 rounded-xl p-3 text-center">
+                       <p className="text-xs font-mono text-cyan-500 uppercase tracking-wider mb-1">XP RECEIVED</p>
+                       <p className="text-lg font-bold text-[#00F5D4]">+{weeklyCelebrationData.xpReward}</p>
+                    </div>
+                 </div>
+                 
+                 <button 
+                    onClick={() => setWeeklyCelebrationData(null)}
+                    className="w-full py-3 bg-gradient-to-r from-[#00F5D4] to-emerald-500 hover:from-[#00d8b9] hover:to-emerald-600 text-zinc-900 font-bold font-mono tracking-widest uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(0,245,212,0.15)] active:scale-95"
+                 >
+                    Acknowledge
+                 </button>
+              </div>
+           )}
+        </AnimatedModal>
+
         {toastData && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 whitespace-nowrap">
           <div className="flex items-center gap-2">

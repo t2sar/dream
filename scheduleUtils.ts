@@ -1,5 +1,5 @@
 import { Habit, HabitLog } from './types';
-import { differenceInCalendarDays, differenceInWeeks, differenceInMonths, isValid, parseISO, startOfWeek, endOfWeek, isWithinInterval, addDays, format } from 'date-fns';
+import { differenceInCalendarDays, differenceInWeeks, differenceInMonths, isValid, parseISO, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
 
 export function isHabitDueToday(habit: Habit): boolean {
   return isHabitDueOnDate(habit, new Date());
@@ -75,12 +75,14 @@ export function isPeriodTargetReached(habit: Habit, logs: HabitLog): boolean {
   
   let completedCount = 0;
   
-  for (let i = 0; i < 7; i++) {
-     const dateStr = format(addDays(start, i), 'yyyy-MM-dd');
-     if (logs[dateStr] && logs[dateStr].includes(habit.id)) {
-        completedCount++;
+  Object.keys(logs).forEach(dateStr => {
+     const logDate = parseISO(dateStr);
+     if (isWithinInterval(logDate, { start, end })) {
+        if (logs[dateStr].includes(habit.id)) {
+           completedCount++;
+        }
      }
-  }
+  });
   
   return completedCount >= targetCount;
 }
@@ -92,12 +94,14 @@ export function getCompletedCountThisWeek(habit: Habit, logs: HabitLog): number 
   
   let completedCount = 0;
   
-  for (let i = 0; i < 7; i++) {
-     const dateStr = format(addDays(start, i), 'yyyy-MM-dd');
-     if (logs[dateStr] && logs[dateStr].includes(habit.id)) {
-        completedCount++;
+  Object.keys(logs).forEach(dateStr => {
+     const logDate = parseISO(dateStr);
+     if (isWithinInterval(logDate, { start, end })) {
+        if (logs[dateStr].includes(habit.id)) {
+           completedCount++;
+        }
      }
-  }
+  });
   
   return completedCount;
 }

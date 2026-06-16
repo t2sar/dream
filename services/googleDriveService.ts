@@ -5,7 +5,7 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
 
 declare const google: any;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 let tokenClient: any;
 let accessToken: string | null = null;
 
@@ -20,11 +20,11 @@ export const initGoogleDrive = (callback: (token: string) => void) => {
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     callback: (tokenResponse: any) => {
       accessToken = tokenResponse.access_token;
       if (tokenResponse.error) {
@@ -59,7 +59,7 @@ const driveFetch = async (url: string, options: RequestInit = {}) => {
     return res;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const backupToDrive = async (data: any) => {
     // 1. Search for existing backup file in AppData folder
     const searchParams = new URLSearchParams({
@@ -120,7 +120,7 @@ export const backupToDrive = async (data: any) => {
     }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const restoreFromDrive = async (): Promise<any> => {
     const searchParams = new URLSearchParams({
         q: "name='tanmoy_backup.json' and 'appDataFolder' in parents and trashed=false",
