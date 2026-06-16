@@ -242,23 +242,23 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
       <div className="relative z-10 space-y-8">
       {/* Rest Mode Banner / Settings */}
       {activeRestMode && activeRestMode.isActive ? (
-        <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between group relative overflow-hidden">
+        <div className="bg-accent-periwinkle/10 border border-accent-periwinkle/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between group relative overflow-hidden">
           <div className="flex items-center gap-2 relative z-50 self-end -mt-4 -mr-2">
              <button
                 onClick={onOpenOrchard}
-                className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 hover:text-amber-400 transition-colors px-3 py-1.5 rounded-full border border-amber-500/30"
+                className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-accent-mustard bg-accent-mustard/10 hover:bg-accent-mustard/20 hover:text-accent-mustard transition-colors px-3 py-1.5 rounded-full border border-accent-mustard/30"
              >
                 <Leaf className="w-3.5 h-3.5" />
                 Orchard
              </button>
           </div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent-periwinkle/5 blur-3xl rounded-full" />
           <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-              <Moon className="w-5 h-5 text-indigo-400" />
+            <div className="w-10 h-10 rounded-xl bg-accent-periwinkle/20 flex items-center justify-center">
+              <Moon className="w-5 h-5 text-accent-periwinkle" />
             </div>
             <div>
-              <div className="text-[10px] font-mono tracking-widest text-indigo-400 uppercase italic">Garden Rest Mode Active</div>
+              <div className="text-[10px] font-mono tracking-widest text-accent-periwinkle uppercase italic">Garden Rest Mode Active</div>
               <h3 className="text-sm font-bold text-white font-display leading-tight">
                 {activeRestMode.modeType === 'vacation' ? 'Vacation Mode is active. Enjoy your break.' : 
                  activeRestMode.modeType === 'sick' ? 'Sick Mode is active. Rest is care too.' : 
@@ -266,22 +266,22 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                  activeRestMode.modeType === 'family_emergency' ? 'Emergency Pause is active. Take care of what matters.' : 
                  'Rest Day active. Plants are safe.'}
               </h3>
-              <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
+              <div className="text-xs text-secondary-text mt-1 flex items-center gap-2">
                  <span>No health loss during pause mode.</span>
-                 {resting.length > 0 && <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 text-[9px] uppercase font-mono border border-indigo-500/30">{resting.length} resting plants</span>}
+                 {resting.length > 0 && <span className="px-1.5 py-0.5 rounded bg-accent-periwinkle/20 text-accent-periwinkle text-[9px] uppercase font-mono border border-accent-periwinkle/30">{resting.length} resting plants</span>}
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2 relative z-10 w-full md:w-auto">
             <button
                onClick={onOpenRestMode}
-               className="flex-1 md:flex-none px-4 py-2 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-xl text-xs font-mono uppercase tracking-widest transition-colors border border-indigo-500/20"
+               className="flex-1 md:flex-none px-4 py-2 bg-accent-periwinkle/10 text-accent-periwinkle hover:bg-accent-periwinkle/20 rounded-xl text-xs font-mono uppercase tracking-widest transition-colors border border-accent-periwinkle/20"
             >
                Edit
             </button>
             <button
                onClick={onResumeRestMode}
-               className="flex-1 md:flex-none px-4 py-2 bg-indigo-500 text-white hover:bg-indigo-600 rounded-xl text-xs font-mono uppercase tracking-widest transition-colors shadow-lg shadow-indigo-500/20"
+               className="flex-1 md:flex-none px-4 py-2 bg-accent-periwinkle text-surface-card hover:bg-accent-periwinkle/90 rounded-xl text-xs font-mono uppercase tracking-widest transition-colors shadow-lg shadow-accent-periwinkle/20"
             >
                Resume
             </button>
@@ -291,14 +291,14 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         <div className="flex justify-end gap-3 -mb-4 relative z-10 w-full px-2">
            <button
               onClick={onOpenOrchard}
-              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-amber-500 hover:text-amber-400 transition-colors px-3 py-1 rounded-full hover:bg-amber-500/10"
+              className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-accent-mustard hover:text-accent-mustard transition-colors px-3 py-1 rounded-full hover:bg-accent-mustard/10"
            >
               <Leaf className="w-3 h-3" />
               Orchard
            </button>
            <button 
              onClick={onOpenRestMode}
-             className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors px-3 py-1 rounded-full hover:bg-indigo-500/10"
+             className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-muted-text hover:text-accent-periwinkle transition-colors px-3 py-1 rounded-full hover:bg-accent-periwinkle/10"
            >
              <Moon className="w-3 h-3" />
              Need a break?
@@ -416,17 +416,17 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
       </div>
 
       {stats.activeChallenge && stats.activeChallenge.status === 'active' && (
-         <div className="bg-[#00F5D4]/10 border border-[#00F5D4]/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between group">
+         <div className="bg-accent-seafoam/10 border border-accent-seafoam/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between group">
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-[#00F5D4]/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-[#00F5D4]" />
+               <div className="w-10 h-10 rounded-xl bg-accent-seafoam/10 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-accent-seafoam" />
                </div>
                <div>
-                  <div className="text-[10px] font-mono tracking-widest text-cyan-400 uppercase italic">Active Challenge</div>
-                  <h3 className="text-sm font-bold text-white font-display leading-tight">{getChallengeTemplate(stats.activeChallenge.templateId)?.title}</h3>
-                  <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                     <span className="text-[#00F5D4]">Progress: {stats.activeChallenge.completedDates.length} / {getChallengeTemplate(stats.activeChallenge.templateId)?.requiredCompletionDays} days</span>
-                     {stats.activeChallenge.completedDates.includes(dateKey) && <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] uppercase font-mono border border-emerald-500/30">Today completed</span>}
+                  <div className="text-[10px] font-mono tracking-widest text-accent-periwinkle uppercase italic">Active Challenge</div>
+                  <h3 className="text-sm font-bold text-primary-anchor font-display leading-tight">{getChallengeTemplate(stats.activeChallenge.templateId)?.title}</h3>
+                  <div className="text-xs text-secondary-text mt-1 flex items-center gap-2">
+                     <span className="text-accent-seafoam">Progress: {stats.activeChallenge.completedDates.length} / {getChallengeTemplate(stats.activeChallenge.templateId)?.requiredCompletionDays} days</span>
+                     {stats.activeChallenge.completedDates.includes(dateKey) && <span className="px-1.5 py-0.5 rounded bg-accent-seafoam/20 text-accent-seafoam text-[9px] uppercase font-mono border border-accent-seafoam/30">Today completed</span>}
                   </div>
                </div>
             </div>
@@ -434,24 +434,24 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
       )}
 
       {critical.length > 0 && (
-         <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+         <div className="bg-accent-coral/10 border border-accent-coral/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-3">
-               <ShieldAlert className="w-8 h-8 text-rose-400" />
+               <ShieldAlert className="w-8 h-8 text-accent-coral" />
                <div>
-                  <h3 className="text-base font-bold text-rose-400">Urgent Care Needed</h3>
-                  <p className="text-xs text-rose-300/80">Your "{critical[0].name}" plant is critical. Complete its habit today to start recovery.</p>
+                  <h3 className="text-base font-bold text-accent-coral">Urgent Care Needed</h3>
+                  <p className="text-xs text-secondary-text">Your "{critical[0].name}" plant is critical. Complete its habit today to start recovery.</p>
                </div>
             </div>
          </div>
       )}
 
       {wilting.length > 0 && critical.length === 0 && (
-         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+         <div className="bg-accent-mustard/10 border border-accent-mustard/30 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-3">
-               <AlertTriangle className="w-8 h-8 text-amber-400" />
+               <AlertTriangle className="w-8 h-8 text-accent-mustard" />
                <div>
-                  <h3 className="text-base font-bold text-amber-400">Needs Attention</h3>
-                  <p className="text-xs text-amber-300/80">Some of your plants are getting dry. Water them to save them.</p>
+                  <h3 className="text-base font-bold text-accent-mustard">Needs Attention</h3>
+                  <p className="text-xs text-secondary-text">Some of your plants are getting dry. Water them to save them.</p>
                </div>
             </div>
          </div>
@@ -776,13 +776,13 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
             <div className="flex flex-col gap-1">
                <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1">
                  <div className="relative inline-flex items-center">
-                    <Flame className={`w-3.5 h-3.5 ${habit.streak >= 30 ? 'text-red-500 animate-pulse' : habit.streak >= 21 ? 'text-amber-500 animate-pulse' : habit.streak >= 14 ? 'text-orange-500 animate-pulse' : habit.streak >= 5 ? 'text-yellow-500 animate-pulse' : ''}`}/>
+                    <Flame className={`w-3.5 h-3.5 ${habit.streak >= 30 ? 'text-accent-coral animate-pulse' : habit.streak >= 21 ? 'text-accent-mustard animate-pulse' : habit.streak >= 14 ? 'text-accent-coral animate-pulse' : habit.streak >= 5 ? 'text-accent-mustard animate-pulse' : ''}`}/>
                     {/* Sparks/Fire Particles for Multiplier Tiers */}
                     {habit.streak >= 5 && (
                       <div className="absolute inset-0 pointer-events-none overflow-visible">
-                        <span className="absolute -top-1.5 -left-1 w-1 h-1 bg-amber-400 rounded-full animate-bounce opacity-70" style={{ animationDuration: '0.8s', boxShadow: '0 0 2px rgba(251, 191, 36, 0.5)' }} />
-                        <span className="absolute -top-3 left-1.5 w-1 h-1 bg-orange-500 rounded-full animate-ping opacity-90" style={{ animationDuration: '1.2s' }} />
-                        <span className="absolute -top-2 left-3 w-1 h-1 bg-yellow-400 rounded-full animate-bounce opacity-80" style={{ animationDuration: '1.5s', boxShadow: '0 0 2px rgba(250, 204, 21, 0.5)' }} />
+                        <span className="absolute -top-1.5 -left-1 w-1 h-1 bg-accent-mustard rounded-full animate-bounce opacity-70" style={{ animationDuration: '0.8s', boxShadow: '0 0 2px var(--color-accent-mustard-rgb)' }} />
+                        <span className="absolute -top-3 left-1.5 w-1 h-1 bg-accent-coral rounded-full animate-ping opacity-90" style={{ animationDuration: '1.2s' }} />
+                        <span className="absolute -top-2 left-3 w-1 h-1 bg-accent-mustard rounded-full animate-bounce opacity-80" style={{ animationDuration: '1.5s', boxShadow: '0 0 2px var(--color-accent-mustard-rgb)' }} />
                       </div>
                     )}
                  </div> Streak: 
@@ -894,7 +894,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
          <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
-                 <ShieldAlert className="w-5 h-5 text-amber-500" /> Plant Protection
+                 <ShieldAlert className="w-5 h-5 text-accent-mustard" /> Plant Protection
                </h3>
                <button onClick={() => setShowSlipModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
                  <X className="w-5 h-5" />
@@ -913,7 +913,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                   setShowSlipModal(false);
                }
             }}>
-               <button type="submit" className="w-full bg-[#00F5D4]/10 text-[#00F5D4] py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-[#00F5D4]/20 transition-colors shadow-sm">
+               <button type="submit" className="w-full bg-accent-seafoam/10 text-accent-seafoam py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-accent-seafoam/20 transition-colors shadow-sm">
                   Start Recovery
                </button>
             </form>
@@ -924,7 +924,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
          <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
-                 <Target className="w-5 h-5 text-[#00F5D4]" /> Log Progress
+                 <Target className="w-5 h-5 text-accent-seafoam" /> Log Progress
                </h3>
                <button onClick={() => setShowQuantityModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
                  <X className="w-5 h-5" />
@@ -948,13 +948,13 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <input 
                   type="number" 
                   autoFocus
-                  className="flex-1 bg-surface-soft border border-surface-alt rounded-xl px-4 py-3 text-white font-mono outline-none focus:border-[#00F5D4] transition-colors"
+                  className="flex-1 bg-surface-soft border border-surface-alt rounded-xl px-4 py-3 text-white font-mono outline-none focus:border-accent-seafoam transition-colors"
                   placeholder={`Amount of ${habit.quantityUnit || 'units'}`}
                   value={manualQuantity}
                   onChange={e => setManualQuantity(e.target.value)}
                   min={1}
                />
-               <button type="submit" disabled={!manualQuantity} className="bg-[#00F5D4] text-black px-6 py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-[#00d8b9] transition-colors shadow-[0_0_20px_rgba(0,245,212,0.2)] disabled:opacity-50">
+               <button type="submit" disabled={!manualQuantity} className="bg-accent-seafoam text-black px-6 py-3 rounded-xl font-bold font-mono tracking-widest uppercase hover:bg-accent-seafoam/80 transition-colors shadow-sm disabled:opacity-50">
                   Save
                </button>
             </form>

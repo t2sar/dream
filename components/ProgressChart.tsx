@@ -62,37 +62,37 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass p-6 rounded-none border border-white/5 relative">
-          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
-          <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] relative">
+          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-accent-seafoam/40" />
+          <p className="text-secondary-text font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
             COMPLETION CONCORDANCE
           </p>
           <div className="flex items-end gap-3">
-            <h3 className="text-5xl font-bold text-[#00F5D4] font-display tracking-tight">
+            <h3 className="text-5xl font-bold text-accent-seafoam font-display tracking-tight">
               {completionRate}%
             </h3>
-            <span className="text-slate-600 font-mono text-[9px] mb-2 uppercase tracking-wider">
+            <span className="text-muted-text font-mono text-[9px] mb-2 uppercase tracking-wider">
               last 14 days
             </span>
           </div>
         </div>
 
-        <div className="glass p-6 rounded-none border border-white/5 relative">
-          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
-          <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] relative">
+          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-accent-seafoam/40" />
+          <p className="text-secondary-text font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
             TOTAL COMPLETED
           </p>
-          <h3 className="text-5xl font-bold text-violet-400 font-display tracking-tight">
+          <h3 className="text-5xl font-bold text-accent-periwinkle font-display tracking-tight">
             {totalCompleted}
           </h3>
         </div>
 
-        <div className="glass p-6 rounded-none border border-white/5 relative">
-          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#00F5D4]/40" />
-          <p className="text-slate-500 font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] relative">
+          <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-accent-seafoam/40" />
+          <p className="text-secondary-text font-mono text-[9px] uppercase tracking-widest font-bold mb-2">
             ACTIVE SECTORS
           </p>
-          <h3 className="text-5xl font-bold text-slate-200 font-display tracking-tight">
+          <h3 className="text-5xl font-bold text-primary-anchor font-display tracking-tight">
             {habits.length}
           </h3>
         </div>
@@ -147,7 +147,7 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
                 fontSize: "10px",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
-              itemStyle={{ color: "#4ade80" }}
+              itemStyle={{ color: "#A8C3A6" }}
               cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
             />
             <Bar dataKey="completed" radius={[4, 4, 0, 0]} maxBarSize={30}>
@@ -156,8 +156,8 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
                   key={`cell-${index}`}
                   fill={
                     entry.completed >= habits.length && habits.length > 0
-                      ? "#4ade80"
-                      : "#22d3ee"
+                      ? "#A8C3A6"
+                      : "#8D99AE"
                   }
                 />
               ))}
@@ -216,14 +216,14 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
                 fontSize: "10px",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
-              itemStyle={{ color: "#00F5D4" }}
+              itemStyle={{ color: "#F2CC8F" }}
               cursor={{ stroke: "rgba(255, 255, 255, 0.05)" }}
             />
             <Line
               type="monotone"
               dataKey="rate"
               name="Completion Rate"
-              stroke="#00F5D4"
+              stroke="#F2CC8F"
               strokeWidth={3}
               dot={{ r: 3, strokeWidth: 1, fill: "#0c0f12" }}
               activeDot={{ r: 6, strokeWidth: 0 }}

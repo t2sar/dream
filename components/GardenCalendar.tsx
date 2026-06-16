@@ -166,28 +166,28 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
   return (
     <div className="space-y-8 pb-32 md:pb-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 glass p-6 border border-surface-alt relative">
-        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00F5D4]/40" />
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-card p-6 shadow-md rounded-[var(--radius-card)] relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent-seafoam/40" />
         <div>
-          <h2 className="text-2xl font-bold font-display text-white">Garden Calendar</h2>
-          <p className="text-[#00F5D4] font-mono text-[10px] tracking-widest uppercase mt-1">
+          <h2 className="text-2xl font-bold font-display text-primary-anchor">Garden Calendar</h2>
+          <p className="text-accent-seafoam font-mono text-[10px] tracking-widest uppercase mt-1">
             Visual Habit Consistency
           </p>
         </div>
         
         <div className="flex items-center gap-4">
-           <button onClick={prevMonth} className="p-2 hover:bg-surface-alt/10 rounded-full transition-colors text-white">
+           <button onClick={prevMonth} className="p-2 hover:bg-surface-alt rounded-full transition-colors text-secondary-text">
              <ChevronLeft className="w-5 h-5" />
            </button>
-           <span className="font-mono text-sm tracking-widest text-[#00F5D4] uppercase w-32 text-center font-bold">
+           <span className="font-mono text-sm tracking-widest text-accent-seafoam uppercase w-32 text-center font-bold">
              {format(currentMonth, 'MMMM yyyy')}
            </span>
-           <button onClick={nextMonth} className="p-2 hover:bg-surface-alt/10 rounded-full transition-colors text-white">
+           <button onClick={nextMonth} className="p-2 hover:bg-surface-alt rounded-full transition-colors text-secondary-text">
              <ChevronRight className="w-5 h-5" />
            </button>
            <button 
               onClick={jumpToToday}
-              className="ml-2 px-3 py-1.5 bg-gradient-to-tr from-cyan-600/20 to-violet-600/20 border border-cyan-500/30 text-cyan-300 font-mono text-[10px] uppercase tracking-widest hover:bg-cyan-500/10 transition-colors"
+              className="ml-2 px-3 py-1.5 bg-accent-periwinkle/10 hover:bg-accent-periwinkle/20 text-accent-periwinkle font-mono text-[10px] uppercase tracking-widest transition-colors rounded-full font-bold"
            >
              Today
            </button>
@@ -196,34 +196,34 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-         <div className="glass p-4 border border-surface-alt flex flex-col items-center justify-center text-center">
-             <div className="text-xl font-bold text-white font-display">{monthData.monthlyCompleted}</div>
-             <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Habits Completed</div>
+         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+             <div className="text-xl font-bold text-primary-anchor font-display">{monthData.monthlyCompleted}</div>
+             <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Habits Completed</div>
          </div>
-         <div className="glass p-4 border border-emerald-500/10 flex flex-col items-center justify-center text-center bg-emerald-950/10">
-             <div className="text-xl font-bold text-emerald-400 font-display">{Math.round(monthData.completionRate)}%</div>
-             <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Monthly Rate</div>
+         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+             <div className="text-xl font-bold text-accent-seafoam font-display">{Math.round(monthData.completionRate)}%</div>
+             <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Monthly Rate</div>
          </div>
-         <div className="glass p-4 border border-amber-500/10 flex flex-col items-center justify-center text-center bg-amber-950/10">
-             <div className="text-xl font-bold text-amber-400 font-display flex items-center gap-1">
+         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+             <div className="text-xl font-bold text-accent-mustard font-display flex items-center gap-1">
                {monthData.monthlyPerfectDays} <Trophy className="w-4 h-4" />
              </div>
-             <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Perfect Days</div>
+             <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Perfect Days</div>
          </div>
-         <div className="glass p-4 border border-surface-alt flex flex-col items-center justify-center text-center">
-             <div className="text-xl font-bold text-blue-400 font-display">~{Math.round(monthData.monthlyXp)}</div>
-             <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">XP Earned</div>
+         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+             <div className="text-xl font-bold text-accent-periwinkle font-display">~{Math.round(monthData.monthlyXp)}</div>
+             <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">XP Earned</div>
          </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="glass p-6 md:p-8 border border-surface-alt relative">
-        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#00F5D4]/40" />
+      <div className="bg-surface-card p-6 md:p-8 shadow-md rounded-[var(--radius-card)] relative">
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-accent-seafoam/40" />
         
         {/* Week Days Header */}
         <div className="grid grid-cols-7 gap-2 mb-4">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-            <div key={d} className="text-center font-mono text-[9px] uppercase tracking-widest text-slate-500">
+            <div key={d} className="text-center font-mono text-[9px] uppercase tracking-widest text-muted-text">
                {d}
             </div>
           ))}
@@ -236,15 +236,15 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
                 key={i}
                 onClick={() => setSelectedDate(day.date)}
                 className={`
-                  aspect-square rounded-sm transition-all duration-200 
+                  aspect-square rounded-full transition-all duration-200 
                   flex items-center justify-center relative
                   ${getDayColor(day.rate, day.isFuture, day.isRestDay)}
                   ${!day.isCurrentMonth ? 'opacity-30' : 'opacity-100'}
-                  ${selectedDate && isSameDay(selectedDate, day.date) ? 'ring-2 ring-white ring-offset-2 ring-offset-[#09090b] scale-110 z-10' : 'hover:scale-105'}
+                  ${selectedDate && isSameDay(selectedDate, day.date) ? 'ring-2 ring-primary-anchor scale-110 z-10' : 'hover:scale-105'}
                 `}
              >
                 {day.isRestDay && !day.isFuture && (
-                   <Moon className="w-3 h-3 text-indigo-200/90 drop-shadow-sm" />
+                   <Moon className="w-3 h-3 text-white/90 drop-shadow-sm" />
                 )}
                 {day.rate >= 1 && !day.isFuture && !day.isRestDay && (
                    <Trophy className="w-3 h-3 text-white/90 drop-shadow-sm" />
@@ -252,44 +252,44 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
                 {day.rate === 0 && day.scheduled > 0 && !day.isFuture && !day.isRestDay && (
                    <Leaf className="w-3 h-3 text-white/60 drop-shadow-sm rotate-45" />
                 )}
-                <span className="absolute top-1 left-1 text-[8px] font-mono text-white/50">{format(day.date, 'd')}</span>
+                <span className="absolute top-1 left-1 text-[8px] font-mono text-white/50 bg-black/10 rounded-full px-1">{format(day.date, 'd')}</span>
              </button>
            ))}
         </div>
 
         {/* Legend */}
-        <div className="mt-8 flex flex-wrap gap-4 items-center justify-center text-[10px] font-mono uppercase tracking-widest text-slate-400">
+        <div className="mt-8 flex flex-wrap gap-4 items-center justify-center text-[10px] font-mono uppercase tracking-widest text-muted-text">
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-amber-400" /> Perfect (100%)
+             <div className="w-3 h-3 rounded-full bg-accent-mustard" /> Perfect (100%)
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-emerald-500" /> Strong (80-99%)
+             <div className="w-3 h-3 rounded-full bg-accent-seafoam" /> Strong (80-99%)
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-teal-400" /> Partial (50-79%)
+             <div className="w-3 h-3 rounded-full bg-teal-400" /> Partial (50-79%)
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-orange-400" /> Low (1-49%)
+             <div className="w-3 h-3 rounded-full bg-accent-coral" /> Low (1-49%)
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-rose-500/50" /> Missed
+             <div className="w-3 h-3 rounded-full bg-rose-500/50" /> Missed
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-indigo-500/50" /> Rest Day
+             <div className="w-3 h-3 rounded-full bg-accent-periwinkle/50" /> Rest Day
            </div>
            <div className="flex items-center gap-1.5">
-             <div className="w-3 h-3 rounded-sm bg-surface-alt/5" /> Future / No Data
+             <div className="w-3 h-3 rounded-full bg-surface-alt" /> Future / No Data
            </div>
         </div>
       </div>
 
       {/* Selected Date Details */}
       {selectedDayData && (
-        <div className="glass p-6 md:p-8 border border-surface-alt border-t-cyan-500/30">
+        <div className="bg-surface-card p-6 md:p-8 shadow-md rounded-[var(--radius-card)]">
            <div className="flex justify-between items-start mb-6">
               <div>
-                 <h3 className="text-xl font-bold font-display text-white">{format(selectedDayData.date, 'MMMM d, yyyy')}</h3>
-                 <p className="text-xs font-mono tracking-widest text-slate-400 uppercase mt-1">
+                 <h3 className="text-xl font-bold font-display text-primary-anchor">{format(selectedDayData.date, 'MMMM d, yyyy')}</h3>
+                 <p className="text-xs font-mono tracking-widest text-muted-text uppercase mt-1">
                    {selectedDayData.isFuture ? 'Future Date' : 
                     selectedDayData.rate === 1 ? 'Perfect Garden Day' :
                     selectedDayData.rate >= 0.8 ? 'Excellent Day' :
@@ -300,10 +300,10 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
               </div>
               {!selectedDayData.isFuture && selectedDayData.scheduled > 0 && (
                 <div className="text-right">
-                  <div className="text-2xl font-bold font-display text-cyan-400">
+                  <div className="text-2xl font-bold font-display text-accent-seafoam">
                     {Math.round(selectedDayData.rate * 100)}%
                   </div>
-                  <div className="text-[10px] font-mono tracking-widest text-slate-500 uppercase">
+                  <div className="text-[10px] font-mono tracking-widest text-muted-text uppercase">
                     {selectedDayData.completedCount} / {selectedDayData.scheduled} Habits
                   </div>
                 </div>

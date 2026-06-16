@@ -92,19 +92,19 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080A] bg-grain flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background-main text-primary-anchor flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Ambience */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#00F5D4]/5 rounded-full blur-[140px] opacity-40 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[140px] opacity-30 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent-seafoam/10 rounded-full blur-[140px] opacity-40 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent-periwinkle/10 rounded-full blur-[140px] opacity-30 pointer-events-none" />
 
       {/* Main Content */}
-      <div className="max-w-md w-full glass p-8 md:p-10 rounded-[32px] relative z-10 border border-white/5 shadow-[0_0_80px_rgba(0,0,0,0.8)] flex flex-col items-center">
+      <div className="max-w-md w-full bg-surface-card p-8 md:p-10 rounded-large-card relative z-10 shadow-lg flex flex-col items-center">
         {/* Top Section: Logo & Welcome */}
         <div className="text-center mb-10 w-full">
-          <div className="w-20 h-20 bg-gradient-to-tr from-violet-600 via-pink-500 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_35px_rgba(0,245,212,0.35)] rotate-45 hover:rotate-90 transition-transform duration-700 border border-white/10">
+          <div className="w-20 h-20 bg-gradient-to-tr from-accent-periwinkle via-accent-blush to-accent-seafoam rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-md rotate-45 hover:rotate-90 transition-transform duration-700">
             <Sparkles className="w-10 h-10 text-white -rotate-45" />
           </div>
-          <h1 className="text-4xl font-extrabold mb-3 tracking-tight font-display text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400 bg-300% animate-gradient">
+          <h1 className="text-4xl font-extrabold mb-3 tracking-tight font-display text-primary-anchor">
             T2SAR DREAM
           </h1>
           <p className="text-slate-400 font-medium text-sm tracking-wide">

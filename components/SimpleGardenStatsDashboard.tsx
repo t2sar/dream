@@ -152,13 +152,13 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="glass p-6 border border-emerald-500/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
+      <div className="bg-surface-card p-6 shadow-md rounded-[var(--radius-card)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-accent-seafoam/10 rounded-full blur-3xl" />
         <div className="relative z-10">
-          <h2 className="text-xl font-display font-bold text-white mb-1">Your Garden Progress</h2>
-          <p className="text-slate-400 text-sm mb-4">Small steps are growing your garden.</p>
+          <h2 className="text-xl font-display font-bold text-primary-anchor mb-1">Your Garden Progress</h2>
+          <p className="text-muted-text text-sm mb-4">Small steps are growing your garden.</p>
           
-          <div className="flex flex-wrap gap-4 text-xs font-mono uppercase tracking-widest text-[#00F5D4]">
+          <div className="flex flex-wrap gap-4 text-xs font-mono uppercase tracking-widest text-accent-seafoam">
             <div className="flex items-center gap-1.5"><Star className="w-4 h-4" /> Lvl {stats.level || 1} • {stats.rank || 'Seedling'}</div>
             <div className="flex items-center gap-1.5"><HeartPulse className="w-4 h-4" /> {computedSummary.gardenHealthLabel}</div>
             <div className="flex items-center gap-1.5"><Activity className="w-4 h-4" /> {stats.xp || 0} XP</div>
@@ -167,12 +167,12 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
       </div>
 
       {/* Period Toggle */}
-      <div className="flex bg-[#0d1017] p-1 rounded border border-surface-alt mx-auto w-fit">
+      <div className="flex bg-surface-alt p-1 rounded-full border-none mx-auto w-fit shadow-sm">
         {(['this_week', 'this_month', 'all_time'] as const).map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-colors rounded ${period === p ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white'}`}
+            className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-colors rounded-full ${period === p ? 'bg-surface-card text-accent-seafoam shadow-sm' : 'text-muted-text hover:text-primary-anchor'}`}
           >
             {p.replace('_', ' ')}
           </button>
@@ -180,13 +180,13 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
       </div>
 
       {computedSummary.totalHabitsCompleted === 0 && (
-         <div className="glass p-8 text-center flex flex-col items-center">
-            <Leaf className="w-12 h-12 text-slate-500 mb-4" />
-            <h3 className="text-lg font-bold text-white mb-2">Your garden is just starting.</h3>
-            <p className="text-slate-400 text-sm mb-6">Stats will appear as you care for plants.</p>
+         <div className="bg-surface-card p-8 text-center flex flex-col items-center shadow-md rounded-[var(--radius-surface)]">
+            <Leaf className="w-12 h-12 text-muted-text mb-4" />
+            <h3 className="text-lg font-bold text-primary-anchor mb-2">Your garden is just starting.</h3>
+            <p className="text-muted-text text-sm mb-6">Stats will appear as you care for plants.</p>
             <button
                onClick={() => setActiveTab(Tab.TRACKER)}
-               className="px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-mono tracking-widest uppercase text-xs transition-colors"
+               className="px-6 py-3 bg-accent-seafoam/20 hover:bg-accent-seafoam/30 text-accent-seafoam font-mono tracking-widest uppercase text-xs transition-colors rounded-full"
             >
                Water your first plant
             </button>
@@ -198,144 +198,144 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
           {/* Main Stats Grid */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {/* Total Habits Completed */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <CheckCircle2 className="w-4 h-4 text-accent-seafoam" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Completed</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.totalHabitsCompleted}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">All-time plant care</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.totalHabitsCompleted}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">All-time plant care</p>
             </div>
 
             {/* Current Best Streak */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Flame className="w-4 h-4 text-orange-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Flame className="w-4 h-4 text-accent-coral" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Best Streak</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.currentBestStreak}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">{bestHabitDisplay}</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.currentBestStreak}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{bestHabitDisplay}</p>
             </div>
 
             {/* Best Category */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform">
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Target className="w-4 h-4 text-cyan-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform">
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Target className="w-4 h-4 text-accent-periwinkle" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Best Category</span>
               </div>
-              <div className="text-base sm:text-xl font-display font-bold text-white mb-1 truncate">
+              <div className="text-base sm:text-xl font-display font-bold text-primary-anchor mb-1 truncate">
                  {computedSummary.bestCategoryId ? (SENSITIVE_CATEGORIES.includes(computedSummary.bestCategoryId) && !defaultSettings.showSensitiveHabitNames ? 'Private Category' : computedSummary.bestCategoryId) : 'No data'}
               </div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">{period.replace('_', ' ')}</p>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{period.replace('_', ' ')}</p>
             </div>
 
             {/* Garden Health */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TRACKER)}>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <HeartPulse className="w-4 h-4 text-pink-400" />
+                <div className="flex items-center gap-2 text-muted-text">
+                  <HeartPulse className="w-4 h-4 text-accent-blush" />
                   <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Health</span>
                 </div>
               </div>
               <div className="flex items-end gap-2 mb-2">
-                 <div className="text-2xl sm:text-3xl font-display font-bold text-white leading-none">{computedSummary.gardenHealthScore}%</div>
+                 <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor leading-none">{computedSummary.gardenHealthScore}%</div>
               </div>
-              <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden mb-1">
-                 <div className="bg-gradient-to-r from-pink-500 to-emerald-400 h-full" style={{ width: `${computedSummary.gardenHealthScore}%` }} />
+              <div className="w-full bg-surface-alt rounded-full h-1.5 overflow-hidden mb-1">
+                 <div className="bg-gradient-to-r from-accent-blush to-accent-seafoam h-full" style={{ width: `${computedSummary.gardenHealthScore}%` }} />
               </div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">{computedSummary.gardenHealthLabel}</p>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{computedSummary.gardenHealthLabel}</p>
             </div>
 
             {/* XP */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt">
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Activity className="w-4 h-4 text-indigo-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)]">
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Activity className="w-4 h-4 text-accent-periwinkle" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">XP</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.xpEarned}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">{period.replace('_', ' ')}</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.xpEarned}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{period.replace('_', ' ')}</p>
             </div>
 
             {/* Coins */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.SHOP)}>
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Coins className="w-4 h-4 text-amber-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.SHOP)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Coins className="w-4 h-4 text-accent-mustard" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Coins</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.coinsEarned}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">Bal: {computedSummary.currentCoinBalance}</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.coinsEarned}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">Bal: {computedSummary.currentCoinBalance}</p>
             </div>
             
             {/* Plants Grown */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TROPHY)}>
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Leaf className="w-4 h-4 text-emerald-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TROPHY)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Leaf className="w-4 h-4 text-accent-seafoam" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Grown</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.plantsGrownCount}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">{period.replace('_', ' ')}</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.plantsGrownCount}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{period.replace('_', ' ')}</p>
             </div>
 
             {/* Perfect Days */}
-            <div className="glass p-4 sm:p-5 border border-surface-alt active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.CALENDAR)}>
-              <div className="flex items-center gap-2 text-slate-400 mb-2">
-                <Award className="w-4 h-4 text-yellow-400" />
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.CALENDAR)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <Award className="w-4 h-4 text-accent-mustard" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Perfect Days</span>
               </div>
-              <div className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">{computedSummary.perfectGardenDays}</div>
-              <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase truncate">Small progress counts.</p>
+              <div className="text-2xl sm:text-3xl font-display font-bold text-primary-anchor mb-1">{computedSummary.perfectGardenDays}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">Small progress counts.</p>
             </div>
           </div>
 
           {/* Plant Growth Summary */}
           {period !== 'this_week' && period !== 'this_month' && (
-             <div className="glass p-5 border border-surface-alt mt-6">
-                <h3 className="text-white font-bold mb-4 font-display text-lg">Garden Growth</h3>
+             <div className="bg-surface-card p-5 shadow-md rounded-[var(--radius-card)] mt-6">
+                <h3 className="text-primary-anchor font-bold mb-4 font-display text-lg">Garden Growth</h3>
                 <div className="space-y-3">
                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-300">
-                         <Leaf className="w-4 h-4 text-emerald-400" />
+                      <div className="flex items-center gap-2 text-muted-text">
+                         <Leaf className="w-4 h-4 text-accent-seafoam" />
                          <span>Plants completely grown</span>
                       </div>
-                      <span className="font-mono text-[#00F5D4]">{computedSummary.plantsGrownCount}</span>
+                      <span className="font-mono text-accent-seafoam">{computedSummary.plantsGrownCount}</span>
                    </div>
                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-300">
-                         <HeartHandshake className="w-4 h-4 text-pink-400" />
+                      <div className="flex items-center gap-2 text-muted-text">
+                         <HeartHandshake className="w-4 h-4 text-accent-blush" />
                          <span>Plants recovered</span>
                       </div>
-                      <span className="font-mono text-[#00F5D4]">{computedSummary.plantsRecoveredCount}</span>
+                      <span className="font-mono text-accent-blush">{computedSummary.plantsRecoveredCount}</span>
                    </div>
                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-300">
-                         <Award className="w-4 h-4 text-yellow-500" />
+                      <div className="flex items-center gap-2 text-muted-text">
+                         <Award className="w-4 h-4 text-accent-mustard" />
                          <span>Trophy plants</span>
                       </div>
-                      <span className="font-mono text-[#00F5D4]">{computedSummary.trophyPlantsAdded}</span>
+                      <span className="font-mono text-accent-mustard">{computedSummary.trophyPlantsAdded}</span>
                    </div>
                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-300">
-                         <Star className="w-4 h-4 text-indigo-400" />
+                      <div className="flex items-center gap-2 text-muted-text">
+                         <Star className="w-4 h-4 text-accent-periwinkle" />
                          <span>Legendary plants</span>
                       </div>
-                      <span className="font-mono text-[#00F5D4]">{computedSummary.legendaryPlantsCount}</span>
+                      <span className="font-mono text-accent-periwinkle">{computedSummary.legendaryPlantsCount}</span>
                    </div>
                 </div>
              </div>
           )}
 
           {/* Gentle Suggestion */}
-          <div className="glass p-5 border border-indigo-500/20 mt-6 relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-4 opacity-5">
-                <ShieldCheck className="w-24 h-24 text-indigo-400" />
+          <div className="bg-surface-card p-5 shadow-md rounded-[var(--radius-card)] mt-6 relative overflow-hidden bg-accent-periwinkle/5">
+             <div className="absolute top-0 right-0 p-4 opacity-10">
+                <ShieldCheck className="w-24 h-24 text-accent-periwinkle" />
              </div>
              <div className="relative z-10 flex gap-4 items-start">
-                <div className="p-2 bg-indigo-500/20 rounded-full shrink-0">
-                   <Leaf className="w-5 h-5 text-indigo-400" />
+                <div className="p-2 bg-accent-periwinkle/20 rounded-full shrink-0">
+                   <Leaf className="w-5 h-5 text-accent-periwinkle" />
                 </div>
                 <div>
-                   <h4 className="text-white font-bold mb-1">A Gentle Suggestion</h4>
-                   <p className="text-sm text-slate-300 leading-relaxed">
+                   <h4 className="text-primary-anchor font-bold mb-1">A Gentle Suggestion</h4>
+                   <p className="text-sm text-secondary-text leading-relaxed">
                       {computedSummary.gardenHealthScore < 70 
                          ? "Some plants need care, but recovery is possible. Consider a gentle Recovery Plan for your wilting plants." 
                          : "Your garden is growing one step at a time. Keep finding joy in steady progress."}
@@ -348,14 +348,14 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <button
               onClick={() => setActiveTab(Tab.REPORT)}
-              className="flex-1 px-4 py-3 bg-surface-alt/5 hover:bg-surface-alt/10 text-slate-300 font-mono text-xs tracking-widest uppercase transition-colors border border-surface-alt flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-surface-card hover:bg-surface-alt shadow-sm text-secondary-text font-mono text-xs tracking-widest uppercase transition-colors rounded-full flex items-center justify-center gap-2"
             >
               <LucideIcons.FileText className="w-4 h-4" />
               View Reports
             </button>
             <button
               onClick={() => setActiveTab(Tab.CALENDAR)}
-              className="flex-1 px-4 py-3 bg-surface-alt/5 hover:bg-surface-alt/10 text-slate-300 font-mono text-xs tracking-widest uppercase transition-colors border border-surface-alt flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-surface-card hover:bg-surface-alt shadow-sm text-secondary-text font-mono text-xs tracking-widest uppercase transition-colors rounded-full flex items-center justify-center gap-2"
             >
               <LucideIcons.CalendarDays className="w-4 h-4" />
               Open Calendar

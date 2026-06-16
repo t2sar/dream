@@ -250,10 +250,10 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
 
   if (habits.length === 0) {
     return (
-      <div className="glass p-12 rounded-none border border-surface-alt text-center flex flex-col items-center justify-center">
-        <Leaf className="w-12 h-12 text-slate-600 mb-6" />
-        <h2 className="text-xl font-display font-bold text-white mb-2">Your garden is empty.</h2>
-        <p className="text-slate-500 font-mono text-xs tracking-widest uppercase">Plant your first habit seed to start growing.</p>
+      <div className="bg-surface-card p-12 shadow-md rounded-[var(--radius-card)] text-center flex flex-col items-center justify-center">
+        <Leaf className="w-12 h-12 text-muted-text mb-6" />
+        <h2 className="text-xl font-display font-bold text-primary-anchor mb-2">Your garden is empty.</h2>
+        <p className="text-secondary-text font-mono text-xs tracking-widest uppercase">Plant your first habit seed to start growing.</p>
       </div>
     );
   }
@@ -264,28 +264,28 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
   return (
     <div className="space-y-8 max-w-4xl mx-auto w-full">
       {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 glass p-6 border border-surface-alt relative">
-         <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#00F5D4]/40" />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-card p-6 shadow-md rounded-[var(--radius-card)] relative">
+         <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-accent-seafoam/40" />
          <div>
-            <h2 className="text-2xl font-bold font-display text-white">{reportData.summaryLabel}</h2>
-            <p className="text-[#00F5D4] font-mono text-[10px] tracking-widest uppercase">
+            <h2 className="text-2xl font-bold font-display text-primary-anchor">{reportData.summaryLabel}</h2>
+            <p className="text-accent-seafoam font-mono text-[10px] tracking-widest uppercase">
               {format(new Date(reportData.startDate), "MMMM yyyy")} {reportData.isFinalized ? "(Final Report)" : "(Month still growing)"}
             </p>
          </div>
          <div className="flex items-center gap-4">
             <button 
               onClick={() => setMonthsAgo(prev => prev + 1)}
-              className="p-2 bg-surface-alt/5 hover:bg-surface-alt/10 text-white transition-colors"
+              className="p-2 bg-surface-alt hover:bg-surface-alt/70 text-secondary-text transition-colors rounded-full"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <span className="font-mono text-xs text-slate-400 w-28 text-center">
+            <span className="font-mono text-xs text-muted-text w-28 text-center">
               {monthsAgo === 0 ? "CURRENT MONTH" : `${monthsAgo} MO AGO`}
             </span>
             <button 
               onClick={() => setMonthsAgo(prev => Math.max(0, prev - 1))}
               disabled={monthsAgo === 0}
-              className="p-2 bg-surface-alt/5 hover:bg-surface-alt/10 text-white transition-colors disabled:opacity-30 disabled:hover:bg-surface-alt/5"
+              className="p-2 bg-surface-alt hover:bg-surface-alt/70 text-secondary-text transition-colors disabled:opacity-30 disabled:hover:bg-surface-alt rounded-full"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -294,28 +294,28 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
 
       {/* Summary Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass p-6 border border-surface-alt flex flex-col items-center text-center">
-          <Activity className="w-5 h-5 text-cyan-400 mb-2 opacity-80" />
-          <div className="text-2xl font-bold text-white mb-1">
-             {reportData.totalCompletedInstances} <span className="text-sm text-slate-500">/ {reportData.totalScheduledInstances}</span>
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] flex flex-col items-center text-center">
+          <Activity className="w-5 h-5 text-accent-periwinkle mb-2 opacity-80" />
+          <div className="text-2xl font-bold text-primary-anchor mb-1">
+             {reportData.totalCompletedInstances} <span className="text-sm text-secondary-text">/ {reportData.totalScheduledInstances}</span>
           </div>
-          <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Habits Built</div>
+          <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Habits Built</div>
         </div>
-        <div className="glass p-6 border border-surface-alt flex flex-col items-center text-center relative">
-          <Trophy className="w-5 h-5 text-amber-400 mb-2 opacity-80" />
-          <div className="text-2xl font-bold text-white mb-1">{reportData.perfectGardenDays}</div>
-          <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Perfect Days</div>
-          {reportData.restDays > 0 && <div className="absolute top-2 right-2 text-indigo-400 text-[10px] font-mono flex gap-1 items-center"><Moon className="w-3 h-3"/> {reportData.restDays} rested</div>}
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] flex flex-col items-center text-center relative">
+          <Trophy className="w-5 h-5 text-accent-mustard mb-2 opacity-80" />
+          <div className="text-2xl font-bold text-primary-anchor mb-1">{reportData.perfectGardenDays}</div>
+          <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Perfect Days</div>
+          {reportData.restDays > 0 && <div className="absolute top-2 right-2 text-accent-periwinkle text-[10px] font-mono flex gap-1 items-center"><Moon className="w-3 h-3"/> {reportData.restDays} rested</div>}
         </div>
-        <div className="glass p-6 border border-surface-alt flex flex-col items-center text-center">
-          <Droplets className="w-5 h-5 text-blue-400 mb-2 opacity-80" />
-          <div className="text-2xl font-bold text-white mb-1">~{Math.round(reportData.xpEarned)}</div>
-          <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">XP Earned</div>
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] flex flex-col items-center text-center">
+          <Droplets className="w-5 h-5 text-accent-seafoam mb-2 opacity-80" />
+          <div className="text-2xl font-bold text-primary-anchor mb-1">~{Math.round(reportData.xpEarned)}</div>
+          <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">XP Earned</div>
         </div>
-        <div className="glass p-6 border border-surface-alt flex flex-col items-center text-center">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 mb-2 opacity-80" />
-          <div className="text-2xl font-bold text-white mb-1">{Math.round(reportData.completionPercentage)}%</div>
-          <div className="text-[9px] font-mono tracking-widest uppercase text-slate-400">Completion</div>
+        <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] flex flex-col items-center text-center">
+          <CheckCircle2 className="w-5 h-5 text-accent-seafoam mb-2 opacity-80" />
+          <div className="text-2xl font-bold text-primary-anchor mb-1">{Math.round(reportData.completionPercentage)}%</div>
+          <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Completion</div>
         </div>
       </div>
 
@@ -323,17 +323,17 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Best Habit */}
         {reportData.bestHabit && (
-          <div className="glass p-6 border border-emerald-500/20 bg-emerald-950/20">
+          <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] bg-accent-seafoam/5">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-emerald-500/20 text-emerald-400">
+              <div className="p-2 bg-accent-seafoam/20 text-accent-seafoam rounded-full">
                 {BestHabitIcon && <BestHabitIcon className="w-5 h-5" />}
               </div>
               <div>
-                <div className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">Best Habit</div>
-                <div className="text-lg font-bold text-white">{reportData.bestHabit.name}</div>
+                <div className="text-[10px] font-mono tracking-widest text-accent-seafoam uppercase">Best Habit</div>
+                <div className="text-lg font-bold text-primary-anchor">{reportData.bestHabit.name}</div>
               </div>
             </div>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-secondary-text">
               Completed {reportData.habitPerformance[reportData.bestHabit.id].completed} / {reportData.habitPerformance[reportData.bestHabit.id].scheduled} times.
               Your "{reportData.bestHabit.name}" plant grew strongly this month.
             </p>
@@ -342,22 +342,22 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
 
         {/* Needs Care */}
         {reportData.needsCareHabit && (
-          <div className="glass p-6 border border-orange-500/20 bg-orange-950/20">
+          <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] bg-accent-coral/5">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-orange-500/20 text-orange-400">
+              <div className="p-2 bg-accent-coral/20 text-accent-coral rounded-full">
                 {CareHabitIcon && <CareHabitIcon className="w-5 h-5" />}
               </div>
               <div>
-                <div className="text-[10px] font-mono tracking-widest text-orange-400 uppercase">Plant Needing Support</div>
-                <div className="text-lg font-bold text-white">{reportData.needsCareHabit.name}</div>
+                <div className="text-[10px] font-mono tracking-widest text-accent-coral uppercase">Plant Needing Support</div>
+                <div className="text-lg font-bold text-primary-anchor">{reportData.needsCareHabit.name}</div>
               </div>
             </div>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-secondary-text">
               Completed {reportData.habitPerformance[reportData.needsCareHabit.id].completed} / {reportData.habitPerformance[reportData.needsCareHabit.id].scheduled} times.
               Try a smaller step or gentler routine next month.
             </p>
             <div className="mt-4 flex gap-2">
-              <button className="text-[10px] uppercase font-mono tracking-widest bg-orange-500/10 text-orange-400 px-3 py-1 border border-orange-500/20 hover:bg-orange-500/20 transition-colors">Make Easier</button>
+              <button className="text-[10px] uppercase font-mono tracking-widest bg-accent-coral/10 text-accent-coral px-3 py-1 rounded hover:bg-accent-coral/20 transition-colors">Make Easier</button>
             </div>
           </div>
         )}
@@ -365,28 +365,28 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
 
       {/* Best Category (if any) */}
       {reportData.bestCategoryId && CATEGORIES[reportData.bestCategoryId as keyof typeof CATEGORIES] && (
-         <div className="glass p-6 border border-surface-alt flex items-center justify-between">
+         <div className="bg-surface-card p-6 shadow-sm rounded-[var(--radius-card)] flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="p-2 bg-surface-alt/5 text-white">
-                 <Leaf className="w-5 h-5 text-[#00F5D4]" />
+               <div className="p-2 bg-accent-seafoam/10 text-accent-seafoam rounded-full">
+                 <Leaf className="w-5 h-5 text-accent-seafoam" />
                </div>
                <div>
-                  <div className="text-[10px] font-mono tracking-widest text-slate-400 uppercase">Best Category</div>
-                  <div className="text-lg font-bold text-white">{CATEGORIES[reportData.bestCategoryId as keyof typeof CATEGORIES].name}</div>
+                  <div className="text-[10px] font-mono tracking-widest text-muted-text uppercase">Best Category</div>
+                  <div className="text-lg font-bold text-primary-anchor">{CATEGORIES[reportData.bestCategoryId as keyof typeof CATEGORIES].name}</div>
                </div>
             </div>
-            <div className="text-sm text-slate-300">
+            <div className="text-sm text-secondary-text">
               Your {CATEGORIES[reportData.bestCategoryId as keyof typeof CATEGORIES].name} garden was strong this month.
             </div>
          </div>
       )}
 
       {/* Monthly Heatmap */}
-      <div className="glass p-8 border border-surface-alt overflow-x-auto">
-        <h3 className="text-xs font-mono tracking-widest text-slate-400 uppercase mb-6">Monthly Calendar Heatmap</h3>
+      <div className="bg-surface-card p-8 shadow-md rounded-[var(--radius-card)] overflow-x-auto">
+        <h3 className="text-xs font-mono tracking-widest text-muted-text uppercase mb-6">Monthly Calendar Heatmap</h3>
         <div className="flex gap-2 mb-4">
            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="w-10 text-center text-[9px] font-mono text-slate-500 uppercase">{d}</div>
+              <div key={d} className="w-10 text-center text-[9px] font-mono text-muted-text uppercase">{d}</div>
            ))}
         </div>
         <div className="grid grid-cols-7 gap-2">
@@ -400,12 +400,12 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
             const rate = day.scheduled > 0 ? day.completed / day.scheduled : 0;
             
             let bgColor = "bg-surface-alt/5 border border-surface-alt";
-            if (day.isRestDay) bgColor = "bg-indigo-500/30 border border-indigo-400/50";
+            if (day.isRestDay) bgColor = "bg-accent-periwinkle/30 border border-accent-periwinkle/50";
             else if (!isFuture && day.scheduled > 0) {
-              if (rate >= 0.8) bgColor = "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]";
-              else if (rate >= 0.5) bgColor = "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.3)]";
-              else if (rate > 0) bgColor = "bg-orange-500";
-              else bgColor = "bg-rose-500/50";
+              if (rate >= 0.8) bgColor = "bg-accent-seafoam shadow-sm";
+              else if (rate >= 0.5) bgColor = "bg-accent-mustard shadow-sm";
+              else if (rate > 0) bgColor = "bg-accent-coral";
+              else bgColor = "bg-accent-coral/50";
             } else if (!isFuture && day.scheduled === 0) {
               bgColor = "bg-transparent border border-surface-alt";
             }
@@ -420,7 +420,7 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
                 className={`w-10 h-10 rounded-sm ${bgColor} flex items-center justify-center relative group`}
                 title={format(day.date, "MMM d")}
               >
-                  {day.isRestDay && <Moon className="w-4 h-4 text-indigo-300" />}
+                  {day.isRestDay && <Moon className="w-4 h-4 text-accent-periwinkle" />}
                   {day.isPerfect && !isFuture && !day.isRestDay && <Trophy className="w-4 h-4 text-white drop-shadow-md" />}
                   <div className="absolute opacity-0 group-hover:opacity-100 bg-[#090b10] border border-surface-alt text-white text-[10px] font-mono px-2 py-1 rounded bottom-full mb-1 whitespace-nowrap z-10 pointer-events-none transition-opacity">
                      {format(day.date, "MMM d")}: {!isFuture ? (day.isRestDay ? 'Rest' : `${day.completed}/${day.scheduled}`) : '-'}
@@ -432,22 +432,22 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
       </div>
 
       {/* Footer Notes & Next Month Focus */}
-      <div className="glass p-8 border-t border-b border-surface-alt relative">
-         <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#00F5D4]/40" />
+      <div className="bg-surface-card p-8 shadow-md rounded-[var(--radius-card)] relative">
+         <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-accent-seafoam/40" />
          
          <div className="flex flex-col md:flex-row gap-8 justify-between">
             <div className="md:w-1/2">
-               <h3 className="text-lg font-bold text-white mb-2">{reportData.supportiveMessage}</h3>
+               <h3 className="text-lg font-bold text-primary-anchor mb-2">{reportData.supportiveMessage}</h3>
                {reportData.plantsDeadCount > 0 ? (
-                  <p className="text-sm text-slate-400 mb-2">Some plants may need a fresh start. You can restart with a new seed anytime.</p>
+                  <p className="text-sm text-secondary-text mb-2">Some plants may need a fresh start. You can restart with a new seed anytime.</p>
                ) : (
-                  <p className="text-sm text-slate-400 mb-2">No plants needed a fresh start this month.</p>
+                  <p className="text-sm text-secondary-text mb-2">No plants needed a fresh start this month.</p>
                )}
             </div>
             
-            <div className="md:w-1/2 glass p-4 border border-[#00F5D4]/20 bg-[#00F5D4]/5">
-               <h3 className="text-[10px] font-mono tracking-widest text-[#00F5D4] uppercase mb-3">Next Month Focus</h3>
-               <ul className="space-y-2 text-sm text-slate-300">
+            <div className="md:w-1/2 bg-surface-alt p-4 rounded-xl border border-accent-seafoam/20">
+               <h3 className="text-[10px] font-mono tracking-widest text-accent-seafoam uppercase mb-3">Next Month Focus</h3>
+               <ul className="space-y-2 text-sm text-secondary-text">
                   {reportData.needsCareHabit ? (
                     <li>• Try a smaller version for <span className="font-bold text-white">{reportData.needsCareHabit.name}</span>.</li>
                   ) : (

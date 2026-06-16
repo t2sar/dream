@@ -46,47 +46,47 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     switch (category) {
       case "health":
         return {
-          bg: "bg-gradient-to-tr from-[#E01E37] to-[#7B2CBF]",
-          glow: "shadow-[0_0_25px_rgba(224,30,55,0.45)]",
-          textColor: "text-[#E01E37]",
+          bg: "bg-gradient-to-tr from-accent-coral to-accent-blush",
+          glow: "shadow-lg shadow-accent-coral/40",
+          textColor: "text-accent-coral",
           label: "KINETIC CORE",
-          borderColor: "border-[#E01E37]/35",
+          borderColor: "border-accent-coral/35",
           sparkName: "KINETIC CORE",
         };
       case "productivity":
         return {
-          bg: "bg-gradient-to-tr from-[#00F5D4] to-[#3A0CA3]",
-          glow: "shadow-[0_0_25px_rgba(0,245,212,0.45)]",
-          textColor: "text-[#00F5D4]",
+          bg: "bg-gradient-to-tr from-accent-seafoam to-accent-periwinkle",
+          glow: "shadow-lg shadow-accent-seafoam/40",
+          textColor: "text-accent-seafoam",
           label: "DEEP WORK CORE",
-          borderColor: "border-[#00F5D4]/35",
+          borderColor: "border-accent-seafoam/35",
           sparkName: "DEEP WORK CORE",
         };
       case "learning":
         return {
-          bg: "bg-gradient-to-tr from-[#F59E0B] to-[#10B981]",
-          glow: "shadow-[0_0_25px_rgba(245,158,11,0.45)]",
-          textColor: "text-[#F59E0B]",
+          bg: "bg-gradient-to-tr from-accent-mustard to-accent-seafoam",
+          glow: "shadow-lg shadow-accent-mustard/40",
+          textColor: "text-accent-mustard",
           label: "GOLDEN SAGE CORE",
-          borderColor: "border-[#F59E0B]/35",
+          borderColor: "border-accent-mustard/35",
           sparkName: "GOLDEN SAGE CORE",
         };
       case "mindfulness":
         return {
-          bg: "bg-gradient-to-tr from-[#FF007F] to-[#3A0CA3]",
-          glow: "shadow-[0_0_25px_rgba(255,0,127,0.45)]",
-          textColor: "text-[#FF007F]",
+          bg: "bg-gradient-to-tr from-accent-periwinkle to-accent-blush",
+          glow: "shadow-lg shadow-accent-periwinkle/40",
+          textColor: "text-accent-periwinkle",
           label: "CYBER ORCHID CORE",
-          borderColor: "border-[#FF007F]/35",
+          borderColor: "border-accent-periwinkle/35",
           sparkName: "CYBER ORCHID CORE",
         };
       default:
         return {
-          bg: "bg-gradient-to-tr from-[#F59E0B] to-[#D97706]",
-          glow: "shadow-[0_0_20px_rgba(245,158,11,0.30)]",
-          textColor: "text-[#F59E0B]",
+          bg: "bg-gradient-to-tr from-accent-mustard to-accent-coral",
+          glow: "shadow-lg shadow-accent-mustard/40",
+          textColor: "text-accent-mustard",
           label: "RAW TITANIUM",
-          borderColor: "border-[#F59E0B]/30",
+          borderColor: "border-accent-mustard/30",
           sparkName: "RAW TITANIUM",
         };
     }
@@ -95,11 +95,11 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   const theme = getCategoryTheme(habit.category);
 
   const getHealthColor = (health: number) => {
-    if (health <= 0) return "text-slate-600";
-    if (health < 20) return "text-rose-500";
-    if (health < 50) return "text-amber-500";
-    if (health < 80) return "text-lime-400";
-    return "text-emerald-500";
+    if (health <= 0) return "text-secondary-text";
+    if (health < 20) return "text-accent-coral";
+    if (health < 50) return "text-accent-mustard";
+    if (health < 80) return "text-accent-seafoam";
+    return "text-accent-seafoam";
   };
 
   const healthColor = getHealthColor(habit.plantHealth ?? 100);
@@ -111,7 +111,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
       p-8 rounded-none border transition-all duration-500 bg-[#0d1017]/40
       ${
         habit.isGolden 
-          ? `border-amber-400/50 shadow-[0_0_30px_-5px_rgba(251,191,36,0.3)] bg-amber-900/10`
+          ? `border-accent-mustard/50 shadow-lg shadow-accent-mustard/20 bg-accent-mustard/10`
           : isCompleted
           ? `border-white/20 shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)]`
           : "border-white/5 hover:border-white/10 hover:bg-[#121620]/40"
@@ -119,7 +119,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     `}
     >
       <div
-        className={`absolute -top-24 -right-24 w-52 h-52 rounded-full transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-[0.03] bg-cyan-400 mix-blend-screen" : "opacity-0"}`}
+        className={`absolute -top-24 -right-24 w-52 h-52 rounded-full transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-[0.03] bg-accent-periwinkle mix-blend-screen" : "opacity-0"}`}
       />
 
       <div className="flex items-center justify-between relative z-10">
@@ -214,9 +214,9 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
 
               {habit.difficulty && (
                 <div className={`flex items-center gap-1.5 text-[10px] font-mono tracking-widest bg-zinc-950/60 px-2.5 py-1 uppercase border ${
-                  habit.difficulty === 'easy' ? 'text-emerald-400 border-emerald-400/20' : 
-                  habit.difficulty === 'medium' ? 'text-amber-400 border-amber-400/20' : 
-                  'text-rose-400 border-rose-400/20'
+                  habit.difficulty === 'easy' ? 'text-accent-seafoam border-accent-seafoam/20' : 
+                  habit.difficulty === 'medium' ? 'text-accent-mustard border-accent-mustard/20' : 
+                  'text-accent-coral border-accent-coral/20'
                 }`}>
                   <span className="text-xs">
                     {habit.difficulty === 'easy' ? '🍃' : habit.difficulty === 'medium' ? '💧' : '🔥'}
@@ -244,11 +244,11 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
               {habit.streak > 0 && (
                 <div className="flex flex-col gap-1.5 relative">
                   <span className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 p-1 rounded-sm relative ${
-                    habit.streak >= 30 ? 'text-red-400 bg-red-950/20 border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]' :
-                    habit.streak >= 21 ? 'text-amber-400 bg-amber-950/20 border border-amber-500/20 shadow-[0_0_8px_rgba(245,158,11,0.15)]' :
-                    habit.streak >= 14 ? 'text-orange-400 bg-orange-950/15 border border-orange-500/15 shadow-[0_0_6px_rgba(249,115,22,0.1)]' :
-                    habit.streak >= 5 ? 'text-yellow-500 bg-yellow-950/10 border border-yellow-500/10' :
-                    'text-amber-500'
+                    habit.streak >= 30 ? 'text-accent-coral bg-accent-coral/10 border border-accent-coral/20 shadow-sm' :
+                    habit.streak >= 21 ? 'text-accent-mustard bg-accent-mustard/10 border border-accent-mustard/20 shadow-sm' :
+                    habit.streak >= 14 ? 'text-accent-coral bg-accent-coral/5 border border-accent-coral/10 shadow-sm' :
+                    habit.streak >= 5 ? 'text-accent-mustard bg-accent-mustard/5 border border-accent-mustard/10' :
+                    'text-accent-mustard'
                   }`}>
                     <div className="relative">
                       <Flame
@@ -286,19 +286,19 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                                <div className="space-y-1 text-[9px] font-mono text-slate-400">
                                   <div className="flex justify-between">
                                      <span>5 Days:</span>
-                                     <span className="text-emerald-400">1.2x Payout</span>
+                                     <span className="text-accent-seafoam">1.2x Payout</span>
                                   </div>
                                   <div className="flex justify-between">
                                      <span>14 Days:</span>
-                                     <span className="text-emerald-400">2.0x Payout</span>
+                                     <span className="text-accent-seafoam">2.0x Payout</span>
                                   </div>
                                   <div className="flex justify-between">
                                      <span>21 Days:</span>
-                                     <span className="text-[#00F5D4]">3.0x Payout</span>
+                                     <span className="text-accent-mustard">3.0x Payout</span>
                                   </div>
                                   <div className="flex justify-between">
                                      <span>30+ Days:</span>
-                                     <span className="text-amber-400 font-bold">5.0x Payout</span>
+                                     <span className="text-accent-coral font-bold">5.0x Payout</span>
                                   </div>
                                </div>
                                {(() => {
@@ -310,7 +310,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                                   
                                   if (currentStreak >= 30) {
                                      return (
-                                        <div className="mt-2 pt-1 border-t border-white/5 text-[9px] font-mono text-amber-400">
+                                        <div className="mt-2 pt-1 border-t border-white/5 text-[9px] font-mono text-accent-coral">
                                            Ultimate 5.0x reward tier reached!
                                         </div>
                                      );
