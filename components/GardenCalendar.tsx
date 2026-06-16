@@ -166,7 +166,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
   return (
     <div className="space-y-8 pb-32 md:pb-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-card p-6 shadow-md rounded-[var(--radius-card)] relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-6 floating-card squircular relative overflow-hidden">
         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-accent-seafoam/40" />
         <div>
           <h2 className="text-2xl font-bold font-display text-primary-anchor">Garden Calendar</h2>
@@ -196,28 +196,28 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
 
       {/* Monthly Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+         <div className="p-4 floating-card squircular flex flex-col items-center justify-center text-center">
              <div className="text-xl font-bold text-primary-anchor font-display">{monthData.monthlyCompleted}</div>
              <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Habits Completed</div>
          </div>
-         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+         <div className="p-4 floating-card squircular flex flex-col items-center justify-center text-center">
              <div className="text-xl font-bold text-accent-seafoam font-display">{Math.round(monthData.completionRate)}%</div>
              <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Monthly Rate</div>
          </div>
-         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+         <div className="p-4 floating-card squircular flex flex-col items-center justify-center text-center">
              <div className="text-xl font-bold text-accent-mustard font-display flex items-center gap-1">
                {monthData.monthlyPerfectDays} <Trophy className="w-4 h-4" />
              </div>
              <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">Perfect Days</div>
          </div>
-         <div className="bg-surface-card p-4 shadow-md rounded-[var(--radius-card)] flex flex-col items-center justify-center text-center">
+         <div className="p-4 floating-card squircular flex flex-col items-center justify-center text-center">
              <div className="text-xl font-bold text-accent-periwinkle font-display">~{Math.round(monthData.monthlyXp)}</div>
              <div className="text-[9px] font-mono tracking-widest uppercase text-muted-text">XP Earned</div>
          </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-surface-card p-6 md:p-8 shadow-md rounded-[var(--radius-card)] relative">
+      <div className="p-6 md:p-8 floating-card squircular relative">
         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-accent-seafoam/40" />
         
         {/* Week Days Header */}
@@ -285,7 +285,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
 
       {/* Selected Date Details */}
       {selectedDayData && (
-        <div className="bg-surface-card p-6 md:p-8 shadow-md rounded-[var(--radius-card)]">
+        <div className="p-6 md:p-8 floating-card squircular">
            <div className="flex justify-between items-start mb-6">
               <div>
                  <h3 className="text-xl font-bold font-display text-primary-anchor">{format(selectedDayData.date, 'MMMM d, yyyy')}</h3>

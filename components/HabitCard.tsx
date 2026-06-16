@@ -108,7 +108,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     <div
       className={`
       relative overflow-hidden group
-      p-8 rounded-none border transition-all duration-500 bg-[#0d1017]/40
+      p-8 floating-card squircular transition-all duration-500
       ${
         habit.isGolden 
           ? `border-accent-mustard/50 shadow-lg shadow-accent-mustard/20 bg-accent-mustard/10`

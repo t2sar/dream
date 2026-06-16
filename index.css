@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;800&family=Poppins:wght@500;600;800&family=Quicksand:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -75,11 +76,41 @@
     line-height: 1.6;
     letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 3s ease-in-out, color 3s ease-in-out;
+  }
+
+  body[data-time-phase="Evening"],
+  body[data-time-phase="Night"] {
+    background-color: var(--color-background-main);
+    color: var(--color-primary-anchor);
   }
   
   h1, h2, h3, h4, h5, h6, .font-display {
     font-weight: var(--font-weight-display);
     letter-spacing: 0.02em;
+    color: var(--color-primary-anchor);
+  }
+  .squircular {
+    border-radius: var(--radius-lg); /* 32px squircular radius */
+  }
+
+  .floating-card {
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); /* 8% opacity, blur 16dp, Y 4dp defined earlier */
+    background-color: var(--color-surface-card);
+  }
+
+  /* Explicit background reset to prevent conflicting styles */
+  .app-background-reset {
+    background-color: var(--color-background-main);
+    color: var(--color-primary-anchor);
+    min-height: 100vh;
+    transition: background-color 3s ease-in-out, color 3s ease-in-out;
+  }
+
+  body[data-time-phase="Evening"] .app-background-reset,
+  body[data-time-phase="Night"] .app-background-reset {
+    background-color: var(--color-background-main);
     color: var(--color-primary-anchor);
   }
 }

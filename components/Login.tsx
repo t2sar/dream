@@ -92,7 +92,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-main text-primary-anchor flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="app-background-reset flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent-seafoam/10 rounded-full blur-[140px] opacity-40 pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent-periwinkle/10 rounded-full blur-[140px] opacity-30 pointer-events-none" />

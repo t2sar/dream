@@ -122,6 +122,215 @@ const MOTIVATIONAL_QUOTES = [
   },
 ];
 
+export const APP_THEMES = [
+  {
+    id: "cream_butter",
+    name: "Cream Butter",
+    description: "Playful organic light theme with warm cream canvas & sage accent.",
+    colors: {
+      "--color-background-main": "#FDFBF7",
+      "--color-primary-anchor": "#1C1B1F",
+      "--color-primary-text": "#1C1B1F",
+      "--color-surface-card": "#FFFFFF",
+      "--color-surface-soft": "#FDFBF7",
+      "--color-surface-alt": "#F4EDE4",
+      "--color-secondary-text": "#4A4A4A",
+      "--color-muted-text": "#737373",
+      "--color-primary-mint": "#4EADA0",
+    },
+    accentColor: "78 173 160",
+    isDark: false,
+  },
+  {
+    id: "midnight_slate",
+    name: "Midnight Slate",
+    description: "Sleek blue tech theme with carbon panels and cool slate colors.",
+    colors: {
+      "--color-background-main": "#0B101B",
+      "--color-primary-anchor": "#F1F5F9",
+      "--color-primary-text": "#F1F5F9",
+      "--color-surface-card": "#151B2C",
+      "--color-surface-soft": "#0B101B",
+      "--color-surface-alt": "#212A3E",
+      "--color-secondary-text": "#94A3B8",
+      "--color-muted-text": "#64748B",
+      "--color-primary-mint": "#22D3EE",
+    },
+    accentColor: "34 211 238",
+    isDark: true,
+  },
+  {
+    id: "cosmic_cyber",
+    name: "Cyberpunk Neon",
+    description: "Immersive synthwave dark purple featuring hot neon pink actions.",
+    colors: {
+      "--color-background-main": "#08040F",
+      "--color-primary-anchor": "#FAF5FF",
+      "--color-primary-text": "#FAF5FF",
+      "--color-surface-card": "#140B25",
+      "--color-surface-soft": "#08040F",
+      "--color-surface-alt": "#2F144D",
+      "--color-secondary-text": "#D8B4FE",
+      "--color-muted-text": "#A855F7",
+      "--color-primary-mint": "#ED1E79",
+    },
+    accentColor: "237 30 121",
+    isDark: true,
+  },
+  {
+    id: "forest_zen",
+    name: "Forest Zen",
+    description: "Peaceful forest floor greens, dark moss, and soft birch details.",
+    colors: {
+      "--color-background-main": "#0A130D",
+      "--color-primary-anchor": "#E6F4EA",
+      "--color-primary-text": "#E6F4EA",
+      "--color-surface-card": "#122017",
+      "--color-surface-soft": "#0A130D",
+      "--color-surface-alt": "#223829",
+      "--color-secondary-text": "#A3D9C9",
+      "--color-muted-text": "#5EA388",
+      "--color-primary-mint": "#4EADA0",
+    },
+    accentColor: "78 173 160",
+    isDark: true,
+  },
+  {
+    id: "retro_paper",
+    name: "Retro Paper",
+    description: "Classic tactile feel of vintage journals with rust/coral dyes.",
+    colors: {
+      "--color-background-main": "#F3EDE0",
+      "--color-primary-anchor": "#29241E",
+      "--color-primary-text": "#29241E",
+      "--color-surface-card": "#FDFBF7",
+      "--color-surface-soft": "#F3EDE0",
+      "--color-surface-alt": "#E3D5B7",
+      "--color-secondary-text": "#5C5245",
+      "--color-muted-text": "#8E7D66",
+      "--color-primary-mint": "#D05A3F",
+    },
+    accentColor: "208 90 63",
+    isDark: false,
+  },
+  {
+    id: "classic_obsidian",
+    name: "Classic Obsidian",
+    description: "Pure contrast deep space theme with emerald habit trackers.",
+    colors: {
+      "--color-background-main": "#050608",
+      "--color-primary-anchor": "#FFFFFF",
+      "--color-primary-text": "#FFFFFF",
+      "--color-surface-card": "#10121A",
+      "--color-surface-soft": "#050608",
+      "--color-surface-alt": "#20232E",
+      "--color-secondary-text": "#94A3B8",
+      "--color-muted-text": "#5A657C",
+      "--color-primary-mint": "#10B981",
+    },
+    accentColor: "16 185 129",
+    isDark: true,
+  },
+];
+
+export function applyAppTheme(
+  themeId: string,
+  customAccentColor?: string,
+  cornerRoundness?: "sharp" | "medium" | "soft",
+  borderStyle?: "invisible" | "subtle" | "solid" | "neon"
+) {
+  const theme = APP_THEMES.find((t) => t.id === themeId) || APP_THEMES[0];
+
+  // Set theme colors
+  Object.entries(theme.colors).forEach(([key, val]) => {
+    document.documentElement.style.setProperty(key, val);
+  });
+
+  // Apply accent color override
+  if (customAccentColor) {
+    if (customAccentColor.includes(" ")) {
+      document.documentElement.style.setProperty("--primary-mint", customAccentColor);
+      document.documentElement.style.setProperty("--color-primary-mint", `rgb(${customAccentColor})`);
+    } else {
+      document.documentElement.style.setProperty("--primary-mint", customAccentColor);
+      document.documentElement.style.setProperty("--color-primary-mint", customAccentColor);
+    }
+  } else {
+    const themeMint = theme.colors["--color-primary-mint"];
+    document.documentElement.style.setProperty("--color-primary-mint", themeMint);
+    try {
+      const hex = themeMint.startsWith("#") ? themeMint : "#4EADA0";
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      document.documentElement.style.setProperty("--primary-mint", `${r} ${g} ${b}`);
+    } catch (e) {
+      document.documentElement.style.setProperty("--primary-mint", "78 173 160");
+    }
+  }
+
+  // Apply corner roundness customization
+  const cr = cornerRoundness || "soft";
+  if (cr === "sharp") {
+    document.documentElement.style.setProperty("--radius-none", "0px");
+    document.documentElement.style.setProperty("--radius-sm", "0px");
+    document.documentElement.style.setProperty("--radius-md", "0px");
+    document.documentElement.style.setProperty("--radius-lg", "0px");
+    document.documentElement.style.setProperty("--radius-xl", "0px");
+    document.documentElement.style.setProperty("--radius-2xl", "0px");
+    document.documentElement.style.setProperty("--radius-3xl", "0px");
+    document.documentElement.style.setProperty("--radius-card", "0px");
+    document.documentElement.style.setProperty("--radius-large-card", "0px");
+    document.documentElement.style.setProperty("--radius-button", "0px");
+    document.documentElement.style.setProperty("--radius-input", "0px");
+    document.documentElement.style.setProperty("--radius-chip", "0px");
+    document.documentElement.style.setProperty("--radius-progress", "0px");
+  } else if (cr === "medium") {
+    document.documentElement.style.setProperty("--radius-none", "2px");
+    document.documentElement.style.setProperty("--radius-sm", "6px");
+    document.documentElement.style.setProperty("--radius-md", "8px");
+    document.documentElement.style.setProperty("--radius-lg", "12px");
+    document.documentElement.style.setProperty("--radius-xl", "14px");
+    document.documentElement.style.setProperty("--radius-2xl", "16px");
+    document.documentElement.style.setProperty("--radius-3xl", "20px");
+    document.documentElement.style.setProperty("--radius-card", "12px");
+    document.documentElement.style.setProperty("--radius-large-card", "16px");
+    document.documentElement.style.setProperty("--radius-button", "8px");
+    document.documentElement.style.setProperty("--radius-input", "8px");
+    document.documentElement.style.setProperty("--radius-chip", "9999px");
+    document.documentElement.style.setProperty("--radius-progress", "9999px");
+  } else {
+    // Default playful
+    document.documentElement.style.setProperty("--radius-none", "16px");
+    document.documentElement.style.setProperty("--radius-sm", "24px");
+    document.documentElement.style.setProperty("--radius-md", "24px");
+    document.documentElement.style.setProperty("--radius-lg", "32px");
+    document.documentElement.style.setProperty("--radius-xl", "32px");
+    document.documentElement.style.setProperty("--radius-2xl", "32px");
+    document.documentElement.style.setProperty("--radius-3xl", "50px");
+    document.documentElement.style.setProperty("--radius-card", "24px");
+    document.documentElement.style.setProperty("--radius-large-card", "32px");
+    document.documentElement.style.setProperty("--radius-button", "9999px");
+    document.documentElement.style.setProperty("--radius-input", "9999px");
+    document.documentElement.style.setProperty("--radius-chip", "9999px");
+    document.documentElement.style.setProperty("--radius-progress", "9999px");
+  }
+
+  // Apply border style intensity
+  const bs = borderStyle || "subtle";
+  if (bs === "invisible") {
+    document.documentElement.style.setProperty("--color-surface-alt", theme.colors["--color-surface-card"]);
+  } else if (bs === "solid") {
+    const textBorder = theme.colors["--color-primary-anchor"];
+    document.documentElement.style.setProperty("--color-surface-alt", textBorder);
+  } else if (bs === "neon") {
+    const themeMint = theme.colors["--color-primary-mint"];
+    document.documentElement.style.setProperty("--color-surface-alt", customAccentColor ? (customAccentColor.includes(" ") ? `rgb(${customAccentColor})` : customAccentColor) : themeMint);
+  } else {
+    document.documentElement.style.setProperty("--color-surface-alt", theme.colors["--color-surface-alt"]);
+  }
+}
+
 function checkWeeklyConsistencyThreeWeeks(habits: Habit[], logs: HabitLog, referenceDate: Date): boolean {
   if (habits.length === 0) return false;
   
@@ -337,9 +546,6 @@ function App() {
         setHabits(data.habits || []);
         setLogs(data.logs || {});
         setExtraStats(data.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 });
-        if (data.extraStats?.accentColor) {
-           document.documentElement.style.setProperty('--primary-mint', data.extraStats.accentColor);
-        }
         setActiveRestMode(data.activeRestMode || null);
       } else {
         // Offline fallback: load from localStorage
@@ -361,6 +567,24 @@ function App() {
 
     return () => unsubscribe();
   }, [user]);
+
+  // Accent and Full Visual Theme Controller Effect
+  useEffect(() => {
+    if (!extraStats) return;
+    const themeId = extraStats.themeId || "cream_butter";
+    const accentColor = extraStats.accentColor;
+    const cornerRoundness = extraStats.cornerRoundness || "soft";
+    const borderStyle = extraStats.borderStyle || "subtle";
+
+    import("./components/GardenSky").then(({ getGardenTimePhase }) => {
+      const phase = getGardenTimePhase();
+      const isNightPhase = phase === "Evening" || phase === "Night";
+      const actualTheme = (isNightPhase && (extraStats.matchTimeOfDay !== false) && themeId === "cream_butter")
+        ? "classic_obsidian"
+        : themeId;
+      applyAppTheme(actualTheme, accentColor, cornerRoundness, borderStyle);
+    });
+  }, [extraStats?.themeId, extraStats?.accentColor, extraStats?.cornerRoundness, extraStats?.borderStyle, extraStats?.matchTimeOfDay, date]);
 
   // Gardener's Streak Processing
   useEffect(() => {
@@ -2038,7 +2262,7 @@ function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background-main flex items-center justify-center">
+      <div className="app-background-reset flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-accent-mustard animate-spin" />
       </div>
     );
@@ -2082,7 +2306,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background-main text-primary-anchor pb-24 md:pb-0 md:pl-28 transition-all relative">
+    <div className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative">
       {/* Sync Status Indicator (Absolute Top Right) */}
       <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
         {!isOnline ? (
@@ -2909,42 +3133,189 @@ function App() {
                     }}
                   />
 
-                  <div className="flex flex-col gap-3 bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
-                     <div>
-                        <h3 className="text-white font-bold text-sm">Accent Color Theme</h3>
-                        <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Personalize your primary color</p>
-                     </div>
-                     <div className="flex items-center gap-3">
-                        {[
-                           { name: 'Mint', value: '143 207 173', hex: '#8FCFAD' },
-                           { name: 'Rose', value: '251 113 133', hex: '#fb7185' },
-                           { name: 'Cyan', value: '34 211 238', hex: '#22d3ee' },
-                           { name: 'Amber', value: '251 191 36', hex: '#fbbf24' },
-                           { name: 'Purple', value: '192 132 252', hex: '#c084fc' }
-                        ].map((color) => (
-                           <button
-                              key={color.name}
-                              onClick={() => {
-                                 const newStats = { ...extraStats, accentColor: color.value };
-                                 document.documentElement.style.setProperty('--primary-mint', color.value);
-                                 setExtraStats(newStats);
-                                 persistData(habits, logs, newStats);
-                              }}
-                              className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center ${
-                                 (extraStats.accentColor || '143 207 173') === color.value 
-                                    ? 'border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]' 
-                                    : 'border-transparent'
-                              }`}
-                              style={{ backgroundColor: color.hex }}
-                              title={color.name}
-                           >
-                              {(extraStats.accentColor || '143 207 173') === color.value && (
-                                 <Check className="w-4 h-4 text-white drop-shadow-md" />
-                              )}
-                           </button>
-                        ))}
-                     </div>
-                  </div>
+                   {/* APP DESIGN & VISUAL LAB */}
+                   <div className="flex flex-col gap-6 bg-surface-alt/5 p-6 rounded-none border border-surface-alt mb-6">
+                      <div>
+                         <div className="flex items-center gap-2 mb-1">
+                            <LucideIcons.Brush className="w-5 h-5 text-primary-mint" />
+                            <h3 className="text-white font-bold text-base">Aesthetic & Layout Design Lab</h3>
+                         </div>
+                         <p className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+                            Fully customize your app canvas, boxes, elements and accent styling
+                         </p>
+                      </div>
+
+                      {/* Option 1: Full App Preset Themes */}
+                      <div className="space-y-3">
+                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">1. Canvas Presets (Body & Containers)</span>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {APP_THEMES.map((t) => {
+                               const isActive = (extraStats.themeId || 'cream_butter') === t.id;
+                               return (
+                                  <button
+                                     key={t.id}
+                                     onClick={() => {
+                                        const newStats = { ...extraStats, themeId: t.id };
+                                        setExtraStats(newStats);
+                                        persistData(habits, logs, newStats);
+                                     }}
+                                     className={`relative p-3 rounded text-left border cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex flex-col justify-between h-28 overflow-hidden group`}
+                                     style={{
+                                        backgroundColor: t.colors['--color-surface-card'],
+                                        borderColor: isActive ? t.colors['--color-primary-mint'] : 'rgba(148, 163, 184, 0.2)',
+                                        boxShadow: isActive ? `0 0 12px ${t.colors['--color-primary-mint']}40` : 'none',
+                                     }}
+                                  >
+                                     <div 
+                                        className="absolute -bottom-6 -right-6 w-16 h-16 rounded-full opacity-10 group-hover:scale-125 transition-transform"
+                                        style={{ backgroundColor: t.colors['--color-primary-mint'] }}
+                                     />
+                                     
+                                     <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                           <span className="font-bold text-xs" style={{ color: t.colors['--color-primary-text'] }}>
+                                              {t.name}
+                                           </span>
+                                           {isActive ? (
+                                              <span className="text-[9px] font-mono uppercase bg-primary-mint/10 border border-primary-mint px-1.5 py-0.5 rounded text-primary-mint">
+                                                 Active
+                                              </span>
+                                           ) : (
+                                              t.isDark ? (
+                                                 <LucideIcons.Moon className="w-3 h-3 text-slate-500" />
+                                              ) : (
+                                                 <LucideIcons.Sun className="w-3 h-3 text-slate-400" />
+                                              )
+                                           )}
+                                        </div>
+                                        <p className="text-[10px] leading-relaxed block" style={{ color: t.colors['--color-secondary-text'] }}>
+                                           {t.description}
+                                        </p>
+                                     </div>
+
+                                     <div className="flex gap-1.5 items-center mt-2 relative z-10">
+                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-background-main'] }} title="BG" />
+                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-surface-card'] }} title="Card" />
+                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-surface-alt'] }} title="Border" />
+                                        <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: t.colors['--color-primary-mint'] }} title="Accent" />
+                                     </div>
+                                  </button>
+                               );
+                            })}
+                         </div>
+                      </div>
+
+                      {/* Option 2: Ambient Accent Tint Override */}
+                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
+                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">2. Ambient Accent Tint (Indicators & Action Buttons)</span>
+                         <div className="flex flex-wrap items-center gap-3">
+                            {[
+                               { name: 'Mint / Sage', value: '78 173 160', hex: '#4EADA0' },
+                               { name: 'Teal Bright', value: '143 207 173', hex: '#8FCFAD' },
+                               { name: 'Rose Petal', value: '251 113 133', hex: '#fb7185' },
+                               { name: 'Electric Cyan', value: '34 211 238', hex: '#22d3ee' },
+                               { name: 'Desert Amber', value: '251 191 36', hex: '#fbbf24' },
+                               { name: 'Pure Amethyst', value: '192 132 252', hex: '#c084fc' },
+                               { name: 'Harvest Rust', value: '208 90 63', hex: '#D05A3F' },
+                               { name: 'Obsidian Emerald', value: '16 185 129', hex: '#10B981' }
+                            ].map((color) => {
+                               const isSelected = extraStats.accentColor === color.value;
+                               return (
+                                  <button
+                                     key={color.name}
+                                     onClick={() => {
+                                        const newStats = { ...extraStats, accentColor: color.value };
+                                        setExtraStats(newStats);
+                                        persistData(habits, logs, newStats);
+                                     }}
+                                     className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center relative active:scale-95 cursor-pointer`}
+                                     style={{ 
+                                        backgroundColor: color.hex,
+                                        borderColor: isSelected ? '#FFFFFF' : 'rgba(255,255,255,0.1)'
+                                     }}
+                                     title={color.name}
+                                  >
+                                     {isSelected && (
+                                        <Check className="w-5 h-5 text-white drop-shadow-md" />
+                                     )}
+                                  </button>
+                               );
+                            })}
+                         </div>
+                      </div>
+
+                      {/* Option 3: Corner Curvatures (Geometry style) */}
+                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
+                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">3. Box Corner Geometry (Curvatures)</span>
+                         <div className="grid grid-cols-3 gap-3">
+                            {[
+                               { id: 'sharp', label: 'Brutalist Sharp', desc: '0px corners', styleText: 'rounded-none' },
+                               { id: 'medium', label: 'Modern Elegant', desc: '12px corners', styleText: 'rounded-[12px]' },
+                               { id: 'soft', label: 'Playful Organic', desc: '32px round pill', styleText: 'rounded-[16px]' }
+                            ].map((item) => {
+                               const isActive = (extraStats.cornerRoundness || 'soft') === item.id;
+                               return (
+                                  <button
+                                     key={item.id}
+                                     onClick={() => {
+                                        const newStats = { ...extraStats, cornerRoundness: item.id as any };
+                                        setExtraStats(newStats);
+                                        persistData(habits, logs, newStats);
+                                     }}
+                                     className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
+                                        isActive ? 'bg-[#1e2538]/40 border-primary-mint text-white' : 'bg-transparent border-slate-500/20 text-slate-300'
+                                     }`}
+                                  >
+                                     <div className="flex items-center justify-between gap-1 mb-1">
+                                        <span className="font-bold text-[11px] tracking-tight">{item.label}</span>
+                                        {isActive && <div className="w-2 h-2 rounded-full bg-primary-mint" />}
+                                     </div>
+                                     <p className="text-[9px] text-slate-400 font-mono leading-none">{item.desc}</p>
+                                     
+                                     <div className="mt-3 flex gap-1 justify-start">
+                                        <span className={`w-8 h-4 border border-slate-500/30 ${item.styleText}`} />
+                                        <span className={`w-4 h-4 border border-slate-500/30 ${item.styleText}`} />
+                                     </div>
+                                  </button>
+                               );
+                            })}
+                         </div>
+                      </div>
+
+                      {/* Option 4: Box Border Outlines */}
+                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
+                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">4. Box Border Styles (Outlines)</span>
+                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[
+                               { id: 'subtle', label: 'Default Subtle', desc: 'Standard soft outline' },
+                               { id: 'invisible', label: 'Seamless None', desc: 'Smooth flat bg' },
+                               { id: 'solid', label: 'Comic Bold', desc: 'High contrast black outline' },
+                               { id: 'neon', label: 'Cosmic Glow', desc: 'Glowing neon outline' }
+                            ].map((item) => {
+                               const isActive = (extraStats.borderStyle || 'subtle') === item.id;
+                               return (
+                                  <button
+                                     key={item.id}
+                                     onClick={() => {
+                                        const newStats = { ...extraStats, borderStyle: item.id as any };
+                                        setExtraStats(newStats);
+                                        persistData(habits, logs, newStats);
+                                     }}
+                                     className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
+                                        isActive ? 'bg-[#1e2538]/40 border-primary-mint text-white' : 'bg-transparent border-slate-500/20 text-slate-300'
+                                     }`}
+                                  >
+                                     <div className="flex items-center justify-between gap-1 mb-1">
+                                        <span className="font-bold text-[11px] tracking-tight">{item.label}</span>
+                                        {isActive && <div className="w-2 h-2 rounded-full bg-primary-mint" />}
+                                     </div>
+                                     <p className="text-[9px] text-slate-400 leading-normal">{item.desc}</p>
+                                  </button>
+                               );
+                            })}
+                         </div>
+                      </div>
+                   </div>
 
                    {/* Recently Unlocked Badges */}
                    {extraStats.unlockedBadgeIds && Object.keys(extraStats.unlockedBadgeIds).length > 0 && (

@@ -212,18 +212,25 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
 
   const matchTimeOfDay = stats.matchTimeOfDay !== false;
 
-  if (!matchTimeOfDay) {
-     if (equippedBackgroundId === 'bg_rooftop') {
-        bgClass += " bg-gradient-to-b from-sky-900/40 to-slate-900/80 border border-sky-500/20";
-     } else if (equippedBackgroundId === 'bg_village') {
-        bgClass += " bg-gradient-to-b from-emerald-900/40 to-green-950/80 border border-emerald-500/20";
-     } else if (equippedBackgroundId === 'bg_morning_sun') {
-        bgClass += " bg-gradient-to-b from-amber-900/40 to-slate-900/80 border border-amber-500/20";
-     } else if (equippedBackgroundId === 'bg_monsoon') {
-        bgClass += " bg-gradient-to-b from-cyan-900/30 to-blue-950/80 border border-blue-500/20";
-     } else if (equippedBackgroundId === 'bg_default') {
-        bgClass += " bg-transparent border border-transparent";
-     }
+  let baseBgColor = '#24676d'; // Default garden teal base
+  if (equippedBackgroundId === 'bg_rooftop') {
+     baseBgColor = '#131e2f'; // City rooftop dark-blue base
+     bgClass += " bg-gradient-to-b from-sky-900/40 to-slate-900/80 border border-sky-500/20";
+  } else if (equippedBackgroundId === 'bg_village') {
+     baseBgColor = '#102717'; // Village dark-green base
+     bgClass += " bg-gradient-to-b from-emerald-900/40 to-green-950/80 border border-emerald-500/20";
+  } else if (equippedBackgroundId === 'bg_morning_sun') {
+     baseBgColor = '#3a2717'; // Warm sunrise golden-brown base
+     bgClass += " bg-gradient-to-b from-amber-900/40 to-slate-900/80 border border-amber-500/20";
+  } else if (equippedBackgroundId === 'bg_monsoon') {
+     baseBgColor = '#1a2230'; // Rainy dark grey-blue base
+     bgClass += " bg-gradient-to-b from-cyan-900/30 to-blue-950/80 border border-blue-500/20";
+  } else if (equippedBackgroundId === 'bg_zamindar_palace') {
+     baseBgColor = '#2d141e'; // Palace rooftop royal crimson/purple base
+     bgClass += " bg-gradient-to-b from-rose-950/40 to-purple-950/80 border border-rose-500/20";
+  } else if (equippedBackgroundId === 'bg_default') {
+     baseBgColor = '#24676d'; // Default garden green
+     bgClass += " bg-transparent border border-transparent";
   }
 
   // Calculate extra fireflies from completed evening habits
@@ -236,7 +243,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   const isDarkPhase = matchTimeOfDay && (currentPhase === 'Evening' || currentPhase === 'Night' || currentPhase === 'Dawn');
 
   return (
-    <div className={bgClass} style={{ backgroundColor: '#24676d' }}>
+    <div className={bgClass} style={{ backgroundColor: baseBgColor }}>
       <GardenSky enabled={matchTimeOfDay} extraFireflies={extraFireflies} />
       
       <div className="relative z-10 space-y-8">

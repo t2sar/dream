@@ -140,6 +140,25 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
     // Touch/Mouse deflections state
     const deflectionInertia = faceIndices.map(() => ({ x: 0, y: 0 }));
 
+    // Precache static HUD elements onto offscreen canvas
+    const hudCanvas = document.createElement("canvas");
+    hudCanvas.width = 400 * window.devicePixelRatio;
+    hudCanvas.height = 360 * window.devicePixelRatio;
+    const hudCtx = hudCanvas.getContext("2d");
+    if (hudCtx) {
+      hudCtx.fillStyle = "rgba(255, 255, 255, 0.1)";
+      hudCtx.strokeStyle = "rgba(255, 255, 255, 0.02)";
+      hudCtx.lineWidth = 1;
+      const rSize = 10;
+      const margin = 20;
+      const hw = hudCanvas.width;
+      const hh = hudCanvas.height;
+      hudCtx.beginPath(); hudCtx.moveTo(margin, margin + rSize); hudCtx.lineTo(margin, margin); hudCtx.lineTo(margin + rSize, margin); hudCtx.stroke();
+      hudCtx.beginPath(); hudCtx.moveTo(hw - margin, margin + rSize); hudCtx.lineTo(hw - margin, margin); hudCtx.lineTo(hw - margin - rSize, margin); hudCtx.stroke();
+      hudCtx.beginPath(); hudCtx.moveTo(margin, hh - margin - rSize); hudCtx.lineTo(margin, hh - margin); hudCtx.lineTo(margin + rSize, hh - margin); hudCtx.stroke();
+      hudCtx.beginPath(); hudCtx.moveTo(hw - margin, hh - margin - rSize); hudCtx.lineTo(hw - margin, hh - margin); hudCtx.lineTo(hw - margin - rSize, hh - margin); hudCtx.stroke();
+    }
+
     let resizeTicking = false;
     const handleResize = () => {
       if (!resizeTicking) {
@@ -484,37 +503,41 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
         ctx.stroke();
       }
 
-      // 3. Central HUD Overlays (Technical Coordinates Frame / System Core Assembly)
-      ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
-      ctx.lineWidth = 1;
-      // Crosshair markers in corners
-      const rSize = 10;
-      const margin = 20;
-      // TL Corner
-      ctx.beginPath();
-      ctx.moveTo(margin, margin + rSize);
-      ctx.lineTo(margin, margin);
-      ctx.lineTo(margin + rSize, margin);
-      ctx.stroke();
-      // TR Corner
-      ctx.beginPath();
-      ctx.moveTo(width - margin, margin + rSize);
-      ctx.lineTo(width - margin, margin);
-      ctx.lineTo(width - margin - rSize, margin);
-      ctx.stroke();
-      // BL Corner
-      ctx.beginPath();
-      ctx.moveTo(margin, height - margin - rSize);
-      ctx.lineTo(margin, height - margin);
-      ctx.lineTo(margin + rSize, height - margin);
-      ctx.stroke();
-      // BR Corner
-      ctx.beginPath();
-      ctx.moveTo(width - margin, height - margin - rSize);
-      ctx.lineTo(width - margin, height - margin);
-      ctx.lineTo(width - margin - rSize, height - margin);
-      ctx.stroke();
+      // 3. Central HUD Overlays from Cache
+      if (hudCanvas.width === width && hudCanvas.height === height) {
+         ctx.drawImage(hudCanvas, 0, 0);
+      } else {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.02)";
+        ctx.lineWidth = 1;
+        // Crosshair markers in corners
+        const rSize = 10;
+        const margin = 20;
+        // TL Corner
+        ctx.beginPath();
+        ctx.moveTo(margin, margin + rSize);
+        ctx.lineTo(margin, margin);
+        ctx.lineTo(margin + rSize, margin);
+        ctx.stroke();
+        // TR Corner
+        ctx.beginPath();
+        ctx.moveTo(width - margin, margin + rSize);
+        ctx.lineTo(width - margin, margin);
+        ctx.lineTo(width - margin - rSize, margin);
+        ctx.stroke();
+        // BL Corner
+        ctx.beginPath();
+        ctx.moveTo(margin, height - margin - rSize);
+        ctx.lineTo(margin, height - margin);
+        ctx.lineTo(margin + rSize, height - margin);
+        ctx.stroke();
+        // BR Corner
+        ctx.beginPath();
+        ctx.moveTo(width - margin, height - margin - rSize);
+        ctx.lineTo(width - margin, height - margin);
+        ctx.lineTo(width - margin - rSize, height - margin);
+        ctx.stroke();
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -540,9 +563,9 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
     : `STREAK MATRIX UNLOCKED // LVL ${level} CONCORDANCE`;
 
   return (
-    <div className="relative w-full rounded-[2.5rem] glass overflow-hidden border border-white/5 py-4 mb-8 bg-[#07080A]">
+    <div className="relative w-full rounded-large-card glass overflow-hidden border border-white/5 py-4 mb-8 bg-[#07080A] shadow-md will-change-transform">
       {/* Visual Ambient Core Glow behind Monolith wrapper container */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[350px] pointer-events-none rounded-full blur-[140px] opacity-25 bg-gradient-to-tr from-violet-600 via-cyan-400 to-amber-300 transition-all duration-1000" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[350px] pointer-events-none rounded-full opacity-20 bg-gradient-to-tr from-violet-600 via-cyan-400 to-amber-300 transition-all duration-1000 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
 
       <div className="relative flex flex-col items-center">
         {/* Living Monolith Canvas Stage */}

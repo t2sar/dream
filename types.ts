@@ -222,6 +222,9 @@ export interface UserStats {
   dailyReminderEnabled?: boolean;
   dailyReminderTime?: string; // e.g., '09:00'
   accentColor?: string; // e.g. '#8FCFAD'
+  themeId?: string; // e.g. 'cream_butter'
+  cornerRoundness?: 'sharp' | 'medium' | 'soft';
+  borderStyle?: 'invisible' | 'subtle' | 'solid' | 'neon';
   streakFreezes?: number;
   // Achievement fields
   habitsCreatedCount?: number;
