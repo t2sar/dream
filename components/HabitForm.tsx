@@ -131,21 +131,21 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             <div 
                onClick={() => setType('build')}
                className={`p-3 border flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
-                 type === 'build' ? 'border-emerald-400 bg-emerald-400/10' : 'border-white/15 bg-[#07080A] hover:border-surface-alt'
+                 type === 'build' ? 'border-emerald-400 bg-emerald-400/10' : 'border-surface-alt bg-background-main hover:border-surface-alt'
                }`}
             >
                <span className="text-xl">🌱</span>
-               <span className="text-xs font-bold text-white uppercase tracking-wider">Build Habit</span>
+               <span className="text-xs font-bold text-primary-text uppercase tracking-wider">Build Habit</span>
                <span className="text-[9px] text-slate-500 text-center uppercase">I want to do this</span>
             </div>
             <div 
                onClick={() => setType('avoid')}
                className={`p-3 border flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
-                 type === 'avoid' ? 'border-amber-400 bg-amber-400/10' : 'border-white/15 bg-[#07080A] hover:border-surface-alt'
+                 type === 'avoid' ? 'border-amber-400 bg-amber-400/10' : 'border-surface-alt bg-background-main hover:border-surface-alt'
                }`}
             >
                <span className="text-xl">🛡️</span>
-               <span className="text-xs font-bold text-white uppercase tracking-wider">Avoid Habit</span>
+               <span className="text-xs font-bold text-primary-text uppercase tracking-wider">Avoid Habit</span>
                <span className="text-[9px] text-slate-500 text-center uppercase">I want to stop this</span>
             </div>
           </div>
@@ -160,7 +160,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-[#07080A] border border-white/15 rounded-none px-4 py-3.5 text-sm text-white font-mono focus:border-[#00F5D4]/65 focus:outline-none transition-all placeholder:text-slate-700"
+            className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none transition-all placeholder:text-slate-700"
             placeholder={type === 'build' ? "e.g. Daily Meditation" : "e.g. No Sugar"}
           />
           {type === 'avoid' && (
@@ -188,7 +188,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
               type="text"
               value={replacementAction}
               onChange={(e) => setReplacementAction(e.target.value)}
-              className="w-full bg-[#07080A] border border-white/15 rounded-none px-4 py-3.5 text-sm text-white font-mono focus:border-amber-400/65 focus:outline-none transition-all placeholder:text-slate-700"
+              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-amber-400/65 focus:outline-none transition-all placeholder:text-slate-700"
               placeholder="e.g. Drink water or eat fruit"
             />
           </div>
@@ -202,7 +202,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             <select
               value={scheduleType}
               onChange={(e) => setScheduleType(e.target.value as Habit['scheduleType'])}
-              className="w-full bg-[#07080A] border border-white/15 rounded-none px-4 py-3.5 text-sm text-white font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
+              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
             >
               <option value="daily">Every day</option>
               <option value="specific_days">Specific days</option>
@@ -241,7 +241,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                   <input 
                      type="number" min="1" max="99" 
                      value={targetCount} onChange={(e) => setTargetCount(Number(e.target.value) || 1)}
-                     className="w-20 bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono"
+                     className="w-20 bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono"
                   />
                   <span className="text-sm text-slate-400 font-mono">times</span>
                </div>
@@ -253,7 +253,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                   <input 
                      type="number" min="1" max="31" 
                      value={monthlyDay} onChange={(e) => setMonthlyDay(Number(e.target.value) || 1)}
-                     className="w-20 bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono"
+                     className="w-20 bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono"
                   />
                </div>
             )}
@@ -264,12 +264,12 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                   <input 
                      type="number" min="1" max="999" 
                      value={intervalValue} onChange={(e) => setIntervalValue(Number(e.target.value) || 1)}
-                     className="w-20 bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono"
+                     className="w-20 bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono"
                   />
                   <select
                      value={intervalUnit}
                      onChange={(e) => setIntervalUnit(e.target.value as any)}
-                     className="bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono"
+                     className="bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono"
                   >
                      <option value="days">Days</option>
                      <option value="weeks">Weeks</option>
@@ -285,7 +285,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                      <input 
                         type="number" min="1" max="99999" 
                         value={quantityTarget} onChange={(e) => setQuantityTarget(Number(e.target.value) || 1)}
-                        className="bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono"
+                        className="bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono"
                      />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
@@ -293,7 +293,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                      <input 
                         type="text" 
                         value={quantityUnit} onChange={(e) => setQuantityUnit(e.target.value)}
-                        className="bg-[#07080A] border border-white/15 px-3 py-2 text-sm text-white font-mono placeholder:text-slate-700"
+                        className="bg-background-main border border-surface-alt px-3 py-2 text-sm text-primary-text font-mono placeholder:text-slate-700"
                         placeholder="glasses"
                      />
                   </div>
@@ -309,31 +309,31 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
               <div 
                 onClick={() => setDifficulty('easy')}
                 className={`p-3 border flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
-                  difficulty === 'easy' ? 'border-emerald-400 bg-emerald-400/10' : 'border-white/15 bg-[#07080A] hover:border-surface-alt'
+                  difficulty === 'easy' ? 'border-emerald-400 bg-emerald-400/10' : 'border-surface-alt bg-background-main hover:border-surface-alt'
                 }`}
               >
                  <span className="text-xl">🍃</span>
-                 <span className="text-xs font-bold text-white uppercase tracking-wider">Easy</span>
+                 <span className="text-xs font-bold text-primary-text uppercase tracking-wider">Easy</span>
                  <span className="text-[9px] text-slate-500 text-center uppercase">Small Effort</span>
               </div>
               <div 
                 onClick={() => setDifficulty('medium')}
                 className={`p-3 border flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
-                  difficulty === 'medium' ? 'border-amber-400 bg-amber-400/10' : 'border-white/15 bg-[#07080A] hover:border-surface-alt'
+                  difficulty === 'medium' ? 'border-amber-400 bg-amber-400/10' : 'border-surface-alt bg-background-main hover:border-surface-alt'
                 }`}
               >
                  <span className="text-xl">💧</span>
-                 <span className="text-xs font-bold text-white uppercase tracking-wider">Medium</span>
+                 <span className="text-xs font-bold text-primary-text uppercase tracking-wider">Medium</span>
                  <span className="text-[9px] text-slate-500 text-center uppercase">Daily Routine</span>
               </div>
               <div 
                 onClick={() => setDifficulty('hard')}
                 className={`p-3 border flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
-                  difficulty === 'hard' ? 'border-rose-400 bg-rose-400/10' : 'border-white/15 bg-[#07080A] hover:border-surface-alt'
+                  difficulty === 'hard' ? 'border-rose-400 bg-rose-400/10' : 'border-surface-alt bg-background-main hover:border-surface-alt'
                 }`}
               >
                  <span className="text-xl">🔥</span>
-                 <span className="text-xs font-bold text-white uppercase tracking-wider">Hard</span>
+                 <span className="text-xs font-bold text-primary-text uppercase tracking-wider">Hard</span>
                  <span className="text-[9px] text-slate-500 text-center uppercase">Discipline</span>
               </div>
             </div>
@@ -345,7 +345,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full bg-[#07080A] border border-white/15 rounded-none px-4 py-3.5 text-sm text-white font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
+              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
             >
               <option value="health">Physical Health & Fitness</option>
               <option value="mind">Mental Rest & Focus</option>
@@ -372,7 +372,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                      <div className={`dot absolute left-1 top-1 bg-surface-card w-4 h-4 rounded-full transition-transform ${isPrivate ? 'translate-x-4' : ''}`}></div>
                   </div>
                   <div>
-                     <span className="text-sm text-white font-bold block">Private Habit</span>
+                     <span className="text-sm text-primary-text font-bold block">Private Habit</span>
                      <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest block">Hide details from notifications</span>
                   </div>
                </label>
@@ -394,7 +394,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') e.preventDefault();
                   }}
-                  className="w-full bg-[#07080A] border border-white/15 rounded-full pl-9 pr-4 py-2 text-xs text-white font-mono focus:border-primary-mint focus:outline-none transition-all placeholder:text-slate-700"
+                  className="w-full bg-background-main border border-surface-alt rounded-full pl-9 pr-4 py-2 text-xs text-primary-text font-mono focus:border-primary-mint focus:outline-none transition-all placeholder:text-slate-700"
                 />
               </div>
             </div>
@@ -487,7 +487,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
               type="text"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              className="w-full bg-[#07080A] border border-white/15 rounded-none px-4 py-3.5 text-sm text-white font-mono focus:border-[#00F5D4]/65 focus:outline-none placeholder:text-slate-700"
+              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none placeholder:text-slate-700"
               placeholder="e.g. Book, Sun, Sparkles"
             />
           </div>

@@ -24,7 +24,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
 
   const filteredTemplates = CHALLENGE_TEMPLATES.filter(c => {
      if (filter === 'all') return true;
-     if (filter === 'beginner') return c.difficulty === 'easy' && c.category === 'all';
+     if (filter === 'beginner') return (c.id === 'starter_habit_7_day' || c.id === 'first_garden_3_day' || c.difficulty === 'easy') && c.category === 'all';
      return c.category === filter;
   });
 
@@ -38,7 +38,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
       
       {/* Active Challenge Banner */}
       {activeChallenge && activeTemplate && activeChallenge.status === 'active' && (
-        <div className="bg-[#0A0D14] border border-[#00F5D4]/20 rounded-3xl p-6 relative overflow-hidden group">
+        <div className="bg-background-main border border-[#00F5D4]/20 rounded-3xl p-6 relative overflow-hidden group">
            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00F5D4]/10 blur-3xl rounded-full" />
            <div className="flex items-center justify-between relative z-10">
               <div className="flex-1">
@@ -89,7 +89,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {filteredTemplates.map(template => (
-            <div key={template.id} className="bg-[#0d1017] border border-surface-alt rounded-2xl p-5 hover:border-[#00F5D4]/30 transition-colors cursor-pointer group flex flex-col justify-between" onClick={() => setSelectedTemplate(template)}>
+            <div key={template.id} className="bg-background-main border border-surface-alt rounded-2xl p-5 hover:border-[#00F5D4]/30 transition-colors cursor-pointer group flex flex-col justify-between" onClick={() => setSelectedTemplate(template)}>
                <div>
                   <div className="flex justify-between items-start mb-3">
                      <div className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-widest font-bold ${template.difficulty === 'easy' ? 'bg-emerald-500/10 text-emerald-400' : template.difficulty === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'}`}>
@@ -112,7 +112,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
       {/* Modal */}
       {selectedTemplate && (
          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-md bg-[#0d1017] border border-surface-alt shadow-2xl relative flex flex-col max-h-[85vh]">
+            <div className="w-full max-w-md bg-background-main border border-surface-alt shadow-2xl relative flex flex-col max-h-[85vh]">
                <div className="p-6 border-b border-surface-alt relative bg-gradient-to-b from-[#00F5D4]/10 to-transparent">
                   <button onClick={() => setSelectedTemplate(null)} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
                     <X className="w-5 h-5" />
@@ -165,7 +165,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
                   )}
                </div>
 
-               <div className="p-6 border-t border-surface-alt bg-[#0d1017]">
+               <div className="p-6 border-t border-surface-alt bg-background-main">
                   {activeChallenge?.templateId === selectedTemplate.id ? (
                       activeChallenge.completedDates.length >= selectedTemplate.requiredCompletionDays && activeChallenge.status !== 'completed' ? (
                         <Button className="w-full" onClick={() => onClaimChallengeReward(activeChallenge.id)}>Claim Reward</Button>

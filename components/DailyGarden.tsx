@@ -341,7 +341,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
            </div>
         )}
         {!stats.isSimpleMode && equippedSeasonalDecorId === 'seasonal_ramadan_lantern' && (
-           <div className="absolute top-3 right-1/4 w-4 h-6 rounded-b-lg bg-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.8)] border-t border-white/40"></div>
+           <div className="absolute top-3 right-1/4 w-4 h-6 rounded-b-lg bg-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.8)] border-t border-surface-alt"></div>
         )}
         {!stats.isSimpleMode && equippedSeasonalDecorId === 'seasonal_winter_sun' && (
            <div className="absolute top-4 left-8 w-12 h-12 rounded-full bg-orange-300/40 blur-md"></div>
@@ -653,7 +653,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
 
   if (isCompleted) {
     cardBg = 'glass-card bg-status-completed/10';
-    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-white/10';
+    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (isDanger) {
@@ -665,7 +665,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   } else if (status === 'Resting') {
     cardBg = 'glass-card bg-status-resting/10';
     statusColor = 'text-status-resting';
-    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border-white/10';
+    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (canHarvest) {
@@ -720,22 +720,25 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
           <Settings className="w-4 h-4" />
         </button>
       )}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex gap-4">
-           <div className={`w-20 h-20 flex items-center justify-center relative`}>
-             {renderPot(equippedPotId, 'inset-x-4 bottom-1 h-3')}
-             
-             <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-20 h-20 relative z-10 animate-breathe transform-gpu will-change-transform group-hover:scale-105 transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-110' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'animate-pulse' : ''}`} />
+      <div className="flex flex-row items-center gap-4 mb-4">
+           {/* Display Case Container for PlantAssetsDictionary SVG */}
+           <div className={`w-20 h-24 shrink-0 flex flex-col items-center justify-end relative group`}>
+             <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-20 h-24 absolute bottom-[5%] z-10 drop-shadow-md animate-breathe transform-gpu will-change-transform group-hover:scale-[1.03] transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-105' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'opacity-95' : ''}`} />
+             {/* Position custom pot exactly overlapping the base */}
+             {renderPot(equippedPotId, 'absolute bottom-[10%] inset-x-4 h-4 z-20')}
+             {/* Elliptical shadow under the plant */}
+             <div className="w-14 h-2 bg-black/15 shadow-[0_0_10px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
            </div>
-           <div>
-             <div className="text-[11px] font-bold tracking-wide uppercase mb-1 flex items-center gap-1">
+           
+           <div className="flex-1 flex flex-col justify-center">
+             <div className="text-[11px] font-bold tracking-wide uppercase mb-1.5 flex items-center gap-1">
                {isDanger ? <AlertTriangle className="w-3.5 h-3.5 text-status-wilting" /> : isCompleted ? <Check className="w-3.5 h-3.5 text-status-healthy" /> : <div className="w-2 h-2 rounded-full bg-status-healthy" />}
                <span className={statusColor}>{isSlipped ? "Slipped Today" : status}</span>
              </div>
-             <h4 className="font-bold text-primary-text text-base capitalize flex items-center gap-2">
-                {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
-                {(() => {
-                   if (!habit.category) return null;
+             <h4 className="font-bold text-primary-text text-base lg:text-lg capitalize flex items-center gap-2 leading-tight">
+               {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
+               {(() => {
+                  if (!habit.category) return null;
                    const custom = customCategories.find((c: any) => c.id === habit.category || c.name === habit.category);
                    if (custom) {
                       return (
@@ -775,7 +778,6 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                </div>
             )}
            </div>
-        </div>
       </div>
       
       <div className="flex flex-col gap-3 mt-auto pt-2">

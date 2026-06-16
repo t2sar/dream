@@ -86,8 +86,20 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
   const renderBaseIcon = () => {
     if (stage === 'Seed') {
       return (
-        <div className="w-full h-full flex items-center justify-center">
-          <span className="text-[2.25em] drop-shadow-sm opacity-90 saturate-50">{emoji}</span>
+        <div className="w-full h-full flex items-center justify-center drop-shadow-md">
+           <svg viewBox="0 0 64 64" fill="none" className="w-full h-full overflow-visible">
+              {/* Soil mound */}
+              <ellipse cx="32" cy="48" rx="14" ry="5" fill="#5C4033" opacity="0.8" />
+              {/* Cute little brown seed tilted */}
+              <g transform="translate(32, 42) rotate(-15) translate(-32, -42)">
+                 {/* Seed body */}
+                 <path d="M32 30 C38 30 42 36 42 42 C42 48 36 50 32 50 C28 50 22 48 22 42 C22 36 26 30 32 30 Z" fill="#8B5A2B" stroke={outlineColor} strokeWidth="3" strokeLinejoin="round" />
+                 {/* Seed highlight */}
+                 <path d="M26 40 C26 36 29 34 32 34" stroke="rgba(255, 255, 255, 0.25)" strokeWidth="2" strokeLinecap="round" />
+                 {/* Tiny cute sprout starting to peek out */}
+                 <path d="M32 30 Q35 20 40 22 Q35 28 32 30" fill="#a3de9a" stroke={outlineColor} strokeWidth="2" strokeLinejoin="round" />
+              </g>
+           </svg>
         </div>
       );
     }

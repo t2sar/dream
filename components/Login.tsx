@@ -157,7 +157,7 @@ export const Login: React.FC = () => {
               setActivePopup("login");
             }}
             variant="ghost"
-            className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-transparent text-white border-2 border-white/10 hover:bg-white/5 rounded-2xl transition-all"
+            className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-transparent text-white border-2 border-surface-alt hover:bg-white/5 rounded-2xl transition-all"
           >
             Login with Email
           </Button>
@@ -181,7 +181,7 @@ export const Login: React.FC = () => {
         alignment="bottom"
         className="!max-w-md mx-auto !p-0"
       >
-        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-white/10 sm:border sm:rounded-[32px]">
+        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-surface-alt sm:border sm:rounded-[32px]">
           <button
             onClick={handleClosePopup}
             className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
@@ -209,7 +209,7 @@ export const Login: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -228,7 +228,7 @@ export const Login: React.FC = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
                     placeholder="Enter your password"
                   />
                 </div>
@@ -287,7 +287,7 @@ export const Login: React.FC = () => {
         alignment="bottom"
         className="!max-w-md mx-auto !p-0"
       >
-        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-white/10 sm:border sm:rounded-[32px]">
+        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-surface-alt sm:border sm:rounded-[32px]">
           <button
             onClick={handleClosePopup}
             className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
@@ -315,7 +315,7 @@ export const Login: React.FC = () => {
                     required
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
                     placeholder="e.g. John Doe"
                   />
                 </div>
@@ -334,7 +334,7 @@ export const Login: React.FC = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
                     placeholder="e.g. your@email.com"
                   />
                 </div>
@@ -353,7 +353,7 @@ export const Login: React.FC = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-zinc-900 border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
                     placeholder="Minimum 6 characters"
                   />
                 </div>
@@ -391,7 +391,7 @@ export const Login: React.FC = () => {
 
 const FeatureRow = ({ icon: Icon, text }: { icon: any; text: string }) => (
   <div className="flex items-center gap-5 w-full max-w-[280px] mx-auto group">
-    <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:border-[#00F5D4]/30 transition-all duration-300 shadow-inner">
+    <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-surface-alt flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:border-[#00F5D4]/30 transition-all duration-300 shadow-inner">
       <Icon className="w-5 h-5 text-[#00F5D4]" strokeWidth={1.5} />
     </div>
     <span className="font-semibold text-sm text-slate-300 tracking-wide">

@@ -421,8 +421,8 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
                 title={format(day.date, "MMM d")}
               >
                   {day.isRestDay && <Moon className="w-4 h-4 text-accent-periwinkle" />}
-                  {day.isPerfect && !isFuture && !day.isRestDay && <Trophy className="w-4 h-4 text-white drop-shadow-md" />}
-                  <div className="absolute opacity-0 group-hover:opacity-100 bg-[#090b10] border border-surface-alt text-white text-[10px] font-mono px-2 py-1 rounded bottom-full mb-1 whitespace-nowrap z-10 pointer-events-none transition-opacity">
+                  {day.isPerfect && !isFuture && !day.isRestDay && <Trophy className="w-4 h-4 text-primary-text drop-shadow-md" />}
+                  <div className="absolute opacity-0 group-hover:opacity-100 bg-background-main border border-surface-alt text-primary-text text-[10px] font-mono px-2 py-1 rounded bottom-full mb-1 whitespace-nowrap z-10 pointer-events-none transition-opacity">
                      {format(day.date, "MMM d")}: {!isFuture ? (day.isRestDay ? 'Rest' : `${day.completed}/${day.scheduled}`) : '-'}
                   </div>
               </div>
@@ -449,9 +449,9 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
                <h3 className="text-[10px] font-mono tracking-widest text-accent-seafoam uppercase mb-3">Next Month Focus</h3>
                <ul className="space-y-2 text-sm text-secondary-text">
                   {reportData.needsCareHabit ? (
-                    <li>• Try a smaller version for <span className="font-bold text-white">{reportData.needsCareHabit.name}</span>.</li>
+                    <li>• Try a smaller version for <span className="font-bold text-primary-text">{reportData.needsCareHabit.name}</span>.</li>
                   ) : (
-                    <li>• Keep <span className="font-bold text-white">{reportData.bestHabit?.name || 'growing'}</span> strong.</li>
+                    <li>• Keep <span className="font-bold text-primary-text">{reportData.bestHabit?.name || 'growing'}</span> strong.</li>
                   )}
                   {reportData.restDays > 0 ? (
                     <li>• Good job using rest days to protect your garden.</li>

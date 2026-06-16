@@ -19,7 +19,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, progr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-[#0d1017] border border-surface-alt shadow-2xl relative flex flex-col h-[85vh] sm:h-auto sm:max-h-[85vh]">
+      <div className="w-full max-w-md bg-background-main border border-surface-alt shadow-2xl relative flex flex-col h-[85vh] sm:h-auto sm:max-h-[85vh]">
         
         {/* Header */}
         <div className="p-6 border-b border-surface-alt relative bg-gradient-to-b from-[#00F5D4]/10 to-transparent">
@@ -97,15 +97,15 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, progr
           <div>
             <h3 className="text-[10px] font-mono uppercase tracking-widest text-white mb-3">Rewards</h3>
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-[#0d1017]/50 border border-surface-alt flex items-center gap-2 text-xs">
+              <div className="p-3 bg-background-main/50 border border-surface-alt flex items-center gap-2 text-xs">
                  <Trophy className="w-4 h-4 text-amber-400" />
                  <span className="text-slate-300 font-mono">+{event.rewardXP} XP</span>
               </div>
-              <div className="p-3 bg-[#0d1017]/50 border border-surface-alt flex items-center gap-2 text-xs">
+              <div className="p-3 bg-background-main/50 border border-surface-alt flex items-center gap-2 text-xs">
                  <Star className="w-4 h-4 text-emerald-400" />
                  <span className="text-slate-300 font-mono">+{event.rewardCoins} Coins</span>
               </div>
-              <div className="p-3 bg-[#0d1017]/50 border border-surface-alt flex items-center gap-2 text-xs col-span-2">
+              <div className="p-3 bg-background-main/50 border border-surface-alt flex items-center gap-2 text-xs col-span-2">
                  <Gift className="w-4 h-4 text-cyan-400" />
                  <span className="text-slate-300 font-mono">{event.rewardDecorationId.replace('_', ' ').toUpperCase()} DECORATION</span>
               </div>
@@ -114,7 +114,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({ event, progr
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t border-surface-alt bg-[#0d1017]">
+        <div className="p-6 border-t border-surface-alt bg-background-main">
           {isAllComplete && !progress.rewardClaimed ? (
              <Button className="w-full" onClick={onClaimReward}>
                Claim Reward

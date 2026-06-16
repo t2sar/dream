@@ -68,11 +68,15 @@
 }
 
 @layer base {
+  html {
+    background-color: var(--color-background-main) !important;
+  }
+
   body {
     font-family: var(--font-sans);
     font-weight: var(--font-weight-body);
-    background-color: var(--color-background-main);
-    color: var(--color-primary-anchor);
+    background-color: var(--color-background-main) !important;
+    color: var(--color-primary-anchor) !important;
     line-height: 1.6;
     letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
@@ -81,8 +85,8 @@
 
   body[data-time-phase="Evening"],
   body[data-time-phase="Night"] {
-    background-color: var(--color-background-main);
-    color: var(--color-primary-anchor);
+    background-color: var(--color-background-main) !important;
+    color: var(--color-primary-anchor) !important;
   }
   
   h1, h2, h3, h4, h5, h6, .font-display {
@@ -102,16 +106,16 @@
 
   /* Explicit background reset to prevent conflicting styles */
   .app-background-reset {
-    background-color: var(--color-background-main);
-    color: var(--color-primary-anchor);
+    background-color: var(--color-background-main) !important;
+    color: var(--color-primary-anchor) !important;
     min-height: 100vh;
     transition: background-color 3s ease-in-out, color 3s ease-in-out;
   }
 
   body[data-time-phase="Evening"] .app-background-reset,
   body[data-time-phase="Night"] .app-background-reset {
-    background-color: var(--color-background-main);
-    color: var(--color-primary-anchor);
+    background-color: var(--color-background-main) !important;
+    color: var(--color-primary-anchor) !important;
   }
 }
 

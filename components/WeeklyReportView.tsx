@@ -314,7 +314,7 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ l
               if (!info) return null;
               const rate = (perf.completed / perf.scheduled) * 100;
               return (
-                <div key={catId} className="flex flex-col gap-2 p-3 border border-surface-alt bg-[#0d1017]/30">
+                <div key={catId} className="flex flex-col gap-2 p-3 border border-surface-alt bg-background-main/30">
                    <div className="flex justify-between items-center">
                      <span className="text-[10px] uppercase font-mono tracking-widest text-slate-300">{info.name}</span>
                      <span className={`text-xs font-bold ${rate === 100 ? 'text-accent-seafoam' : rate > 50 ? 'text-accent-mustard' : 'text-accent-coral'}`}>
@@ -378,7 +378,7 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ l
               <div key={i} className="flex flex-col items-center gap-3">
                 <div className="text-[10px] font-mono text-slate-500 uppercase">{format(day.date, "EEE")}</div>
                 <div className={`w-full aspect-square max-w-[2.5rem] rounded-full ${bgColor} border border-surface-alt flex items-center justify-center`}>
-                  {day.isRestDay ? <Moon className="w-3.5 h-3.5 text-accent-periwinkle" /> : day.isPerfect && !isFuture && <Trophy className="w-3.5 h-3.5 text-white drop-shadow-md" />}
+                  {day.isRestDay ? <Moon className="w-3.5 h-3.5 text-accent-periwinkle" /> : day.isPerfect && !isFuture && <Trophy className="w-3.5 h-3.5 text-primary-text drop-shadow-md" />}
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">{!isFuture ? (day.isRestDay ? 'Rest' : `${day.completed}/${day.scheduled}`) : '-'}</div>
               </div>

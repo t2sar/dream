@@ -40,7 +40,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
         <div>
            <div className="text-[10px] font-bold tracking-widest text-status-healthy uppercase italic">Your Pouch</div>
            <h2 className="text-2xl font-bold font-display text-primary-text mt-1 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-status-needsCare flex items-center justify-center text-[10px] text-white font-bold border border-white/20 shadow-sm">C</span>
+              <span className="w-6 h-6 rounded-full bg-status-needsCare flex items-center justify-center text-[10px] text-white font-bold border border-surface-alt shadow-sm">C</span>
               {Math.floor(currentCoins)}
            </h2>
         </div>
@@ -161,20 +161,21 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           }
           
           return (
-            <div key={item.id} className="bg-[#0A0D14] border border-surface-alt rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-hidden group">
+            <div key={item.id} className="bg-background-main border border-surface-alt rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-hidden group">
                {/* Background Hint */}
                {item.type === 'background' && (
                   <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5 opacity-50 pointer-events-none" />
                )}
                
-               <div className="w-20 mb-3 mx-auto relative group-hover:scale-105 transition-transform duration-300">
+               <div className="w-20 h-28 mb-3 mx-auto flex flex-col items-center justify-end relative group-hover:scale-105 transition-transform duration-300">
                   <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin mx-auto" />}>
                      {item.type === 'seed' ? (
-                        <PlantIcon plantType={item.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-full" />
+                        <PlantIcon plantType={item.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-20 h-24 absolute bottom-[5%] z-10" />
                      ) : (
-                        <ShopItemSvg itemId={item.id} className="w-full" />
+                        <ShopItemSvg itemId={item.id} className="w-20 h-24 absolute bottom-[5%] z-10" />
                      )}
                   </React.Suspense>
+                  <div className="w-12 h-2 bg-black/30 shadow-[0_0_8px_4px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[2%] z-0" />
                </div>
                <h3 className="text-sm font-bold text-white text-center line-clamp-1 leading-tight">{item.name}</h3>
                <p className="text-[10px] text-slate-500 font-mono text-center leading-tight line-clamp-3">{item.description}</p>
@@ -215,12 +216,13 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                 </button>
              </div>
              <div className="flex items-start gap-4 mb-8 bg-surface-alt/10 p-4 rounded-xl border border-surface-alt/50">
-               <div className="w-24 shrink-0 relative flex items-center justify-center">
+               <div className="w-24 h-32 shrink-0 relative flex flex-col items-center justify-end">
                   {confirmPurchaseItem.type === 'seed' ? (
-                      <PlantIcon plantType={confirmPurchaseItem.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-full" />
+                      <PlantIcon plantType={confirmPurchaseItem.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-20 h-28 absolute bottom-[5%] z-10" />
                    ) : (
-                      <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-full" />
+                      <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-20 h-28 absolute bottom-[5%] z-10" />
                    )}
+                  <div className="w-14 h-2 bg-black/30 shadow-[0_0_10px_4px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[-2%] z-0" />
                </div>
                <div>
                   <h4 className="font-bold text-white mb-1">{confirmPurchaseItem.name}</h4>

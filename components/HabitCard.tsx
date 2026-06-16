@@ -113,8 +113,8 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
         habit.isGolden 
           ? `border-accent-mustard/50 shadow-lg shadow-accent-mustard/20 bg-accent-mustard/10`
           : isCompleted
-          ? `border-white/20 shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)]`
-          : "border-white/5 hover:border-white/10 hover:bg-[#121620]/40"
+          ? `border-surface-alt shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)]`
+          : "border-surface-alt hover:border-surface-alt hover:bg-surface-alt/40"
       }
     `}
     >
@@ -139,7 +139,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 ${
                   isCompleted
                     ? habit.type === 'avoid' ? "bg-emerald-500/20 shadow-[0_0_25px_rgba(16,185,129,0.45)] border-emerald-500 text-emerald-400 scale-105" : "bg-blue-500/20 shadow-[0_0_25px_rgba(59,130,246,0.45)] border-blue-500 text-blue-400 scale-105"
-                    : "bg-transparent text-slate-500 border-white/20 hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
+                    : "bg-transparent text-slate-500 border-surface-alt hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
                 }
                 ${isSlipped ? "opacity-30 cursor-not-allowed" : ""}
               `}
@@ -176,7 +176,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                  disabled={isCompleted}
                  className={`text-[9px] font-mono tracking-widest uppercase transition-colors px-1 py-1 border ${
                    isCompleted ? 'opacity-30 cursor-not-allowed border-transparent text-slate-600' : 
-                   isSlipped ? 'bg-rose-500/20 text-rose-400 border-rose-500/50' : 'bg-transparent text-slate-500 border-white/10 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
+                   isSlipped ? 'bg-rose-500/20 text-rose-400 border-rose-500/50' : 'bg-transparent text-slate-500 border-surface-alt hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
                  }`}
                >
                  {isSlipped ? "Recover" : "Slipped"}
@@ -186,17 +186,20 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
 
           <div>
             <div className="flex items-center gap-5 mb-3">
-              <PlantIcon 
-                plantType={habit.plantType} 
-                stage={habit.plantStage} 
-                status={habit.plantStatus} 
-                isPrivate={habit.isPrivate} 
-                health={habit.plantHealth}
-                isLegendary={habit.isLegendary} 
-                isArchived={habit.isArchived} 
-                isGolden={habit.isGolden}
-                className="w-20 h-20" 
-              />
+              <div className="w-20 h-24 shrink-0 flex flex-col items-center justify-end relative group/plant cursor-pointer mt-2">
+                 <PlantIcon 
+                   plantType={habit.plantType} 
+                   stage={habit.plantStage} 
+                   status={habit.plantStatus} 
+                   isPrivate={habit.isPrivate} 
+                   health={habit.plantHealth}
+                   isLegendary={habit.isLegendary} 
+                   isArchived={habit.isArchived} 
+                   isGolden={habit.isGolden}
+                   className="w-20 h-24 absolute bottom-[5%] z-10 drop-shadow-md group-hover/plant:-translate-y-1 transition-transform" 
+                 />
+                 <div className="w-14 h-2.5 bg-black/15 shadow-[0_0_10px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
+              </div>
               <h3
                 className={`font-display text-2xl tracking-tight font-medium transition-colors duration-300 ${isCompleted ? "text-white" : "text-slate-200"}`}
               >
@@ -206,7 +209,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
 
             <div className="flex flex-wrap items-center gap-3 mt-2">
               {CATEGORIES[habit.category] && (
-                <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-widest bg-zinc-950/60 px-2.5 py-1 uppercase border border-white/5 text-slate-400">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono tracking-widest bg-zinc-950/60 px-2.5 py-1 uppercase border border-surface-alt text-slate-400">
                   {React.createElement(CATEGORIES[habit.category].icon, { className: "w-3 h-3 text-slate-400" })}
                   <span>{CATEGORIES[habit.category].name}</span>
                 </div>
@@ -280,7 +283,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                                 sideOffset={5} 
                                 className="w-56 p-3 bg-zinc-950 border border-zinc-800 rounded-xl shadow-xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-150 normal-case tracking-normal text-left"
                              >
-                               <p className="text-[10px] font-mono text-slate-300 uppercase tracking-wider mb-2 border-b border-white/5 pb-1">
+                               <p className="text-[10px] font-mono text-slate-300 uppercase tracking-wider mb-2 border-b border-surface-alt pb-1">
                                   🔥 Streak Multipliers
                                </p>
                                <div className="space-y-1 text-[9px] font-mono text-slate-400">
@@ -310,7 +313,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                                   
                                   if (currentStreak >= 30) {
                                      return (
-                                        <div className="mt-2 pt-1 border-t border-white/5 text-[9px] font-mono text-accent-coral">
+                                        <div className="mt-2 pt-1 border-t border-surface-alt text-[9px] font-mono text-accent-coral">
                                            Ultimate 5.0x reward tier reached!
                                         </div>
                                      );
@@ -330,7 +333,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                                   
                                   const diff = nextThreshold - currentStreak;
                                   return (
-                                     <div className="mt-2 pt-2 border-t border-white/5 text-[9px] font-mono leading-tight text-slate-300">
+                                     <div className="mt-2 pt-2 border-t border-surface-alt text-[9px] font-mono leading-tight text-slate-300">
                                         Next bonus in <strong className="text-amber-400 font-bold">{diff} {diff === 1 ? 'day' : 'days'}</strong> (At {nextThreshold} days: <span className="text-emerald-400 font-semibold">{currentMult} → {nextMult} multiplier</span>)
                                      </div>
                                   );
@@ -351,7 +354,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                     
                     return (
                       <div className="flex items-center gap-1.5 w-full pr-2">
-                        <div className="flex-1 bg-black/60 h-1.5 rounded-full overflow-hidden border border-white/10 min-w-[50px]">
+                        <div className="flex-1 bg-black/60 h-1.5 rounded-full overflow-hidden border border-surface-alt min-w-[50px]">
                            <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${percent}%` }} />
                         </div>
                         <span className="text-[8px] font-mono text-slate-500">Tier {nextTier}</span>
@@ -376,7 +379,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
              <select
                value={habit.difficulty || 'medium'}
                onChange={(e) => onChangeDifficulty(habit.id, e.target.value as any)}
-               className="bg-transparent text-[10px] uppercase font-mono tracking-widest text-slate-500 hover:text-white border border-transparent hover:border-white/20 p-2 cursor-pointer transition-colors opacity-0 group-hover:opacity-100"
+               className="bg-transparent text-[10px] uppercase font-mono tracking-widest text-slate-500 hover:text-white border border-transparent hover:border-surface-alt p-2 cursor-pointer transition-colors opacity-0 group-hover:opacity-100"
                title="Change Difficulty"
              >
                <option value="easy">Easy 🍃</option>

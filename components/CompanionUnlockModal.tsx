@@ -11,7 +11,7 @@ export const CompanionUnlockModal: React.FC<CompanionUnlockModalProps> = ({ comp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-[#121620] border border-emerald-500/30 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+      <div className="bg-background-main border border-emerald-500/30 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-cyan-400" />
         
         <div className="p-6 text-center space-y-6">
@@ -21,7 +21,7 @@ export const CompanionUnlockModal: React.FC<CompanionUnlockModalProps> = ({ comp
           </div>
           
           <div>
-             <h2 className="text-2xl font-black font-display tracking-tight text-white mb-2">New Companion!</h2>
+             <h2 className="text-2xl font-black font-display tracking-tight text-primary-text mb-2">New Companion!</h2>
              <p className="text-emerald-400 font-mono text-sm tracking-widest uppercase mb-4">A friend has arrived</p>
           </div>
 
@@ -31,7 +31,7 @@ export const CompanionUnlockModal: React.FC<CompanionUnlockModalProps> = ({ comp
                 if (!comp) return null;
                 return (
                    <div key={id} className="bg-surface-alt/5 border border-surface-alt rounded-xl p-4">
-                      <h3 className="font-bold text-white text-lg">{comp.name}</h3>
+                      <h3 className="font-bold text-primary-text text-lg">{comp.name}</h3>
                       <p className="text-emerald-400 font-mono text-xs mb-2">{comp.banglaName}</p>
                       <p className="text-slate-400 text-sm">has chosen your garden.</p>
                       <p className="text-xs text-slate-500 mt-2 italic px-2">Earned: {comp.unlockConditionStr}</p>

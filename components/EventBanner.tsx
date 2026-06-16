@@ -20,7 +20,7 @@ export const EventBanner: React.FC<EventBannerProps> = ({ event, progress, onVie
       
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex gap-4 items-center">
-          <div className="w-12 h-12 bg-[#0d1017]/50 rounded-lg flex items-center justify-center border border-surface-alt">
+          <div className="w-12 h-12 bg-background-main/50 rounded-lg flex items-center justify-center border border-surface-alt">
             <Gift className="w-6 h-6 text-[#00F5D4]" />
           </div>
           <div>

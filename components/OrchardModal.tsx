@@ -41,9 +41,9 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
   if (selected) {
      return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-[#121620] border border-amber-500/30 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl overflow-hidden">
+          <div className="bg-background-main border border-amber-500/30 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl overflow-hidden">
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-400" />
-             <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+             <button onClick={() => setSelected(null)} className="absolute top-4 right-4 text-slate-500 hover:text-primary-text transition-colors">
                <X className="w-5 h-5" />
              </button>
              <div className="flex flex-col items-center text-center">
@@ -58,7 +58,7 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                      }`} 
                    />
                 </div>
-                <h3 className="text-2xl font-black font-display text-white mb-1">{selected.name}</h3>
+                <h3 className="text-2xl font-black font-display text-primary-text mb-1">{selected.name}</h3>
                 <p className="text-xs font-mono text-amber-500 tracking-widest uppercase mb-6">Harvested {selected.count} {selected.count === 1 ? 'Time' : 'Times'}</p>
                 
                 <div className="w-full bg-black/30 rounded-xl p-4 text-left border border-surface-alt space-y-3">
@@ -73,7 +73,7 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                       </div>
                    </div>
                 </div>
-                <button onClick={() => setSelected(null)} className="mt-8 w-full py-4 text-xs font-black uppercase tracking-widest font-mono bg-surface-alt/5 hover:bg-surface-alt/10 text-white rounded-xl transition-colors">
+                <button onClick={() => setSelected(null)} className="mt-8 w-full py-4 text-xs font-black uppercase tracking-widest font-mono bg-surface-alt/5 hover:bg-surface-alt/10 text-primary-text rounded-xl transition-colors">
                    Back to Orchard
                 </button>
              </div>
@@ -84,19 +84,19 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-[#121620] border border-amber-500/30 rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden">
+      <div className="bg-background-main border border-amber-500/30 rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-400" />
         
         <div className="p-6 pb-4 flex justify-between items-center border-b border-surface-alt">
            <div>
-             <h2 className="text-2xl font-black font-display tracking-tight text-white mb-1 flex items-center gap-2">
+             <h2 className="text-2xl font-black font-display tracking-tight text-primary-text mb-1 flex items-center gap-2">
                 My Orchard
              </h2>
              <p className="text-amber-500 font-mono text-xs tracking-widest uppercase">
                 {mergedFruits.reduce((s, a) => s + a.count, 0)} Total Harvests
              </p>
            </div>
-           <button onClick={onClose} className="p-2 rounded-full bg-surface-alt/5 text-slate-400 hover:text-white hover:bg-rose-500/20 transition-colors">
+           <button onClick={onClose} className="p-2 rounded-full bg-surface-alt/5 text-slate-400 hover:text-primary-text hover:bg-rose-500/20 transition-colors">
              <X className="w-5 h-5" />
            </button>
         </div>
@@ -107,7 +107,7 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                  <div className="w-20 h-20 mx-auto bg-surface-alt/5 rounded-full flex items-center justify-center mb-4">
                     <Leaf className="w-8 h-8 text-slate-500" />
                  </div>
-                 <h3 className="text-lg font-bold text-white mb-2">Orchard is Empty</h3>
+                 <h3 className="text-lg font-bold text-primary-text mb-2">Orchard is Empty</h3>
                  <p className="text-sm text-slate-400 max-w-xs mx-auto">Nurture a plant to its final stage to harvest its fruit.</p>
               </div>
            ) : (
@@ -118,13 +118,14 @@ export const OrchardModal: React.FC<OrchardModalProps> = ({ entries, habits, onC
                        onClick={() => setSelected(item)}
                        className="bg-black/20 border border-surface-alt rounded-2xl p-4 flex flex-col items-center hover:bg-amber-500/5 hover:border-amber-500/30 transition-all group"
                     >
-                       <div className="relative w-16 h-16 mb-2 flex items-center justify-center">
-                          <PlantIcon plantType={item.fruitId as any} stage="Fruiting Plant" status="Normal" className={`w-16 h-16 group-hover:scale-110 transition-transform ${['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'].includes(item.fruitId) ? 'drop-shadow-[0_0_12px_rgba(236,72,153,0.5)] group-hover:drop-shadow-[0_0_16px_rgba(236,72,153,0.8)]' : 'drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]'}`} />
-                          <div className="absolute -top-1 -right-1 bg-amber-500 text-black text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#121620]">
+                       <div className="relative w-16 h-20 mb-3 flex flex-col items-center justify-end">
+                          <PlantIcon plantType={item.fruitId as any} stage="Fruiting Plant" status="Normal" className={`w-16 h-20 absolute bottom-[5%] z-10 group-hover:scale-105 transition-transform ${['Asian Palmyra Palm / Taal', 'Black Plum / Jam', 'Wood Apple / Bel', 'Star Fruit / Kamranga', 'Dragon Fruit / Dragon Fol'].includes(item.fruitId) ? 'drop-shadow-[0_0_12px_rgba(236,72,153,0.5)] group-hover:drop-shadow-[0_0_16px_rgba(236,72,153,0.8)]' : 'drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]'}`} />
+                          <div className="w-10 h-2 bg-black/15 shadow-[0_0_8px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
+                          <div className="absolute -top-1 -right-1 z-20 bg-amber-500 text-black text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#121620]">
                              ×{item.count}
                           </div>
                        </div>
-                       <span className="text-xs font-bold text-white text-center leading-tight truncate w-full">{item.name}</span>
+                       <span className="text-xs font-bold text-primary-text text-center leading-tight truncate w-full">{item.name}</span>
                     </button>
                  ))}
               </div>

@@ -10,6 +10,8 @@ interface SimpleGardenStatsDashboardProps {
   stats: Partial<UserStats>;
   setActiveTab: (tab: Tab) => void;
   userName: string;
+  onViewReports?: () => void;
+  onViewHistory?: () => void;
 }
 
 const defaultSettings: DashboardSettings = {
@@ -28,7 +30,7 @@ const defaultSettings: DashboardSettings = {
 
 const SENSITIVE_CATEGORIES = ['health', 'finance', 'bad_habit', 'prayer', 'self_care', 'mood', 'journal', 'medicine'];
 
-export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsDashboard({ habits, logs, stats, setActiveTab, userName }: SimpleGardenStatsDashboardProps) {
+export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsDashboard({ habits, logs, stats, setActiveTab, userName, onViewReports, onViewHistory }: SimpleGardenStatsDashboardProps) {
   const [period, setPeriod] = useState<'this_week' | 'this_month' | 'all_time'>(defaultSettings.defaultPeriod);
 
   // Compute stats based on period
@@ -267,7 +269,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
             </div>
             
             {/* Plants Grown */}
-            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={() => setActiveTab(Tab.TROPHY)}>
+            <div className="bg-surface-card p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform" onClick={onViewHistory || (() => setActiveTab(Tab.TROPHY))}>
               <div className="flex items-center gap-2 text-muted-text mb-2">
                 <Leaf className="w-4 h-4 text-accent-seafoam" />
                 <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Grown</span>
@@ -347,7 +349,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
           {/* Report Links */}
           <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <button
-              onClick={() => setActiveTab(Tab.REPORT)}
+              onClick={onViewReports || (() => setActiveTab(Tab.STATS))}
               className="flex-1 px-4 py-3 bg-surface-card hover:bg-surface-alt shadow-sm text-secondary-text font-mono text-xs tracking-widest uppercase transition-colors rounded-full flex items-center justify-center gap-2"
             >
               <LucideIcons.FileText className="w-4 h-4" />

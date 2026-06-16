@@ -15,7 +15,7 @@ export const DailyGoalRing: React.FC<DailyGoalRingProps> = ({ completed, total }
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="flex items-center gap-6 p-6 rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-md shadow-lg relative overflow-hidden">
+    <div className="flex items-center gap-6 p-6 rounded-[32px] bg-white/5 border border-surface-alt backdrop-blur-md shadow-lg relative overflow-hidden">
       {/* Decorative gradient blur in background */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#00F5D4]/10 blur-3xl rounded-full pointer-events-none" />
       

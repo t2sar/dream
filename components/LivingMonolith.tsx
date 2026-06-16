@@ -563,7 +563,7 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
     : `STREAK MATRIX UNLOCKED // LVL ${level} CONCORDANCE`;
 
   return (
-    <div className="relative w-full rounded-large-card glass overflow-hidden border border-white/5 py-4 mb-8 bg-[#07080A] shadow-md will-change-transform">
+    <div className="relative w-full rounded-large-card glass overflow-hidden border border-surface-alt py-4 mb-8 bg-background-main shadow-md will-change-transform">
       {/* Visual Ambient Core Glow behind Monolith wrapper container */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[350px] pointer-events-none rounded-full opacity-20 bg-gradient-to-tr from-violet-600 via-cyan-400 to-amber-300 transition-all duration-1000 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]" />
 

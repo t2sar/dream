@@ -56,15 +56,15 @@ export const BadgeUnlockModal: React.FC<BadgeUnlockModalProps> = ({ badges, onCl
   const Icon = BADGE_ICONS[badge.iconName] || Award;
 
   return (
-    <AnimatedModal isOpen={true} onClose={onClose} className="!max-w-sm !p-0 bg-[#000428] border border-[#00F5D4]/50 rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(0,245,212,0.15)]">
+    <AnimatedModal isOpen={true} onClose={onClose} className="!max-w-sm !p-0 bg-background-main border border-[#00F5D4]/50 rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_0_50px_rgba(0,245,212,0.15)]">
         
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b border-surface-alt relative bg-gradient-to-r from-emerald-900/50 to-transparent">
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-emerald-400" />
-            <h3 className="font-bold font-display text-white">Badge Unlocked!</h3>
+            <h3 className="font-bold font-display text-primary-text">Badge Unlocked!</h3>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-primary-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -82,7 +82,7 @@ export const BadgeUnlockModal: React.FC<BadgeUnlockModalProps> = ({ badges, onCl
             {badge.category} Badge
           </span>
           
-          <h2 className="text-3xl font-display font-bold text-white mb-3">{badge.title}</h2>
+          <h2 className="text-3xl font-display font-bold text-primary-text mb-3">{badge.title}</h2>
           <p className="text-slate-300 text-sm mb-6 max-w-[250px] leading-relaxed">
             {badge.description}
           </p>

@@ -40,7 +40,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
       <div className="max-w-4xl mx-auto animate-in slide-in-from-bottom-4 fade-in duration-500">
         <button 
           onClick={() => { setSelectedHabit(null); setIsEditingNote(false); }}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm font-mono tracking-widest uppercase"
+          className="flex items-center gap-2 text-slate-400 hover:text-primary-text transition-colors mb-6 text-sm font-mono tracking-widest uppercase"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Trophy Garden
         </button>
@@ -48,32 +48,33 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
         <div className="glass p-8 rounded-none border border-surface-alt relative mb-6 overflow-hidden">
            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-3xl rounded-full" />
            <div className="flex flex-col md:flex-row gap-8 relative z-10">
-              <div className="flex-shrink-0 flex items-center justify-center bg-surface-alt/5 w-48 h-48 rounded-2xl border border-surface-alt">
+              <div className="flex-shrink-0 flex items-center justify-center bg-surface-alt/5 w-48 h-56 rounded-2xl border border-surface-alt relative overflow-hidden group">
                  <PlantIcon 
                     plantType={selectedHabit.plantType} 
                     stage={selectedHabit.plantStage} 
                     status={selectedHabit.plantStatus} 
                     health={selectedHabit.plantHealth}
-                    className="w-32 h-32 drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]" 
+                    className="w-32 h-40 absolute bottom-[10%] drop-shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform" 
                  />
+                 <div className="w-20 h-3 bg-black/30 shadow-[0_0_15px_5px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[-2%]" />
               </div>
               <div className="flex-1">
                  <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase mb-3 border ${getArchiveTypeColor(selectedHabit.archiveType)}`}>
                     <Trophy className="w-3 h-3" />
                     {formatArchiveType(selectedHabit.archiveType)}
                  </div>
-                 <h2 className="text-3xl font-display font-bold text-white mb-4">
+                 <h2 className="text-3xl font-display font-bold text-primary-text mb-4">
                     {selectedHabit.isPrivate ? "Protected" : selectedHabit.name}
                  </h2>
                  
                  <div className="grid grid-cols-2 gap-4 max-w-xs">
                     <div className="bg-surface-alt/5 p-3 rounded-lg border border-surface-alt">
                        <p className="text-[10px] font-mono tracking-widest text-[#00F5D4] uppercase mb-1">Best Streak</p>
-                       <p className="font-bold text-white text-lg">{selectedHabit.bestStreak || selectedHabit.streak || 0} days</p>
+                       <p className="font-bold text-primary-text text-lg">{selectedHabit.bestStreak || selectedHabit.streak || 0} days</p>
                     </div>
                     <div className="bg-surface-alt/5 p-3 rounded-lg border border-surface-alt">
                        <p className="text-[10px] font-mono tracking-widest text-amber-400 uppercase mb-1">Total XP</p>
-                       <p className="font-bold text-white text-lg">{selectedHabit.xp || 0}</p>
+                       <p className="font-bold text-primary-text text-lg">{selectedHabit.xp || 0}</p>
                     </div>
                  </div>
               </div>
@@ -123,7 +124,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
                        value={noteText}
                        onChange={e => setNoteText(e.target.value)}
                        placeholder="Memory note..."
-                       className="w-full bg-[#07080A] border border-surface-alt p-3 text-sm text-white focus:outline-none focus:border-cyan-500/50 resize-none h-24"
+                       className="w-full bg-background-main border border-surface-alt p-3 text-sm text-primary-text focus:outline-none focus:border-cyan-500/50 resize-none h-24"
                     />
                     <div className="flex justify-end gap-2 mt-auto">
                        <button onClick={() => setIsEditingNote(false)} className="text-xs font-mono uppercase tracking-widest text-slate-500 hover:text-slate-300 px-3 py-1">Cancel</button>
@@ -188,7 +189,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
       <div className="flex flex-col items-center justify-center text-center py-10 mb-8 border-b border-surface-alt relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
         <Trophy className="w-12 h-12 text-amber-500 mb-4 opacity-80" />
-        <h1 className="text-3xl md:text-5xl font-display font-bold text-white uppercase tracking-wider mb-4">
+        <h1 className="text-3xl md:text-5xl font-display font-bold text-primary-text uppercase tracking-wider mb-4">
           Trophy Garden
         </h1>
         <p className="text-slate-400 max-w-lg mx-auto font-mono text-xs uppercase tracking-widest leading-relaxed">
@@ -199,7 +200,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
       {archivedHabits.length === 0 ? (
         <div className="glass p-12 text-center rounded-none border border-surface-alt flex flex-col items-center justify-center">
            <Archive className="w-12 h-12 text-slate-600 mb-6" />
-           <h3 className="text-xl font-display font-bold text-white mb-2">No Trophy Plants Yet</h3>
+           <h3 className="text-xl font-display font-bold text-primary-text mb-2">No Trophy Plants Yet</h3>
            <p className="text-slate-500 text-sm max-w-sm mx-auto">
              When a habit journey is complete, you can archive its plant here as part of your garden story.
            </p>
@@ -213,15 +214,16 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
                  className="glass p-4 rounded-xl border border-surface-alt hover:border-amber-500/30 hover:bg-surface-alt/10 transition-all group flex flex-col h-full text-left"
               >
                  <div className="flex items-start justify-between mb-4 w-full">
-                    <div className="bg-[#07080A]/50 p-2 rounded-lg border border-surface-alt">
-                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-16 h-16 group-hover:scale-110 transition-transform" />
+                    <div className="bg-background-main/50 px-2 py-3 rounded-lg border border-surface-alt flex flex-col items-center justify-end relative h-[80px] w-[70px]">
+                       <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-14 h-16 absolute bottom-[5%] group-hover:scale-110 transition-transform z-10" />
+                       <div className="w-8 h-1.5 bg-black/30 shadow-[0_0_6px_3px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[2%] z-0" />
                     </div>
                     <div className={`px-2 py-0.5 rounded-full text-[8px] font-mono uppercase tracking-widest border ${getArchiveTypeColor(habit.archiveType)}`}>
                        {formatArchiveType(habit.archiveType)}
                     </div>
                  </div>
                  
-                 <h4 className="font-bold text-white mb-4 line-clamp-2">{habit.isPrivate ? "Protected" : habit.name}</h4>
+                 <h4 className="font-bold text-primary-text mb-4 line-clamp-2">{habit.isPrivate ? "Protected" : habit.name}</h4>
                  
                  <div className="mt-auto pt-3 border-t border-surface-alt flex gap-4 w-full">
                     <div className="flex flex-col">

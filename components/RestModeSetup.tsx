@@ -51,13 +51,13 @@ export function RestModeSetup({ onClose, onSave, habits, currentRestMode }: Rest
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+      <div className="bg-background-main border border-surface-alt rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-4 border-b border-surface-alt flex justify-between items-center bg-background-main/50">
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
             <Moon className="w-5 h-5 text-indigo-400" />
             Garden Rest Mode
           </h2>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800 transition-colors">
+          <button onClick={onClose} className="p-2 text-secondary-text hover:text-primary-text rounded-lg hover:bg-surface-alt transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -78,7 +78,7 @@ export function RestModeSetup({ onClose, onSave, habits, currentRestMode }: Rest
                   className={`flex flex-col items-center gap-2 p-3 text-sm rounded-xl border transition-colors ${
                     type === opt.value
                       ? 'bg-indigo-600 border-indigo-500 text-white'
-                      : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                      : 'bg-surface-alt border-surface-alt/50 text-secondary-text hover:bg-surface-alt'
                   }`}
                 >
                   {opt.icon}
@@ -90,7 +90,7 @@ export function RestModeSetup({ onClose, onSave, habits, currentRestMode }: Rest
 
           <div className="space-y-3">
             <label className="block text-sm font-medium text-slate-300">What do you want to pause?</label>
-            <div className="flex gap-2 p-1 bg-slate-800 rounded-xl">
+            <div className="flex gap-2 p-1 bg-surface-alt rounded-xl">
               {(['all_habits', 'selected_habits', 'one_habit'] as RestScopeType[]).map(s => (
                 <button
                   key={s}
@@ -142,7 +142,7 @@ export function RestModeSetup({ onClose, onSave, habits, currentRestMode }: Rest
           </div>
         </div>
 
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex gap-3">
+        <div className="p-4 border-t border-surface-alt bg-background-main/50 flex gap-3">
           <Button variant="ghost" onClick={onClose} className="flex-1">Cancel</Button>
           <Button
             variant="primary"

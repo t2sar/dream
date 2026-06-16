@@ -396,7 +396,9 @@ function App() {
 
   // App State
   const [activeTab, setActiveTab] = useState<Tab>(Tab.TRACKER);
+  const [progressSubTab, setProgressSubTab] = useState<'virtual_garden' | 'calendar'>('virtual_garden');
   const [reportViewMode, setReportViewMode] = useState<'weekly' | 'monthly'>('weekly');
+  const [statsSubTab, setStatsSubTab] = useState<'overview' | 'reports' | 'challenges' | 'badges' | 'profile' | 'history'>('overview');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showRestModeModal, setShowRestModeModal] = useState(false);
@@ -2343,28 +2345,10 @@ function App() {
           <Store className="w-5 h-5" />
         </button>
         <button
-          onClick={() => setActiveTab(Tab.CHALLENGES)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.CHALLENGES ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
+          onClick={() => setActiveTab(Tab.STATS)}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.STATS ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
         >
-          <Target className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.CALENDAR)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.CALENDAR ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
-        >
-          <CalendarDays className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.PROFILE)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.PROFILE ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
-        >
-          <UserIcon className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.TROPHY)}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === Tab.TROPHY ? "text-primary-mint scale-110" : "hover:text-secondary-text"}`}
-        >
-          <Archive className="w-5 h-5" />
+          <Activity className="w-5 h-5" />
         </button>
         <button
           onClick={() => setActiveTab(Tab.SETTINGS)}
@@ -2380,14 +2364,8 @@ function App() {
           {[
             { id: Tab.TRACKER, icon: LayoutDashboard },
             { id: Tab.PROGRESS, icon: BarChart2 },
-            { id: Tab.CHALLENGES, icon: Target },
             { id: Tab.SHOP, icon: Store },
-            { id: Tab.CALENDAR, icon: CalendarDays },
-            { id: Tab.PROFILE, icon: UserIcon },
             { id: Tab.STATS, icon: Activity },
-            { id: Tab.REPORT, icon: FileText },
-            { id: Tab.BADGES, icon: LucideIcons.Award },
-            { id: Tab.TROPHY, icon: Archive },
             { id: Tab.SETTINGS, icon: Settings },
           ].map((item) => (
             <button
@@ -2436,14 +2414,15 @@ function App() {
                 {activeTab === Tab.TRACKER &&
                   `HELLO, ${user.displayName?.split(" ")[0] || "USER"}`}
                 {activeTab === Tab.PROGRESS && "Your Garden"}
-                {activeTab === Tab.CHALLENGES && "Garden Challenges"}
                 {activeTab === Tab.SHOP && "Garden Shop"}
-                {activeTab === Tab.CALENDAR && "Garden Calendar"}
-                {activeTab === Tab.PROFILE && "Gardener Profile"}
-                {activeTab === Tab.STATS && "Garden Stats Overview"}
-                {activeTab === Tab.REPORT && "Garden Reports"}
-                {activeTab === Tab.BADGES && "Garden Badges"}
-                {activeTab === Tab.TROPHY && "Trophy Garden"}
+                {activeTab === Tab.STATS && (
+                  statsSubTab === 'overview' ? "Garden Stats Overview" :
+                  statsSubTab === 'reports' ? "Garden Reports" :
+                  statsSubTab === 'challenges' ? "Garden Challenges" :
+                  statsSubTab === 'badges' ? "Garden Badges" :
+                  statsSubTab === 'profile' ? "Gardener Profile" :
+                  "Garden History"
+                )}
                 {activeTab === Tab.SETTINGS && "Settings"}
               </h1>
               {activeTab === Tab.TRACKER && (
@@ -2518,7 +2497,10 @@ function App() {
                       </p>
                     </div>
                     <button 
-                      onClick={() => setActiveTab(Tab.REPORT)}
+                      onClick={() => {
+                        setStatsSubTab('reports');
+                        setActiveTab(Tab.STATS);
+                      }}
                       className="px-6 py-3 bg-surface-card hover:bg-surface-alt text-secondary-text font-bold text-[11px] uppercase tracking-wide border border-surface-alt rounded-button transition-colors shrink-0 shadow-sm"
                     >
                       View Report
@@ -2559,7 +2541,7 @@ function App() {
                                 <LucideIcons.BookOpen className="w-5 h-5 text-emerald-400" />
                              </div>
                              <div>
-                                <h3 className="text-white font-bold font-display text-lg">Your {year} Garden Almanac is ready</h3>
+                                <h3 className="text-primary-text font-bold font-display text-lg">Your {year} Garden Almanac is ready</h3>
                                 <p className="text-emerald-200 text-xs font-mono tracking-widest uppercase">Tap to open your story</p>
                              </div>
                           </div>
@@ -2643,9 +2625,26 @@ function App() {
             )}
 
             {activeTab === Tab.PROGRESS && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
+              <div className="space-y-6">
+                <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg mb-4">
+                   <button 
+                     onClick={() => setProgressSubTab('virtual_garden')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${progressSubTab === 'virtual_garden' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Your Garden
+                   </button>
+                   <button 
+                     onClick={() => setProgressSubTab('calendar')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${progressSubTab === 'calendar' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Garden Calendar
+                   </button>
+                </div>
+
+                {progressSubTab === 'virtual_garden' ? (
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <Zap className="w-4 h-4 text-secondary-blue" />
                       <span className="text-[10px] text-muted-text font-bold uppercase tracking-widest">
@@ -2699,16 +2698,18 @@ function App() {
                     {filteredTrackerHabits.map((habit) => (
                       <div
                         key={habit.id}
-                        className="grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm"
+                        className="grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm max-w-[140px] mx-auto w-full"
                       >
-                        <div className="w-12 h-12 text-5xl mb-2 transform group-hover:scale-110 transition-transform">
-                          <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-12 h-12" />
+                        <div className="w-16 h-20 flex flex-col items-center justify-end relative mb-3 group-hover:scale-105 transition-transform duration-300">
+                          <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-16 h-20 absolute bottom-[5%] z-10 drop-shadow-md" />
+                          {/* Elliptical shadow under the plant */}
+                          <div className="w-10 h-2 bg-black/15 shadow-[0_0_8px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
                         </div>
-                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize">
+                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize leading-tight">
                           {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
                         </h3>
-                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full">
-                          <Flame className="w-3.5 h-3.5" />
+                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full mt-1">
+                          <Flame className="w-3 h-3" />
                           Streak: {habit.streak} days
                         </div>
                         <div className="text-[10px] text-secondary-text font-bold text-center w-full">
@@ -2727,79 +2728,19 @@ function App() {
                 <Heatmap logs={logs} />
                 <ProgressChart logs={logs} habits={habits} />
               </div>
+                ) : (
+                  <GardenCalendar logs={logs} habits={habits} stats={stats} activeRestMode={activeRestMode} />
+                )}
+              </div>
             )}
 
-            {activeTab === Tab.PROFILE && (
+            {activeTab === Tab.SHOP && (
               <div className="space-y-8">
-                {/* Profile Header Card */}
-                <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative flex flex-col md:flex-row items-center gap-8 shadow-sm">
-                  <div className="w-24 h-24 rounded-full bg-surface-card border border-surface-alt flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <UserIcon className="w-10 h-10 text-primary-mint" />
-                    )}
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-2xl font-bold font-display text-primary-text mb-1">
-                      {user.displayName || "Gardener"}
-                    </h2>
-                    <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-4">
-                      {stats.rank} (Level {stats.level})
-                    </p>
-                    
-                    {/* XP Progress Bar */}
-                    <div className="w-full max-w-md mx-auto md:mx-0">
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="text-[11px] font-bold tracking-wide text-secondary-text uppercase">
-                          Total XP: {stats.xp}
-                        </span>
-                        <span className="text-[11px] font-bold tracking-wide text-muted-text uppercase">
-                          Next Lvl: {LEVEL_THRESHOLDS[stats.level + 1] ? LEVEL_THRESHOLDS[stats.level + 1] : "Max"}
-                        </span>
-                      </div>
-                      <div className="h-3 w-full bg-surface-card rounded-progress overflow-hidden border border-surface-alt p-0.5 shadow-inner-sm">
-                        <div 
-                          className="h-full bg-status-healthy rounded-progress transition-all duration-1000" 
-                          style={{ 
-                            width: LEVEL_THRESHOLDS[stats.level + 1] 
-                              ? `${((stats.xp - LEVEL_THRESHOLDS[stats.level]) / (LEVEL_THRESHOLDS[stats.level + 1] - LEVEL_THRESHOLDS[stats.level])) * 100}%` 
-                              : '100%' 
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Profile Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                    <Zap className="w-6 h-6 text-yellow-400 mb-3" />
-                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.currentLoginStreak || 0}</div>
-                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Login Streak</div>
-                  </div>
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                    <Trophy className="w-6 h-6 text-accent-peach mb-3" />
-                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.totalHabitsCompleted}</div>
-                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Habits Built</div>
-                  </div>
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                    <Flame className="w-6 h-6 text-status-wilting mb-3" />
-                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.perfectGardenDays}</div>
-                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Perfect Days</div>
-                  </div>
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                    <Cloud className="w-6 h-6 text-status-healthy mb-3" />
-                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{habits.filter(h => h.plantStage === 'Fruiting Plant').length}</div>
-                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Plants Matured</div>
-                  </div>
-                  <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                    <Zap className="w-6 h-6 text-secondary-blue mb-3" />
-                    <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.plantsRevived}</div>
-                    <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Plants Saved</div>
-                  </div>
-                </div>
+                <GardenShop 
+                   stats={stats}
+                   onBuyItem={handleBuyItem}
+                   onEquipItem={handleEquipItem}
+                />
 
                 {/* Companions Album Showcase */}
                 <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative mt-8 shadow-sm">
@@ -2831,80 +2772,192 @@ function App() {
               </div>
             )}
 
-            {activeTab === Tab.CHALLENGES && (
-              <ChallengesView 
-                 habits={activeHabitsList}
-                 stats={stats}
-                 onJoinChallenge={handleJoinChallenge}
-                 onQuitChallenge={handleQuitChallenge}
-                 onClaimChallengeReward={handleClaimChallengeReward}
-              />
-            )}
-
-            {activeTab === Tab.SHOP && (
-              <GardenShop 
-                 stats={stats}
-                 onBuyItem={handleBuyItem}
-                 onEquipItem={handleEquipItem}
-              />
-            )}
-
             {activeTab === Tab.STATS && (
-              <SimpleGardenStatsDashboard
-                 habits={habits}
-                 logs={logs}
-                 stats={stats}
-                 setActiveTab={setActiveTab}
-                 userName={user?.displayName || "Gardener"}
-              />
-            )}
-
-            {activeTab === Tab.REPORT && (
               <div className="space-y-6">
-                <div className="flex gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit">
+                {/* Status Tab Toggle */}
+                <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
                    <button 
-                     onClick={() => setReportViewMode('weekly')}
-                     className={`px-4 py-2 text-xs font-mono tracking-widest uppercase transition-colors ${reportViewMode === 'weekly' ? 'bg-[#00F5D4]/10 text-[#00F5D4] border border-[#00F5D4]/20' : 'text-slate-400 hover:text-white border border-transparent'}`}
+                     onClick={() => setStatsSubTab('overview')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'overview' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
                    >
-                     Weekly Report
+                     Overview
                    </button>
                    <button 
-                     onClick={() => setReportViewMode('monthly')}
-                     className={`px-4 py-2 text-xs font-mono tracking-widest uppercase transition-colors ${reportViewMode === 'monthly' ? 'bg-[#00F5D4]/10 text-[#00F5D4] border border-[#00F5D4]/20' : 'text-slate-400 hover:text-white border border-transparent'}`}
+                     onClick={() => setStatsSubTab('reports')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'reports' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
                    >
-                     Monthly Report
+                     Garden Reports
+                   </button>
+                   <button 
+                     onClick={() => setStatsSubTab('challenges')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'challenges' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Garden Challenges
+                   </button>
+                   <button 
+                     onClick={() => setStatsSubTab('badges')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'badges' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Garden Badges
+                   </button>
+                   <button 
+                     onClick={() => setStatsSubTab('profile')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'profile' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Gardener Profile
+                   </button>
+                   <button 
+                     onClick={() => setStatsSubTab('history')}
+                     className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${statsSubTab === 'history' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
+                   >
+                     Garden History
                    </button>
                 </div>
-                {reportViewMode === 'weekly' ? (
-                  <WeeklyReportView 
-                     logs={logs} 
-                     habits={habits} // Keep all for historical
-                     stats={stats} 
-                     activeEvent={activeEvent} 
-                     eventProgress={eventProgress}
-                     activeRestMode={activeRestMode}
+
+                {statsSubTab === 'profile' && (
+                  <div className="space-y-8">
+                    {/* Profile Header Card */}
+                    <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative flex flex-col md:flex-row items-center gap-8 shadow-sm">
+                      <div className="w-24 h-24 rounded-full bg-surface-card border border-surface-alt flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                        {user.photoURL ? (
+                          <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <UserIcon className="w-10 h-10 text-primary-mint" />
+                        )}
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h2 className="text-2xl font-bold font-display text-primary-text mb-1">
+                          {user.displayName || "Gardener"}
+                        </h2>
+                        <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-4">
+                          {stats.rank} (Level {stats.level})
+                        </p>
+                        
+                        {/* XP Progress Bar */}
+                        <div className="w-full max-w-md mx-auto md:mx-0">
+                          <div className="flex justify-between items-end mb-2">
+                            <span className="text-[11px] font-bold tracking-wide text-secondary-text uppercase">
+                              Total XP: {stats.xp}
+                            </span>
+                            <span className="text-[11px] font-bold tracking-wide text-muted-text uppercase">
+                              Next Lvl: {LEVEL_THRESHOLDS[stats.level + 1] ? LEVEL_THRESHOLDS[stats.level + 1] : "Max"}
+                            </span>
+                          </div>
+                          <div className="h-3 w-full bg-surface-card rounded-progress overflow-hidden border border-surface-alt p-0.5 shadow-inner-sm">
+                            <div 
+                              className="h-full bg-status-healthy rounded-progress transition-all duration-1000" 
+                              style={{ 
+                                width: LEVEL_THRESHOLDS[stats.level + 1] 
+                                  ? `${((stats.xp - LEVEL_THRESHOLDS[stats.level]) / (LEVEL_THRESHOLDS[stats.level + 1] - LEVEL_THRESHOLDS[stats.level])) * 100}%` 
+                                  : '100%' 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Profile Stats Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                        <Zap className="w-6 h-6 text-yellow-400 mb-3" />
+                        <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.currentLoginStreak || 0}</div>
+                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Login Streak</div>
+                      </div>
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                        <Trophy className="w-6 h-6 text-accent-peach mb-3" />
+                        <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.totalHabitsCompleted}</div>
+                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Habits Built</div>
+                      </div>
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                        <Flame className="w-6 h-6 text-status-wilting mb-3" />
+                        <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.perfectGardenDays}</div>
+                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Perfect Days</div>
+                      </div>
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                        <Cloud className="w-6 h-6 text-status-healthy mb-3" />
+                        <div className="text-2xl font-display font-bold text-primary-text mb-1">{habits.filter(h => h.plantStage === 'Fruiting Plant').length}</div>
+                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Plants Matured</div>
+                      </div>
+                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                        <Zap className="w-6 h-6 text-secondary-blue mb-3" />
+                        <div className="text-2xl font-display font-bold text-primary-text mb-1">{stats.plantsRevived}</div>
+                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">Plants Saved</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {statsSubTab === 'overview' && (
+                  <SimpleGardenStatsDashboard
+                     habits={habits}
+                     logs={logs}
+                     stats={stats}
+                     setActiveTab={setActiveTab}
+                     userName={user?.displayName || "Gardener"}
+                     onViewReports={() => setStatsSubTab('reports')}
+                     onViewHistory={() => setStatsSubTab('history')}
                   />
-                ) : (
-                  <MonthlyReportView 
-                     logs={logs} 
-                     habits={habits} 
-                     activeRestMode={activeRestMode}
+                )}
+
+                {statsSubTab === 'reports' && (
+                  <div className="space-y-6">
+                    <div className="flex gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
+                       <button 
+                         onClick={() => setReportViewMode('weekly')}
+                         className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === 'weekly' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-slate-400 hover:text-primary-text border border-transparent'}`}
+                       >
+                         Weekly Report
+                       </button>
+                       <button 
+                         onClick={() => setReportViewMode('monthly')}
+                         className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === 'monthly' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-slate-400 hover:text-primary-text border border-transparent'}`}
+                       >
+                         Monthly Report
+                       </button>
+                    </div>
+                    {reportViewMode === 'weekly' ? (
+                      <WeeklyReportView 
+                         logs={logs} 
+                         habits={habits} 
+                         stats={stats} 
+                         activeEvent={activeEvent} 
+                         eventProgress={eventProgress}
+                         activeRestMode={activeRestMode}
+                      />
+                    ) : (
+                      <MonthlyReportView 
+                         logs={logs} 
+                         habits={habits} 
+                         activeRestMode={activeRestMode}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {statsSubTab === 'challenges' && (
+                  <ChallengesView 
+                     habits={activeHabitsList}
+                     stats={stats}
+                     onJoinChallenge={handleJoinChallenge}
+                     onQuitChallenge={handleQuitChallenge}
+                     onClaimChallengeReward={handleClaimChallengeReward}
+                  />
+                )}
+
+                {statsSubTab === 'badges' && (
+                  <GardenBadgesView stats={stats} />
+                )}
+
+                {statsSubTab === 'history' && (
+                  <GardenHistoryView 
+                    archivedHabits={habits.filter(h => h.isArchived)} 
+                    onRestore={restoreArchivedHabit}
+                    onDeletePermanently={(id) => deleteHabit(id, true)}
+                    onUpdateNote={updateArchiveNote}
                   />
                 )}
               </div>
-            )}
-
-            {activeTab === Tab.BADGES && (
-              <GardenBadgesView stats={stats} />
-            )}
-
-            {activeTab === Tab.TROPHY && (
-              <GardenHistoryView 
-                archivedHabits={habits.filter(h => h.isArchived)} 
-                onRestore={restoreArchivedHabit}
-                onDeletePermanently={(id) => deleteHabit(id, true)}
-                onUpdateNote={updateArchiveNote}
-              />
             )}
 
             {activeTab === Tab.CALENDAR && (
@@ -2928,7 +2981,7 @@ function App() {
                       </div>
                     )}
                     <div>
-                      <h2 className="text-2xl font-bold text-white font-display uppercase tracking-wide">
+                      <h2 className="text-2xl font-bold text-primary-text font-display uppercase tracking-wide">
                         {user.displayName}
                       </h2>
                       <p className="text-slate-500 font-mono text-xs">
@@ -2948,7 +3001,7 @@ function App() {
                   
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-4">
                      <div>
-                        <h3 className="text-white font-bold text-sm">Simple Garden Mode</h3>
+                        <h3 className="text-primary-text font-bold text-sm">Simple Garden Mode</h3>
                         <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Disable animations and decorations</p>
                      </div>
                      <button 
@@ -2965,7 +3018,7 @@ function App() {
 
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-4">
                      <div>
-                        <h3 className="text-white font-bold text-sm">Vibration Effects</h3>
+                        <h3 className="text-primary-text font-bold text-sm">Vibration Effects</h3>
                         <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Haptic feedback on habit completion</p>
                      </div>
                      <button 
@@ -2985,7 +3038,7 @@ function App() {
                   <div className="flex bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-4 flex-col gap-4">
                      <div className="flex items-center justify-between">
                         <div>
-                           <h3 className="text-white font-bold text-sm">Evening Garden Summary</h3>
+                           <h3 className="text-primary-text font-bold text-sm">Evening Garden Summary</h3>
                            <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">One gentle nudge for unfinished plants</p>
                         </div>
                         <button 
@@ -3018,7 +3071,7 @@ function App() {
                               setExtraStats(newStats);
                               persistData(habits, logs, newStats);
                            }}
-                           className="bg-transparent border border-surface-alt text-white font-mono text-sm px-2 py-1 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                           className="bg-transparent border border-surface-alt text-primary-text font-mono text-sm px-2 py-1 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
                          />
                        </div>
                      )}
@@ -3028,7 +3081,7 @@ function App() {
                   <div className="bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6 flex flex-col gap-4">
                      <div className="flex items-center justify-between">
                         <div>
-                           <h3 className="text-white font-bold text-sm text-balance">Daily Quick Reminder</h3>
+                           <h3 className="text-primary-text font-bold text-sm text-balance">Daily Quick Reminder</h3>
                            <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-[200px] leading-relaxed">A gentle nudge at a specific time</p>
                         </div>
                         <button 
@@ -3061,7 +3114,7 @@ function App() {
                               setExtraStats(newStats);
                               persistData(habits, logs, newStats);
                            }}
-                           className="bg-transparent border border-surface-alt text-white font-mono text-sm px-2 py-1 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                           className="bg-transparent border border-surface-alt text-primary-text font-mono text-sm px-2 py-1 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
                          />
                        </div>
                      )}
@@ -3069,7 +3122,7 @@ function App() {
 
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
                      <div>
-                        <h3 className="text-white font-bold text-sm">Garden Matches Time of Day</h3>
+                        <h3 className="text-primary-text font-bold text-sm">Garden Matches Time of Day</h3>
                         <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Visuals change from dawn to night</p>
                      </div>
                      <button 
@@ -3087,7 +3140,7 @@ function App() {
 
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
                      <div>
-                        <h3 className="text-white font-bold text-sm">Completion Sound Cue</h3>
+                        <h3 className="text-primary-text font-bold text-sm">Completion Sound Cue</h3>
                         <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Audio cue on habit completion</p>
                      </div>
                      <select 
@@ -3101,7 +3154,7 @@ function App() {
                               playCompletionSound(soundTheme);
                            }
                         }}
-                        className="bg-[#0d1017] border border-surface-alt text-white font-mono text-xs px-3 py-2 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                        className="bg-background-main border border-surface-alt text-primary-text font-mono text-xs px-3 py-2 rounded outline-none focus:border-cyan-500 transition-colors cursor-pointer"
                      >
                         <option value="droplet">Water Droplet</option>
                         <option value="chime">Soft Chime</option>
@@ -3138,7 +3191,7 @@ function App() {
                       <div>
                          <div className="flex items-center gap-2 mb-1">
                             <LucideIcons.Brush className="w-5 h-5 text-primary-mint" />
-                            <h3 className="text-white font-bold text-base">Aesthetic & Layout Design Lab</h3>
+                            <h3 className="text-primary-text font-bold text-base">Aesthetic & Layout Design Lab</h3>
                          </div>
                          <p className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                             Fully customize your app canvas, boxes, elements and accent styling
@@ -3236,7 +3289,7 @@ function App() {
                                      title={color.name}
                                   >
                                      {isSelected && (
-                                        <Check className="w-5 h-5 text-white drop-shadow-md" />
+                                        <Check className="w-5 h-5 text-primary-text drop-shadow-md" />
                                      )}
                                   </button>
                                );
@@ -3263,7 +3316,7 @@ function App() {
                                         persistData(habits, logs, newStats);
                                      }}
                                      className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
-                                        isActive ? 'bg-[#1e2538]/40 border-primary-mint text-white' : 'bg-transparent border-slate-500/20 text-slate-300'
+                                        isActive ? 'bg-background-main/40 border-primary-mint text-primary-text' : 'bg-transparent border-slate-500/20 text-slate-300'
                                      }`}
                                   >
                                      <div className="flex items-center justify-between gap-1 mb-1">
@@ -3302,7 +3355,7 @@ function App() {
                                         persistData(habits, logs, newStats);
                                      }}
                                      className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
-                                        isActive ? 'bg-[#1e2538]/40 border-primary-mint text-white' : 'bg-transparent border-slate-500/20 text-slate-300'
+                                        isActive ? 'bg-background-main/40 border-primary-mint text-primary-text' : 'bg-transparent border-slate-500/20 text-slate-300'
                                      }`}
                                   >
                                      <div className="flex items-center justify-between gap-1 mb-1">
@@ -3324,9 +3377,9 @@ function App() {
                          <div className="flex items-center justify-between mb-4 relative z-10">
                             <div className="flex items-center gap-2">
                                <LucideIcons.Award className="w-4 h-4 text-emerald-400" />
-                               <h3 className="text-white font-bold text-sm">Recently Unlocked Badges</h3>
+                               <h3 className="text-primary-text font-bold text-sm">Recently Unlocked Badges</h3>
                             </div>
-                            <button onClick={() => setActiveTab(Tab.BADGES)} className="text-xs font-mono uppercase tracking-widest text-[#00F5D4] hover:text-[#00d8b9] transition-colors">
+                            <button onClick={() => { setStatsSubTab('badges'); setActiveTab(Tab.STATS); }} className="text-xs font-mono uppercase tracking-widest text-[#00F5D4] hover:text-[#00d8b9] transition-colors">
                                View All
                             </button>
                          </div>
@@ -3344,7 +3397,7 @@ function App() {
                                           <Icon className="w-5 h-5 text-emerald-400" />
                                        </div>
                                        <div className="min-w-0">
-                                          <p className="text-white font-bold text-sm truncate">{badge.title}</p>
+                                          <p className="text-primary-text font-bold text-sm truncate">{badge.title}</p>
                                           <p className="text-[10px] font-mono tracking-widest text-emerald-400/80 uppercase truncate">{badge.category}</p>
                                        </div>
                                     </div>
@@ -3358,7 +3411,7 @@ function App() {
                      <div className="bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
                         <div className="flex items-center gap-2 mb-4">
                            <LucideIcons.Library className="w-4 h-4 text-emerald-400" />
-                           <h3 className="text-white font-bold text-sm">Garden Almanacs</h3>
+                           <h3 className="text-primary-text font-bold text-sm">Garden Almanacs</h3>
                         </div>
                         <div className="flex flex-wrap gap-4">
                            {Object.values(extraStats.almanacs).sort((a,b) => b.year.localeCompare(a.year)).map(a => (
@@ -3371,7 +3424,7 @@ function App() {
                                 className="flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-900/40 to-[#000428] border border-emerald-500/20 hover:border-emerald-500/50 transition-colors shadow-lg hover:scale-[1.02] transform"
                               >
                                  <LucideIcons.Book className="w-8 h-8 text-emerald-300 mb-2 drop-shadow-md" />
-                                 <span className="text-white font-display font-bold">{a.year}</span>
+                                 <span className="text-primary-text font-display font-bold">{a.year}</span>
                               </button>
                            ))}
                         </div>
@@ -3397,7 +3450,7 @@ function App() {
                   </p>
                   <Button
                     onClick={handleExportData}
-                    className="w-full py-4 text-xs font-mono tracking-widest uppercase bg-zinc-800 text-slate-300 hover:text-white hover:bg-zinc-700 border-zinc-700 rounded-none transition-all flex items-center justify-center gap-3"
+                    className="w-full py-4 text-xs font-mono tracking-widest uppercase bg-zinc-800 text-slate-300 hover:text-primary-text hover:bg-zinc-700 border-zinc-700 rounded-none transition-all flex items-center justify-center gap-3"
                   >
                     <Download className="w-4 h-4" />
                     Export Garden Data
@@ -3502,7 +3555,7 @@ function App() {
                  
                  <button 
                     onClick={() => setMotivationPopup(null)}
-                    className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition-colors z-20 hover:bg-white/5 rounded-full"
+                    className="absolute top-4 right-4 p-2 text-slate-500 hover:text-primary-text transition-colors z-20 hover:bg-white/5 rounded-full"
                  >
                     <Check className="w-5 h-5" />
                  </button>
@@ -3556,14 +3609,14 @@ function App() {
                     <span className="text-4xl drop-shadow-[0_0_20px_rgba(0,245,212,0.8)]">🌟</span>
                  </div>
                  
-                 <h2 className="text-2xl md:text-3xl font-display font-medium text-white tracking-tight text-center leading-snug mb-2 relative z-10">
+                 <h2 className="text-2xl md:text-3xl font-display font-medium text-primary-text tracking-tight text-center leading-snug mb-2 relative z-10">
                     Weekly Consistency!
                  </h2>
                  <p className="text-xs text-slate-400 max-w-xs mx-auto mb-6 relative z-10 font-mono uppercase tracking-wider">
                     3 Consecutive Weeks Achieved
                  </p>
                  
-                 <div className="w-full bg-[#0A0D14] border border-surface-alt rounded-2xl p-4 text-left space-y-3 mb-6 relative z-10">
+                 <div className="w-full bg-background-main border border-surface-alt rounded-2xl p-4 text-left space-y-3 mb-6 relative z-10">
                     <h3 className="text-[10px] font-mono tracking-widest text-[#00F5D4] uppercase italic mb-2 border-b border-surface-alt pb-1">
                        GARDEN GROWTH REPORT
                     </h3>
@@ -3607,7 +3660,7 @@ function App() {
         </AnimatedModal>
 
         {toastData && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 whitespace-nowrap">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-zinc-900 text-primary-text px-6 py-3 rounded-full text-sm font-medium shadow-2xl z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 whitespace-nowrap">
           <div className="flex items-center gap-2">
             {toastData.message.includes("XP") ? <Zap className="w-4 h-4 text-[#00F5D4]" /> : <Check className="w-4 h-4 text-[#00F5D4]" />}
             <span>{toastData.message}</span>
@@ -3618,7 +3671,7 @@ function App() {
                 toastData.action!.onClick();
                 setToastData(null);
               }}
-              className="ml-2 pl-3 border-l border-white/20 text-[#00F5D4] font-bold uppercase tracking-wider hover:text-white transition-colors text-xs"
+              className="ml-2 pl-3 border-l border-surface-alt text-[#00F5D4] font-bold uppercase tracking-wider hover:text-primary-text transition-colors text-xs"
             >
               {toastData.action.label}
             </button>
