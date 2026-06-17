@@ -54,8 +54,8 @@ export const DailyGoalRing: React.FC<DailyGoalRingProps> = ({ completed, total }
         </div>
       </div>
       
-      <div className="relative z-10 flex-1">
-         <h3 className="font-display font-bold text-lg text-white mb-1 tracking-wide">Daily Goal</h3>
+      <div className="relative z-10 flex-1" style={{ color: '#ffffff', fontWeight: 'bold' }}>
+         <h3 className="font-display font-bold text-lg text-white mb-1 tracking-wide" style={{ color: 'inherit' }}>Daily Goal</h3>
          <p className="text-sm font-medium text-slate-400 leading-relaxed text-balance">
             {total === 0 
               ? "No habits scheduled for today." 

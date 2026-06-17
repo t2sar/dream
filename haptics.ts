@@ -1,4 +1,4 @@
-export type HapticEvent = 'water' | 'allDone' | 'grow' | 'protect';
+export type HapticEvent = 'water' | 'allDone' | 'grow' | 'protect' | 'complete' | 'harvest' | 'unlock' | 'slip';
 
 export const playHaptic = (event: HapticEvent, enabled: boolean = true) => {
   if (!enabled) return;
@@ -10,23 +10,35 @@ export const playHaptic = (event: HapticEvent, enabled: boolean = true) => {
   try {
     switch (event) {
       case 'water':
-        // Two quick light pulses: ~30ms, pause 60ms, ~30ms
         navigator.vibrate([30, 60, 30]);
         break;
+      case 'complete':
+        // Success feeling: medium-pause-strong
+        navigator.vibrate([40, 60, 80]);
+        break;
+      case 'harvest':
+        // Burst of joy: strong, multiple light pulses
+        navigator.vibrate([80, 40, 30, 40, 30, 40, 50]);
+        break;
+      case 'unlock':
+        // Grand reveal: strong-pause-strong-medium
+        navigator.vibrate([100, 50, 100, 50, 60]);
+        break;
+      case 'slip':
+        // Negative reinforcement: single heavy long vibrate
+        navigator.vibrate([200]);
+        break;
       case 'allDone':
-        // Light-pause-medium: 30ms, 80ms pause, 60ms
         navigator.vibrate([30, 80, 60]);
         break;
       case 'grow':
-        // Single firm pulse: ~80ms
         navigator.vibrate([80]);
         break;
       case 'protect':
-        // One long soft pulse: ~150ms
         navigator.vibrate([150]);
         break;
     }
   } catch (err) {
-    // Silently continue if vibrate fails (e.g. cross-origin iframe without permission, though preview handles it)
+    // Silently continue
   }
 };

@@ -310,13 +310,15 @@ const RAW_SHOP_ITEMS: (Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: num
     tier: 2
   },
   {
-    id: 'boost_streak_freeze',
+    id: 'item_streak_freeze',
     name: 'Streak Freeze',
     type: 'boost',
-    description: 'Protects your streak for one missed habit.',
+    description: "Protects your garden's streak for one full day of missed habits.",
+    price: 500,
     iconName: 'Snowflake',
     isConsumable: true,
-    tier: 2
+    maxCapacity: 2,
+    tier: 3
   },
   {
     id: 'boost_streak_repair',

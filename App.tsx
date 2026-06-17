@@ -29,7 +29,7 @@ import {
 import * as LucideIcons from "lucide-react";
 import { format, differenceInCalendarDays, subDays, startOfWeek, endOfWeek, subWeeks, isWithinInterval, parseISO, eachDayOfInterval } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
-import { playCompletionSound } from "./audio";
+import { playCompletionSound, playMilestoneSound } from "./audio";
 import { onAuthStateChanged, User } from "firebase/auth";
 
 import {
@@ -72,7 +72,7 @@ import { checkBadgeUnlocks } from "./badgeUtils";
 import { ACHIEVEMENT_BADGES } from "./badgeConfig";
 import { AchievementBadge } from "./types";
 
-// Haptics utility for sensory feedback
+import { validatePurchase, calculateDailyCoinCap, calculateSecureCoinReward, processDailyEconomyReset } from './economyEngine';
 import { playHaptic } from "./haptics";
 import confetti from "canvas-confetti";
 import { getChallengeTemplate } from "./challengesData";
@@ -84,10 +84,12 @@ import { EventDetailModal } from "./components/EventDetailModal";
 import { GardenCompanions } from "./components/GardenCompanions";
 import { CompanionUnlockModal } from "./components/CompanionUnlockModal";
 import { OrchardModal } from "./components/OrchardModal";
+import pkg from "./package.json";
 import { HarvestModal } from "./components/HarvestModal";
 import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
 import { MotivationSettings } from "./components/MotivationSettings";
 import { COMPANIONS } from "./companionsData";
+import { evaluateCompanionUnlocks } from "./companionUtils";
 
 const APP_START_TIME = Date.now();
 
@@ -387,6 +389,15 @@ function checkWeeklyConsistencyThreeWeeks(habits: Habit[], logs: HabitLog, refer
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -459,6 +470,12 @@ function App() {
   // Motivation Popup State
   const [motivationPopup, setMotivationPopup] = useState<{ text: string, author?: string } | null>(null);
   const [massiveCoinPopup, setMassiveCoinPopup] = useState<number | null>(null);
+  const [growthMultiplierPopup, setGrowthMultiplierPopup] = useState<{
+     streak: number;
+     extraCoins: number;
+     habitName: string;
+     multiplier: number;
+  } | null>(null);
   const [weeklyCelebrationData, setWeeklyCelebrationData] = useState<{
      activePlants: number;
      maturePlants: number;
@@ -680,6 +697,11 @@ function App() {
   useEffect(() => {
     if (dataLoading || habits.length === 0) return;
     let changed = false;
+    
+    let activeFreezes = extraStats.streakFreezes || 0;
+    let freezesUsed = 0;
+    const frozenDates = new Set<string>();
+
     const updatedHabits = habits.map((habit) => {
       const lastDate =
         habit.lastMissCheckedDate ||
@@ -691,7 +713,6 @@ function App() {
 
       if (daysMissed > 0) {
         let missedCount = 0;
-        const isFlexibleTargetMetForLastCycle = false;
         
         for (let i = 1; i <= daysMissed; i++) {
           const checkDateStr = format(
@@ -702,45 +723,34 @@ function App() {
           const wasProtected = isHabitPaused(habit.id, checkDateStr, activeRestMode);
           const wasDue = isHabitDueOnDate(habit, checkDateStr);
           
-          if (!wasDue) continue; // If it's not due on that specific day based on schedule (and not times_per_week evaluated daily), skip.
-          // Wait, times_per_week returns true for every day, so we need to be careful not to penalize everyday.
-          // So let's handle flexible schedules separately.
+          if (!wasDue) continue;
           
           if (habit.scheduleType === 'times_per_week' || habit.scheduleType === 'weekly' || habit.scheduleType === 'anytime') {
-             // For flexible schedules, we shouldn't do simple daily checks. 
-             // We'd ideally check if the whole week was missed. For MVP, we simply don't penalize daily to keep it simple, 
-             // or we check if target was met for previous weeks.
-             continue; // No daily penalty for flexible schedule
+             continue;
           }
           
           const didComplete = logs[checkDateStr]?.includes(habit.id);
-          if (!didComplete && !wasProtected) missedCount++;
+          if (!didComplete && !wasProtected) {
+            // Did we already freeze this date globally for another habit in this loop?
+            if (frozenDates.has(checkDateStr)) {
+               // Protected by a freeze already consumed in this loop
+               continue;
+            } else if (activeFreezes > 0) {
+               // Consume a freeze to protect this whole day for all habits
+               activeFreezes--;
+               freezesUsed++;
+               frozenDates.add(checkDateStr);
+               // Do not increment missedCount, it's frozen!
+            } else {
+               missedCount++;
+            }
+          }
         }
 
         if (missedCount > 0) {
           changed = true;
           let newHealth = habit.plantHealth ?? 100;
           let remainingMisses = missedCount;
-          
-          const ownedFreezes = extraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
-          let freezesUsed = 0;
-          
-          if (ownedFreezes >= remainingMisses) {
-            freezesUsed = remainingMisses;
-            remainingMisses = 0;
-          } else {
-            freezesUsed = ownedFreezes;
-            remainingMisses -= ownedFreezes;
-          }
-          
-          if (freezesUsed > 0) {
-             const newCounts = {
-                ...(extraStats.boostItemCounts || {}),
-                'boost_streak_freeze': ownedFreezes - freezesUsed
-             };
-             setExtraStats(prev => ({ ...prev, boostItemCounts: newCounts }));
-          }
-
           let grace = habit.graceDays || 0;
 
           if (grace >= remainingMisses) {
@@ -784,10 +794,19 @@ function App() {
       return habit;
     });
 
-    if (changed) {
+    if (changed || freezesUsed > 0) {
       setTimeout(() => {
         setHabits(updatedHabits);
-        persistData(updatedHabits, logs, extraStats, activeRestMode);
+        
+        const newExtraStats = { ...extraStats };
+        if (freezesUsed > 0) {
+           newExtraStats.streakFreezes = Math.max(0, (newExtraStats.streakFreezes || 0) - freezesUsed);
+        }
+        
+        persistData(updatedHabits, logs, newExtraStats, activeRestMode);
+        if (freezesUsed > 0) {
+           setExtraStats(newExtraStats);
+        }
       }, 500);
     }
   }, [dataLoading, dateKey]);
@@ -857,6 +876,7 @@ function App() {
            ]));
            
            if (!isHydrationLoad) {
+             playHaptic('unlock');
              setNewlyUnlockedBadges(prev => [...prev, ...actualNewBadges]);
              playHaptic('allDone');
 
@@ -876,6 +896,20 @@ function App() {
            setNewlyUnlockedBadges(prev => [...prev, ...unlockedBadges]);
         }
       }
+    }
+
+    const companionResults = evaluateCompanionUnlocks(newHabits, statsToSave);
+    if (companionResults) {
+       Object.assign(statsToSave, {
+          companions: companionResults.updatedCompanions
+       });
+       setExtraStats(statsToSave);
+       
+       const isHydrationLoad = Date.now() - APP_START_TIME < 5000;
+       if (!isHydrationLoad) {
+         setRecentlyUnlockedCompanions(prev => [...prev, ...companionResults.newUnlockIds]);
+         playHaptic('unlock');
+       }
     }
 
     if (user) {
@@ -1205,15 +1239,12 @@ function App() {
     const changedHabit = habits.find(h => h.id === id);
     if (!changedHabit) return;
 
-    const ownedFreezes = newExtraStats.boostItemCounts?.['boost_streak_freeze'] || 0;
+    const ownedFreezes = newExtraStats.streakFreezes || 0;
     let usedFreeze = false;
     
     if (ownedFreezes > 0) {
       usedFreeze = true;
-      newExtraStats.boostItemCounts = {
-        ...newExtraStats.boostItemCounts,
-        'boost_streak_freeze': ownedFreezes - 1
-      };
+      newExtraStats.streakFreezes = ownedFreezes - 1;
       setExtraStats(newExtraStats);
     }
 
@@ -1281,6 +1312,7 @@ function App() {
     const xpReward = diff === 'easy' ? 30 : diff === 'medium' ? 50 : diff === 'hard' ? 80 : 120;
     const coinReward = diff === 'easy' ? 400 : diff === 'medium' ? 700 : diff === 'hard' ? 1000 : 1600;
     
+    playHaptic('harvest');
     const newOrchard = [...(extraStats.orchard || [])];
     const fruitId = habit.plantType || 'Unknown';
     const existingIndex = newOrchard.findIndex(o => o.fruitId === fruitId && o.habitId === habit.id);
@@ -1734,15 +1766,52 @@ function App() {
         
         let streakMultiplier = 1.0;
         const currentStreak = h.streak || 0;
+        const updatedH = updatedHabits.find(uh => uh.id === id);
+        const finalStreak = updatedH?.streak || 0;
+
+        let extraMilestoneCoins = 0;
+        let triggeredGrowthPopup = false;
+
+        if (finalStreak === 7 || finalStreak === 14 || finalStreak === 30) {
+           triggeredGrowthPopup = true;
+           let mult = 1.0;
+           let coinsBonus = 0;
+           if (finalStreak === 7) {
+              mult = 2.0;
+              coinsBonus = 75;
+           } else if (finalStreak === 14) {
+              mult = 3.0;
+              coinsBonus = 150;
+           } else if (finalStreak === 30) {
+              mult = 5.0;
+              coinsBonus = 300;
+           }
+           extraMilestoneCoins = coinsBonus;
+           
+           // Trigger sound + haptics
+           playMilestoneSound();
+           import('./haptics').then(({ playHaptic }) => playHaptic('unlock'));
+           
+           setGrowthMultiplierPopup({
+              streak: finalStreak,
+              multiplier: mult,
+              extraCoins: coinsBonus,
+              habitName: h.name
+           });
+        }
+
         if (currentStreak >= 30) {
            streakMultiplier = 5.0;
-           setMassiveCoinPopup(Math.floor(baseAward * streakMultiplier));
+           if (!triggeredGrowthPopup) {
+              setMassiveCoinPopup(Math.floor(baseAward * streakMultiplier));
+           }
         }
         else if (currentStreak >= 21) streakMultiplier = 3.0;
         else if (currentStreak >= 14) streakMultiplier = 2.0;
         else if (currentStreak >= 5) streakMultiplier = 1.2;
         
         baseCoinsDelta += Math.floor(baseAward * streakMultiplier);
+        bonusCoinsDelta += extraMilestoneCoins;
         if (h.type === 'avoid') incResist++;
         
         if (h.plantStatus === 'Wilting' || h.plantStatus === 'Critical' || h.plantStatus === 'Dead') {
@@ -1845,16 +1914,21 @@ function App() {
     }
 
     let finalCoinsDelta = 0;
-    let currentDailyCoins = newExtraStats.dailyCoinsEarned || 0;
-    let lastReset = newExtraStats.lastCoinResetDate || dateKey;
     
-    if (lastReset !== dateKey) {
-       currentDailyCoins = 0;
-       lastReset = dateKey;
+    // 1. Process daily reset & Famine recovery first
+    const resetUpdates = processDailyEconomyReset(newExtraStats);
+    if (resetUpdates) {
+       newExtraStats = { ...newExtraStats, ...resetUpdates };
     }
     
+    // 2. Fetch the dynamic daily cap
+    const dynamicCap = calculateDailyCoinCap(habits, extraStats.level || 1);
+    
+    let currentDailyCoins = newExtraStats.dailyCoinsEarned || 0;
+    
     if (baseCoinsDelta > 0) {
-       const allowedBase = baseCoinsDelta;
+       // Only apply hard cap bounds from our economy engine for requested earnings
+       const allowedBase = calculateSecureCoinReward(baseCoinsDelta, newExtraStats, dynamicCap);
        currentDailyCoins += allowedBase;
        finalCoinsDelta = allowedBase + bonusCoinsDelta;
     } else if (baseCoinsDelta < 0) {
@@ -1877,7 +1951,7 @@ function App() {
           activeChallenge: updatedChallenge,
           coins: Math.max(0, (newExtraStats.coins || 0) + finalCoinsDelta),
           dailyCoinsEarned: currentDailyCoins,
-          lastCoinResetDate: lastReset,
+          lastCoinResetDate: newExtraStats.lastCoinResetDate || dateKey,
           eveningCompletions: Math.max(0, (newExtraStats.eveningCompletions || 0) + incEvening),
           nightCompletions: Math.max(0, (newExtraStats.nightCompletions || 0) + incNight),
           rainySeasonCompletions: Math.max(0, (newExtraStats.rainySeasonCompletions || 0) + incRainy),
@@ -2092,38 +2166,14 @@ function App() {
   };
 
   const handleBuyItem = (item: ShopItem) => {
-    const currentCoins = extraStats.coins || 0;
-    if (currentCoins < item.price) return;
-    
-    // Check required level
-    if (item.requiredLevel && (extraStats.level || 1) < item.requiredLevel) {
-       alert(`You need to be level ${item.requiredLevel} to buy this.`);
+    const errorMsg = validatePurchase(extraStats, item);
+    if (errorMsg) {
+       alert(errorMsg);
        return;
     }
-    
+
+    const currentCoins = extraStats.coins || 0;
     const now = new Date();
-    
-    // Check bounds for consumables
-    if (item.isConsumable) {
-       const currentCount = extraStats.boostItemCounts?.[item.id] || 0;
-       if (item.maxCapacity && currentCount >= item.maxCapacity) {
-          alert(`You can't carry more than ${item.maxCapacity} of ${item.name}.`);
-          return;
-       }
-       
-       if (item.cooldownHours) {
-          const lastPurchases = extraStats.lastPurchaseDates || {};
-          const lastDateStr = lastPurchases[item.id];
-          if (lastDateStr) {
-             const lastD = new Date(lastDateStr);
-             const diffHours = (now.getTime() - lastD.getTime()) / (1000 * 60 * 60);
-             if (diffHours < item.cooldownHours) {
-                alert(`${item.name} is on cooldown. Try again later.`);
-                return;
-             }
-          }
-       }
-    }
     
     const newExtraStats = { 
        ...extraStats, 
@@ -2132,10 +2182,14 @@ function App() {
     };
     
     if (item.isConsumable) {
-       newExtraStats.boostItemCounts = {
-          ...(newExtraStats.boostItemCounts || {}),
-          [item.id]: (newExtraStats.boostItemCounts?.[item.id] || 0) + 1
-       };
+       if (item.id === 'item_streak_freeze') {
+           newExtraStats.streakFreezes = (newExtraStats.streakFreezes || 0) + 1;
+       } else {
+           newExtraStats.boostItemCounts = {
+              ...(newExtraStats.boostItemCounts || {}),
+              [item.id]: (newExtraStats.boostItemCounts?.[item.id] || 0) + 1
+           };
+       }
        if (item.cooldownHours) {
           newExtraStats.lastPurchaseDates = {
              ...(newExtraStats.lastPurchaseDates || {}),
@@ -2262,6 +2316,29 @@ function App() {
 
   // -- Render Logic --
 
+  if (showSplash) {
+    return (
+      <div 
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500 bg-[#FDFBF7]"
+      >
+        <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-8 flex items-center justify-center">
+          <img 
+            src="/logo finalll.png" 
+            alt="Your Garden Logo" 
+            className="w-full h-full object-contain drop-shadow-md"
+            style={{ mixBlendMode: 'multiply' }}
+          />
+        </div>
+        <h1 
+          className="font-display font-extrabold tracking-tight text-3xl"
+          style={{ color: '#1C1B1F' }}
+        >
+          Your Garden
+        </h1>
+      </div>
+    );
+  }
+
   if (authLoading) {
     return (
       <div className="app-background-reset flex items-center justify-center">
@@ -2359,7 +2436,7 @@ function App() {
       </nav>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 bg-primary-anchor text-surface-soft shadow-xl border-r border-surface-alt/10 flex-col items-center py-12 z-50 rounded-r-[32px]">
+      <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-28 bg-[#6d5e8f] text-surface-soft shadow-xl border-r border-surface-alt/10 flex-col items-center py-12 z-50 rounded-r-[32px]">
         <div className="flex flex-col gap-10 w-full px-6 md:px-8 overflow-y-auto hidden-scrollbar">
           {[
             { id: Tab.TRACKER, icon: LayoutDashboard },
@@ -2373,7 +2450,7 @@ function App() {
               onClick={() => setActiveTab(item.id)}
               className={`w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${activeTab === item.id ? "bg-surface-soft/10 text-primary-mint shadow-sm scale-110" : "text-surface-soft/60 hover:text-surface-soft hover:bg-surface-soft/5"}`}
             >
-              <item.icon className="w-6 h-6" />
+              <item.icon className={`w-6 h-6 ${item.id === Tab.SHOP ? 'bg-[#987878] p-1 rounded-md' : ''}`} />
             </button>
           ))}
         </div>
@@ -2391,7 +2468,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen bg-[#16aa92]">
         {/* Garden Companions Ambient Layer */}
         <React.Suspense fallback={null}>
           {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}
@@ -3329,10 +3406,20 @@ function App() {
                                      }`}
                                   >
                                      <div className="flex items-center justify-between gap-1 mb-1">
-                                        <span className="font-bold text-[11px] tracking-tight">{item.label}</span>
+                                        <span 
+                                           className="font-bold text-[11px] tracking-tight"
+                                           style={item.id === 'invisible' ? { color: '#000000' } : undefined}
+                                        >
+                                           {item.label}
+                                        </span>
                                         {isActive && <div className="w-2 h-2 rounded-full bg-primary-mint" />}
                                      </div>
-                                     <p className="text-[9px] text-slate-400 leading-normal">{item.desc}</p>
+                                     <p 
+                                        className="text-[9px] text-slate-400 leading-normal"
+                                        style={item.id === 'solid' ? { backgroundColor: '#ffffff', color: '#080101', fontWeight: 'bold' } : undefined}
+                                     >
+                                        {item.desc}
+                                     </p>
                                   </button>
                                );
                             })}
@@ -3412,7 +3499,7 @@ function App() {
                 </div>
 
                 <div className="glass p-8 rounded-none border border-surface-alt relative mb-6">
-                  <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4">
+                  <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4" style={{ color: '#f57100' }}>
                     DATA & BACKUP
                   </h2>
                   <p className="text-slate-500 font-mono text-[10px] leading-relaxed uppercase tracking-wider mb-6">
@@ -3432,7 +3519,7 @@ function App() {
                     SYSTEM SETTINGS
                   </h2>
                   <p className="text-slate-500 font-mono text-[10px] leading-relaxed uppercase tracking-wider">
-                    Version 3.2
+                    Version {pkg.version}
                   </p>
                 </div>
               </div>
@@ -3566,8 +3653,70 @@ function App() {
         </AnimatedModal>
 
         <AnimatedModal 
-           isOpen={!!weeklyCelebrationData} 
-           onClose={() => setWeeklyCelebrationData(null)}
+           isOpen={!!growthMultiplierPopup} 
+            onClose={() => setGrowthMultiplierPopup(null)}
+            alignment="center"
+            className="!max-w-md mx-auto !p-0 overflow-hidden bg-[#0B1528] border border-amber-400/40 rounded-3xl shadow-[0_30px_70px_rgba(245,158,11,0.25)] relative"
+         >
+            {growthMultiplierPopup !== null && (
+               <div className="relative p-8 md:p-10 text-center flex flex-col items-center justify-center min-h-[320px] text-white">
+                  <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-amber-400/15 via-emerald-400/5 to-transparent pointer-events-none" />
+                  
+                  <div className="mb-4 bg-amber-400/10 border border-amber-400/30 text-amber-300 px-4 py-1.5 rounded-full font-mono text-xs uppercase tracking-widest animate-pulse">
+                     🏆 Growth Milestone
+                  </div>
+                  
+                  <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
+                     <div className="absolute inset-0 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin [animation-duration:3s]" />
+                     <div className="absolute inset-2 border-2 border-dashed border-amber-400/20 rounded-full animate-spin [animation-duration:6s] ease-linear" />
+                     <div className="absolute w-16 h-16 bg-gradient-to-tr from-amber-500 to-emerald-400 rounded-full blur-md opacity-30 animate-pulse" />
+                     <div className="bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center relative z-10 border border-amber-400/30 shadow-lg animate-bounce">
+                        <span className="text-4xl text-amber-400">⚡</span>
+                     </div>
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl font-display font-black text-amber-400 tracking-tight mb-2 drop-shadow-[0_2px_8px_rgba(245,158,11,0.3)]">
+                     {growthMultiplierPopup.streak}-Day Milestone!
+                  </h2>
+                  
+                  <p className="text-emerald-400 font-mono text-sm tracking-wide mb-4">
+                     for "<span className="text-slate-200 font-semibold">{growthMultiplierPopup.habitName}</span>"
+                  </p>
+                  
+                  <div className="space-y-3 w-full bg-slate-900/60 border border-white/5 p-4 rounded-2xl mb-6">
+                     <div className="flex justify-between items-center text-sm font-mono text-slate-300">
+                        <span>Streak Boost:</span>
+                        <span className="text-amber-400 font-bold">{growthMultiplierPopup.multiplier.toFixed(1)}x Multiplier</span>
+                     </div>
+                     <div className="h-[1px] bg-white/5 w-full" />
+                     <div className="flex justify-between items-center font-display font-bold text-lg text-white">
+                        <span>Coins Granted:</span>
+                        <span className="text-emerald-400 flex items-center gap-1">
+                           🪙 +{growthMultiplierPopup.extraCoins}
+                        </span>
+                     </div>
+                  </div>
+
+                  <p className="text-slate-400 text-xs italic mb-4">
+                     Keep your streak alive to unlock higher multipliers!
+                  </p>
+
+                  <button 
+                     id="growth-milestone-claim-btn"
+                     onClick={() => {
+                        setGrowthMultiplierPopup(null);
+                        import('./haptics').then(({ playHaptic }) => playHaptic('complete'));
+                     }}
+                     className="w-full py-3 bg-gradient-to-r from-amber-400 to-emerald-500 hover:from-amber-500 hover:to-emerald-600 font-bold text-slate-950 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                     Claim Rewards 🎉
+                  </button>
+               </div>
+            )}
+         </AnimatedModal>
+
+         <AnimatedModal 
+           isOpen={!!weeklyCelebrationData}           onClose={() => setWeeklyCelebrationData(null)}
            alignment="center"
            className="!max-w-md mx-auto !p-0 overflow-hidden bg-surface-card border border-[#00F5D4]/20 shadow-[0_20px_60px_rgba(0,245,212,0.15)]"
         >

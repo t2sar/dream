@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserStats, ShopItem } from '../types';
 import { SHOP_ITEMS } from '../shopData';
-import { COMPANIONS } from '../companionsData';
+import { COMPANIONS, CompanionAssetsDictionary } from '../companionsData';
 import { Button } from './Button';
 import { AnimatedModal } from './AnimatedModal';
 import { X, Coins, Package } from 'lucide-react';
@@ -84,8 +84,14 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
               const isUnlocked = stats.companions?.some(c => c.id === comp.id);
               return (
                 <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all`}>
-                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card text-2xl shadow-sm' : 'bg-surface-alt text-xl grayscale'}`}>
-                    {isUnlocked ? '🐦‍⬛' : '❓'}
+                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card shadow-sm' : 'bg-surface-alt text-xl'}`}>
+                    {CompanionAssetsDictionary[comp.id] ? (
+                      React.createElement(CompanionAssetsDictionary[comp.id], { 
+                        className: `w-8 h-8 ${isUnlocked ? 'drop-shadow-sm' : 'brightness-0 opacity-20 grayscale'}` 
+                      })
+                    ) : (
+                      <span className={`text-2xl ${!isUnlocked && 'grayscale opacity-50'}`}>{isUnlocked ? '🐦‍⬛' : '❓'}</span>
+                    )}
                   </div>
                   <h4 className="font-bold text-primary-text text-sm mb-0.5">{isUnlocked ? comp.name : '???'}</h4>
                   <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{isUnlocked ? comp.banglaName : 'Unknown'}</h5>
@@ -155,7 +161,9 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           }
           
           if (item.isConsumable && !isLevelLocked) {
-              const ownedCount = stats.boostItemCounts?.[item.id] || 0;
+              const ownedCount = item.id === 'item_streak_freeze' 
+                  ? (stats.streakFreezes || 0) 
+                  : (stats.boostItemCounts?.[item.id] || 0);
               const isCapped = item.maxCapacity ? ownedCount >= item.maxCapacity : false;
               let isOnCooldown = false;
               
@@ -187,7 +195,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           }
           
           return (
-            <div key={item.id} className="bg-background-main border border-surface-alt rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-hidden group">
+            <div key={item.id} className="rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-visible group">
                {/* Background Hint */}
                {item.type === 'background' && (
                   <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5 opacity-50 pointer-events-none" />
@@ -201,13 +209,12 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                         <ShopItemSvg itemId={item.id} className="w-20 h-24 absolute bottom-[5%] z-10" />
                      )}
                   </React.Suspense>
-                  <div className="w-12 h-2 bg-black/30 shadow-[0_0_8px_4px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[2%] z-0" />
                </div>
                <h3 className="text-sm font-bold text-white text-center line-clamp-1 leading-tight">{item.name}</h3>
                <p className="text-[10px] text-slate-500 font-mono text-center leading-tight line-clamp-3">{item.description}</p>
                
                {item.isConsumable && (
-                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center">Owned: {stats.boostItemCounts?.[item.id] || 0} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
+                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center">Owned: {item.id === 'item_streak_freeze' ? (stats.streakFreezes || 0) : (stats.boostItemCounts?.[item.id] || 0)} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
                )}
                
                <button
@@ -249,7 +256,6 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
                    ) : (
                       <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-20 h-28 absolute bottom-[5%] z-10" />
                    )}
-                  <div className="w-14 h-2 bg-black/30 shadow-[0_0_10px_4px_rgba(0,0,0,0.3)] rounded-[100%] absolute bottom-[-2%] z-0" />
                </div>
                <div>
                   <h4 className="font-bold text-white mb-1">{confirmPurchaseItem.name}</h4>

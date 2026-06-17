@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 import { Habit } from "../types";
 import { CATEGORIES } from "../categories";
+import { playHaptic } from "../haptics";
 import { PlantIcon } from "./PlantIcon";
+import { motion } from "motion/react";
 import * as LucideIcons from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
@@ -127,8 +129,10 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           <div className="flex flex-col gap-2">
             <button
               onClick={() => {
-                if ("vibrate" in navigator) {
-                  navigator.vibrate(50);
+                if (!isCompleted) {
+                  playHaptic('complete');
+                } else {
+                  playHaptic('water'); // or slight tap when un-completing
                 }
                 if (isSlipped && undoSlip) undoSlip(habit.id);
                 // Can't toggle complete if currently slipped without undoing first, but we handle that logic in parent maybe or here
@@ -164,12 +168,11 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
             {habit.type === 'avoid' && (
                <button
                  onClick={() => {
-                   if ("vibrate" in navigator) {
-                     navigator.vibrate(50);
-                   }
                    if (isSlipped && undoSlip) {
+                      playHaptic('water');
                       undoSlip(habit.id);
                    } else if (!isSlipped && onSlip && !isCompleted) {
+                      playHaptic('slip');
                       onSlip(habit.id);
                    }
                  }}
@@ -246,7 +249,10 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
 
               {habit.streak > 0 && (
                 <div className="flex flex-col gap-1.5 relative">
-                  <span className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 p-1 rounded-sm relative ${
+                  <motion.span 
+                    animate={isCompleted ? { scale: [1, 1.15, 1], filter: ['brightness(1)', 'brightness(1.5)', 'brightness(1)'] } : {}}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 p-1 rounded-sm relative inline-flex ${
                     habit.streak >= 30 ? 'text-accent-coral bg-accent-coral/10 border border-accent-coral/20 shadow-sm' :
                     habit.streak >= 21 ? 'text-accent-mustard bg-accent-mustard/10 border border-accent-mustard/20 shadow-sm' :
                     habit.streak >= 14 ? 'text-accent-coral bg-accent-coral/5 border border-accent-coral/10 shadow-sm' :
@@ -342,7 +348,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                           </Tooltip.Portal>
                        </Tooltip.Root>
                     </Tooltip.Provider>
-                   </span>
+                   </motion.span>
                    {(() => {
                     const tiers = [5, 14, 21, 30];
                     const nextTier = tiers.find(t => t > habit.streak);
@@ -405,6 +411,12 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           </button>
         </div>
       </div>
+      
+      {/* Completion Progress Bar */}
+      <div 
+        className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${theme.bg} transition-all duration-1000 ease-out`} 
+        style={{ width: isCompleted ? '100%' : '0%', opacity: isCompleted ? 1 : 0 }} 
+      />
     </div>
   );
 });

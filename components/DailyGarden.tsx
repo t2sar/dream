@@ -32,6 +32,8 @@ interface DailyGardenProps {
 
 import { GardenSky, getGardenTimePhase } from './GardenSky';
 
+import { GardenCanvasTerrain } from './GardenCanvasTerrain';
+
 const ViewportLazyWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
@@ -376,7 +378,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         
         <div className="relative z-10">
           <h2 className="text-2xl font-display font-bold text-primary-text mb-1">{greeting}</h2>
-          <p className="text-secondary-text text-sm mb-6 flex items-center gap-2">
+          <p 
+            className="text-secondary-text text-sm mb-6 flex items-center gap-2"
+            style={{ color: '#ffffff', fontWeight: 'bold', fontStyle: 'italic' }}
+          >
             <Sun className="w-4 h-4 text-status-needsCare" />
             {new Date().toLocaleDateString('en-BD', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
@@ -491,6 +496,15 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
               <h3 className="text-lg font-bold text-status-healthy font-display mb-1">Perfect Garden Day</h3>
               <p className="text-sm text-secondary-text">Your garden is fully watered today. Enjoy the rest of your day!</p>
            </div>
+        )}
+
+        {habits.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xs font-bold tracking-widest text-primary-text uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-4">
+               Garden Terrain View (2.5D)
+            </h3>
+            <GardenCanvasTerrain habits={habits} stats={stats} onWaterPlant={(id) => onWaterPlant(id, false)} />
+          </div>
         )}
 
         {habits.length > 0 && (

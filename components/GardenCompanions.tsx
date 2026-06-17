@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { UserStats } from '../types';
-import { COMPANIONS } from '../companionsData';
-import { CompanionSVGs } from './CompanionAssets';
+import { COMPANIONS, CompanionAssetsDictionary } from '../companionsData';
 
 interface GardenCompanionsProps {
   stats: Partial<UserStats>;
@@ -39,36 +38,41 @@ export const GardenCompanions: React.FC<GardenCompanionsProps> = ({ stats }) => 
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-      <svg width="0" height="0">
-         <defs>
-            <linearGradient id="projapotiGrad" x1="0" y1="0" x2="1" y2="1">
-               <stop offset="0%" stopColor="#ec4899" />
-               <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-         </defs>
-      </svg>
       {sessionCompanions.map(id => {
         const comp = COMPANIONS.find(c => c.id === id);
         if (!comp) return null;
 
         return (
-          <CompanionRenderer key={id} companion={comp} />
+          <CompanionCard key={id} companionId={id} />
         );
       })}
     </div>
   );
 };
 
-const CompanionRenderer = ({ companion }: { companion: typeof COMPANIONS[0] }) => {
-  // Using pure CSS animations to keep it lightweight!
-  const SvgComponent = CompanionSVGs[companion.id];
+interface CompanionCardProps {
+  companionId: string;
+}
+
+export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => {
+  const SvgComponent = CompanionAssetsDictionary[companionId];
   if (!SvgComponent) return null;
   
-  // Choose behavior style based on ID
-  let customClass = '';
-  const inlineStyle: React.CSSProperties = {};
+  // Determine flyer vs sitter
+  const isFlyer = ['shongee', 'projapoti', 'moumachhi', 'phoring', 'jonaki', 'machranga', 'pecha'].includes(companionId);
+  const isSitter = ['doel', 'kaktadhua', 'ladybug', 'chorui', 'tuntuni', 'bang', 'shalik'].includes(companionId);
   
-  switch (companion.id) {
+  let customClass = '';
+  switch (companionId) {
+    case 'shongee':
+      customClass = 'top-1/3 left-1/4 animate-hovering animate-duration-[4000ms]';
+      break;
+    case 'kaktadhua':
+      customClass = 'bottom-10 right-10 scale-150 transform-origin-bottom';
+      break;
+    case 'doel':
+      customClass = 'bottom-20 left-1/4 animate-perch-sing animate-duration-[10000ms]';
+      break;
     case 'projapoti':
       customClass = 'animate-fluttering top-1/4 left-1/4 animate-duration-[12000ms]';
       break;
@@ -86,9 +90,6 @@ const CompanionRenderer = ({ companion }: { companion: typeof COMPANIONS[0] }) =
       break;
     case 'phoring':
       customClass = 'animate-darting top-1/4 right-1/5 animate-duration-[7000ms]';
-      break;
-    case 'doel':
-      customClass = 'animate-perch-sing bottom-20 left-1/4 animate-duration-[10000ms]';
       break;
     case 'jonaki':
       return (
@@ -122,8 +123,16 @@ const CompanionRenderer = ({ companion }: { companion: typeof COMPANIONS[0] }) =
   }
 
   return (
-    <div className={`absolute ${customClass} w-12 h-12 z-20`} style={inlineStyle}>
-      <SvgComponent className="w-full h-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] transition-transform hover:scale-110" />
+    <div className={`absolute ${customClass} w-16 h-16 z-20 group pointer-events-auto cursor-pointer`}>
+      <div className="relative w-full h-full">
+         {isFlyer && (
+           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/10 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+         )}
+         {isSitter && (
+           <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#78350F]/20 rounded-full blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+         )}
+         <SvgComponent className="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.2)] transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1" />
+      </div>
     </div>
   );
 };

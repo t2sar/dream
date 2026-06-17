@@ -1,5 +1,5 @@
 import React from 'react';
-import { COMPANIONS } from '../companionsData';
+import { COMPANIONS, CompanionAssetsDictionary } from '../companionsData';
 
 interface CompanionUnlockModalProps {
   companionIds: string[];
@@ -11,15 +11,10 @@ export const CompanionUnlockModal: React.FC<CompanionUnlockModalProps> = ({ comp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-background-main border border-emerald-500/30 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+      <div className="bg-background-main border border-emerald-500/30 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-300">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-cyan-400" />
         
         <div className="p-6 text-center space-y-6">
-          <div className="mx-auto w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center relative shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-             <div className="absolute inset-0 bg-emerald-500/20 animate-ping rounded-full" style={{ animationDuration: '3s' }} />
-             <div className="text-4xl relative z-10">🐦‍⬛</div>
-          </div>
-          
           <div>
              <h2 className="text-2xl font-black font-display tracking-tight text-primary-text mb-2">New Companion!</h2>
              <p className="text-emerald-400 font-mono text-sm tracking-widest uppercase mb-4">A friend has arrived</p>
@@ -29,8 +24,18 @@ export const CompanionUnlockModal: React.FC<CompanionUnlockModalProps> = ({ comp
              {companionIds.map(id => {
                 const comp = COMPANIONS.find(c => c.id === id);
                 if (!comp) return null;
+                const SvgComponent = CompanionAssetsDictionary[id];
+                
                 return (
-                   <div key={id} className="bg-surface-alt/5 border border-surface-alt rounded-xl p-4">
+                   <div key={id} className="bg-surface-alt/5 border border-surface-alt rounded-xl p-4 flex flex-col items-center">
+                      <div className="mx-auto w-24 h-24 mb-4 bg-emerald-500/10 rounded-full flex items-center justify-center relative shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                         <div className="absolute inset-0 bg-emerald-500/20 animate-ping rounded-full" style={{ animationDuration: '3s' }} />
+                         {SvgComponent ? (
+                           <SvgComponent className="w-16 h-16 drop-shadow-lg animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out fill-mode-both" />
+                         ) : (
+                           <div className="text-4xl relative z-10 animate-bounce">🦋</div>
+                         )}
+                      </div>
                       <h3 className="font-bold text-primary-text text-lg">{comp.name}</h3>
                       <p className="text-emerald-400 font-mono text-xs mb-2">{comp.banglaName}</p>
                       <p className="text-slate-400 text-sm">has chosen your garden.</p>

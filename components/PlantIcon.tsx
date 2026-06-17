@@ -142,39 +142,23 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
       style={{ ...(size ? { width: size } : {}), aspectRatio: '3/4', height: 'auto' }}
       title={`${plantType} - ${stage} (${status})`}
     >
-      {/* Background container: Premium Midnight Glass Display Case */}
-      <div 
-        className={`absolute inset-x-0 bottom-0 top-[15%] transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${isLocked ? 'opacity-50' : ''} ${isGolden ? 'ring-1 ring-amber-500/50' : ''}`}
-        style={{ 
-          background: 'rgba(0, 0, 0, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderRadius: '24px' // Smooth rounded corners
-        }}
-      />
-
-      {/* Inner Glow to match the fruit color */}
-      <div 
-        className="absolute inset-x-0 bottom-0 top-[15%] rounded-[24px] opacity-30 mix-blend-screen pointer-events-none"
-        style={{
-          background: `radial-gradient(circle at center, ${glowColor} 0%, transparent 70%)`,
-          filter: 'blur(12px)',
-        }}
-      />
-      
-      {/* Grounding Shadow (Elliptical shadow under the pot) */}
-      <div className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[60%] h-[12%] bg-black/60 blur-[6px] rounded-[100%] pointer-events-none" />
-
       {/* Icon Layer (Strictly bounded inside the container) */}
       <motion.div 
-        className="absolute inset-0 flex items-center justify-center p-[8%]"
+        className="absolute inset-0 flex items-center justify-center transform-gpu will-change-transform"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ 
           scale: scaleValue, 
           opacity: opacityValue, 
           y: yOffset
         }}
-        transition={{ type: "spring", stiffness: 120, damping: 15 }}
+        whileHover={!isLocked && status !== 'Dead' ? { scale: scaleValue * 1.08 } : {}}
+        whileTap={!isLocked ? { scale: scaleValue * 0.95 } : {}}
+        transition={{ 
+          type: "spring", 
+          stiffness: 300, 
+          damping: 15,
+          rotate: { type: "tween", duration: 0.3 }
+        }}
       >
          <div 
             className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}

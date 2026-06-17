@@ -11,16 +11,80 @@ jobs:
   build:
     name: Build Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Automatic Version Bump
+        id: bump
+        run: |
+          # Check head commit message for automated/skip tags to prevent loop
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          if [[ "$COMMIT_MSG" == *"[skip ci]"* || "$COMMIT_MSG" == *"chore(release):"* ]]; then
+            echo "Automated commit or manual skip detected. Skipping version bump."
+            echo "skipped=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Automated version bump started..."
+          # Increment patch version in package.json
+          npm version patch --no-git-tag-version
+          
+          # Read new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New Version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "skipped=false" >> $GITHUB_OUTPUT
+          
+          # Update android/app/build.gradle if it exists
+          node -e '
+            const fs = require("fs");
+            const file = "android/app/build.gradle";
+            if (fs.existsSync(file)) {
+              let content = fs.readFileSync(file, "utf8");
+              // Increment versionCode
+              content = content.replace(/versionCode (\d+)/, (match, p1) => {
+                const nextCode = parseInt(p1) + 1;
+                console.log(`Bumping versionCode from ${p1} to ${nextCode}`);
+                return `versionCode ${nextCode}`;
+              });
+              // Set versionName
+              content = content.replace(/versionName "[^"]+"/, `versionName "${process.argv[1]}"`);
+              fs.writeFileSync(file, content, "utf8");
+              console.log("Successfully updated android build.gradle");
+            } else {
+              console.log("Android build.gradle not found, skipping android version sync");
+            }
+          ' "$NEW_VERSION"
+
+      - name: Commit and Push Version Bump
+        if: steps.bump.outputs.skipped == 'false' && steps.bump.outputs.new_version != ''
+        run: |
+          git add package.json
+          if [ -f "package-lock.json" ]; then
+            git add package-lock.json
+          fi
+          if [ -f "android/app/build.gradle" ]; then
+            git add android/app/build.gradle
+          fi
+          git commit -m "chore(release): bump version to ${{ steps.bump.outputs.new_version }} [skip ci]"
+          git push origin HEAD:${{ github.ref }}
 
       - name: Install Web Dependencies
         run: npm ci || npm install

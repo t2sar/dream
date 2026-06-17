@@ -154,42 +154,48 @@ export const ShopBoosts: Record<string, React.FC<ShopAssetProps>> = {
       <path d="M 50 44 L 45 52 M 50 44 L 54 50" stroke="#65A30D" strokeWidth="2" strokeLinecap="round" />
     </svg>
   ),
-  'boost_streak_freeze': (props) => (
+  'item_streak_freeze': (props) => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
-        <linearGradient id="iceGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#E0F2FE" />
-          <stop offset="50%" stopColor="#7DD3FC" />
-          <stop offset="100%" stopColor="#0284C7" />
+        <linearGradient id="iceBlockGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.9" />
+          <stop offset="40%" stopColor="#BAE6FD" stopOpacity="0.75" />
+          <stop offset="100%" stopColor="#7DD3FC" stopOpacity="0.85" />
         </linearGradient>
-        <radialGradient id="iceGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#BAE6FD" stopOpacity="0.8"/>
-          <stop offset="100%" stopColor="#BAE6FD" stopOpacity="0"/>
+        <radialGradient id="seedGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FEF08A" stopOpacity="1" />
+          <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#B45309" stopOpacity="0" />
         </radialGradient>
       </defs>
       
-      <circle cx="50" cy="45" r="35" fill="url(#iceGlow)" />
+      {/* Soft periwinkle drop shadow beneath */}
+      <ellipse cx="50" cy="85" rx="35" ry="8" fill="#C7D2FE" opacity="0.6" />
+      <ellipse cx="50" cy="85" rx="20" ry="4" fill="#A5B4FC" opacity="0.8" />
       
-      {/* Crystal core */}
-      <path d="M 50 15 L 65 45 L 50 75 L 35 45 Z" fill="url(#iceGrad)" />
-      <path d="M 50 15 L 65 45 L 50 75 Z" fill="#38BDF8" opacity="0.6" />
-      <path d="M 50 15 L 50 75 L 35 45 Z" fill="#E0F2FE" opacity="0.6" />
+      {/* Back face of the ice block for 3D translucent depth */}
+      <path d="M 30 25 L 70 25 L 70 65 L 30 65 Z" fill="#7DD3FC" opacity="0.4" />
       
-      {/* Inner facets */}
-      <path d="M 50 25 L 58 45 L 50 65 L 42 45 Z" fill="#FFFFFF" opacity="0.8" />
+      {/* Glowing Golden Seed in the center */}
+      <circle cx="50" cy="45" r="25" fill="url(#seedGlow)" />
+      <path d="M 50 35 C 60 35, 60 55, 50 55 C 40 55, 40 35, 50 35 Z" fill="#FACC15" />
+      <path d="M 50 38 C 55 38, 55 52, 50 52" fill="#FEF08A" opacity="0.8" />
+      <circle cx="50" cy="45" r="3" fill="#FFFFFF" opacity="0.9" />
       
-      {/* Side smaller crystals */}
-      <path d="M 35 45 L 20 40 L 30 60 Z" fill="url(#iceGrad)" />
-      <path d="M 65 45 L 80 40 L 70 60 Z" fill="url(#iceGrad)" />
+      {/* Front faces of the frosted light-blue ice block (flat 2D vector style) */}
+      <path d="M 20 35 L 50 15 L 80 35 L 80 75 L 50 95 L 20 75 Z" fill="url(#iceBlockGrad)" />
+      <path d="M 20 35 L 50 50 L 50 95 L 20 75 Z" fill="#E0F2FE" opacity="0.5" />
+      <path d="M 50 50 L 80 35 L 80 75 L 50 95 Z" fill="#7DD3FC" opacity="0.5" />
+      <path d="M 20 35 L 50 15 L 80 35 L 50 50 Z" fill="#FFFFFF" opacity="0.6" />
       
-      {/* Floating Base */}
-      <ellipse cx="50" cy="85" rx="25" ry="6" fill="#1E293B" opacity="0.4" />
-      <path d="M 35 85 C 35 80, 65 80, 65 85 C 65 90, 35 90, 35 85 Z" fill="#94A3B8" />
-      <ellipse cx="50" cy="83" rx="15" ry="3" fill="#E2E8F0" />
+      {/* Crisp ice edge highlights */}
+      <path d="M 50 15 L 50 50" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+      <path d="M 20 35 L 50 50 L 80 35" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+      <path d="M 50 50 L 50 95" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
       
-      {/* Sparkles */}
-      <path d="M 25 25 L 27 18 L 29 25 L 36 27 L 29 29 L 27 36 L 25 29 L 18 27 Z" fill="#FFFFFF" />
-      <path d="M 75 65 L 76 60 L 77 65 L 82 66 L 77 67 L 76 72 L 75 67 L 70 66 Z" fill="#FFFFFF" />
+      {/* Frost sparkles */}
+      <path d="M 30 30 L 32 25 L 34 30 L 39 32 L 34 34 L 32 39 L 30 34 L 25 32 Z" fill="#FFFFFF" opacity="0.9" />
+      <path d="M 65 70 L 66 67 L 67 70 L 70 71 L 67 72 L 66 75 L 65 72 L 62 71 Z" fill="#FFFFFF" opacity="0.8" />
     </svg>
   ),
   'boost_streak_repair': (props) => (
@@ -1200,7 +1206,7 @@ export const ShopItemSvg = ({ itemId, className }: { itemId: string; className?:
             <path d="M 28 24 L 36 24 M 32 24 L 32 16 L 24 16 M 22 24 L 20 16 M 42 24 L 44 16" fill="none" stroke="#1E3A8A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </>
         );
-      case 'boost_streak_freeze':
+      case 'item_streak_freeze':
         return (
           <>
             <path d="M 32 8 L 32 56 M 8 32 L 56 32 M 16 16 L 48 48 M 16 48 L 48 16" stroke="#93C5FD" strokeWidth="3" strokeLinecap="round" />
