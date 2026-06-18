@@ -2323,7 +2323,7 @@ function App() {
       >
         <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-8 flex items-center justify-center">
           <img 
-            src="/logo finalll.png" 
+            src="/logo.svg" 
             alt="Your Garden Logo" 
             className="w-full h-full object-contain drop-shadow-md"
             style={{ mixBlendMode: 'multiply' }}
@@ -2816,6 +2816,7 @@ function App() {
                  stats={stats}
                  onBuyItem={handleBuyItem}
                  onEquipItem={handleEquipItem}
+                 onEquipCompanion={(compId) => setExtraStats(prev => ({ ...prev, activeCompanionId: compId || undefined }))}
               />
             )}
 

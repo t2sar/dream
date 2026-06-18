@@ -195,6 +195,7 @@ export interface UserStats {
   claimedRewardIds?: string[];
   slipLogs?: Record<string, { id: string, reason?: string, time?: string }[]>;
   companions?: CompanionUnlock[];
+  activeCompanionId?: string;
   eveningCompletions?: number;
   nightCompletions?: number;
   rainySeasonCompletions?: number;

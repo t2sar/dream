@@ -13,9 +13,10 @@ interface GardenShopProps {
   stats: UserStats;
   onBuyItem: (item: ShopItem) => void;
   onEquipItem: (item: ShopItem) => void;
+  onEquipCompanion?: (id: string | null) => void;
 }
 
-export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
+export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: GardenShopProps) {
   const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts' | 'seeds' | 'companions'>('seeds');
   const [confirmPurchaseItem, setConfirmPurchaseItem] = useState<ShopItem | null>(null);
   
@@ -80,24 +81,41 @@ export function GardenShop({ stats, onBuyItem, onEquipItem }: GardenShopProps) {
           </p>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {COMPANIONS.map(comp => {
+            {COMPANIONS.map((comp, index) => {
               const isUnlocked = stats.companions?.some(c => c.id === comp.id);
+              const showDetails = true;
+              const isEquipped = stats.activeCompanionId === comp.id;
+              
+              const isHoverAnimatedCompanion = ['moumachhi', 'ladybug', 'chorui', 'phoring', 'pecha', 'shalik', 'jonaki'].includes(comp.id);
               return (
-                <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all`}>
-                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card shadow-sm' : 'bg-surface-alt text-xl'}`}>
+                <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all group`}>
+                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card shadow-sm' : 'bg-surface-alt text-xl'} relative`}>
                     {CompanionAssetsDictionary[comp.id] ? (
                       React.createElement(CompanionAssetsDictionary[comp.id], { 
-                        className: `w-8 h-8 ${isUnlocked ? 'drop-shadow-sm' : 'brightness-0 opacity-20 grayscale'}` 
+                        className: `w-8 h-8 ${showDetails ? 'drop-shadow-sm' : 'brightness-0 opacity-20 grayscale'} ${isHoverAnimatedCompanion ? 'transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110' : ''}` 
                       })
                     ) : (
-                      <span className={`text-2xl ${!isUnlocked && 'grayscale opacity-50'}`}>{isUnlocked ? '🐦‍⬛' : '❓'}</span>
+                      <span className={`text-2xl ${!showDetails && 'grayscale opacity-50'} ${isHoverAnimatedCompanion ? 'transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110' : ''}`}>{showDetails ? '🐦‍⬛' : '❓'}</span>
                     )}
                   </div>
-                  <h4 className="font-bold text-primary-text text-sm mb-0.5">{isUnlocked ? comp.name : '???'}</h4>
-                  <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{isUnlocked ? comp.banglaName : 'Unknown'}</h5>
-                  <p className="text-[11px] text-secondary-text leading-tight md:block hidden">
-                    {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : 'Condition locked'}
+                  <h4 className="font-bold text-primary-text text-sm mb-0.5">{showDetails ? comp.name : '???'}</h4>
+                  <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{showDetails ? comp.banglaName : 'Unknown'}</h5>
+                  <p className="text-[11px] text-secondary-text leading-tight md:block hidden mb-3">
+                    {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : (showDetails ? `Locked (${comp.unlockConditionStr})` : 'Condition locked')}
                   </p>
+                  
+                  {isUnlocked && onEquipCompanion && (
+                    <button
+                      onClick={() => onEquipCompanion(isEquipped ? null : comp.id)}
+                      className={`mt-auto px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                        isEquipped 
+                          ? 'bg-status-healthy text-white shadow-md shadow-status-healthy/30' 
+                          : 'bg-white shadow-[0_4px_0_#CBD5E1] text-secondary-text hover:-translate-y-0.5 hover:shadow-[0_6px_0_#CBD5E1] active:translate-y-1 active:shadow-[0_0_0_#CBD5E1]'
+                      }`}
+                    >
+                      {isEquipped ? 'Active' : 'Equip'}
+                    </button>
+                  )}
                 </div>
               )
             })}

@@ -336,6 +336,318 @@ export const CompanionAssetsDictionary: Record<string, React.FC<React.SVGProps<S
       {/* Beak (Thin and slightly curved) */}
       <path d="M 22 41 C 12 43, 5 45, 10 46 C 15 45, 20 44, 22 44 Z" fill="#78350F" />
     </svg>
+  ),
+
+  // 8. Moumachhi (Honey Bee)
+  'moumachhi': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Shadow */}
+      <ellipse cx="50" cy="85" rx="18" ry="4" fill="#1E293B" opacity="0.2" />
+
+      {/* Back Wings */}
+      <ellipse cx="40" cy="30" rx="6" ry="18" transform="rotate(-40 40 30)" fill="#E0F2FE" opacity="0.8" />
+      <ellipse cx="60" cy="30" rx="6" ry="18" transform="rotate(40 60 30)" fill="#E0F2FE" opacity="0.8" />
+
+      {/* Body - Round shape */}
+      <ellipse cx="50" cy="55" rx="18" ry="22" fill="#FACC15" />
+
+      {/* Stripes */}
+      <path d="M 32 50 C 45 55, 55 55, 68 50 L 68 56 C 55 61, 45 61, 32 56 Z" fill="#334155" />
+      <path d="M 34 65 C 45 70, 55 70, 66 65 L 64 71 C 55 75, 45 75, 36 71 Z" fill="#334155" />
+
+      {/* Stinger */}
+      <path d="M 48 76 L 50 85 L 52 76 Z" fill="#334155" />
+
+      {/* Head */}
+      <circle cx="50" cy="35" r="10" fill="#FACC15" />
+
+      {/* Eyes */}
+      <ellipse cx="45" cy="33" rx="2" ry="3" fill="#334155" />
+      <ellipse cx="55" cy="33" rx="2" ry="3" fill="#334155" />
+      
+      {/* Antennae */}
+      <path d="M 46 26 Q 42 16 38 18" stroke="#334155" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M 54 26 Q 58 16 62 18" stroke="#334155" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <circle cx="38" cy="18" r="1.5" fill="#334155" />
+      <circle cx="62" cy="18" r="1.5" fill="#334155" />
+
+      {/* Front Wings */}
+      <ellipse cx="32" cy="40" rx="10" ry="24" transform="rotate(-55 32 40)" fill="#BAE6FD" opacity="0.8" />
+      <ellipse cx="68" cy="40" rx="10" ry="24" transform="rotate(55 68 40)" fill="#BAE6FD" opacity="0.8" />
+      
+      {/* Wing details */}
+      <path d="M 22 35 Q 28 35 32 40" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
+      <path d="M 78 35 Q 72 35 68 40" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
+    </svg>
+  ),
+
+  // 9. Ladybug (Ladybug)
+  'ladybug': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Base (Leaf piece) */}
+      <path d="M 15 85 C 30 75, 70 75, 85 85 C 60 95, 40 95, 15 85 Z" fill="#22C55E" />
+      <path d="M 15 85 Q 50 85 85 85" stroke="#166534" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+      {/* Legs */}
+      <path d="M 30 70 L 25 78 L 22 78 M 50 70 L 48 78 L 45 78 M 70 70 L 75 78 L 78 78" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+      {/* Body / Shell */}
+      <ellipse cx="50" cy="55" rx="30" ry="25" fill="#EF4444" />
+      <ellipse cx="50" cy="53" rx="28" ry="23" fill="#F87171" opacity="0.5" />
+      
+      {/* Center line (Shell separation) */}
+      <path d="M 20 55 C 40 50, 60 50, 80 55" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.8" />
+
+      {/* Spots */}
+      <circle cx="45" cy="40" r="5" fill="#1E293B" />
+      <circle cx="65" cy="45" r="4.5" fill="#1E293B" />
+      <circle cx="35" cy="65" r="4.5" fill="#1E293B" />
+      <circle cx="55" cy="65" r="5" fill="#1E293B" />
+      <circle cx="75" cy="55" r="3.5" fill="#1E293B" />
+      <circle cx="30" cy="50" r="3" fill="#1E293B" />
+
+      {/* Head */}
+      <circle cx="18" cy="55" r="8" fill="#1E293B" />
+      
+      {/* Eyes */}
+      <circle cx="15" cy="51" r="1.5" fill="#FFFFFF" />
+      <circle cx="15" cy="59" r="1.5" fill="#FFFFFF" />
+
+      {/* Antennae */}
+      <path d="M 15 48 Q 10 40 12 35" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M 15 62 Q 10 70 12 75" stroke="#1E293B" strokeWidth="2" strokeLinecap="round" fill="none" />
+    </svg>
+  ),
+
+  // 10. Chorui (Sparrow)
+  'chorui': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Base */}
+      <ellipse cx="50" cy="85" rx="20" ry="4" fill="#1E293B" opacity="0.2" />
+
+      {/* Feet */}
+      <path d="M 40 75 L 35 83 L 30 83 M 35 83 L 38 85 M 60 75 L 55 83 L 50 83 M 55 83 L 58 85" stroke="#B45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+      {/* Tail (Pointing down-right) */}
+      <path d="M 70 65 L 90 75 L 95 70 Z" fill="#78350F" />
+      <path d="M 68 62 L 85 70 L 90 65 Z" fill="#92400E" />
+
+      {/* Body Base */}
+      <ellipse cx="50" cy="60" rx="22" ry="18" fill="#D4D4D8" />
+      <ellipse cx="52" cy="62" rx="18" ry="15" fill="#F4F4F5" />
+      
+      {/* Brown/Tan Wing */}
+      <path d="M 40 50 C 65 45, 80 55, 75 70 C 60 65, 45 60, 40 50 Z" fill="#92400E" />
+      <path d="M 42 53 C 60 50, 72 58, 68 67 C 58 64, 48 58, 42 53 Z" fill="#B45309" />
+      {/* Wing patterns */}
+      <path d="M 50 56 L 60 62 M 55 54 L 65 60 M 55 60 L 62 66" stroke="#451A03" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" fill="none" />
+
+      {/* Head */}
+      <circle cx="35" cy="40" r="14" fill="#92400E" />
+      
+      {/* Light Cheek / Neck */}
+      <path d="M 28 45 C 35 50, 45 48, 42 38 C 35 38, 25 40, 28 45 Z" fill="#F4F4F5" />
+      
+      {/* Black bib/throat (typical sparrow) */}
+      <path d="M 25 45 C 32 48, 38 55, 30 60 C 22 55, 20 48, 25 45 Z" fill="#1E293B" />
+
+      {/* Eye */}
+      <circle cx="30" cy="35" r="2.5" fill="#1E293B" />
+      <circle cx="29" cy="34" r="1" fill="#FFFFFF" />
+
+      {/* Beak */}
+      <path d="M 22 38 L 10 40 L 22 43 Z" fill="#713F12" />
+      <path d="M 22 40 L 15 40 Z" stroke="#451A03" strokeWidth="1" />
+    </svg>
+  ),
+
+  // 11. Phoring (Dragonfly)
+  'phoring': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Hover Shadow */}
+      <ellipse cx="50" cy="90" rx="15" ry="3" fill="#1E293B" opacity="0.2" />
+
+      {/* Long tail (Abdomen) */}
+      <path d="M 50 50 L 50 85" stroke="#0EA5E9" strokeWidth="4" strokeLinecap="round" fill="none" />
+      <path d="M 50 52 L 50 83" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Tail segments */}
+      <path d="M 48 55 L 52 55 M 48 62 L 52 62 M 48 69 L 52 69 M 48 76 L 52 76" stroke="#0284C7" strokeWidth="1.5" />
+
+      {/* Back Wings (Lower) */}
+      <ellipse cx="30" cy="60" rx="6" ry="18" transform="rotate(45 30 60)" fill="#E0F2FE" opacity="0.8" />
+      <ellipse cx="70" cy="60" rx="6" ry="18" transform="rotate(-45 70 60)" fill="#E0F2FE" opacity="0.8" />
+      <path d="M 38 52 Q 25 60 22 68" stroke="#FFFFFF" strokeWidth="1" fill="none" opacity="0.5" />
+      <path d="M 62 52 Q 75 60 78 68" stroke="#FFFFFF" strokeWidth="1" fill="none" opacity="0.5" />
+
+      {/* Front Wings (Upper) */}
+      <ellipse cx="25" cy="40" rx="8" ry="25" transform="rotate(60 25 40)" fill="#BAE6FD" opacity="0.8" />
+      <ellipse cx="75" cy="40" rx="8" ry="25" transform="rotate(-60 75 40)" fill="#BAE6FD" opacity="0.8" />
+      <path d="M 40 46 Q 20 40 8 46" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.6" />
+      <path d="M 60 46 Q 80 40 92 46" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.6" />
+
+      {/* Body (Thorax) */}
+      <ellipse cx="50" cy="45" rx="5" ry="8" fill="#0284C7" />
+      <ellipse cx="50" cy="45" rx="3" ry="6" fill="#38BDF8" />
+
+      {/* Head */}
+      <circle cx="50" cy="33" r="6" fill="#0369A1" />
+      
+      {/* Large Eyes */}
+      <circle cx="46" cy="31" r="3.5" fill="#7DD3FC" />
+      <circle cx="54" cy="31" r="3.5" fill="#7DD3FC" />
+      <circle cx="45" cy="30" r="1.5" fill="#FFFFFF" />
+      <circle cx="53" cy="30" r="1.5" fill="#FFFFFF" />
+      
+      {/* Tiny Legs */}
+      <path d="M 45 42 L 38 45 M 55 42 L 62 45 M 45 48 L 40 52 M 55 48 L 60 52" stroke="#1E293B" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
+    </svg>
+  ),
+
+  // 12. Pecha (Owl)
+  'pecha': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Base */}
+      <ellipse cx="50" cy="88" rx="22" ry="4" fill="#1E293B" opacity="0.2" />
+      
+      {/* Branch */}
+      <path d="M 20 85 C 40 85, 60 85, 80 85" stroke="#78350F" strokeWidth="6" strokeLinecap="round" fill="none" />
+      <path d="M 20 85 C 40 85, 60 85, 80 85" stroke="#451A03" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+      {/* Feet */}
+      <path d="M 45 82 L 45 88 M 40 82 L 40 88 M 55 82 L 55 88 M 60 82 L 60 88" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+      {/* Body */}
+      <ellipse cx="50" cy="65" rx="20" ry="22" fill="#8B5CF6" />
+      <ellipse cx="50" cy="67" rx="16" ry="18" fill="#C4B5FD" />
+      
+      {/* Belly markings - Chevrons */}
+      <path d="M 45 60 L 50 64 L 55 60 M 42 68 L 47 72 L 52 68 M 48 68 L 53 72 L 58 68 M 46 76 L 50 80 L 54 76" stroke="#6D28D9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+      {/* Wings */}
+      <path d="M 30 55 C 20 65, 25 80, 32 82 C 32 70, 35 60, 30 55 Z" fill="#6D28D9" />
+      <path d="M 70 55 C 80 65, 75 80, 68 82 C 68 70, 65 60, 70 55 Z" fill="#6D28D9" />
+
+      {/* Head */}
+      <ellipse cx="50" cy="40" rx="22" ry="18" fill="#8B5CF6" />
+
+      {/* Ear Tufts (Horns) */}
+      <path d="M 35 28 L 28 18 L 42 26 Z" fill="#6D28D9" />
+      <path d="M 65 28 L 72 18 L 58 26 Z" fill="#6D28D9" />
+
+      {/* Facial Disk */}
+      <circle cx="38" cy="40" r="10" fill="#F3F4F6" />
+      <circle cx="62" cy="40" r="10" fill="#F3F4F6" />
+      <path d="M 38 40 C 45 35, 55 35, 62 40" stroke="#8B5CF6" strokeWidth="2" fill="none" />
+
+      {/* Eyes */}
+      <circle cx="38" cy="40" r="6" fill="#FACC15" />
+      <circle cx="62" cy="40" r="6" fill="#FACC15" />
+      <circle cx="38" cy="40" r="3" fill="#1E293B" />
+      <circle cx="62" cy="40" r="3" fill="#1E293B" />
+      <circle cx="39" cy="39" r="1" fill="#FFFFFF" />
+      <circle cx="63" cy="39" r="1" fill="#FFFFFF" />
+
+      {/* Beak */}
+      <path d="M 50 45 L 47 52 L 53 52 Z" fill="#F59E0B" />
+    </svg>
+  ),
+
+  // 13. Shalik (Myna)
+  'shalik': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Base */}
+      <ellipse cx="50" cy="85" rx="18" ry="4" fill="#1E293B" opacity="0.2" />
+
+      {/* Feet */}
+      <path d="M 45 75 L 42 83 L 38 83 M 42 83 L 45 85 M 65 75 L 62 83 L 58 83 M 62 83 L 65 85" stroke="#FACC15" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+
+      {/* Tail */}
+      <path d="M 75 60 C 85 65, 95 72, 92 78 C 85 75, 78 68, 75 65 Z" fill="#1E293B" />
+      <path d="M 78 62 L 92 76" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+
+      {/* Body */}
+      <path d="M 35 45 C 50 35, 75 45, 80 65 C 65 75, 45 75, 30 60 C 25 55, 25 50, 35 45 Z" fill="#713F12" />
+      
+      {/* Belly */}
+      <path d="M 35 55 C 50 50, 65 60, 70 70 C 55 75, 40 70, 35 55 Z" fill="#A16207" />
+
+      {/* Wing */}
+      <path d="M 45 48 C 65 42, 80 50, 85 60 C 70 55, 55 55, 45 48 Z" fill="#1E293B" />
+      <ellipse cx="65" cy="52" rx="4" ry="8" transform="rotate(-30 65 52)" fill="#FFFFFF" />
+
+      {/* Head */}
+      <circle cx="32" cy="35" r="14" fill="#1E293B" />
+
+      {/* Yellow Eye Patch */}
+      <ellipse cx="28" cy="32" rx="7" ry="5" transform="rotate(-15 28 32)" fill="#FACC15" />
+
+      {/* Eye */}
+      <circle cx="27" cy="32" r="2.5" fill="#1E293B" />
+      <circle cx="26" cy="31" r="1" fill="#FFFFFF" />
+
+      {/* Beak */}
+      <path d="M 20 33 L 8 36 L 20 40 Z" fill="#FACC15" />
+      <path d="M 20 36 L 12 36" stroke="#B45309" strokeWidth="1" />
+    </svg>
+  ),
+
+  // 14. Jonaki (Firefly Swarm)
+  'jonaki': (props) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Grounding Base / Soft ambient glow */}
+      <ellipse cx="50" cy="85" rx="30" ry="8" fill="#1E293B" opacity="0.1" />
+
+      {/* Firefly 1 (Center Large) */}
+      <g>
+        <circle cx="50" cy="50" r="18" fill="#BEF264" opacity="0.2" style={{ mixBlendMode: 'screen' }} />
+        <circle cx="50" cy="50" r="10" fill="#A3E635" opacity="0.4" style={{ mixBlendMode: 'screen' }} />
+        <circle cx="50" cy="50" r="4" fill="#E4FFA3" />
+        
+        {/* Firefly Body Details */}
+        <ellipse cx="50" cy="46" rx="2" ry="3.5" fill="#334155" />
+        <path d="M 50 44 Q 48 42 46 41 M 50 44 Q 52 42 54 41" stroke="#334155" strokeWidth="0.5" fill="none" />
+        <ellipse cx="48" cy="47" rx="1.5" ry="3" transform="rotate(-30 48 47)" fill="#FFFFFF" opacity="0.6" />
+        <ellipse cx="52" cy="47" rx="1.5" ry="3" transform="rotate(30 52 47)" fill="#FFFFFF" opacity="0.6" />
+      </g>
+
+      {/* Firefly 2 (Top Left) */}
+      <g>
+        <circle cx="30" cy="30" r="12" fill="#BEF264" opacity="0.15" style={{ mixBlendMode: 'screen' }} />
+        <circle cx="30" cy="30" r="6" fill="#A3E635" opacity="0.3" style={{ mixBlendMode: 'screen' }} />
+        <circle cx="30" cy="30" r="2" fill="#E4FFA3" />
+        
+        <ellipse cx="30" cy="28" rx="1" ry="2" fill="#334155" />
+      </g>
+
+      {/* Firefly 3 (Right) */}
+      <g>
+        <circle cx="75" cy="45" r="14" fill="#BEF264" opacity="0.15" />
+        <circle cx="75" cy="45" r="7" fill="#A3E635" opacity="0.3" />
+        <circle cx="75" cy="45" r="2.5" fill="#E4FFA3" />
+        
+        <ellipse cx="75" cy="42" rx="1.5" ry="2.5" fill="#334155" />
+      </g>
+
+      {/* Firefly 4 (Bottom Left) */}
+      <g>
+        <circle cx="25" cy="65" r="10" fill="#BEF264" opacity="0.1" />
+        <circle cx="25" cy="65" r="5" fill="#A3E635" opacity="0.2" />
+        <circle cx="25" cy="65" r="2" fill="#E4FFA3" />
+        
+        <ellipse cx="25" cy="63" rx="1" ry="2" fill="#334155" />
+      </g>
+
+      {/* Firefly 5 (Tiny Top Right) */}
+      <g>
+        <circle cx="65" cy="20" r="8" fill="#BEF264" opacity="0.1" />
+        <circle cx="65" cy="20" r="3" fill="#A3E635" opacity="0.2" />
+        <circle cx="65" cy="20" r="1" fill="#E4FFA3" />
+      </g>
+
+      {/* Sparkles / Light Trails */}
+      <path d="M 45 55 Q 35 60 40 70" stroke="#BEF264" strokeWidth="1" strokeLinecap="round" strokeDasharray="2 4" fill="none" opacity="0.6" />
+      <path d="M 68 40 Q 60 30 70 25" stroke="#BEF264" strokeWidth="1" strokeLinecap="round" strokeDasharray="1 3" fill="none" opacity="0.5" />
+    </svg>
   )
 };
 

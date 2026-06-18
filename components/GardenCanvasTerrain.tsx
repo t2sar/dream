@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Habit, UserStats } from '../types';
 import { PlantIcon } from './PlantIcon';
 import { renderPot } from './DailyGarden';
+import { CompanionAssetsDictionary } from '../companionsData';
 
 interface GardenCanvasTerrainProps {
   habits: Habit[];
@@ -15,10 +16,11 @@ const GRID_ROWS = 12;
 
 interface CanvasItem {
   id: string;
-  type: 'plant' | 'fence' | 'pond';
+  type: 'plant' | 'fence' | 'pond' | 'companion';
   gridX: number;
   gridY: number;
   habit?: Habit; // For plants
+  companionId?: string; // For companion
 }
 
 function verifyCanvasEngine() {
@@ -161,9 +163,24 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
       items.push({ id: `plant_${habit.id}`, type: 'plant', gridX: x, gridY: y, habit });
     });
 
+    if (stats.activeCompanionId) {
+      // Spawn companion near the pond if possible
+      let x = 4, y = 4;
+      let attempts = 0;
+      while (occupied.has(`${x},${y}`) && attempts < 20) {
+        x = 3 + Math.floor(Math.random() * 4);
+        y = 4 + Math.floor(Math.random() * 4);
+        attempts++;
+      }
+      if (!occupied.has(`${x},${y}`)) {
+        occupied.add(`${x},${y}`);
+        items.push({ id: `companion_${stats.activeCompanionId}`, type: 'companion', gridX: x, gridY: y, companionId: stats.activeCompanionId });
+      }
+    }
+
     // 3. Y-Sorting
     return items.sort((a, b) => a.gridY - b.gridY);
-  }, [habits]);
+  }, [habits, stats.activeCompanionId]);
 
   return (
     <div className="relative w-full h-[600px] border border-surface-alt rounded-2xl overflow-hidden bg-[#24676d]/50" style={{ perspective: '800px' }}>
@@ -194,6 +211,17 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                       />
                       {renderPot(stats.equippedPotId, 'absolute bottom-2 inset-x-2 h-4 z-20')}
                       <div className="w-10 h-2 bg-black/30 rounded-full blur-[2px]" />
+                    </div>
+                 </div>
+               )
+            } else if (item.type === 'companion' && item.companionId) {
+               const AssetComp = CompanionAssetsDictionary[item.companionId];
+               // Some companions hover out naturally, some are grounded
+               const isFlying = ['moumachhi', 'ladybug', 'chorui', 'phoring', 'projapoti', 'jonaki'].includes(item.companionId);
+               return (
+                 <div key={item.id} className="absolute" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateX(-45deg)`, transformOrigin: 'bottom center' }}>
+                    <div className={`relative w-12 h-12 flex flex-col items-center justify-end z-20 ${isFlying ? 'animate-bounce' : ''}`}>
+                       {AssetComp ? React.createElement(AssetComp, { className: "w-full h-full drop-shadow-lg" }) : <span className="text-3xl drop-shadow-lg">🐦‍⬛</span>}
                     </div>
                  </div>
                )
