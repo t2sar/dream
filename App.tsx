@@ -25,6 +25,7 @@ import {
   Activity,
   Check,
   Quote,
+  Coins,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { format, differenceInCalendarDays, subDays, startOfWeek, endOfWeek, subWeeks, isWithinInterval, parseISO, eachDayOfInterval } from "date-fns";
@@ -53,31 +54,32 @@ import { Button } from "./components/Button";
 import { Login } from "./components/Login";
 import { PlantIcon } from "./components/PlantIcon";
 import { DailyGarden } from "./components/DailyGarden";
-import { WeeklyReportView } from "./components/WeeklyReportView";
-import { MonthlyReportView } from "./components/MonthlyReportView";
+const WeeklyReportView = React.lazy(() => import("./components/WeeklyReportView").then(m => ({ default: m.WeeklyReportView })));
+const MonthlyReportView = React.lazy(() => import("./components/MonthlyReportView").then(m => ({ default: m.MonthlyReportView })));
 import { GardenCalendar } from "./components/GardenCalendar";
-import { ChallengesView } from "./components/ChallengesView";
+const ChallengesView = React.lazy(() => import("./components/ChallengesView").then(m => ({ default: m.ChallengesView })));
 import { GardenShop } from "./components/GardenShop";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { RestModeSetup } from "./components/RestModeSetup";
 import { isDateInRestMode, isHabitPaused } from "./restModeUtils";
-import { AlmanacView } from "./components/AlmanacView";
+const AlmanacView = React.lazy(() => import("./components/AlmanacView").then(m => ({ default: m.AlmanacView })));
 import { isAlmanacSeason, getAlmanacYear, generateAlmanac } from "./almanacUtils";
 import { isHabitDueOnDate, getCompletedCountThisWeek } from "./scheduleUtils";
-import { GardenBadgesView } from "./components/GardenBadgesView";
+const GardenBadgesView = React.lazy(() => import("./components/GardenBadgesView").then(m => ({ default: m.GardenBadgesView })));
 import { useAndroidApp } from "./services/useAndroidApp";
 import { SimpleGardenStatsDashboard } from "./components/SimpleGardenStatsDashboard";
 import { checkBadgeUnlocks } from "./badgeUtils";
 import { ACHIEVEMENT_BADGES } from "./badgeConfig";
 import { AchievementBadge } from "./types";
 
-import { validatePurchase, calculateDailyCoinCap, calculateSecureCoinReward, processDailyEconomyReset } from './economyEngine';
+import { validatePurchase, calculateDailyCoinCap, calculateSecureCoinReward, processDailyEconomyReset, runEconomyDiagnostics } from './economyEngine';
 import { playHaptic } from "./haptics";
 import confetti from "canvas-confetti";
 import { getChallengeTemplate } from "./challengesData";
 import { CATEGORIES } from "./categories";
-import { GardenHistoryView } from "./components/GardenHistoryView";
+const GardenHistoryView = React.lazy(() => import("./components/GardenHistoryView").then(m => ({ default: m.GardenHistoryView })));
+import { getBengaliSeason, getSeasonThemeClasses } from "./seasonalUtils";
 import { getActiveEvent } from "./events";
 import { EventBanner } from "./components/EventBanner";
 import { EventDetailModal } from "./components/EventDetailModal";
@@ -235,6 +237,8 @@ export const APP_THEMES = [
   },
 ];
 
+const _themeVarCache: Record<string, string> = {};
+
 export function applyAppTheme(
   themeId: string,
   customAccentColor?: string,
@@ -242,95 +246,104 @@ export function applyAppTheme(
   borderStyle?: "invisible" | "subtle" | "solid" | "neon"
 ) {
   const theme = APP_THEMES.find((t) => t.id === themeId) || APP_THEMES[0];
+  const updates: Record<string, string> = {};
 
   // Set theme colors
   Object.entries(theme.colors).forEach(([key, val]) => {
-    document.documentElement.style.setProperty(key, val);
+    updates[key] = val;
   });
 
   // Apply accent color override
   if (customAccentColor) {
     if (customAccentColor.includes(" ")) {
-      document.documentElement.style.setProperty("--primary-mint", customAccentColor);
-      document.documentElement.style.setProperty("--color-primary-mint", `rgb(${customAccentColor})`);
+      updates["--primary-mint"] = customAccentColor;
+      updates["--color-primary-mint"] = `rgb(${customAccentColor})`;
     } else {
-      document.documentElement.style.setProperty("--primary-mint", customAccentColor);
-      document.documentElement.style.setProperty("--color-primary-mint", customAccentColor);
+      updates["--primary-mint"] = customAccentColor;
+      updates["--color-primary-mint"] = customAccentColor;
     }
   } else {
     const themeMint = theme.colors["--color-primary-mint"];
-    document.documentElement.style.setProperty("--color-primary-mint", themeMint);
+    updates["--color-primary-mint"] = themeMint;
     try {
       const hex = themeMint.startsWith("#") ? themeMint : "#4EADA0";
       const r = parseInt(hex.slice(1, 3), 16);
       const g = parseInt(hex.slice(3, 5), 16);
       const b = parseInt(hex.slice(5, 7), 16);
-      document.documentElement.style.setProperty("--primary-mint", `${r} ${g} ${b}`);
+      updates["--primary-mint"] = `${r} ${g} ${b}`;
     } catch (e) {
-      document.documentElement.style.setProperty("--primary-mint", "78 173 160");
+      updates["--primary-mint"] = "78 173 160";
     }
   }
 
   // Apply corner roundness customization
   const cr = cornerRoundness || "soft";
   if (cr === "sharp") {
-    document.documentElement.style.setProperty("--radius-none", "0px");
-    document.documentElement.style.setProperty("--radius-sm", "0px");
-    document.documentElement.style.setProperty("--radius-md", "0px");
-    document.documentElement.style.setProperty("--radius-lg", "0px");
-    document.documentElement.style.setProperty("--radius-xl", "0px");
-    document.documentElement.style.setProperty("--radius-2xl", "0px");
-    document.documentElement.style.setProperty("--radius-3xl", "0px");
-    document.documentElement.style.setProperty("--radius-card", "0px");
-    document.documentElement.style.setProperty("--radius-large-card", "0px");
-    document.documentElement.style.setProperty("--radius-button", "0px");
-    document.documentElement.style.setProperty("--radius-input", "0px");
-    document.documentElement.style.setProperty("--radius-chip", "0px");
-    document.documentElement.style.setProperty("--radius-progress", "0px");
+    updates["--radius-none"] = "0px";
+    updates["--radius-sm"] = "0px";
+    updates["--radius-md"] = "0px";
+    updates["--radius-lg"] = "0px";
+    updates["--radius-xl"] = "0px";
+    updates["--radius-2xl"] = "0px";
+    updates["--radius-3xl"] = "0px";
+    updates["--radius-card"] = "0px";
+    updates["--radius-large-card"] = "0px";
+    updates["--radius-button"] = "0px";
+    updates["--radius-input"] = "0px";
+    updates["--radius-chip"] = "0px";
+    updates["--radius-progress"] = "0px";
   } else if (cr === "medium") {
-    document.documentElement.style.setProperty("--radius-none", "2px");
-    document.documentElement.style.setProperty("--radius-sm", "6px");
-    document.documentElement.style.setProperty("--radius-md", "8px");
-    document.documentElement.style.setProperty("--radius-lg", "12px");
-    document.documentElement.style.setProperty("--radius-xl", "14px");
-    document.documentElement.style.setProperty("--radius-2xl", "16px");
-    document.documentElement.style.setProperty("--radius-3xl", "20px");
-    document.documentElement.style.setProperty("--radius-card", "12px");
-    document.documentElement.style.setProperty("--radius-large-card", "16px");
-    document.documentElement.style.setProperty("--radius-button", "8px");
-    document.documentElement.style.setProperty("--radius-input", "8px");
-    document.documentElement.style.setProperty("--radius-chip", "9999px");
-    document.documentElement.style.setProperty("--radius-progress", "9999px");
+    updates["--radius-none"] = "2px";
+    updates["--radius-sm"] = "6px";
+    updates["--radius-md"] = "8px";
+    updates["--radius-lg"] = "12px";
+    updates["--radius-xl"] = "14px";
+    updates["--radius-2xl"] = "16px";
+    updates["--radius-3xl"] = "20px";
+    updates["--radius-card"] = "12px";
+    updates["--radius-large-card"] = "16px";
+    updates["--radius-button"] = "8px";
+    updates["--radius-input"] = "8px";
+    updates["--radius-chip"] = "9999px";
+    updates["--radius-progress"] = "9999px";
   } else {
     // Default playful
-    document.documentElement.style.setProperty("--radius-none", "16px");
-    document.documentElement.style.setProperty("--radius-sm", "24px");
-    document.documentElement.style.setProperty("--radius-md", "24px");
-    document.documentElement.style.setProperty("--radius-lg", "32px");
-    document.documentElement.style.setProperty("--radius-xl", "32px");
-    document.documentElement.style.setProperty("--radius-2xl", "32px");
-    document.documentElement.style.setProperty("--radius-3xl", "50px");
-    document.documentElement.style.setProperty("--radius-card", "24px");
-    document.documentElement.style.setProperty("--radius-large-card", "32px");
-    document.documentElement.style.setProperty("--radius-button", "9999px");
-    document.documentElement.style.setProperty("--radius-input", "9999px");
-    document.documentElement.style.setProperty("--radius-chip", "9999px");
-    document.documentElement.style.setProperty("--radius-progress", "9999px");
+    updates["--radius-none"] = "16px";
+    updates["--radius-sm"] = "24px";
+    updates["--radius-md"] = "24px";
+    updates["--radius-lg"] = "32px";
+    updates["--radius-xl"] = "32px";
+    updates["--radius-2xl"] = "32px";
+    updates["--radius-3xl"] = "50px";
+    updates["--radius-card"] = "24px";
+    updates["--radius-large-card"] = "32px";
+    updates["--radius-button"] = "9999px";
+    updates["--radius-input"] = "9999px";
+    updates["--radius-chip"] = "9999px";
+    updates["--radius-progress"] = "9999px";
   }
 
   // Apply border style intensity
   const bs = borderStyle || "subtle";
   if (bs === "invisible") {
-    document.documentElement.style.setProperty("--color-surface-alt", theme.colors["--color-surface-card"]);
+    updates["--color-surface-alt"] = theme.colors["--color-surface-card"];
   } else if (bs === "solid") {
     const textBorder = theme.colors["--color-primary-anchor"];
-    document.documentElement.style.setProperty("--color-surface-alt", textBorder);
+    updates["--color-surface-alt"] = textBorder;
   } else if (bs === "neon") {
     const themeMint = theme.colors["--color-primary-mint"];
-    document.documentElement.style.setProperty("--color-surface-alt", customAccentColor ? (customAccentColor.includes(" ") ? `rgb(${customAccentColor})` : customAccentColor) : themeMint);
+    updates["--color-surface-alt"] = customAccentColor ? (customAccentColor.includes(" ") ? `rgb(${customAccentColor})` : customAccentColor) : themeMint;
   } else {
-    document.documentElement.style.setProperty("--color-surface-alt", theme.colors["--color-surface-alt"]);
+    updates["--color-surface-alt"] = theme.colors["--color-surface-alt"];
   }
+
+  // Inject only changed CSS variables to prevent DOM thrashing
+  Object.entries(updates).forEach(([key, val]) => {
+    if (_themeVarCache[key] !== val) {
+      document.documentElement.style.setProperty(key, val);
+      _themeVarCache[key] = val;
+    }
+  });
 }
 
 function checkWeeklyConsistencyThreeWeeks(habits: Habit[], logs: HabitLog, referenceDate: Date): boolean {
@@ -392,6 +405,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
+    runEconomyDiagnostics();
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2000);
@@ -411,6 +425,8 @@ function App() {
   const [reportViewMode, setReportViewMode] = useState<'weekly' | 'monthly'>('weekly');
   const [statsSubTab, setStatsSubTab] = useState<'overview' | 'reports' | 'challenges' | 'badges' | 'profile' | 'history'>('overview');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showMailboxModal, setShowMailboxModal] = useState(false);
+  const [mailboxLetter, setMailboxLetter] = useState<{text: string, coins: number} | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showRestModeModal, setShowRestModeModal] = useState(false);
   const [activeRestMode, setActiveRestMode] = useState<RestMode | null>(null);
@@ -422,7 +438,7 @@ function App() {
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean, title: string, message: string, confirmText?: string, cancelText?: string, secondaryActionText?: string, onConfirm: () => void, onSecondaryAction?: () => void, variant?: 'danger' | 'warning' | 'info' }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [newlyUnlockedBadges, setNewlyUnlockedBadges] = useState<AchievementBadge[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [sortType, setSortType] = useState<'health' | 'alpha' | 'recent' | 'recovery'>('recent');
+  const [sortType, setSortType] = useState<'health' | 'alpha' | 'recent' | 'recovery' | 'custom'>('custom');
   const [date, setDate] = useState(new Date());
   const dateKey = format(date, "yyyy-MM-dd");
 
@@ -431,9 +447,12 @@ function App() {
     // Only runs heavily when idle or unfocused, reducing battery consumption
     const runChecks = () => {
        const newDate = new Date();
-       if (format(newDate, "yyyy-MM-dd") !== format(date, "yyyy-MM-dd")) {
-          setDate(newDate); // triggers midnight cascade
-       }
+       setDate(prevDate => {
+          if (format(newDate, "yyyy-MM-dd") !== format(prevDate, "yyyy-MM-dd")) {
+             return newDate; // triggers midnight cascade
+          }
+          return prevDate;
+       });
        import('./components/GardenSky').then(({ getGardenTimePhase }) => {
           const phase = getGardenTimePhase();
           if (document.body.getAttribute('data-time-phase') !== phase) {
@@ -464,7 +483,7 @@ function App() {
        window.removeEventListener('focus', handleFocus);
        clearInterval(interval);
     };
-  }, [date]);
+  }, []);
   const [isOnline, setIsOnline] = useState<boolean>(true);
 
   // Motivation Popup State
@@ -540,14 +559,26 @@ function App() {
       if (currentUser) {
         // Migration Check
         const localHabits = localStorage.getItem("t2sar_habits");
+        const modernOfflineCache = localStorage.getItem("t2sar_offline_cache");
+        const chunkMeta = localStorage.getItem("t2sar_offline_meta");
+        
         if (localHabits) {
           const parsedHabits = JSON.parse(localHabits);
           const parsedLogs = JSON.parse(
-            localStorage.getItem("t2sar_logs") || "{}",
+            localStorage.getItem("t2sar_logs") || "{}"
           );
           await syncLocalDataToCloud(currentUser.uid, parsedHabits, parsedLogs);
           localStorage.removeItem("t2sar_habits");
           localStorage.removeItem("t2sar_logs");
+        } else if (chunkMeta) {
+          const meta = JSON.parse(chunkMeta);
+          const h = JSON.parse(localStorage.getItem("t2sar_offline_habits") || "[]");
+          const l = JSON.parse(localStorage.getItem("t2sar_offline_logs") || "{}");
+          const r = JSON.parse(localStorage.getItem("t2sar_offline_rest") || "null");
+          await syncLocalDataToCloud(currentUser.uid, h, l, r, meta.lastUpdated);
+        } else if (modernOfflineCache) {
+          const parsed = JSON.parse(modernOfflineCache);
+          await syncLocalDataToCloud(currentUser.uid, parsed.habits || [], parsed.logs || {}, parsed.activeRestMode, parsed.lastUpdated);
         }
       }
       setAuthLoading(false);
@@ -562,23 +593,61 @@ function App() {
     setDataLoading(true);
     const unsubscribe = subscribeToUserData(user.uid, (data) => {
       if (data) {
-        setHabits(data.habits || []);
-        setLogs(data.logs || {});
-        setExtraStats(data.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 });
-        setActiveRestMode(data.activeRestMode || null);
+        const h = data.habits || [];
+        const l = data.logs || {};
+        const s = data.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 };
+        const r = data.activeRestMode || null;
+        
+        lastPersistedState.current = JSON.parse(JSON.stringify({ h, l, s, r }));
+        lastStateHash.current = JSON.stringify({ h, l, s, r });
+
+        setHabits(h);
+        setLogs(l);
+        setExtraStats(s);
+        setActiveRestMode(r);
+        
+        runEconomyDiagnostics(s, h);
       } else {
         // Offline fallback: load from localStorage
         try {
           const cached = localStorage.getItem('t2sar_offline_cache');
-          if (cached) {
+          const chunkMeta = localStorage.getItem('t2sar_offline_meta');
+          
+          let h = [];
+          let l = {};
+          let s: any = { perfectGardenDays: 0, plantsRevived: 0, xp: 0 };
+          let r = null;
+          let loaded = false;
+
+          if (chunkMeta) {
+            h = JSON.parse(localStorage.getItem("t2sar_offline_habits") || "[]");
+            l = JSON.parse(localStorage.getItem("t2sar_offline_logs") || "{}");
+            s = JSON.parse(localStorage.getItem("t2sar_offline_stats") || "{}");
+            r = JSON.parse(localStorage.getItem("t2sar_offline_rest") || "null");
+            if (!s.perfectGardenDays) s = { perfectGardenDays: 0, plantsRevived: 0, xp: 0, ...s };
+            loaded = true;
+          } else if (cached) {
             const parsed = JSON.parse(cached);
-            setHabits(parsed.habits || []);
-            setLogs(parsed.logs || {});
-            setExtraStats(parsed.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 });
-            setActiveRestMode(parsed.activeRestMode || null);
+            h = parsed.habits || [];
+            l = parsed.logs || {};
+            s = parsed.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 };
+            r = parsed.activeRestMode || null;
+            loaded = true;
+          }
+          
+          if (loaded) {
+            lastPersistedState.current = JSON.parse(JSON.stringify({ h, l, s, r }));
+            lastStateHash.current = JSON.stringify({ h, l, s, r });
+
+            setHabits(h);
+            setLogs(l);
+            setExtraStats(s);
+            setActiveRestMode(r);
+            
+            runEconomyDiagnostics(s, h);
           }
         } catch (e) {
-          console.error('Failed to load offline cache:', e);
+          console.error('Failed to load offline cache chunks:', e);
         }
       }
       setDataLoading(false);
@@ -702,94 +771,100 @@ function App() {
     let freezesUsed = 0;
     const frozenDates = new Set<string>();
 
-    const updatedHabits = habits.map((habit) => {
-      const lastDate =
-        habit.lastMissCheckedDate ||
-        format(new Date(habit.createdAt || Date.now()), "yyyy-MM-dd");
-      const daysMissed = Math.max(
-        0,
-        differenceInCalendarDays(new Date(dateKey), new Date(lastDate)),
-      );
+    // Pass 1: Collect all unprotected misses by date
+    const missesByDate = new Map<string, string[]>();
+    const simulatedMissCounts = new Map<string, number>();
+
+    habits.forEach((habit) => {
+      const lastDate = habit.lastMissCheckedDate || format(new Date(habit.createdAt || Date.now()), "yyyy-MM-dd");
+      const daysMissed = Math.max(0, differenceInCalendarDays(new Date(dateKey), new Date(lastDate)));
 
       if (daysMissed > 0) {
-        let missedCount = 0;
-        
+        changed = true; // Needs lastMissCheckedDate update at minimum
         for (let i = 1; i <= daysMissed; i++) {
-          const checkDateStr = format(
-            subDays(new Date(dateKey), i),
-            "yyyy-MM-dd",
-          );
-          
+          const checkDateStr = format(subDays(new Date(dateKey), i), "yyyy-MM-dd");
           const wasProtected = isHabitPaused(habit.id, checkDateStr, activeRestMode);
           const wasDue = isHabitDueOnDate(habit, checkDateStr);
           
           if (!wasDue) continue;
-          
-          if (habit.scheduleType === 'times_per_week' || habit.scheduleType === 'weekly' || habit.scheduleType === 'anytime') {
-             continue;
-          }
+          if (habit.scheduleType === 'times_per_week' || habit.scheduleType === 'weekly' || habit.scheduleType === 'anytime') continue;
           
           const didComplete = logs[checkDateStr]?.includes(habit.id);
           if (!didComplete && !wasProtected) {
-            // Did we already freeze this date globally for another habit in this loop?
-            if (frozenDates.has(checkDateStr)) {
-               // Protected by a freeze already consumed in this loop
-               continue;
-            } else if (activeFreezes > 0) {
-               // Consume a freeze to protect this whole day for all habits
-               activeFreezes--;
-               freezesUsed++;
-               frozenDates.add(checkDateStr);
-               // Do not increment missedCount, it's frozen!
-            } else {
-               missedCount++;
-            }
+            if (!missesByDate.has(checkDateStr)) missesByDate.set(checkDateStr, []);
+            missesByDate.get(checkDateStr)!.push(habit.id);
           }
-        }
-
-        if (missedCount > 0) {
-          changed = true;
-          let newHealth = habit.plantHealth ?? 100;
-          let remainingMisses = missedCount;
-          let grace = habit.graceDays || 0;
-
-          if (grace >= remainingMisses) {
-            grace -= remainingMisses;
-            remainingMisses = 0;
-          } else {
-            remainingMisses -= grace;
-            grace = 0;
-          }
-
-          const diff = habit.difficulty || 'medium';
-          const missLoss = diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25;
-          newHealth -= remainingMisses * missLoss;
-          newHealth = Math.max(0, newHealth);
-
-          const status = newHealth <= 0
-              ? "Dead"
-              : newHealth < 20
-                ? "Critical"
-                : newHealth < 50
-                  ? "Wilting"
-                  : newHealth < 80
-                    ? "Normal"
-                    : "Healthy";
-
-          return {
-            ...habit,
-            streak: remainingMisses > 0 ? 0 : habit.streak,
-            graceDays: grace,
-            plantHealth: newHealth,
-            plantStatus: status as PlantHealthStatus,
-            lastMissCheckedDate: dateKey,
-          };
         }
       }
+    });
 
-      if (daysMissed > 0) {
-        changed = true;
-        return { ...habit, lastMissCheckedDate: dateKey };
+    // Pass 2: Chronologically verify freezes to protect grace days
+    const sortedDates = Array.from(missesByDate.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    
+    sortedDates.forEach(dateStr => {
+       const missedHabitIds = missesByDate.get(dateStr) || [];
+       
+       // Does ANY habit lack enough grace days, requiring a global freeze?
+       let needsFreeze = false;
+       for (const hId of missedHabitIds) {
+          const h = habits.find(habit => habit.id === hId)!;
+          const currentMissCount = simulatedMissCounts.get(hId) || 0;
+          if (currentMissCount >= (h.graceDays || 0)) {
+             needsFreeze = true; break;
+          }
+       }
+       
+       if (needsFreeze && activeFreezes > 0) {
+          activeFreezes--;
+          freezesUsed++;
+          frozenDates.add(dateStr);
+       } else {
+          // No freeze used, all these habits accumulate a miss
+          missedHabitIds.forEach(hId => {
+             simulatedMissCounts.set(hId, (simulatedMissCounts.get(hId) || 0) + 1);
+          });
+       }
+    });
+
+    if (!changed && freezesUsed === 0) return;
+
+    // Pass 3: Apply the calculated misses back onto the habits
+    const updatedHabits = habits.map((habit) => {
+      const missedCount = simulatedMissCounts.get(habit.id) || 0;
+      
+      if (missedCount > 0) {
+        let newHealth = habit.plantHealth ?? 100;
+        let remainingMisses = missedCount;
+        let grace = habit.graceDays || 0;
+
+        if (grace >= remainingMisses) {
+          grace -= remainingMisses;
+          remainingMisses = 0;
+        } else {
+          remainingMisses -= grace;
+          grace = 0;
+        }
+
+        const diff = habit.difficulty || 'medium';
+        const missLoss = diff === 'easy' ? 15 : diff === 'medium' ? 20 : 25;
+        newHealth -= remainingMisses * missLoss;
+        newHealth = Math.max(0, newHealth);
+
+        const status = newHealth <= 0 ? "Dead" : newHealth < 20 ? "Critical" : newHealth < 50 ? "Wilting" : newHealth < 80 ? "Normal" : "Healthy";
+
+        return {
+          ...habit,
+          streak: remainingMisses > 0 ? 0 : habit.streak,
+          graceDays: grace,
+          plantHealth: newHealth,
+          plantStatus: status as PlantHealthStatus,
+          lastMissCheckedDate: dateKey,
+        };
+      }
+
+      // If no misses but date needs updating (or frozen dates protected it)
+      if (changed) {
+         return { ...habit, lastMissCheckedDate: dateKey };
       }
       return habit;
     });
@@ -832,6 +907,8 @@ function App() {
   }, [extraStats, habits]);
 
   // 4. Save to Cloud Helper
+  const lastPersistedState = React.useRef<any>(null);
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
   const persistData = (newHabits: Habit[], newLogs: HabitLog, incomingStats: Partial<UserStats> = extraStats, newRestMode: RestMode | null = activeRestMode) => {
     // Verify badges using a dynamically constructed full stats object
     const totalCompleted = newHabits.reduce((acc, h) => acc + (h.totalCompletions || 0), 0);
@@ -912,25 +989,102 @@ function App() {
        }
     }
 
-    if (user) {
-      saveUserData(user.uid, { habits: newHabits, logs: newLogs, extraStats: statsToSave, activeRestMode: newRestMode });
+    const deepCompare = (obj1: any, obj2: any): boolean => {
+      if (obj1 === obj2) return true;
+      if (!obj1 || !obj2 || typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
+      const keys1 = Object.keys(obj1);
+      const keys2 = Object.keys(obj2);
+      if (keys1.length !== keys2.length) return false;
+      for (const key of keys1) {
+        if (!keys2.includes(key) || !deepCompare(obj1[key], obj2[key])) return false;
+      }
+      return true;
+    };
+
+    const newState = { h: newHabits, l: newLogs, s: statsToSave, r: newRestMode };
+    if (lastPersistedState.current && deepCompare(lastPersistedState.current, newState)) {
+      // Data is identical block unnecessary Firebase write
+    } else {
+      if (user) {
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = setTimeout(() => {
+          const performSave = () => {
+             lastPersistedState.current = JSON.parse(JSON.stringify(newState));
+             saveUserData(user.uid, { habits: newHabits, logs: newLogs, extraStats: statsToSave, activeRestMode: newRestMode });
+          };
+          
+          if ('requestIdleCallback' in window) {
+            (window as any).requestIdleCallback(performSave, { timeout: 5000 });
+          } else {
+            performSave();
+          }
+        }, 2000); // 2 seconds debounce
+      } else {
+         lastPersistedState.current = JSON.parse(JSON.stringify(newState));
+      }
     }
 
-    // Offline fallback: always persist to localStorage
-    try {
-      localStorage.setItem('t2sar_offline_cache', JSON.stringify({
-        habits: newHabits,
-        logs: newLogs,
-        extraStats: statsToSave,
-        activeRestMode: newRestMode
-      }));
-    } catch (e) {
-      console.error('Failed to save offline cache:', e);
+    // Offline fallback: always persist to localStorage in smaller chunks to avoid size limit
+    const performLocalSave = () => {
+      try {
+        localStorage.setItem('t2sar_offline_habits', JSON.stringify(newHabits));
+        localStorage.setItem('t2sar_offline_logs', JSON.stringify(newLogs));
+        localStorage.setItem('t2sar_offline_stats', JSON.stringify(statsToSave));
+        localStorage.setItem('t2sar_offline_rest', JSON.stringify(newRestMode));
+        localStorage.setItem('t2sar_offline_meta', JSON.stringify({ lastUpdated: Date.now() }));
+      } catch (e) {
+        console.error('Failed to save offline cache chunks:', e);
+      }
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(performLocalSave, { timeout: 2000 });
+    } else {
+      performLocalSave();
     }
   };
 
   const lastStateHash = React.useRef<string>('');
-  const throttleTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  
+  // Cleanup debouncers on unmount
+  useEffect(() => {
+    return () => {
+       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
+  
+  const gardenGridRef = React.useRef<HTMLDivElement>(null);
+  const [masterKanthaPoints, setMasterKanthaPoints] = useState<string>('');
+
+  useEffect(() => {
+    if (activeTab === Tab.PROGRESS && progressSubTab === 'virtual_garden' && gardenGridRef.current) {
+      const updateLines = () => {
+         const gridElem = gardenGridRef.current;
+         if (!gridElem) return;
+         const gridRect = gridElem.getBoundingClientRect();
+         const masterCards = gridElem.querySelectorAll('.master-card');
+         if (masterCards.length < 2) {
+           setMasterKanthaPoints('');
+           return;
+         }
+         let points: string[] = [];
+         masterCards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const cx = rect.left - gridRect.left + rect.width / 2;
+            const cy = rect.top - gridRect.top + rect.height / 2;
+            points.push(`${cx},${cy}`);
+         });
+         setMasterKanthaPoints(points.join(' '));
+      };
+      
+      const timer = setTimeout(updateLines, 100);
+      window.addEventListener('resize', updateLines);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('resize', updateLines);
+      }
+    }
+  }, [activeTab, progressSubTab, habits, logs, categoryFilter]);
 
   useEffect(() => {
     if (dataLoading || authLoading || !user) return;
@@ -938,19 +1092,8 @@ function App() {
     const currentHash = JSON.stringify({ h: habits, l: logs, s: extraStats, r: activeRestMode });
     if (currentHash === lastStateHash.current) return;
     
-    if (!throttleTimeoutRef.current) {
-        lastStateHash.current = currentHash;
-        persistData(habits, logs, extraStats, activeRestMode);
-        throttleTimeoutRef.current = setTimeout(() => {
-            throttleTimeoutRef.current = null;
-            // Also commit any trailing changes that occurred during the throttle window
-            const latestHash = JSON.stringify({ h: stateRefs.current.habits, l: stateRefs.current.logs, s: stateRefs.current.extraStats, r: stateRefs.current.activeRestMode });
-            if (latestHash !== lastStateHash.current) {
-               lastStateHash.current = latestHash;
-               persistData(stateRefs.current.habits, stateRefs.current.logs, stateRefs.current.extraStats, stateRefs.current.activeRestMode);
-            }
-        }, 15000); // 15 seconds aggressive throttle
-    }
+    lastStateHash.current = currentHash;
+    persistData(habits, logs, extraStats, activeRestMode);
   }, [habits, logs, extraStats, activeRestMode, user, dataLoading, authLoading]);
 
   // 5. Install Prompt
@@ -1056,6 +1199,35 @@ function App() {
   };
 
   // Logic Handlers
+  const [draggedHabitId, setDraggedHabitId] = useState<string | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedHabitId(id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedHabitId || draggedHabitId === targetId) return;
+
+    const sourceIndex = habits.findIndex(h => h.id === draggedHabitId);
+    const targetIndex = habits.findIndex(h => h.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const newHabits = [...habits];
+    const [removed] = newHabits.splice(sourceIndex, 1);
+    newHabits.splice(targetIndex, 0, removed);
+    
+    setHabits(newHabits);
+    persistData(newHabits, logs, extraStats, activeRestMode);
+    setDraggedHabitId(null);
+  };
+
   const handleAddHabit = (
     newHabitData: Omit<
       Habit,
@@ -1085,6 +1257,7 @@ function App() {
       lastMissCheckedDate: format(new Date(), "yyyy-MM-dd"),
       graceDays: 0,
       createdAt: new Date().toISOString(),
+      creationDate: new Date().toISOString(),
     };
     const updatedHabits = [...habits, newHabit];
     const newStats = { ...extraStats, habitsCreatedCount: (extraStats.habitsCreatedCount || 0) + 1 };
@@ -1179,7 +1352,8 @@ function App() {
           plantHealth: 100,
           xp: 0,
           lastMissCheckedDate: new Date().toISOString().split('T')[0],
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          creationDate: new Date().toISOString(),
        };
        updatedHabits.push(newHabit);
        // Original stays archived, mark as restarted
@@ -1304,6 +1478,55 @@ function App() {
      persistData(updatedHabits, logs, newExtraStats);
   };
 
+  const handleSnoozeHabit = (id: string, dateStr: string) => {
+     const changedHabit = habits.find(h => h.id === id);
+     if (!changedHabit) return;
+     
+     const currentSnoozed = changedHabit.snoozedDates || [];
+     if (currentSnoozed.includes(dateStr)) return;
+
+     const updatedHabits = habits.map(h => {
+        if (h.id !== id) return h;
+        return {
+           ...h,
+           snoozedDates: [...(h.snoozedDates || []), dateStr]
+        };
+     });
+
+     setHabits(updatedHabits);
+     persistData(updatedHabits, logs);
+  };
+
+  const handleMailboxClick = () => {
+    // Only allow once per day/week, we check lastMailboxGiftDate
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (extraStats.lastMailboxGiftDate === todayStr) {
+       // Already collected!
+       alert("The Mailbox is empty. Check back next week!");
+       return;
+    }
+    
+    const letters = [
+       "Did you know? The sweet smell of the Sheuli flower means Autumn is truly here. Your dedication is blooming just like it.",
+       "A farmer who tends strictly to his crops sees no weeds. Keep your focus sharp, gardener.",
+       "Patience is the seed of joy. A perfect week means your roots are growing deep.",
+       "Even the majestic Banyan started as a tiny seed. Look how far you've come this week!"
+    ];
+    const text = letters[Math.floor(Math.random() * letters.length)];
+    const coins = 500;
+    
+    setExtraStats({
+       ...extraStats,
+       lastMailboxGiftDate: todayStr,
+       coins: (extraStats.coins || 0) + coins
+    });
+    
+    setMailboxLetter({ text, coins });
+    setShowMailboxModal(true);
+    playHaptic('unlock');
+    confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors: ['#FFD700', '#F57100'] });
+  };
+
   const handleHarvestPlant = (habitId: string) => {
     const habit = habits.find(h => h.id === habitId);
     if (!habit || habit.plantStage !== 'Fruiting Plant') return;
@@ -1343,17 +1566,14 @@ function App() {
        activeDailyCoins = 0;
     }
     
-    let finalCoinReward = coinReward;
-    if (activeDailyCoins + finalCoinReward > 25) {
-       finalCoinReward = Math.max(0, 25 - activeDailyCoins);
-    }
+    let finalCoinReward = 100; // Pacha harvest bonus
+    const hasMelodyBoost = extraStats.melodyBoostUntil && new Date(extraStats.melodyBoostUntil) > new Date();
+    if (hasMelodyBoost) finalCoinReward *= 2;
     
     const newExtraStats = {
        ...extraStats,
-       xp: (extraStats.xp || 0) + xpReward,
+       xp: (extraStats.xp || 0), // No extra xp for pacha harvest unless we keep the old
        coins: (extraStats.coins || 0) + finalCoinReward,
-       dailyCoinsEarned: activeDailyCoins + finalCoinReward,
-       lastCoinResetDate: todayStr,
        orchard: newOrchard
     };
     
@@ -1361,10 +1581,7 @@ function App() {
        if (h.id === habit.id) {
           return {
              ...h,
-             plantStage: 'Seed' as const,
-             xp: 0,
-             plantHealth: 100,
-             plantStatus: 'Normal' as const,
+             lastHarvestStreak: h.streak // Reset Kacha-Pacha timer
           };
        }
        return h;
@@ -1821,6 +2038,24 @@ function App() {
       if (isPerfectDayNow) {
         bonusCoinsDelta += 40;
         if (activeEvent && activeEvent.id === 'monsoon_festival') incRainy++;
+        
+        // Wandering Baul Event Check
+        const todayStr = new Date().toISOString().split('T')[0];
+        const dayOfWeek = new Date().getDay();
+        const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Friday or Saturday
+        
+        // Deterministic 50% chance based on date string
+        let dayHash = 0;
+        for (let i = 0; i < todayStr.length; i++) dayHash += todayStr.charCodeAt(i);
+        const hasBaul = isWeekend && (dayHash % 2 === 0);
+        
+        if (hasBaul) {
+           newExtraStats = {
+              ...newExtraStats,
+              melodyBoostUntil: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+           };
+           playMilestoneSound(); // Play sound to indicate special event triggered
+        }
       }
       
       const hr = new Date().getHours();
@@ -1925,6 +2160,13 @@ function App() {
     const dynamicCap = calculateDailyCoinCap(habits, extraStats.level || 1);
     
     let currentDailyCoins = newExtraStats.dailyCoinsEarned || 0;
+    
+    // Apply Melody Boost to all coins delta
+    const hasMelodyBoost = newExtraStats.melodyBoostUntil && new Date(newExtraStats.melodyBoostUntil) > new Date();
+    if (hasMelodyBoost) {
+       baseCoinsDelta *= 2;
+       bonusCoinsDelta *= 2;
+    }
     
     if (baseCoinsDelta > 0) {
        // Only apply hard cap bounds from our economy engine for requested earnings
@@ -2258,7 +2500,8 @@ function App() {
      undoSlipHabit,
      deleteHabit,
      handleHarvestPlant,
-     handleBackdate
+     handleBackdate,
+     handleSnoozeHabit
   });
   
   React.useEffect(() => {
@@ -2268,7 +2511,8 @@ function App() {
       undoSlipHabit,
       deleteHabit,
       handleHarvestPlant,
-      handleBackdate
+      handleBackdate,
+      handleSnoozeHabit
     };
   });
 
@@ -2278,6 +2522,7 @@ function App() {
   const stableDeleteHabit = React.useCallback((id: string) => handlersRef.current.deleteHabit(id), []);
   const stableHarvestPlant = React.useCallback((id: string) => handlersRef.current.handleHarvestPlant(id), []);
   const stableBackdate = React.useCallback((id: string, d: string) => handlersRef.current.handleBackdate(id, d), []);
+  const stableSnoozeHabit = React.useCallback((id: string, d: string) => handlersRef.current.handleSnoozeHabit(id, d), []);
 
   const almanacEligibility = React.useMemo(() => {
     const year = getAlmanacYear(date);
@@ -2306,34 +2551,36 @@ function App() {
        if (sortType === 'alpha') {
           return a.name.localeCompare(b.name);
        }
+       if (sortType === 'custom') {
+          return 0;
+       }
        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [activeHabitsList, sortType]);
 
   const filteredTrackerHabits = React.useMemo(() => {
-    return categoryFilter === 'all' ? habits : habits.filter((h) => h.category === categoryFilter);
-  }, [categoryFilter, habits]);
+    // Also use sortedActiveHabits for tracker filtering so they stay in sync
+    return categoryFilter === 'all' ? sortedActiveHabits : sortedActiveHabits.filter((h) => h.category === categoryFilter);
+  }, [categoryFilter, sortedActiveHabits]);
 
   // -- Render Logic --
 
   if (showSplash) {
     return (
       <div 
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500 bg-[#FDFBF7]"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500 bg-background-main"
       >
         <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-8 flex items-center justify-center">
           <img 
             src="/logo.svg" 
-            alt="Your Garden Logo" 
+            alt="Habit Garden Logo" 
             className="w-full h-full object-contain drop-shadow-md"
-            style={{ mixBlendMode: 'multiply' }}
           />
         </div>
         <h1 
-          className="font-display font-extrabold tracking-tight text-3xl"
-          style={{ color: '#1C1B1F' }}
+          className="font-display font-extrabold tracking-tight text-3xl text-primary-anchor"
         >
-          Your Garden
+          Habit Garden
         </h1>
       </div>
     );
@@ -2371,6 +2618,7 @@ function App() {
           lastMissCheckedDate: format(new Date(), "yyyy-MM-dd"),
           graceDays: 0,
           createdAt: new Date().toISOString(),
+          creationDate: new Date().toISOString(),
           color: "emerald",
           icon: "Sprout",
         };
@@ -2490,7 +2738,7 @@ function App() {
               <h1 className="text-4xl font-extrabold tracking-tight font-display text-primary-text">
                 {activeTab === Tab.TRACKER &&
                   `HELLO, ${user.displayName?.split(" ")[0] || "USER"}`}
-                {activeTab === Tab.PROGRESS && "Your Garden"}
+                {activeTab === Tab.PROGRESS && "Habit Garden"}
                 {activeTab === Tab.SHOP && "Garden Shop"}
                 {activeTab === Tab.STATS && (
                   statsSubTab === 'overview' ? "Garden Stats Overview" :
@@ -2635,6 +2883,7 @@ function App() {
                      onChange={(e) => setSortType(e.target.value as any)}
                      className="bg-surface-soft border border-surface-alt text-primary-text text-sm rounded-lg px-4 py-2 outline-none focus:border-primary-mint font-mono uppercase tracking-wider shadow-sm appearance-none cursor-pointer hover:bg-surface-alt/50 transition-colors"
                   >
+                     <option value="custom">Sort: Custom</option>
                      <option value="recent">Sort: Recent</option>
                      <option value="health">Sort: Health</option>
                      <option value="recovery">Needs Recovery</option>
@@ -2666,6 +2915,8 @@ function App() {
                   onHarvestPlant={stableHarvestPlant}
                   onOpenOrchard={() => setShowOrchard(true)}
                   onBackdate={stableBackdate}
+                  onSnoozeHabit={stableSnoozeHabit}
+                  onMailboxClick={handleMailboxClick}
                 />
 
                 <HabitForm
@@ -2708,7 +2959,7 @@ function App() {
                      onClick={() => setProgressSubTab('virtual_garden')}
                      className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${progressSubTab === 'virtual_garden' ? 'bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold' : 'text-muted-text hover:text-secondary-text border border-transparent'}`}
                    >
-                     Your Garden
+                     Habit Garden
                    </button>
                    <button 
                      onClick={() => setProgressSubTab('calendar')}
@@ -2745,10 +2996,10 @@ function App() {
                   </div>
                 </div>
 
-                <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative shadow-sm">
+                <div className={`p-8 rounded-[32px] border relative shadow-sm ${getSeasonThemeClasses(getBengaliSeason(new Date()))}`}>
                   <h2 className="text-xl font-bold font-display text-primary-text mb-6 flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-status-healthy" />
-                    Your Garden
+                    Habit Garden <span className="text-[10px] uppercase font-mono tracking-widest ml-2 bg-black/5 px-2 py-1 rounded-md">{getBengaliSeason(new Date())}</span>
                   </h2>
                   <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-4">
                     <button 
@@ -2771,29 +3022,52 @@ function App() {
                       );
                     })}
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    {filteredTrackerHabits.map((habit) => (
+                  <div ref={gardenGridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative">
+                    {masterKanthaPoints && (
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
+                         <polyline points={masterKanthaPoints} fill="none" stroke="#E57C5D" strokeWidth="2" strokeDasharray="8 6" opacity="0.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    {filteredTrackerHabits.map((habit) => {
+                      const isMaster = habit.streak >= 30;
+                      return (
                       <div
                         key={habit.id}
-                        className="grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm max-w-[140px] mx-auto w-full"
+                        id={`habit-card-${habit.id}`}
+                        data-status={habit.plantStatus || "Normal"}
+                        data-habit-name={habit.name}
+                        draggable={categoryFilter === 'all' && sortType === 'custom'}
+                        onDragStart={(e) => handleDragStart(e, habit.id)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, habit.id)}
+                        className={`habit-card-visit-node ${isMaster ? 'master-card ring-2 ring-primary-mint/40 border-primary-mint/50' : ''} relative z-10 grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-surface-card border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm max-w-[140px] mx-auto w-full overflow-hidden ${draggedHabitId === habit.id ? 'opacity-50' : ''}`}
                       >
-                        <div className="w-16 h-20 flex flex-col items-center justify-end relative mb-3 group-hover:scale-105 transition-transform duration-300">
+                        {isMaster && (
+                           <svg className="absolute inset-x-0 bottom-0 top-auto w-full h-24 text-primary-mint/10 z-0 pointer-events-none transform -translate-y-2 opacity-60" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                             <path d="M50 10 Q60 50 90 50 Q60 50 50 90 Q40 50 10 50 Q40 50 50 10 Z" fill="currentColor" />
+                             <circle cx="50" cy="50" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+                             <circle cx="50" cy="50" r="2" fill="currentColor" />
+                             <path d="M20 20 L30 30 M80 20 L70 30 M20 80 L30 70 M80 80 L70 70" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                           </svg>
+                        )}
+                        <div className="w-16 h-20 flex flex-col items-center justify-end relative mb-3 group-hover:scale-105 transition-transform duration-300 z-10">
                           <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className="w-16 h-20 absolute bottom-[5%] z-10 drop-shadow-md" />
                           {/* Elliptical shadow under the plant */}
                           <div className="w-10 h-2 bg-black/15 shadow-[0_0_8px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
                         </div>
-                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize leading-tight">
+                        <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize leading-tight z-10">
                           {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
                         </h3>
-                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full mt-1">
+                        <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full mt-1 z-10">
                           <Flame className="w-3 h-3" />
                           Streak: {habit.streak} days
                         </div>
-                        <div className="text-[10px] text-secondary-text font-bold text-center w-full">
+                        <div className="text-[10px] text-secondary-text font-bold text-center w-full z-10">
                           Status: {habit.plantStatus || 'Healthy'}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   {filteredTrackerHabits.length === 0 && (
                     <div className="text-center text-muted-text text-sm py-10 font-bold uppercase tracking-wide">
@@ -2965,45 +3239,55 @@ function App() {
                        </button>
                     </div>
                     {reportViewMode === 'weekly' ? (
-                      <WeeklyReportView 
-                         logs={logs} 
-                         habits={habits} 
-                         stats={stats} 
-                         activeEvent={activeEvent} 
-                         eventProgress={eventProgress}
-                         activeRestMode={activeRestMode}
-                      />
+                      <React.Suspense fallback={<div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">Loading Report Module...</div>}>
+                        <WeeklyReportView 
+                           logs={logs} 
+                           habits={habits} 
+                           stats={stats} 
+                           activeEvent={activeEvent} 
+                           eventProgress={eventProgress}
+                           activeRestMode={activeRestMode}
+                        />
+                      </React.Suspense>
                     ) : (
-                      <MonthlyReportView 
-                         logs={logs} 
-                         habits={habits} 
-                         activeRestMode={activeRestMode}
-                      />
+                      <React.Suspense fallback={<div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">Loading Report Module...</div>}>
+                        <MonthlyReportView 
+                           logs={logs} 
+                           habits={habits} 
+                           activeRestMode={activeRestMode}
+                        />
+                      </React.Suspense>
                     )}
                   </div>
                 )}
 
                 {statsSubTab === 'challenges' && (
-                  <ChallengesView 
-                     habits={activeHabitsList}
-                     stats={stats}
-                     onJoinChallenge={handleJoinChallenge}
-                     onQuitChallenge={handleQuitChallenge}
-                     onClaimChallengeReward={handleClaimChallengeReward}
-                  />
+                  <React.Suspense fallback={<div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">Loading Challenges...</div>}>
+                    <ChallengesView 
+                       habits={activeHabitsList}
+                       stats={stats}
+                       onJoinChallenge={handleJoinChallenge}
+                       onQuitChallenge={handleQuitChallenge}
+                       onClaimChallengeReward={handleClaimChallengeReward}
+                    />
+                  </React.Suspense>
                 )}
 
                 {statsSubTab === 'badges' && (
-                  <GardenBadgesView stats={stats} />
+                  <React.Suspense fallback={<div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">Loading Badges...</div>}>
+                    <GardenBadgesView stats={stats} />
+                  </React.Suspense>
                 )}
 
                 {statsSubTab === 'history' && (
-                  <GardenHistoryView 
-                    archivedHabits={habits.filter(h => h.isArchived)} 
-                    onRestore={restoreArchivedHabit}
-                    onDeletePermanently={(id) => deleteHabit(id, true)}
-                    onUpdateNote={updateArchiveNote}
-                  />
+                  <React.Suspense fallback={<div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">Loading Record...</div>}>
+                    <GardenHistoryView 
+                      archivedHabits={habits.filter(h => h.isArchived)} 
+                      onRestore={restoreArchivedHabit}
+                      onDeletePermanently={(id) => deleteHabit(id, true)}
+                      onUpdateNote={updateArchiveNote}
+                    />
+                  </React.Suspense>
                 )}
               </div>
             )}
@@ -3233,6 +3517,49 @@ function App() {
                        persistData(habits, logs, newStats);
                     }}
                   />
+
+                  {/* DIAGNOSTIC TOOLS */}
+                  <div className="flex flex-col gap-6 bg-red-900/10 p-6 rounded-none border border-red-500/20 mb-6">
+                     <div>
+                        <div className="flex items-center gap-2 mb-1">
+                           <Activity className="w-5 h-5 text-red-400" />
+                           <h3 className="text-primary-text font-bold text-base">Debug Diagnostics</h3>
+                        </div>
+                        <p className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+                           Force sync and reconcile data state
+                        </p>
+                     </div>
+                     <button
+                       onClick={async () => {
+                         if (!user) return;
+                         console.log("=== STARTING CLOUD DIAGNOSTIC ===");
+                         console.log("Local Habits:", habits.length);
+                         console.log("Local Logs Keys:", Object.keys(logs).length);
+                         console.log("Local Data Hash:", JSON.stringify({h: habits, l: logs, s: extraStats}).length);
+                         
+                         import("firebase/firestore").then(async ({ doc, getDoc }) => {
+                           const { db } = await import("./services/firebase");
+                           if (!db) return;
+                           const snapshot = await getDoc(doc(db, "users", user.uid));
+                           if (snapshot.exists()) {
+                             const data = snapshot.data();
+                             console.log("Cloud Raw Object Size:", JSON.stringify(data).length);
+                             console.log("Cloud Habits:", data?.habits?.length);
+                             console.log("Cloud Last Updated:", data?.lastUpdated, "Local:", Date.now());
+                             if (data) {
+                               alert("Diagnostic Sent to Console. View DevTools.");
+                             }
+                           } else {
+                             console.log("Cloud Document does not exist.");
+                             alert("Diagnostic Sent to Console. Document does not exist.");
+                           }
+                         });
+                       }}
+                       className="px-4 py-2 bg-red-500/40 text-red-100 rounded border border-red-500/50 hover:bg-red-500/60 font-mono text-xs w-max"
+                     >
+                        Run Data Sync Console Report
+                     </button>
+                  </div>
 
                    {/* APP DESIGN & VISUAL LAB */}
                    <div className="flex flex-col gap-6 bg-surface-alt/5 p-6 rounded-none border border-surface-alt mb-6">
@@ -3545,40 +3872,42 @@ function App() {
           )}
 
           {showAlmanac && currentAlmanacYear && (
-            <AlmanacView 
-               almanac={
-                  extraStats.almanacs?.[currentAlmanacYear] || 
-                  (generateAlmanac(currentAlmanacYear, logs, habits, extraStats) || {
-                     year: currentAlmanacYear,
-                     totalCheckins: 0,
-                     bestStreak: {days: 0, habitName: '', icon: ''},
-                     topHabit: {name: '', fruit: '', count: 0, icon: ''},
-                     rhythm: {label: '', percent: 0, busiestMonth: ''},
-                     harvest: {plantsGrown: 0, harvests: 0, badges: 0, companions: 0},
-                     comebacks: 0,
-                     computedAt: new Date().toISOString()
-                  })
-               }
-               userName={user?.displayName || "Gardener"}
-               userRank={stats.rank}
-               onClose={() => {
-                  setShowAlmanac(false);
-                  if (!extraStats.almanacs || !extraStats.almanacs[currentAlmanacYear]) {
-                     const generated = generateAlmanac(currentAlmanacYear, logs, habits, extraStats);
-                     if (generated) {
-                        const newStats = {
-                           ...extraStats,
-                           almanacs: {
-                              ...(extraStats.almanacs || {}),
-                              [currentAlmanacYear]: generated
-                           }
-                        };
-                        setExtraStats(newStats);
-                        persistData(habits, logs, newStats);
-                     }
-                  }
-               }}
-            />
+            <React.Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 text-white font-mono opacity-60 animate-pulse">Loading Almanac...</div>}>
+              <AlmanacView 
+                 almanac={
+                    extraStats.almanacs?.[currentAlmanacYear] || 
+                    (generateAlmanac(currentAlmanacYear, logs, habits, extraStats) || {
+                       year: currentAlmanacYear,
+                       totalCheckins: 0,
+                       bestStreak: {days: 0, habitName: '', icon: ''},
+                       topHabit: {name: '', fruit: '', count: 0, icon: ''},
+                       rhythm: {label: '', percent: 0, busiestMonth: ''},
+                       harvest: {plantsGrown: 0, harvests: 0, badges: 0, companions: 0},
+                       comebacks: 0,
+                       computedAt: new Date().toISOString()
+                    })
+                 }
+                 userName={user?.displayName || "Gardener"}
+                 userRank={stats.rank}
+                 onClose={() => {
+                    setShowAlmanac(false);
+                    if (!extraStats.almanacs || !extraStats.almanacs[currentAlmanacYear]) {
+                       const generated = generateAlmanac(currentAlmanacYear, logs, habits, extraStats);
+                       if (generated) {
+                          const newStats = {
+                             ...extraStats,
+                             almanacs: {
+                                ...(extraStats.almanacs || {}),
+                                [currentAlmanacYear]: generated
+                             }
+                          };
+                          setExtraStats(newStats);
+                          persistData(habits, logs, newStats);
+                       }
+                    }
+                 }}
+              />
+            </React.Suspense>
           )}
 
           {newlyUnlockedBadges.length > 0 && (
@@ -3774,6 +4103,47 @@ function App() {
                     className="w-full py-3 bg-gradient-to-r from-[#00F5D4] to-emerald-500 hover:from-[#00d8b9] hover:to-emerald-600 text-zinc-900 font-bold font-mono tracking-widest uppercase rounded-xl transition-all shadow-[0_0_20px_rgba(0,245,212,0.15)] active:scale-95"
                  >
                     Acknowledge
+                 </button>
+              </div>
+           )}
+        </AnimatedModal>
+
+         <AnimatedModal 
+           isOpen={showMailboxModal} 
+           onClose={() => setShowMailboxModal(false)}
+           alignment="center"
+           className="!max-w-md mx-auto !p-0 overflow-hidden bg-surface-card border border-red-500/20 shadow-[0_20px_60px_rgba(239,68,68,0.15)]"
+        >
+           {mailboxLetter && (
+              <div className="relative p-8 md:p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
+                 <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none" />
+                 
+                 <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6 relative z-10 mx-auto border border-red-500/20">
+                    <span className="text-4xl">💌</span>
+                 </div>
+                 
+                 <h2 className="text-2xl font-display font-medium text-primary-text mb-4 relative z-10">
+                    Letter from the Village
+                 </h2>
+                 
+                 <p className="text-lg italic text-slate-300 font-serif leading-relaxed mb-6 px-4">
+                    "{mailboxLetter.text}"
+                 </p>
+                 
+                 <div className="w-full flex justify-center mb-8 relative z-10">
+                    <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-xl px-6 py-3 text-center inline-block">
+                       <p className="text-xs font-mono text-yellow-500 uppercase tracking-wider mb-1">ENCLOSED GIFT</p>
+                       <p className="text-xl font-bold text-yellow-400 flex items-center justify-center gap-2">
+                           <Coins className="w-5 h-5 text-yellow-500" /> +{mailboxLetter.coins} Coins
+                       </p>
+                    </div>
+                 </div>
+                 
+                 <button 
+                    onClick={() => setShowMailboxModal(false)}
+                    className="w-full py-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold font-mono tracking-widest uppercase rounded-xl transition-all shadow-md active:scale-95"
+                 >
+                    Keep in Heart
                  </button>
               </div>
            )}

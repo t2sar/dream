@@ -122,10 +122,17 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    let isIntersecting = true;
+    const observer = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry.isIntersecting;
+    });
+    observer.observe(canvas);
+
     let animationFrameId: number;
+    let lastRenderTime = 0;
     let rotationAngleX = 0.005;
     let rotationAngleY = 0.008;
 
@@ -209,7 +216,12 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
     canvas.addEventListener("touchend", onMouseLeave);
 
     // Main animation loop
-    const render = () => {
+    const render = (time: number) => {
+      animationFrameId = requestAnimationFrame(render);
+      if (!isIntersecting) return;
+      if (time - lastRenderTime < 33) return; // ~30 fps max
+      lastRenderTime = time;
+
       const { habits, completedHabitIds, completionRatio, isFullComplete, isSnapping, shockwaveRadius } = stateRef.current;
       
       if (stateRef.current.shockwaveRadius !== null) {
@@ -538,14 +550,13 @@ export const LivingMonolith: React.FC<LivingMonolithProps> = ({
         ctx.lineTo(width - margin - rSize, height - margin);
         ctx.stroke();
       }
-
-      animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseleave", onMouseLeave);

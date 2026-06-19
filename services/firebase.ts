@@ -192,14 +192,24 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
   
   let currentData: any = null;
   const currentLogs: any = {};
-  let isFirstDocFetch = true;
+  let docFetched = false;
+  let logsFetched = false;
   
   const notifyUpdate = () => {
-    if (currentData) {
-      onUpdate({
-        ...currentData,
-        logs: { ...(currentData.logs || {}), ...currentLogs }
-      });
+    console.log(`[Sync Debug] notifyUpdate called: docFetched=${docFetched}, logsFetched=${logsFetched}`);
+    console.log(`[Sync Debug] Auth State: user=${auth?.currentUser?.uid}, sync mode active`);
+    if (docFetched && logsFetched) {
+      if (currentData) {
+        const payload = {
+          ...currentData,
+          logs: { ...(currentData.logs || {}), ...currentLogs }
+        };
+        console.log(`[Sync Debug] Payload generated, size stringified approx: ${JSON.stringify(payload).length} bytes`);
+        onUpdate(payload);
+      } else {
+        console.log(`[Sync Debug] No main document found for user, pushing null to fallback.`);
+        onUpdate(null);
+      }
     }
   };
 
@@ -207,13 +217,13 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
   let unsubLogs: () => void = () => {};
 
   unsubDoc = onSnapshot(doc(dbInstance, "users", userId), (docSnap) => {
+    docFetched = true;
     if (docSnap.exists()) {
       currentData = docSnap.data();
-      if (!isFirstDocFetch) notifyUpdate();
-      isFirstDocFetch = false;
     } else {
-      onUpdate(null);
+      currentData = null;
     }
+    notifyUpdate();
   }, (error) => {
     if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
       enterOfflineMode();
@@ -225,11 +235,12 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
   });
 
   unsubLogs = onSnapshot(collection(dbInstance, "users", userId, "logs"), (collSnap) => {
+    logsFetched = true;
     collSnap.docChanges().forEach((change) => {
       // Each doc is a YYYY-MM record
       Object.assign(currentLogs, change.doc.data());
     });
-    if (currentData && !isFirstDocFetch) notifyUpdate();
+    notifyUpdate();
   }, (error) => {
     if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
       enterOfflineMode();
@@ -272,7 +283,7 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
     try {
       const { logs, ...mainData } = dataToSave;
       
-      const cleanMainData = mainData;
+      const cleanMainData = { ...mainData, lastUpdated: Date.now() };
       
       await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
 
@@ -302,24 +313,41 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
       pendingUpdatesPromise = null;
       pendingUpdatesResolve = null;
     }
-  }, 10000); // 10 seconds debounce to save quota
+  }, 500); // 500ms debounce to prevent overlapping writes (App.tsx already throttles 2000ms)
 
   return pendingUpdatesPromise;
 };
 
-export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any) => {
+export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any, localTimestamp?: number) => {
   if (!dbInstance || isQuotaExceeded) return false;
   const pathForWrite = `users/${userId}`;
+
+  console.log(`[Sync Debug] syncLocalDataToCloud attempt for ${userId}. Local habits count: ${localHabits.length}, logs count: ${Object.keys(localLogs).length}, local TS: ${localTimestamp}`);
 
   try {
     const userRef = doc(dbInstance, "users", userId);
     const snapshot = await getDoc(userRef);
 
-    if (!snapshot.exists()) {
+    let shouldOverwrite = false;
+    let remoteTimestamp = 0;
+    
+    if (snapshot.exists()) {
+      remoteTimestamp = snapshot.data()?.lastUpdated || 0;
+      if (localTimestamp && localTimestamp > remoteTimestamp + 5000) {
+        shouldOverwrite = true;
+        console.log(`[Sync Debug] Conflict resolved: Local cache (${localTimestamp}) is newer than Remote (${remoteTimestamp}). Overwriting remote...`);
+      }
+    } else {
+      shouldOverwrite = true;
+      console.log(`[Sync Debug] No remote document exists for ${userId}. Initiating overwrite from local cache.`);
+    }
+
+    if (shouldOverwrite) {
       const cleanData = {
         habits: localHabits,
         activeRestMode: activeRestMode || null,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        lastUpdated: localTimestamp || Date.now()
       };
       await setDoc(userRef, cleanData);
 
@@ -330,14 +358,19 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
         if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
         logsByMonth[monthPrefix][dateStr] = ids;
       }
+      let totalLogsSize = 0;
       for (const [month, monthLogs] of Object.entries(logsByMonth)) {
         const monthHash = JSON.stringify(monthLogs);
+        totalLogsSize += monthHash.length;
         await setDoc(doc(dbInstance, "users", userId, "logs", month), JSON.parse(monthHash), { merge: true });
         lastSavedMonthHashes[month] = monthHash;
       }
-
+      
+      console.log(`[Sync Debug] Successfully created new document and synced local data. Approx logs payload size: ${totalLogsSize} bytes`);
       return true; 
     }
+    
+    console.log(`[Sync Debug] Document already exists for ${userId}. Skipping local overwrite. Document reference conflict: Local data is older or different.`);
     return false; 
   } catch (error: any) {
     if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {

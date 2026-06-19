@@ -101,11 +101,11 @@ export const Login: React.FC = () => {
       <div className="max-w-md w-full bg-surface-card p-8 md:p-10 rounded-large-card relative z-10 shadow-lg flex flex-col items-center">
         {/* Top Section: Logo & Welcome */}
         <div className="text-center mb-10 w-full">
-          <div className="w-20 h-20 bg-gradient-to-tr from-accent-periwinkle via-accent-blush to-accent-seafoam rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-md rotate-45 hover:rotate-90 transition-transform duration-700">
-            <Sparkles className="w-10 h-10 text-white -rotate-45" />
+          <div className="w-32 h-32 flex items-center justify-center mx-auto mb-4 drop-shadow-md">
+            <img src="/logo.svg" alt="App Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-4xl font-extrabold mb-3 tracking-tight font-display text-primary-anchor">
-            T2SAR DREAM
+            Habit Garden
           </h1>
           <p className="text-slate-400 font-medium text-sm tracking-wide">
             Cultivate your habits. Grow your life.

@@ -419,4 +419,8 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
       />
     </div>
   );
+}, (prev, next) => {
+  return prev.habit === next.habit &&
+         prev.isCompleted === next.isCompleted &&
+         prev.isSlipped === next.isSlipped;
 });

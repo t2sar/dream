@@ -4,13 +4,32 @@ export interface PlantSvgProps {
   primaryColor?: string;
   secondaryColor?: string;
   outlineColor?: string;
+  fruitColor?: string;
 }
 
 export type PlantSvgRenderer = React.FC<PlantSvgProps>;
 
+// Fruit Color Generator: accepts a hex value and programmatically renders a ripeness-shaded gradient
+function generateFruitGradients(baseColor: string, idPrefix: string) {
+  // basic shade generation (assuming baseColor is a valid hex or color string)
+  // We'll create a radial gradient to give it a 3D spherical ripeness look.
+  return (
+    <defs>
+      <radialGradient id={`${idPrefix}-fruit-grad`} cx="30%" cy="30%" r="70%">
+        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+        <stop offset="40%" stopColor={baseColor} />
+        <stop offset="100%" stopColor={baseColor} stopOpacity="0.8" />
+      </radialGradient>
+    </defs>
+  );
+}
+
 export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
-  'Mango / Aam': (props) => (
+  'Mango / Aam': (props) => {
+    const fColor = props.fruitColor || "#FFC843";
+    return (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {generateFruitGradients(fColor, 'mango')}
       <g transform="translate(0, 0)">
         {/* Canopy Back */}
         <path d="M 50 10 C 80 10, 95 35, 85 60 C 95 65, 90 85, 70 90 C 65 100, 35 100, 30 90 C 10 85, 5 65, 15 60 C 5 35, 20 10, 50 10 Z" fill="#3A752C" />
@@ -23,7 +42,7 @@ export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
         {/* Canopy Front */}
         <path d="M 50 10 C 80 10, 95 35, 85 60 C 95 65, 90 85, 70 90 C 65 100, 35 100, 30 90 C 10 85, 5 65, 15 60 C 5 35, 20 10, 50 10 Z" fill="#4B8B3B" />
         {/* Mangoes */}
-        <g fill="#FFC843" stroke="#D97925" strokeWidth="1.5">
+        <g fill="url(#mango-fruit-grad)" stroke="#D97925" strokeWidth="1.5">
           <circle cx="35" cy="40" r="5" />
           <circle cx="65" cy="45" r="5" />
           <circle cx="50" cy="25" r="5" />
@@ -33,7 +52,8 @@ export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
         </g>
       </g>
     </svg>
-  ),
+    );
+  },
   'Banana / Kola': (props) => (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate(0, 0)">
@@ -56,8 +76,11 @@ export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
       </g>
     </svg>
   ),
-  'Jackfruit / Kathal': (props) => (
+  'Jackfruit / Kathal': (props) => {
+    const fColor = props.fruitColor || "#88A825";
+    return (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {generateFruitGradients(fColor, 'jackfruit')}
       <g transform="translate(0, 0)">
         {/* Massive Tree Canopy */}
         <path d="M 50 5 C 80 5, 100 25, 90 55 C 95 80, 75 90, 50 90 C 25 90, 5 80, 10 55 C 0 25, 20 5, 50 5 Z" fill="#2E5A1C" />
@@ -66,23 +89,24 @@ export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
         <path d="M 45 100 Q 45 40 50 30 Q 55 40 55 100" fill="#6B4226" />
         {/* Jackfruits growing directly on the trunk */}
         {/* Main jackfruit */}
-        <ellipse cx="40" cy="65" rx="8" ry="14" fill="#88A825" stroke="#5C7A14" strokeWidth="1.5" />
+        <ellipse cx="40" cy="65" rx="8" ry="14" fill="url(#jackfruit-fruit-grad)" stroke="#5C7A14" strokeWidth="1.5" />
         {/* Texture bumps on Jackfruit */}
         <path d="M 36 60 L 38 62 L 40 60 M 36 65 L 38 67 L 40 65 M 36 70 L 38 72 L 40 70" stroke="#5C7A14" strokeWidth="1.5" opacity="0.6" strokeLinecap="round" />
         
         {/* Second Jackfruit */}
-        <ellipse cx="62" cy="75" rx="7" ry="12" fill="#99BD2E" stroke="#5C7A14" strokeWidth="1.5" />
+        <ellipse cx="62" cy="75" rx="7" ry="12" fill="url(#jackfruit-fruit-grad)" stroke="#5C7A14" strokeWidth="1.5" />
         <path d="M 58 70 L 60 72 L 62 70 M 58 75 L 60 77 L 62 75 M 58 80 L 60 82 L 62 80" stroke="#5C7A14" strokeWidth="1.5" opacity="0.6" strokeLinecap="round" />
 
         {/* Small young Jackfruit */}
-        <ellipse cx="42" cy="50" rx="5" ry="8" fill="#AADD33" stroke="#5C7A14" strokeWidth="1" />
+        <ellipse cx="42" cy="50" rx="5" ry="8" fill="url(#jackfruit-fruit-grad)" stroke="#5C7A14" strokeWidth="1" />
 
         {/* Pot */}
         <path d="M 30 95 Q 50 105 70 95 L 65 115 Q 50 120 35 115 Z" fill="#8C533E" />
         <path d="M 25 85 L 75 85 L 70 95 Q 50 100 30 95 Z" fill="#A86A53" />
       </g>
     </svg>
-  ),
+    );
+  },
   'Guava / Peyara': (props) => (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate(0, 0)">

@@ -7,8 +7,13 @@ export function isHabitDueToday(habit: Habit): boolean {
 
 export function isHabitDueOnDate(habit: Habit, date: Date | string): boolean {
   const targetDate = typeof date === 'string' ? parseISO(date) : date;
+  const dateKey = typeof date === 'string' ? date : targetDate.toISOString().split('T')[0];
   const createdDate = habit.createdAt ? new Date(habit.createdAt) : targetDate;
   
+  if (habit.snoozedDates && habit.snoozedDates.includes(dateKey)) {
+    return false; // Snoozed for this day
+  }
+
   if (!isValid(createdDate)) return true; // Fallback
 
   const scheduleType = habit.scheduleType || 'daily';

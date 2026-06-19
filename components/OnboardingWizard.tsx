@@ -52,7 +52,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
               <div className="w-20 h-20 bg-primary-mint/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sprout className="w-10 h-10 text-primary-mint" />
               </div>
-              <h1 className="text-2xl font-bold text-primary-text mb-4">Welcome to Your Garden</h1>
+              <h1 className="text-2xl font-bold text-primary-text mb-4">Welcome to Habit Garden</h1>
               <p className="text-muted-text leading-relaxed mb-8">
                 Here, your habits are plants. Complete them daily to help them grow from tiny seeds into magnificent flora. Skip a day, and they might wilt.
               </p>

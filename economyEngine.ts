@@ -58,12 +58,68 @@ export function processDailyEconomyReset(extraStats: Partial<UserStats>): Partia
 export function calculateSecureCoinReward(requestedCoins: number, extraStats: Partial<UserStats>, dynamicCap: number): number {
     const todayEarned = extraStats.dailyCoinsEarned || 0;
     
+    let finalRequested = requestedCoins;
+    if (requestedCoins > 0) {
+        // Hemanto Season Logic (10% boost in Oct/Nov)
+        const currentMonth = new Date().getMonth();
+        if (currentMonth === 9 || currentMonth === 10) {
+            finalRequested = Math.floor(requestedCoins * 1.10);
+            console.log(`[Economy Engine] Hemanto season active! Coin yield boosted: ${requestedCoins} -> ${finalRequested}`);
+        }
+    }
+
     if (todayEarned >= dynamicCap) {
         return 0; // Cap reached, no more coins today
     }
     
-    const allowedEarnings = Math.min(requestedCoins, dynamicCap - todayEarned);
+    const allowedEarnings = Math.min(finalRequested, dynamicCap - todayEarned);
     return allowedEarnings;
+}
+
+export function runEconomyDiagnostics(extraStats?: Partial<UserStats>, habits?: Habit[]) {
+    console.log("=== RUNNING ECONOMY ENGINE DIAGNOSTICS ===");
+    let passed = true;
+    
+    // Check for potential coin overflow from current state
+    if (extraStats) {
+        if ((extraStats.coins || 0) > 9999999) {
+            console.warn(`[Economy Engine] Potential coin overflow detected! Coins: ${extraStats.coins}`);
+            passed = false;
+        }
+        if (habits && extraStats.level) {
+            const dynamicCap = calculateDailyCoinCap(habits, extraStats.level);
+            if ((extraStats.dailyCoinsEarned || 0) > dynamicCap) {
+                console.warn(`[Economy Engine] Daily coin limit overflow detected! Earned: ${extraStats.dailyCoinsEarned}, Cap: ${dynamicCap}`);
+                passed = false;
+            }
+        }
+    }
+
+    // Test 1: Standard Reward
+    const res1 = calculateSecureCoinReward(100, { dailyCoinsEarned: 500 }, 1000);
+    if (res1 !== 100) { console.error("Economy Test 1 Failed: Expected 100, got", res1); passed = false; }
+    
+    // Test 2: Reward hitting the cap exactly
+    const res2 = calculateSecureCoinReward(500, { dailyCoinsEarned: 500 }, 1000);
+    if (res2 !== 500) { console.error("Economy Test 2 Failed: Expected 500, got", res2); passed = false; }
+    
+    // Test 3: Reward overflowing the cap
+    const res3 = calculateSecureCoinReward(600, { dailyCoinsEarned: 500 }, 1000);
+    if (res3 !== 500) { console.error("Economy Test 3 Failed: Expected 500, got", res3); passed = false; }
+    
+    // Test 4: Reward when already at cap
+    const res4 = calculateSecureCoinReward(100, { dailyCoinsEarned: 1000 }, 1000);
+    if (res4 !== 0) { console.error("Economy Test 4 Failed: Expected 0, got", res4); passed = false; }
+    
+    // Test 5: Reward when over cap (edge case)
+    const res5 = calculateSecureCoinReward(100, { dailyCoinsEarned: 1200 }, 1000);
+    if (res5 !== 0) { console.error("Economy Test 5 Failed: Expected 0, got", res5); passed = false; }
+    
+    if (passed) {
+        console.log("Economy Engine Secure: Daily ceilings strictly enforced. No overflow detected.");
+    } else {
+        console.error("Economy Engine Diagnostics Failed! Security risk detected.");
+    }
 }
 
 /**

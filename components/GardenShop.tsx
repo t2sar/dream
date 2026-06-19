@@ -23,6 +23,9 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
   const currentCoins = stats.coins || 0;
   const ownedItemIds = stats.ownedItemIds || [];
   
+  const hour = new Date().getHours();
+  const isNightMarket = hour >= 22 || hour < 2;
+
   const filteredItems = SHOP_ITEMS.filter(item => {
     if (activeTab === 'pots') return item.type === 'pot';
     if (activeTab === 'decorations') return item.type === 'decoration';
@@ -34,15 +37,24 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
     return true;
   });
 
+  if (isNightMarket && activeTab === 'seeds') {
+     filteredItems.unshift(
+        { id: 'seed_lychee', name: 'Lychee Seed', type: 'seed', price: 800, requiredLevel: 5, description: 'Exclusive night market item. Grows into a rare Lychee tree.', iconName: 'plant' },
+        { id: 'seed_papaya', name: 'Papaya Seed', type: 'seed', price: 600, requiredLevel: 3, description: 'Exclusive night market item. Grows into a fast Papaya tree.', iconName: 'plant' }
+     );
+  }
+
   return (
-    <div className="space-y-6 pb-20 fade-in animate-in duration-500">
+    <div className={`space-y-6 pb-20 fade-in animate-in duration-500 ${isNightMarket ? 'bg-indigo-950/20 p-4 rounded-3xl' : ''}`}>
       
       {/* Coin Balance Header */}
-      <div className="bg-surface-card border border-surface-alt rounded-3xl p-6 flex items-center justify-between shadow-sm">
+      <div className={`border rounded-3xl p-6 flex items-center justify-between shadow-sm ${isNightMarket ? 'bg-indigo-900/40 border-indigo-500/30' : 'bg-surface-card border-surface-alt'}`}>
         <div>
-           <div className="text-[10px] font-bold tracking-widest text-status-healthy uppercase italic">Your Pouch</div>
+           <div className={`text-[10px] font-bold tracking-widest uppercase italic ${isNightMarket ? 'text-indigo-300' : 'text-status-healthy'}`}>
+             {isNightMarket ? 'Jochona Night Market' : 'Your Pouch'}
+           </div>
            <h2 className="text-2xl font-bold font-display text-primary-text mt-1 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-status-needsCare flex items-center justify-center text-[10px] text-white font-bold border border-surface-alt shadow-sm">C</span>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold border shadow-sm ${isNightMarket ? 'bg-indigo-500 border-indigo-400' : 'bg-status-needsCare border-surface-alt'}`}>C</span>
               {Math.floor(currentCoins)}
            </h2>
         </div>

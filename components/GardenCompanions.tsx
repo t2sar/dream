@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { UserStats } from '../types';
 import { COMPANIONS, CompanionAssetsDictionary } from '../companionsData';
 
@@ -56,40 +56,103 @@ interface CompanionCardProps {
 
 export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => {
   const SvgComponent = CompanionAssetsDictionary[companionId];
+  const [targetPos, setTargetPos] = useState<{ x: number, y: number, name?: string, status?: string } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Only certain companions visit
+    if (companionId === 'kaktadhua' || companionId === 'jonaki') return;
+
+    const pickTarget = () => {
+      // Find all habit card nodes in the DOM
+      const nodes = Array.from(document.querySelectorAll('.habit-card-visit-node')) as HTMLElement[];
+      const container = containerRef.current?.closest('.inset-0') as HTMLElement; // The GardenCompanions parent
+      
+      if (nodes.length > 0 && container && Math.random() > 0.3) {
+        // Weight by attention needed
+        const weightedNodes: HTMLElement[] = [];
+        nodes.forEach((node) => {
+           const status = node.getAttribute('data-status') || 'Normal';
+           let weight = 1;
+           if (status === 'Dead' || status === 'Critical') weight = 10;
+           else if (status === 'Wilting') weight = 5;
+           
+           for (let i = 0; i < weight; i++) {
+              weightedNodes.push(node);
+           }
+        });
+        
+        const target = weightedNodes[Math.floor(Math.random() * weightedNodes.length)];
+        const targetRect = target.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        const x = targetRect.left - containerRect.left + (Math.random() * targetRect.width * 0.6);
+        const y = targetRect.top - containerRect.top - 40; // Perch slightly above the plant
+        
+        const habitName = target.getAttribute('data-habit-name') || '';
+        const status = target.getAttribute('data-status') || 'Normal';
+        
+        setTargetPos({ x, y, name: habitName, status });
+      } else {
+        // Return to a default or wild position occasionally
+        setTargetPos(null);
+      }
+    };
+
+    // Initial delay so layout can settle
+    let timerId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      timerId = setTimeout(() => {
+        pickTarget();
+        scheduleNext();
+      }, 10000 + Math.random() * 8000);
+    };
+
+    timerId = setTimeout(() => {
+       pickTarget();
+       scheduleNext();
+    }, 2000);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [companionId]);
+
   if (!SvgComponent) return null;
   
   // Determine flyer vs sitter
   const isFlyer = ['shongee', 'projapoti', 'moumachhi', 'phoring', 'jonaki', 'machranga', 'pecha'].includes(companionId);
   const isSitter = ['doel', 'kaktadhua', 'ladybug', 'chorui', 'tuntuni', 'bang', 'shalik'].includes(companionId);
   
-  let customClass = '';
+  let baseClass = '';
   switch (companionId) {
     case 'shongee':
-      customClass = 'top-1/3 left-1/4 animate-hovering animate-duration-[4000ms]';
+      baseClass = 'top-1/3 left-1/4 animate-hovering animate-duration-[4000ms]';
       break;
     case 'kaktadhua':
-      customClass = 'bottom-10 right-10 scale-150 transform-origin-bottom';
+      baseClass = 'bottom-10 right-10 scale-150 transform-origin-bottom';
       break;
     case 'doel':
-      customClass = 'bottom-20 left-1/4 animate-perch-sing animate-duration-[10000ms]';
+      baseClass = 'bottom-20 left-1/4 animate-perch-sing animate-duration-[10000ms]';
       break;
     case 'projapoti':
-      customClass = 'animate-fluttering top-1/4 left-1/4 animate-duration-[12000ms]';
+      baseClass = 'animate-fluttering top-1/4 left-1/4 animate-duration-[12000ms]';
       break;
     case 'moumachhi':
-      customClass = 'animate-hovering top-1/3 right-1/4 animate-duration-[4000ms]';
+      baseClass = 'animate-hovering top-1/3 right-1/4 animate-duration-[4000ms]';
       break;
     case 'ladybug':
-      customClass = 'animate-crawling bottom-10 left-10 animate-duration-[20000ms]';
+      baseClass = 'animate-crawling bottom-10 left-10 animate-duration-[20000ms]';
       break;
     case 'chorui':
-      customClass = 'animate-hopping bottom-4 right-1/3 animate-duration-[6000ms]';
+      baseClass = 'animate-hopping bottom-4 right-1/3 animate-duration-[6000ms]';
       break;
     case 'tuntuni':
-      customClass = 'animate-perch-flick top-1/3 left-1/3 animate-duration-[5000ms]';
+      baseClass = 'animate-perch-flick top-1/3 left-1/3 animate-duration-[5000ms]';
       break;
     case 'phoring':
-      customClass = 'animate-darting top-1/4 right-1/5 animate-duration-[7000ms]';
+      baseClass = 'animate-darting top-1/4 right-1/5 animate-duration-[7000ms]';
       break;
     case 'jonaki':
       return (
@@ -109,28 +172,62 @@ export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => 
          </div>
       )
     case 'bang':
-      customClass = 'animate-frog-hop bottom-2 right-10 animate-duration-[15000ms]';
+      baseClass = 'animate-frog-hop bottom-2 right-10 animate-duration-[15000ms]';
       break;
     case 'shalik':
-      customClass = 'animate-strutting bottom-2 left-1/2 animate-duration-[10000ms]';
+      baseClass = 'animate-strutting bottom-2 left-1/2 animate-duration-[10000ms]';
       break;
     case 'machranga':
-      customClass = 'animate-dive top-1/4 right-1/4 animate-duration-[12000ms]';
+      baseClass = 'animate-dive top-1/4 right-1/4 animate-duration-[12000ms]';
       break;
     case 'pecha':
-      customClass = 'animate-perch-blink top-20 right-10 animate-duration-[8000ms] opacity-80';
+      baseClass = 'animate-perch-blink top-20 right-10 animate-duration-[8000ms] opacity-80';
       break;
   }
 
+  // Remove positioning classes from baseClass if we have a target
+  const isVisiting = targetPos !== null;
+  const appliedClass = isVisiting 
+    ? baseClass.replace(/top-\S+|bottom-\S+|left-\S+|right-\S+/g, '') 
+    : baseClass;
+
+  const style: React.CSSProperties = isVisiting ? {
+     top: 0,
+     left: 0,
+     transform: `translate(${targetPos.x}px, ${targetPos.y}px)`,
+     transition: 'transform 3s cubic-bezier(0.25, 1, 0.5, 1)',
+  } : {
+     transition: 'transform 3s cubic-bezier(0.25, 1, 0.5, 1)'
+  };
+
   return (
-    <div className={`absolute ${customClass} w-16 h-16 z-20 group pointer-events-auto cursor-pointer`}>
-      <div className="relative w-full h-full">
+    <div 
+      ref={containerRef}
+      className={`absolute ${appliedClass} w-16 h-16 z-20 group pointer-events-auto cursor-pointer`}
+      style={style}
+    >
+      <div className={`relative w-full h-full ${isVisiting ? 'animate-companion-nuzzle' : (isFlyer ? 'animate-companion-float' : (isSitter ? 'animate-companion-bounce' : ''))}`}>
          {isFlyer && (
            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-2 bg-black/10 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
          )}
          {isSitter && (
            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2 bg-[#78350F]/20 rounded-full blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
          )}
+         
+         {isVisiting && (
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-6 h-6 flex items-center justify-center animate-bounce z-30">
+               {targetPos.status === 'Dead' || targetPos.status === 'Critical' || targetPos.status === 'Wilting' ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-blue-400 drop-shadow-md">
+                     <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                  </svg>
+               ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-rose-400 drop-shadow-md">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+               )}
+            </div>
+         )}
+         
          <SvgComponent className="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.2)] transition-transform duration-500 ease-out group-hover:scale-110 group-hover:-translate-y-1" />
       </div>
     </div>

@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#FDFBF7" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="t2sar dream">
-    <title>t2sar dream</title>
+    <meta name="apple-mobile-web-app-title" content="Habit Garden">
+    <title>Habit Garden</title>
     <script>
       // Fix for "Cannot set property fetch of #<Window> which has only a getter"
       try {
@@ -30,16 +30,22 @@
         color: #1C1B1F;
         margin: 0;
       }
+      @media (prefers-color-scheme: dark) {
+        body, html {
+          background-color: #1A1C1E;
+          color: #FDFBF7;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="root">
       <!-- Splash Screen (replaced by React on mount) -->
-      <div id="splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#FDFBF7;font-family:'Nunito',sans-serif;color:#1C1B1F;text-align:center;">
+      <div id="splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;text-align:center;">
         <div style="position:relative;width:14rem;height:14rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:center;">
-          <img src="/logo.svg" alt="App Logo" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));" />
+          <img src="/logo.svg" alt="App Logo" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));" />
         </div>
-        <h1 style="font-size:1.875rem;font-weight:800;letter-spacing:-0.02em;margin:0;">Your Garden</h1>
+        <h1 style="font-size:1.875rem;font-weight:800;letter-spacing:-0.02em;margin:0;">Habit Garden</h1>
       </div>
       <style>
         @keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.15); } }

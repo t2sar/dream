@@ -149,7 +149,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
 
   const bestHabit = habits.find(h => h.id === computedSummary.currentBestStreakHabitId);
   const isBestHabitSensitive = bestHabit && SENSITIVE_CATEGORIES.includes(bestHabit.category);
-  const bestHabitDisplay = isBestHabitSensitive && !defaultSettings.showSensitiveHabitNames ? 'Private Plant' : (bestHabit?.name || 'Your Garden');
+  const bestHabitDisplay = isBestHabitSensitive && !defaultSettings.showSensitiveHabitNames ? 'Private Plant' : (bestHabit?.name || 'Habit Garden');
 
   return (
     <div className="space-y-6 pb-20 animate-in fade-in duration-500">
@@ -157,7 +157,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
       <div className="bg-surface-card p-6 shadow-md rounded-[var(--radius-card)] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-accent-seafoam/10 rounded-full blur-3xl" />
         <div className="relative z-10">
-          <h2 className="text-xl font-display font-bold text-primary-anchor mb-1">Your Garden Progress</h2>
+          <h2 className="text-xl font-display font-bold text-primary-anchor mb-1">Habit Garden Progress</h2>
           <p className="text-muted-text text-sm mb-4">Small steps are growing your garden.</p>
           
           <div className="flex flex-wrap gap-4 text-xs font-mono uppercase tracking-widest text-accent-seafoam">

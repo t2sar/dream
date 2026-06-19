@@ -2,7 +2,7 @@ import React from 'react';
 import { PlantType, PlantHealthStatus, PlantStage } from '../types';
 import { PLANT_ICONS_CONFIG, PlantIconConfig } from './plantIconRegistry';
 import { Lock } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 // import { PlantSvgShape } from './PlantAssets';
 const PlantSvgShape = React.lazy(() => import('./PlantAssets').then(module => ({ default: module.PlantSvgShape })));
 
@@ -147,16 +147,20 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
         className="absolute inset-0 flex items-center justify-center transform-gpu will-change-transform"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ 
-          scale: scaleValue, 
+          scale: health !== undefined && health > 20 && !isLocked && status !== 'Dead' && status !== 'Critical'
+            ? [scaleValue, scaleValue * (1 + (health / 100) * 0.06), scaleValue]
+            : scaleValue, 
           opacity: opacityValue, 
           y: yOffset
         }}
         whileHover={!isLocked && status !== 'Dead' ? { scale: scaleValue * 1.08 } : {}}
         whileTap={!isLocked ? { scale: scaleValue * 0.95 } : {}}
         transition={{ 
-          type: "spring", 
-          stiffness: 300, 
-          damping: 15,
+          scale: health !== undefined && health > 20 && !isLocked && status !== 'Dead' && status !== 'Critical'
+            ? { repeat: Infinity, duration: 4 - (health / 100) * 2, ease: "easeInOut" }
+            : { type: "spring", stiffness: 300, damping: 15 },
+          opacity: { type: "spring", stiffness: 300, damping: 15 },
+          y: { type: "spring", stiffness: 300, damping: 15 },
           rotate: { type: "tween", duration: 0.3 }
         }}
       >
@@ -164,7 +168,18 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
             className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}
             style={{ filter: getGrayscaleFilter(), willChange: 'transform', transformOrigin: 'bottom center' }}
          >
-            {renderBaseIcon()}
+            <AnimatePresence mode="wait">
+               <motion.div
+                 key={stage}
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 1.2 }}
+                 transition={{ duration: 0.3 }}
+                 className="w-full h-full flex items-center justify-center"
+               >
+                 {renderBaseIcon()}
+               </motion.div>
+            </AnimatePresence>
          </div>
       </motion.div>
 

@@ -107,8 +107,10 @@ export interface Habit {
   difficulty?: 'easy' | 'medium' | 'hard';
   xp?: number;
   lastMissCheckedDate?: string;
+  lastHarvestStreak?: number;
   graceDays?: number;
   createdAt: string;
+  creationDate?: string;
   type?: 'build' | 'avoid';
   replacementAction?: string;
   isPrivate?: boolean;
@@ -134,6 +136,7 @@ export interface Habit {
   intervalUnit?: 'days' | 'weeks' | 'months'; // for custom_interval
   quantityTarget?: number; // for quantity
   quantityUnit?: string; // for quantity
+  snoozedDates?: string[]; // tracks dates where the habit was snoozed
 }
 
 export interface HabitLog {
@@ -215,10 +218,14 @@ export interface UserStats {
   quietHoursEnd?: string;
   monthlyReports?: Record<string, MonthlyGardenReport>; // key is YYYY-MM
   almanacs?: Record<string, AlmanacData>; // key is YYYY
+  melodyBoostUntil?: string; // date string or ISO
   quantityLogs?: Record<string, Record<string, number>>; // dateKey -> habitId -> amount
   // Gardener's Streak
   lastLoginDate?: string;
   currentLoginStreak?: number;
+  lastPerfectDate?: string;
+  currentPerfectStreak?: number;
+  lastMailboxGiftDate?: string;
   completionSound?: 'chime' | 'droplet' | 'pop' | 'none'; // New setting
   dailyReminderEnabled?: boolean;
   dailyReminderTime?: string; // e.g., '09:00'

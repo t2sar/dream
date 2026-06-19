@@ -36,6 +36,35 @@ body[data-time-phase="Night"],
 }
 
 @theme {
+  --animate-cloudPan: cloudPan 60s linear infinite;
+  --animate-fall: fall 1s linear infinite;
+
+  @keyframes cloudPan {
+    from {
+      transform: translate(-100%, -50%);
+    }
+    to {
+      transform: translate(200%, 150%);
+    }
+  }
+
+  @keyframes fall {
+    from {
+      transform: translateY(-10px) rotate(15deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    90% {
+      opacity: 0.8;
+    }
+    to {
+      transform: translate(-20px, 120vh) rotate(15deg);
+      opacity: 0;
+    }
+  }
+
   --color-background-main: var(--bg-base);
   --color-primary-anchor: var(--primary-anchor);
   --color-accent-coral: var(--accent-coral);
@@ -75,9 +104,9 @@ body[data-time-phase="Night"],
   --font-weight-display: 800;
 
   /* Geometry - STRICT RULE: NO 90-degree corners */
-  --radius-none: 16px;
-  --radius-sm: 24px;
-  --radius-md: 24px;
+  --radius-none: 32px;
+  --radius-sm: 32px;
+  --radius-md: 32px;
   --radius-lg: 32px;
   --radius-xl: 32px;
   --radius-2xl: 32px;
@@ -305,6 +334,20 @@ body[data-time-phase="Night"] .bg-surface-card {
   100% { opacity: 1; transform: translate(0, 0); }
 }
 
+@keyframes companionGentleBounce {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-4px) scaleY(1.02); }
+}
+
+@keyframes companionFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(2deg); }
+  75% { transform: translateY(4px) rotate(-2deg); }
+}
+
+.animate-companion-bounce { animation: companionGentleBounce 3.5s ease-in-out infinite; }
+.animate-companion-float { animation: companionFloat 5s ease-in-out infinite; }
+
 .animate-breathe { animation: breathe 4s ease-in-out infinite; }
 .animate-gradient {
   background-size: 300%;
@@ -321,6 +364,17 @@ body[data-time-phase="Night"] .bg-surface-card {
 .animate-strutting { animation: strutting infinite alternate ease-in-out; }
 .animate-dive { animation: dive infinite ease-in-out; }
 .animate-perch-blink { animation: hovering infinite alternate linear; }
+
+@keyframes companionNuzzle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-10deg); }
+  50% { transform: translateY(0) rotate(5deg); }
+  75% { transform: translateY(-3px) rotate(-5deg); }
+}
+
+.animate-companion-nuzzle {
+  animation: companionNuzzle 2.5s ease-in-out infinite;
+}
 
 .bg-surface-card, .bg-surface-soft, .bg-surface-alt, .glass, .glass-card {
   transition: background-color 3s ease-in-out, border-color 3s ease-in-out;
