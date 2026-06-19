@@ -38,6 +38,7 @@ import {
   subscribeToUserData,
   saveUserData,
   syncLocalDataToCloud,
+  flushPendingSaves,
   logout,
 } from "./services/firebase";
 
@@ -90,6 +91,7 @@ import pkg from "./package.json";
 import { HarvestModal } from "./components/HarvestModal";
 import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
 import { MotivationSettings } from "./components/MotivationSettings";
+import { DataDiagnosticPanel } from "./components/DataDiagnosticPanel";
 import { COMPANIONS } from "./companionsData";
 import { evaluateCompanionUnlocks } from "./companionUtils";
 
@@ -567,18 +569,19 @@ function App() {
           const parsedLogs = JSON.parse(
             localStorage.getItem("t2sar_logs") || "{}"
           );
-          await syncLocalDataToCloud(currentUser.uid, parsedHabits, parsedLogs);
+          await syncLocalDataToCloud(currentUser.uid, parsedHabits, parsedLogs, null, null, Date.now());
           localStorage.removeItem("t2sar_habits");
           localStorage.removeItem("t2sar_logs");
         } else if (chunkMeta) {
           const meta = JSON.parse(chunkMeta);
           const h = JSON.parse(localStorage.getItem("t2sar_offline_habits") || "[]");
           const l = JSON.parse(localStorage.getItem("t2sar_offline_logs") || "{}");
+          const s = JSON.parse(localStorage.getItem("t2sar_offline_stats") || "{}");
           const r = JSON.parse(localStorage.getItem("t2sar_offline_rest") || "null");
-          await syncLocalDataToCloud(currentUser.uid, h, l, r, meta.lastUpdated);
+          await syncLocalDataToCloud(currentUser.uid, h, l, s, r, meta.lastUpdated);
         } else if (modernOfflineCache) {
           const parsed = JSON.parse(modernOfflineCache);
-          await syncLocalDataToCloud(currentUser.uid, parsed.habits || [], parsed.logs || {}, parsed.activeRestMode, parsed.lastUpdated);
+          await syncLocalDataToCloud(currentUser.uid, parsed.habits || [], parsed.logs || {}, parsed.extraStats || null, parsed.activeRestMode || null, parsed.lastUpdated);
         }
       }
       setAuthLoading(false);
@@ -598,8 +601,9 @@ function App() {
         const s = data.extraStats || { perfectGardenDays: 0, plantsRevived: 0, xp: 0 };
         const r = data.activeRestMode || null;
         
-        lastPersistedState.current = JSON.parse(JSON.stringify({ h, l, s, r }));
-        lastStateHash.current = JSON.stringify({ h, l, s, r });
+        const str = JSON.stringify({ h, l, s, r });
+        lastPersistedStateHash.current = str;
+        lastStateHash.current = str;
 
         setHabits(h);
         setLogs(l);
@@ -636,8 +640,9 @@ function App() {
           }
           
           if (loaded) {
-            lastPersistedState.current = JSON.parse(JSON.stringify({ h, l, s, r }));
-            lastStateHash.current = JSON.stringify({ h, l, s, r });
+            const str = JSON.stringify({ h, l, s, r });
+            lastPersistedStateHash.current = str;
+            lastStateHash.current = str;
 
             setHabits(h);
             setLogs(l);
@@ -907,8 +912,9 @@ function App() {
   }, [extraStats, habits]);
 
   // 4. Save to Cloud Helper
-  const lastPersistedState = React.useRef<any>(null);
+  const lastPersistedStateHash = React.useRef<string>('');
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
   const persistData = (newHabits: Habit[], newLogs: HabitLog, incomingStats: Partial<UserStats> = extraStats, newRestMode: RestMode | null = activeRestMode) => {
     // Verify badges using a dynamically constructed full stats object
     const totalCompleted = newHabits.reduce((acc, h) => acc + (h.totalCompletions || 0), 0);
@@ -989,59 +995,39 @@ function App() {
        }
     }
 
-    const deepCompare = (obj1: any, obj2: any): boolean => {
-      if (obj1 === obj2) return true;
-      if (!obj1 || !obj2 || typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
-      const keys1 = Object.keys(obj1);
-      const keys2 = Object.keys(obj2);
-      if (keys1.length !== keys2.length) return false;
-      for (const key of keys1) {
-        if (!keys2.includes(key) || !deepCompare(obj1[key], obj2[key])) return false;
-      }
-      return true;
-    };
-
     const newState = { h: newHabits, l: newLogs, s: statsToSave, r: newRestMode };
-    if (lastPersistedState.current && deepCompare(lastPersistedState.current, newState)) {
-      // Data is identical block unnecessary Firebase write
-    } else {
-      if (user) {
-        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = setTimeout(() => {
-          const performSave = () => {
-             lastPersistedState.current = JSON.parse(JSON.stringify(newState));
-             saveUserData(user.uid, { habits: newHabits, logs: newLogs, extraStats: statsToSave, activeRestMode: newRestMode });
-          };
-          
-          if ('requestIdleCallback' in window) {
-            (window as any).requestIdleCallback(performSave, { timeout: 5000 });
-          } else {
-            performSave();
-          }
-        }, 2000); // 2 seconds debounce
-      } else {
-         lastPersistedState.current = JSON.parse(JSON.stringify(newState));
-      }
-    }
-
-    // Offline fallback: always persist to localStorage in smaller chunks to avoid size limit
-    const performLocalSave = () => {
+    
+    // Defer the heavy JSON.stringify serialization to requestIdleCallback
+    const processSave = () => {
       try {
-        localStorage.setItem('t2sar_offline_habits', JSON.stringify(newHabits));
-        localStorage.setItem('t2sar_offline_logs', JSON.stringify(newLogs));
-        localStorage.setItem('t2sar_offline_stats', JSON.stringify(statsToSave));
-        localStorage.setItem('t2sar_offline_rest', JSON.stringify(newRestMode));
-        localStorage.setItem('t2sar_offline_meta', JSON.stringify({ lastUpdated: Date.now() }));
+         const stateStr = JSON.stringify(newState);
+         if (lastPersistedStateHash.current !== stateStr) {
+             lastPersistedStateHash.current = stateStr;
+             const cleanDataToSave = JSON.parse(stateStr);
+             
+             if (user) {
+               saveUserData(user.uid, { habits: cleanDataToSave.h, logs: cleanDataToSave.l, extraStats: cleanDataToSave.s, activeRestMode: cleanDataToSave.r });
+             }
+
+             localStorage.setItem('t2sar_offline_habits', JSON.stringify(cleanDataToSave.h));
+             localStorage.setItem('t2sar_offline_logs', JSON.stringify(cleanDataToSave.l));
+             localStorage.setItem('t2sar_offline_stats', JSON.stringify(cleanDataToSave.s));
+             localStorage.setItem('t2sar_offline_rest', JSON.stringify(cleanDataToSave.r));
+             localStorage.setItem('t2sar_offline_meta', JSON.stringify({ lastUpdated: Date.now() }));
+         }
       } catch (e) {
-        console.error('Failed to save offline cache chunks:', e);
+         console.error('Failed to process offline cache chunks:', e);
       }
     };
 
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(performLocalSave, { timeout: 2000 });
-    } else {
-      performLocalSave();
-    }
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+        if ('requestIdleCallback' in window) {
+           (window as any).requestIdleCallback(processSave, { timeout: 3000 });
+        } else {
+           processSave();
+        }
+    }, 1500);
   };
 
   const lastStateHash = React.useRef<string>('');
@@ -2716,7 +2702,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen bg-[#16aa92]">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen">
         {/* Garden Companions Ambient Layer */}
         <React.Suspense fallback={null}>
           {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}
@@ -2735,6 +2721,7 @@ function App() {
         <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-2">
+              <img src="/logo.svg" alt="Logo" className="w-10 h-10 object-contain drop-shadow-md" />
               <h1 className="text-4xl font-extrabold tracking-tight font-display text-primary-text">
                 {activeTab === Tab.TRACKER &&
                   `HELLO, ${user.displayName?.split(" ")[0] || "USER"}`}
@@ -3817,7 +3804,14 @@ function App() {
                   )}
 
                   <Button
-                    onClick={() => logout()}
+                    onClick={async () => {
+                      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+                      if (user) {
+                        saveUserData(user.uid, { habits, logs, extraStats, activeRestMode });
+                        await flushPendingSaves();
+                      }
+                      await logout();
+                    }}
                     variant="danger"
                     className="w-full md:w-auto px-8 rounded-none font-mono text-xs tracking-widest uppercase py-3 border border-rose-500/20 hover:bg-rose-500/10"
                   >
@@ -3825,6 +3819,14 @@ function App() {
                     Disconnect Session
                   </Button>
                 </div>
+
+                <DataDiagnosticPanel 
+                  user={user} 
+                  habits={habits} 
+                  logs={logs} 
+                  extraStats={extraStats} 
+                  activeRestMode={activeRestMode} 
+                />
 
                 <div className="glass p-8 rounded-none border border-surface-alt relative mb-6">
                   <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4" style={{ color: '#f57100' }}>

@@ -259,14 +259,71 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingData: any = null;
+let pendingUserId: string | null = null;
 let pendingUpdatesPromise: Promise<void> | null = null;
 let pendingUpdatesResolve: (() => void) | null = null;
 const lastSavedMonthHashes: Record<string, string> = {};
+
+const executeSave = async () => {
+  if (!pendingData || !pendingUserId) {
+    if (pendingUpdatesResolve) pendingUpdatesResolve();
+    pendingUpdatesPromise = null;
+    pendingUpdatesResolve = null;
+    return;
+  }
+  const dataToSave = pendingData;
+  const userId = pendingUserId;
+  pendingData = null;
+  pendingUserId = null;
+  const pathForWrite = `users/${userId}`;
+  try {
+    const { logs, ...mainData } = dataToSave;
+    
+    const cleanMainData = { ...mainData, lastUpdated: Date.now() };
+    
+    await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
+
+    const logsByMonth: Record<string, HabitLog> = {};
+    for (const [dateStr, ids] of Object.entries(logs || {}) as [string, string[]][]) {
+      const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
+      if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
+      logsByMonth[monthPrefix][dateStr] = ids;
+    }
+
+    for (const [month, monthLogs] of Object.entries(logsByMonth)) {
+      const monthHash = JSON.stringify(monthLogs);
+      if (lastSavedMonthHashes[month] !== monthHash) {
+         const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
+         await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
+         lastSavedMonthHashes[month] = monthHash;
+      }
+    }
+  } catch (e: any) {
+    if (e?.code === 'resource-exhausted' || (e?.message && e.message.includes('Quota exceeded'))) {
+      await enterOfflineMode();
+    } else {
+      handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
+    }
+  } finally {
+    if (pendingUpdatesResolve) pendingUpdatesResolve();
+    pendingUpdatesPromise = null;
+    pendingUpdatesResolve = null;
+  }
+};
+
+export const flushPendingSaves = async () => {
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
+    }
+    await executeSave();
+};
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }): Promise<void> => {
   if (!dbInstance || isQuotaExceeded) return;
   
   pendingData = data;
+  pendingUserId = userId;
   
   if (!pendingUpdatesPromise) {
     pendingUpdatesPromise = new Promise((resolve) => {
@@ -276,49 +333,12 @@ export const saveUserData = async (userId: string, data: { habits: Habit[], logs
 
   if (saveTimeout) clearTimeout(saveTimeout);
   
-  saveTimeout = setTimeout(async () => {
-    const dataToSave = pendingData;
-    pendingData = null;
-    const pathForWrite = `users/${userId}`;
-    try {
-      const { logs, ...mainData } = dataToSave;
-      
-      const cleanMainData = { ...mainData, lastUpdated: Date.now() };
-      
-      await setDoc(doc(dbInstance, "users", userId), cleanMainData, { merge: true });
-
-      const logsByMonth: Record<string, HabitLog> = {};
-      for (const [dateStr, ids] of Object.entries(logs || {}) as [string, string[]][]) {
-        const monthPrefix = dateStr.substring(0, 7); // YYYY-MM
-        if (!logsByMonth[monthPrefix]) logsByMonth[monthPrefix] = {};
-        logsByMonth[monthPrefix][dateStr] = ids;
-      }
-
-      for (const [month, monthLogs] of Object.entries(logsByMonth)) {
-        const monthHash = JSON.stringify(monthLogs);
-        if (lastSavedMonthHashes[month] !== monthHash) {
-           const monthDocRef = doc(dbInstance, "users", userId, "logs", month);
-           await setDoc(monthDocRef, JSON.parse(monthHash), { merge: true });
-           lastSavedMonthHashes[month] = monthHash;
-        }
-      }
-    } catch (e: any) {
-      if (e?.code === 'resource-exhausted' || (e?.message && e.message.includes('Quota exceeded'))) {
-        await enterOfflineMode();
-      } else {
-        handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
-      }
-    } finally {
-      if (pendingUpdatesResolve) pendingUpdatesResolve();
-      pendingUpdatesPromise = null;
-      pendingUpdatesResolve = null;
-    }
-  }, 500); // 500ms debounce to prevent overlapping writes (App.tsx already throttles 2000ms)
+  saveTimeout = setTimeout(executeSave, 500); 
 
   return pendingUpdatesPromise;
 };
 
-export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, activeRestMode?: any, localTimestamp?: number) => {
+export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[], localLogs: HabitLog, extraStats?: any, activeRestMode?: any, localTimestamp?: number) => {
   if (!dbInstance || isQuotaExceeded) return false;
   const pathForWrite = `users/${userId}`;
 
@@ -345,6 +365,7 @@ export const syncLocalDataToCloud = async (userId: string, localHabits: Habit[],
     if (shouldOverwrite) {
       const cleanData = {
         habits: localHabits,
+        extraStats: extraStats || null,
         activeRestMode: activeRestMode || null,
         createdAt: new Date().toISOString(),
         lastUpdated: localTimestamp || Date.now()

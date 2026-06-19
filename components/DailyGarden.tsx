@@ -68,6 +68,89 @@ const WeatherOverlay = () => {
         </div>
       );
     }
+
+    if (season === 'Sheet') {
+       return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+          {[...Array(30)].map((_, i) => (
+             <div 
+                key={i} 
+                className="absolute w-1.5 h-1.5 bg-white/40 rounded-full animate-snow-fall"
+                style={{ 
+                   left: `${Math.random() * 100}%`,
+                   top: `-${Math.random() * 20}%`,
+                   animationDuration: `${5 + Math.random() * 5}s`,
+                   animationDelay: `${Math.random() * 5}s`
+                }} 
+             />
+          ))}
+          <style>{`
+            @keyframes snowFall {
+               0% { transform: translateY(-10px) translateX(0px); opacity: 0; }
+               10% { opacity: 1; }
+               50% { transform: translateY(50vh) translateX(${Math.random() > 0.5 ? 20 : -20}px); }
+               100% { transform: translateY(100vh) translateX(${Math.random() > 0.5 ? -20 : 20}px); opacity: 0; }
+            }
+            .animate-snow-fall { animation: snowFall linear infinite; }
+          `}</style>
+        </div>
+      );
+    }
+
+    if (season === 'Bashonto') {
+       return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+          {[...Array(20)].map((_, i) => (
+             <div 
+                key={i} 
+                className="absolute w-2 h-2 bg-pink-300/30 rounded-bl-full rounded-tr-full animate-petal-fall"
+                style={{ 
+                   left: `${Math.random() * 100}%`,
+                   top: `-${Math.random() * 20}%`,
+                   animationDuration: `${3 + Math.random() * 4}s`,
+                   animationDelay: `${Math.random() * 3}s`
+                }} 
+             />
+          ))}
+          <style>{`
+            @keyframes petalFall {
+               0% { transform: translateY(-10px) rotate(0deg) translateX(0px); opacity: 0; }
+               10% { opacity: 1; }
+               50% { transform: translateY(50vh) rotate(180deg) translateX(30px); }
+               100% { transform: translateY(100vh) rotate(360deg) translateX(-30px); opacity: 0; }
+            }
+            .animate-petal-fall { animation: petalFall linear infinite; }
+          `}</style>
+        </div>
+      );
+    }
+
+    if (season === 'Grishmo') {
+       return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-20 mix-blend-overlay">
+          {[...Array(10)].map((_, i) => (
+             <div 
+                key={i} 
+                className="absolute w-32 h-32 bg-amber-400/5 rounded-full animate-heat-wave blur-2xl"
+                style={{ 
+                   left: `${Math.random() * 100}%`,
+                   top: `${Math.random() * 100}%`,
+                   animationDuration: `${4 + Math.random() * 4}s`,
+                   animationDelay: `${Math.random() * 2}s`
+                }} 
+             />
+          ))}
+          <style>{`
+            @keyframes heatWave {
+               0% { transform: scale(1) translateY(0); opacity: 0.3; }
+               50% { transform: scale(1.5) translateY(-20px); opacity: 0.6; }
+               100% { transform: scale(1) translateY(0); opacity: 0.3; }
+            }
+            .animate-heat-wave { animation: heatWave ease-in-out infinite; }
+          `}</style>
+        </div>
+      );
+    }
     
     return null;
 };

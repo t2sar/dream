@@ -15,25 +15,36 @@
   --accent-periwinkle: #7F91F0;
   --accent-blush: #F5B3BE;
 
-  --text-secondary: #4A4A4A;
-  --text-muted: #737373;
+  --text-secondary: #3B3B3B;
+  --text-muted: #555555;
+  --text-status-healthy: #276B60;
 }
 
 body[data-time-phase="Evening"],
-body[data-time-phase="Night"],
+body[data-time-phase="Night"] {
+  --bg-base: #121315;
+  --primary-anchor: #FFFFFF;
+  --surface: #1E2023;
+  --surface-soft: #121315;
+  --surface-alt: #272A2E;
+  --text-secondary: #D0D5DB;
+  --text-muted: #9BA2AB;
+  --text-status-healthy: #5FD1C1;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Playful Organic Modernism Palette - Dark */
-    --bg-base: #1A1C1E;
-    --primary-anchor: #FDFBF7; /* Invert anchor text to light cream */
-    --surface: #242629;
-    --surface-soft: #1A1C1E;
-    --surface-alt: #2D3035;
-
-    --text-secondary: #A0A5AE;
-    --text-muted: #6E747C;
+    --bg-base: #121315;
+    --primary-anchor: #FFFFFF;
+    --surface: #1E2023;
+    --surface-soft: #121315;
+    --surface-alt: #272A2E;
+    --text-secondary: #D0D5DB;
+    --text-muted: #9BA2AB;
+    --text-status-healthy: #5FD1C1;
   }
 }
+
 
 @theme {
   --animate-cloudPan: cloudPan 60s linear infinite;
@@ -88,6 +99,7 @@ body[data-time-phase="Night"],
   
   --color-status-excellent: var(--color-accent-seafoam);
   --color-status-healthy: var(--color-accent-seafoam);
+  --color-status-healthy-text: var(--text-status-healthy);
   --color-status-needsCare: var(--color-accent-mustard);
   --color-status-wilting: var(--color-accent-coral);
   --color-status-critical: var(--color-accent-coral);
@@ -378,4 +390,19 @@ body[data-time-phase="Night"] .bg-surface-card {
 
 .bg-surface-card, .bg-surface-soft, .bg-surface-alt, .glass, .glass-card {
   transition: background-color 3s ease-in-out, border-color 3s ease-in-out;
+}
+
+@layer utilities {
+  .text-status-healthy, .text-emerald-400, .text-emerald-300, .text-emerald-200, .text-emerald-400\/80 {
+    color: var(--text-status-healthy) !important;
+  }
+  .bg-emerald-400 {
+    background-color: var(--color-accent-seafoam) !important;
+  }
+  .text-slate-400 {
+    color: var(--text-muted) !important;
+  }
+  .text-slate-500 {
+    color: var(--text-secondary) !important;
+  }
 }

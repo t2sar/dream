@@ -13,7 +13,7 @@ import { Habit } from "../types";
 import { CATEGORIES } from "../categories";
 import { playHaptic } from "../haptics";
 import { PlantIcon } from "./PlantIcon";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import * as LucideIcons from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
@@ -107,7 +107,8 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   const healthColor = getHealthColor(habit.plantHealth ?? 100);
 
   return (
-    <div
+    <motion.div
+      layout
       className={`
       relative overflow-hidden group
       p-8 floating-card squircular transition-all duration-500
@@ -237,15 +238,23 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 {habit.plantStatus || "Healthy"} ({habit.plantHealth ?? 100}%)
               </span>
 
-              <span
-                className={`text-[10px] font-mono uppercase tracking-widest transition-all duration-500 flex items-center gap-1.5 ${isCompleted ? theme.textColor : "text-slate-500"}`}
-                style={{
-                  textShadow: isCompleted ? "0 0 15px currentColor" : "none",
-                }}
-              >
-                <Sprout className="w-3.5 h-3.5" />
-                {habit.plantStage || "Seed"} ({habit.xp ?? ((habit.totalCompletions || 0) * 10)} XP)
-              </span>
+              <AnimatePresence mode="popLayout">
+                <motion.span
+                  layout
+                  key={habit.plantStage || "Seed"}
+                  initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className={`text-[10px] font-mono uppercase tracking-widest transition-all duration-500 flex items-center gap-1.5 ${isCompleted ? theme.textColor : "text-slate-500"}`}
+                  style={{
+                    textShadow: isCompleted ? "0 0 15px currentColor" : "none",
+                  }}
+                >
+                  <Sprout className="w-3.5 h-3.5" />
+                  {habit.plantStage || "Seed"} ({habit.xp ?? ((habit.totalCompletions || 0) * 10)} XP)
+                </motion.span>
+              </AnimatePresence>
 
               {habit.streak > 0 && (
                 <div className="flex flex-col gap-1.5 relative">
@@ -417,7 +426,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
         className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${theme.bg} transition-all duration-1000 ease-out`} 
         style={{ width: isCompleted ? '100%' : '0%', opacity: isCompleted ? 1 : 0 }} 
       />
-    </div>
+    </motion.div>
   );
 }, (prev, next) => {
   return prev.habit === next.habit &&
