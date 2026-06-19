@@ -569,7 +569,9 @@ function App() {
           const parsedLogs = JSON.parse(
             localStorage.getItem("t2sar_logs") || "{}"
           );
-          await syncLocalDataToCloud(currentUser.uid, parsedHabits, parsedLogs, null, null, Date.now());
+          if (parsedHabits.length > 0 || Object.keys(parsedLogs).length > 0) {
+            await syncLocalDataToCloud(currentUser.uid, parsedHabits, parsedLogs, null, null, Date.now());
+          }
           localStorage.removeItem("t2sar_habits");
           localStorage.removeItem("t2sar_logs");
         } else if (chunkMeta) {
@@ -578,10 +580,18 @@ function App() {
           const l = JSON.parse(localStorage.getItem("t2sar_offline_logs") || "{}");
           const s = JSON.parse(localStorage.getItem("t2sar_offline_stats") || "{}");
           const r = JSON.parse(localStorage.getItem("t2sar_offline_rest") || "null");
-          await syncLocalDataToCloud(currentUser.uid, h, l, s, r, meta.lastUpdated);
+          
+          if (h.length > 0 || Object.keys(l).length > 0 || Object.keys(s).length > 0) {
+             await syncLocalDataToCloud(currentUser.uid, h, l, s, r, meta.lastUpdated);
+          }
         } else if (modernOfflineCache) {
           const parsed = JSON.parse(modernOfflineCache);
-          await syncLocalDataToCloud(currentUser.uid, parsed.habits || [], parsed.logs || {}, parsed.extraStats || null, parsed.activeRestMode || null, parsed.lastUpdated);
+          const h = parsed.habits || [];
+          const l = parsed.logs || {};
+          const s = parsed.extraStats || null;
+          if (h.length > 0 || Object.keys(l).length > 0 || (s && Object.keys(s).length > 0)) {
+            await syncLocalDataToCloud(currentUser.uid, h, l, s, parsed.activeRestMode || null, parsed.lastUpdated);
+          }
         }
       }
       setAuthLoading(false);
@@ -595,6 +605,7 @@ function App() {
 
     setDataLoading(true);
     const unsubscribe = subscribeToUserData(user.uid, (data) => {
+      console.log(`[Sync Debug] subscribeToUserData callback triggered. Data present: ${!!data}`);
       if (data) {
         const h = data.habits || [];
         const l = data.logs || {};
@@ -602,10 +613,10 @@ function App() {
         const r = data.activeRestMode || null;
         
         const str = JSON.stringify({ h, l, s, r });
+        console.log(`[Sync Debug] Local state properly reconciled with Remote Data. Handled ${h.length} habits. Last hash match: ${str === lastPersistedStateHash.current}`);
+        
         lastPersistedStateHash.current = str;
         lastStateHash.current = str;
-
-        console.log(`[Sync Debug] Local state properly reconciled with Remote Data. Handled ${h.length} habits.`);
 
         setHabits(h);
         setLogs(l);
@@ -723,7 +734,6 @@ function App() {
         xp: (extraStats.xp || 0) + xpBonus
       };
       setExtraStats(updatedStats);
-      saveUserData(user.uid, { habits, logs, extraStats: updatedStats, activeRestMode });
       
       setTimeout(() => {
         showToast(`🌱 Gardener's Streak Day ${currentStreak}! +${xpBonus} XP`);
@@ -763,7 +773,6 @@ function App() {
             lastMotivationDate: dateKey
           };
           setExtraStats(updatedStats);
-          saveUserData(user.uid, { habits, logs, extraStats: updatedStats, activeRestMode });
         }
       }
     }, 2000); // 2 second delay for gentle entry after loading
@@ -885,7 +894,6 @@ function App() {
            newExtraStats.streakFreezes = Math.max(0, (newExtraStats.streakFreezes || 0) - freezesUsed);
         }
         
-        persistData(updatedHabits, logs, newExtraStats, activeRestMode);
         if (freezesUsed > 0) {
            setExtraStats(newExtraStats);
         }
@@ -1261,8 +1269,11 @@ function App() {
       createdAt: new Date().toISOString(),
       creationDate: new Date().toISOString(),
     };
+    console.log(`[App State] handleAddHabit called. Creating new habit: ${newHabit.id}`);
     const updatedHabits = [...habits, newHabit];
     const newStats = { ...extraStats, habitsCreatedCount: (extraStats.habitsCreatedCount || 0) + 1 };
+    
+    console.log(`[App State] Updating habits state from ${habits.length} to ${updatedHabits.length} items`);
     setExtraStats(newStats);
     setHabits(updatedHabits);
     persistData(updatedHabits, logs, newStats);

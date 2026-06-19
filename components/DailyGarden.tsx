@@ -183,16 +183,16 @@ import { WeatherParticles } from './WeatherParticles';
 
 import { GardenCanvasTerrain } from './GardenCanvasTerrain';
 
-const ViewportLazyWrapper: React.FC<{ children: React.ReactNode, id?: string, status?: string }> = ({ children, id, status }) => {
+const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.ReactNode, id?: string, status?: string }>(({ children, id, status }, ref) => {
   const [isVisible, setIsVisible] = useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
+  const internalRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!internalRef.current) return;
     const observer = new IntersectionObserver(([entry]) => {
       setIsVisible(entry.isIntersecting);
     }, { rootMargin: "300px" });
-    observer.observe(ref.current);
+    observer.observe(internalRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -204,13 +204,22 @@ const ViewportLazyWrapper: React.FC<{ children: React.ReactNode, id?: string, st
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.8, y: -20 }}
       transition={{ type: "spring", stiffness: 250, damping: 25 }}
-      ref={ref} 
+      ref={(node) => {
+        // @ts-ignore
+        internalRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      }} 
       className="min-h-[140px] w-full"
     >
       {isVisible ? children : null}
     </motion.div>
   );
-};
+});
+ViewportLazyWrapper.displayName = 'ViewportLazyWrapper';
 
 export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   habits,

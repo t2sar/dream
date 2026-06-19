@@ -14,11 +14,6 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Google accounts typically provide verified emails.
-    function isVerified() {
-      return isSignedIn() && request.auth.token.email_verified == true;
-    }
-
     function existing() { return resource.data; }
     function incoming() { return request.resource.data; }
     function isValidId(id) { 
@@ -36,13 +31,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId);
       
-      allow create: if isVerified() 
-        && isValidId(userId) 
+      allow create: if isValidId(userId) 
         && isOwner(userId) 
         && isValidUser(incoming());
 
-      allow update: if isVerified() 
-        && isValidId(userId) 
+      allow update: if isValidId(userId) 
         && isOwner(userId) 
         && isValidUser(incoming())
         // Immutable check for createdAt if exists
