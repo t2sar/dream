@@ -605,6 +605,8 @@ function App() {
         lastPersistedStateHash.current = str;
         lastStateHash.current = str;
 
+        console.log(`[Sync Debug] Local state properly reconciled with Remote Data. Handled ${h.length} habits.`);
+
         setHabits(h);
         setLogs(l);
         setExtraStats(s);

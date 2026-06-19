@@ -218,6 +218,7 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 
   unsubDoc = onSnapshot(doc(dbInstance, "users", userId), (docSnap) => {
     docFetched = true;
+    console.log(`[Firestore Read] Main user document fetched for ${userId}. Exists: ${docSnap.exists()}`);
     if (docSnap.exists()) {
       currentData = docSnap.data();
     } else {
@@ -225,6 +226,7 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
     }
     notifyUpdate();
   }, (error) => {
+    console.error(`[Firestore Read] Error fetching main user document for ${userId}`, error);
     if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
       enterOfflineMode();
       onUpdate(null);
@@ -236,12 +238,14 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
 
   unsubLogs = onSnapshot(collection(dbInstance, "users", userId, "logs"), (collSnap) => {
     logsFetched = true;
+    console.log(`[Firestore Read] Logs collection fetched for ${userId}. Snapshot size: ${collSnap.size} documents`);
     collSnap.docChanges().forEach((change) => {
       // Each doc is a YYYY-MM record
       Object.assign(currentLogs, change.doc.data());
     });
     notifyUpdate();
   }, (error) => {
+    console.error(`[Firestore Read] Error fetching logs collection for ${userId}`, error);
     if (error?.code === 'resource-exhausted' || (error?.message && error.message.includes('Quota exceeded'))) {
       enterOfflineMode();
       onUpdate(null);
@@ -298,7 +302,9 @@ const executeSave = async () => {
          lastSavedMonthHashes[month] = monthHash;
       }
     }
+    console.log(`[Firestore Write] Successfully saved user data for ${userId}`);
   } catch (e: any) {
+    console.error(`[Firestore Write] Error saving user data for ${userId}:`, e);
     if (e?.code === 'resource-exhausted' || (e?.message && e.message.includes('Quota exceeded'))) {
       await enterOfflineMode();
     } else {
@@ -321,6 +327,7 @@ export const flushPendingSaves = async () => {
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }): Promise<void> => {
   if (!dbInstance || isQuotaExceeded) return;
+  console.log(`[Firestore Write] saveUserData called for user ${userId} with ${data.habits.length} habits`);
   
   pendingData = data;
   pendingUserId = userId;
