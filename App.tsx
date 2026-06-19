@@ -916,6 +916,8 @@ function App() {
   // 4. Save to Cloud Helper
   const lastPersistedStateHash = React.useRef<string>('');
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const syncLock = React.useRef<boolean>(false);
+  const syncQueue = React.useRef<(() => void) | null>(null);
 
   const persistData = (newHabits: Habit[], newLogs: HabitLog, incomingStats: Partial<UserStats> = extraStats, newRestMode: RestMode | null = activeRestMode) => {
     // Verify badges using a dynamically constructed full stats object
@@ -1000,7 +1002,12 @@ function App() {
     const newState = { h: newHabits, l: newLogs, s: statsToSave, r: newRestMode };
     
     // Defer the heavy JSON.stringify serialization to requestIdleCallback
-    const processSave = () => {
+    const processSave = async () => {
+      if (syncLock.current) {
+         syncQueue.current = () => processSave();
+         return;
+      }
+      syncLock.current = true;
       try {
          const stateStr = JSON.stringify(newState);
          if (lastPersistedStateHash.current !== stateStr) {
@@ -1008,7 +1015,7 @@ function App() {
              const cleanDataToSave = JSON.parse(stateStr);
              
              if (user) {
-               saveUserData(user.uid, { habits: cleanDataToSave.h, logs: cleanDataToSave.l, extraStats: cleanDataToSave.s, activeRestMode: cleanDataToSave.r });
+               await saveUserData(user.uid, { habits: cleanDataToSave.h, logs: cleanDataToSave.l, extraStats: cleanDataToSave.s, activeRestMode: cleanDataToSave.r });
              }
 
              localStorage.setItem('t2sar_offline_habits', JSON.stringify(cleanDataToSave.h));
@@ -1019,6 +1026,13 @@ function App() {
          }
       } catch (e) {
          console.error('Failed to process offline cache chunks:', e);
+      } finally {
+         syncLock.current = false;
+         if (syncQueue.current) {
+             const next = syncQueue.current;
+             syncQueue.current = null;
+             next();
+         }
       }
     };
 

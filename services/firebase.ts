@@ -268,18 +268,26 @@ let pendingUpdatesPromise: Promise<void> | null = null;
 let pendingUpdatesResolve: (() => void) | null = null;
 const lastSavedMonthHashes: Record<string, string> = {};
 
+let isExecutingSave = false;
+
 const executeSave = async () => {
+  if (isExecutingSave) return;
+  
   if (!pendingData || !pendingUserId) {
     if (pendingUpdatesResolve) pendingUpdatesResolve();
     pendingUpdatesPromise = null;
     pendingUpdatesResolve = null;
     return;
   }
+  
+  isExecutingSave = true;
   const dataToSave = pendingData;
   const userId = pendingUserId;
   pendingData = null;
   pendingUserId = null;
+  const currentResolve = pendingUpdatesResolve;
   const pathForWrite = `users/${userId}`;
+  
   try {
     const { logs, ...mainData } = dataToSave;
     
@@ -311,9 +319,18 @@ const executeSave = async () => {
       handleFirestoreError(e, OperationType.WRITE, `users/${userId}`);
     }
   } finally {
-    if (pendingUpdatesResolve) pendingUpdatesResolve();
-    pendingUpdatesPromise = null;
-    pendingUpdatesResolve = null;
+    isExecutingSave = false;
+    if (currentResolve) currentResolve();
+    // Only nullify if we haven't picked up a new promise via a nested saveUserData call
+    if (pendingUpdatesResolve === currentResolve) {
+      pendingUpdatesPromise = null;
+      pendingUpdatesResolve = null;
+    }
+    
+    // If more data queued up while we were saving, trigger it immediately
+    if (pendingData) {
+       await executeSave();
+    }
   }
 };
 
@@ -321,8 +338,12 @@ export const flushPendingSaves = async () => {
     if (saveTimeout) {
         clearTimeout(saveTimeout);
         saveTimeout = null;
+        await executeSave();
     }
-    await executeSave();
+    
+    if (pendingUpdatesPromise) {
+        await pendingUpdatesPromise;
+    }
 };
 
 export const saveUserData = async (userId: string, data: { habits: Habit[], logs: HabitLog, slipLogs?: HabitLog, extraStats?: any, activeRestMode?: any }): Promise<void> => {

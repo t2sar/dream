@@ -16,3 +16,11 @@ Whenever you are asked to create new visual assets (plants, pots, decorations, s
    - Ensure the asset is scaled so the highest leaf or widest edge never touches or clips outside the bounds of the parent UI container. 
 
 When asked for a new item, confirm you understand these rules, generate the Dictionary/Map entry, and provide the raw SVG code.
+
+# Absolute Data Preservation Rule
+
+No matter how many features are added or updated, **USER DATA MUST NEVER BE LOST**. 
+Any modification to state management (`App.tsx`), database synchronization (`services/firebase.ts`), offline caching, or logout mechanisms MUST:
+1. Ensure all local changes are fully saved, flushed, and confirmed to the database (Firestore) before unmounting components or terminating sessions.
+2. Synchronize local and remote state properly during authentication and session recovery to never overwrite user progress with empty or disconnected states.
+3. Be verified against data preservation standards before deploying.
