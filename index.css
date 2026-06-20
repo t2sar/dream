@@ -15,8 +15,8 @@
   --accent-periwinkle: #7F91F0;
   --accent-blush: #F5B3BE;
 
-  --text-secondary: #3B3B3B;
-  --text-muted: #555555;
+  --text-secondary: #2B2D31;
+  --text-muted: #4B4F55;
   --text-status-healthy: #276B60;
 }
 
@@ -27,8 +27,8 @@ body[data-time-phase="Night"] {
   --surface: #1E2023;
   --surface-soft: #121315;
   --surface-alt: #272A2E;
-  --text-secondary: #D0D5DB;
-  --text-muted: #9BA2AB;
+  --text-secondary: #E5E7EB;
+  --text-muted: #BEC3C9;
   --text-status-healthy: #5FD1C1;
 }
 
@@ -39,8 +39,8 @@ body[data-time-phase="Night"] {
     --surface: #1E2023;
     --surface-soft: #121315;
     --surface-alt: #272A2E;
-    --text-secondary: #D0D5DB;
-    --text-muted: #9BA2AB;
+    --text-secondary: #E5E7EB;
+    --text-muted: #BEC3C9;
     --text-status-healthy: #5FD1C1;
   }
 }

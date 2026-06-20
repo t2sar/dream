@@ -1,11 +1,12 @@
 {
   "name": "habit-garden",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --force",
     "build": "tsc && vite build",
+    "build:android": "npm run build && npx cap sync android",
     "preview": "vite preview",
     "lint": "eslint ."
   },
@@ -25,6 +26,8 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
     "@tailwindcss/vite": "^4.3.1",
     "@types/canvas-confetti": "^1.9.0",

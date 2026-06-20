@@ -1,0 +1,39 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arc path centered at top (24 degrees) -->
+    <!-- R=220. Center 256,256 -->
+    <path id="seg" d="M 210.26 40.82 A 220 220 0 0 1 301.74 40.82" fill="none" stroke-width="36" />
+  </defs>
+
+  <!-- Arcs -->
+  <use href="#seg" transform="rotate(-90 256 256)" stroke="#6eba9f" />
+  <use href="#seg" transform="rotate(-60 256 256)" stroke="#6eba9f" />
+  <use href="#seg" transform="rotate(-30 256 256)" stroke="#fce473" />
+  <use href="#seg" transform="rotate(0 256 256)" stroke="#6eba9f" />
+  <use href="#seg" transform="rotate(30 256 256)" stroke="#6eba9f" />
+  <use href="#seg" transform="rotate(60 256 256)" stroke="#6eba9f" />
+  <use href="#seg" transform="rotate(90 256 256)" stroke="#6eba9f" />
+
+  <!-- Green Mountains -->
+  <path d="M 40 512 L 40 370 C 40 310, 80 260, 130 260 C 180 260, 210 330, 256 330 L 256 512 Z" fill="#6eba9f" stroke="#242220" stroke-width="12" stroke-linejoin="round" />
+  <path d="M 472 512 L 472 370 C 472 310, 420 260, 380 260 C 330 260, 290 330, 256 330 L 256 512 Z" fill="#6eba9f" stroke="#242220" stroke-width="12" stroke-linejoin="round" />
+
+  <!-- Red Mountain Main -->
+  <!-- Left shoulder curve added -->
+  <path d="M 30 512 C 40 380, 100 290, 150 290 C 200 290, 210 210, 256 210 C 302 210, 312 290, 362 290 C 412 290, 472 380, 482 512 Z" fill="#fa6d5b" stroke="#242220" stroke-width="16" stroke-linejoin="round" />
+
+  <!-- Path -->
+  <path d="M 120 512 L 256 420 C 330 380, 350 350, 256 350 C 150 350, 150 280, 256 260 L 256 250" fill="none" stroke="#242220" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- ArrowHead -->
+  <polygon points="256,225 230,265 282,265" fill="#242220" stroke="#242220" stroke-width="6" stroke-linejoin="round" />
+
+  <!-- Dots -->
+  <circle cx="256" cy="420" r="14" fill="#fce473" stroke="#242220" stroke-width="8" />
+  <circle cx="256" cy="350" r="14" fill="#fce473" stroke="#242220" stroke-width="8" />
+
+  <!-- Sprout at Peak -->
+  <!-- Let's put standard leaves that match the user's flat design -->
+  <path d="M 256 210 C 230 140, 170 160, 180 180 C 190 200, 230 210, 256 210 Z" fill="#6eba9f" />
+  <path d="M 256 210 C 290 120, 360 140, 350 170 C 340 200, 290 210, 256 210 Z" fill="#6eba9f" />
+</svg>

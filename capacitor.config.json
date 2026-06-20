@@ -1,0 +1,6 @@
+{
+  "appId": "com.serene.garden",
+  "appName": "Habit Garden",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

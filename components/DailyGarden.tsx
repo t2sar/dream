@@ -246,7 +246,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   const [greeting, setGreeting] = useState('');
   
   useEffect(() => {
-    const phase = stats.matchTimeOfDay !== false ? getGardenTimePhase() : 'Morning';
+    const phase = getGardenTimePhase();
     if (phase === 'Dawn') setGreeting('Good morning, early bird!');
     else if (phase === 'Morning') setGreeting('Good morning, Gardener!');
     else if (phase === 'Midday') setGreeting('Bright midday! How are your plants?');
@@ -254,7 +254,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
     else if (phase === 'Sunset') setGreeting('Sunset glows! Beautiful evening.');
     else if (phase === 'Evening') setGreeting('Shubho shondha! Your garden is glowing tonight 🌙');
     else setGreeting('Late night... Your garden is sleeping soon.');
-  }, [stats.matchTimeOfDay]);
+  }, []);
 
   const completedTodayIds = logs[dateKey] || [];
   const slippedTodayIds = (stats.slipLogs?.[dateKey] || []).map(s => s.id);
@@ -381,7 +381,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   let bgClass = "space-y-8 animate-in fade-in duration-500 rounded-3xl p-4 md:p-6 -mx-4 md:-mx-6 relative overflow-hidden";
   const { equippedBackgroundId, equippedFenceId, equippedLeftDecorId, equippedRightDecorId, equippedSeasonalDecorId } = stats;
 
-  const matchTimeOfDay = stats.matchTimeOfDay !== false;
+  const matchTimeOfDay = true;
 
   let baseBgColor = '#24676d'; // Default garden teal base
   if (equippedBackgroundId === 'bg_rooftop') {
@@ -405,7 +405,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   }
 
   // Calculate extra fireflies from completed evening habits
-  const currentPhase = stats.matchTimeOfDay !== false ? getGardenTimePhase() : 'Morning';
+  const currentPhase = getGardenTimePhase();
   let extraFireflies = 0;
   if ((currentPhase === 'Evening' || currentPhase === 'Night') && isPerfectDayNow) {
      extraFireflies = 3;

@@ -98,14 +98,12 @@ export function generateAlmanac(
   let label = "Dupurer Mali";
   let percent = 50;
 
-  if (stats.matchTimeOfDay !== false) {
-     if (eveComps > 0 || nightComps > 0) {
-        label = "Nishachor";
-        percent = Math.min(100, Math.max(30, Math.round(((eveComps + nightComps) / Math.max(1, totalCheckins)) * 100)));
-     } else {
-        label = "Bhorer Pakhi";
-        percent = 60 + Math.round(Math.random() * 20); // 60-80%
-     }
+  if (eveComps > 0 || nightComps > 0) {
+     label = "Nishachor";
+     percent = Math.min(100, Math.max(30, Math.round(((eveComps + nightComps) / Math.max(1, totalCheckins)) * 100)));
+  } else {
+     label = "Bhorer Pakhi";
+     percent = 60 + Math.round(Math.random() * 20); // 60-80%
   }
 
   // Busiest month

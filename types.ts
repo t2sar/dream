@@ -204,7 +204,6 @@ export interface UserStats {
   rainySeasonCompletions?: number;
   badHabitResists?: number;
   orchard?: OrchardEntry[];
-  matchTimeOfDay?: boolean;
   backdatesUsedThisWeek?: number;
   backdateWeekStart?: string;
   backdatedLogs?: Record<string, string[]>; // dateKey -> habitIds

@@ -1,0 +1,19 @@
+{
+  "short_name": "Habit Garden",
+  "name": "Habit Garden",
+  "description": "An ethereal habit tracker for focus and growth",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FDFBF7",
+  "background_color": "#FDFBF7",
+  "orientation": "portrait",
+  "categories": ["productivity", "lifestyle"]
+}

@@ -91,11 +91,75 @@ import pkg from "./package.json";
 import { HarvestModal } from "./components/HarvestModal";
 import { BadgeUnlockModal } from "./components/BadgeUnlockModal";
 import { MotivationSettings } from "./components/MotivationSettings";
-import { DataDiagnosticPanel } from "./components/DataDiagnosticPanel";
+
 import { COMPANIONS } from "./companionsData";
 import { evaluateCompanionUnlocks } from "./companionUtils";
 
 const APP_START_TIME = Date.now();
+
+const serializationWorkerCode = `
+self.onmessage = function(e) {
+  try {
+    const { h, l, s, r } = e.data.payload;
+    const fullStr = JSON.stringify(e.data.payload);
+    const hStr = JSON.stringify(h);
+    const lStr = JSON.stringify(l);
+    const sStr = JSON.stringify(s);
+    const rStr = JSON.stringify(r);
+    self.postMessage({ id: e.data.id, result: { full: fullStr, h: hStr, l: lStr, s: sStr, r: rStr } });
+  } catch (err) {
+    self.postMessage({ id: e.data.id, error: err.message });
+  }
+};
+`;
+
+let jsonWorker: Worker | null = null;
+const jsonCallbacks = new Map<number, { resolve: (val: any) => void, reject: (err: Error) => void }>();
+let jsonMsgId = 0;
+
+function getSerializationWorker() {
+  if (typeof window !== 'undefined' && !jsonWorker) {
+    try {
+      const blob = new Blob([serializationWorkerCode], { type: 'application/javascript' });
+      jsonWorker = new Worker(URL.createObjectURL(blob));
+      jsonWorker.onmessage = (e) => {
+        const { id, result, error } = e.data;
+        if (jsonCallbacks.has(id)) {
+           const { resolve, reject } = jsonCallbacks.get(id)!;
+           jsonCallbacks.delete(id);
+           if (error) reject(new Error(error));
+           else resolve(result);
+        }
+      };
+    } catch (e) {
+       console.warn("Failed to initialize serialization worker, falling back to main thread.");
+    }
+  }
+  return jsonWorker;
+}
+
+function asyncSerializeForPersist(payload: any): Promise<{ full: string, h: string, l: string, s: string, r: string }> {
+  return new Promise((resolve, reject) => {
+    const worker = getSerializationWorker();
+    if (!worker) {
+       try {
+         resolve({
+           full: JSON.stringify(payload),
+           h: JSON.stringify(payload.h),
+           l: JSON.stringify(payload.l),
+           s: JSON.stringify(payload.s),
+           r: JSON.stringify(payload.r)
+         });
+       } catch (e: any) {
+         reject(e);
+       }
+       return;
+    }
+    const id = jsonMsgId++;
+    jsonCallbacks.set(id, { resolve, reject });
+    worker.postMessage({ id, payload });
+  });
+}
 
 const MOTIVATIONAL_QUOTES = [
   {
@@ -682,15 +746,8 @@ function App() {
     const cornerRoundness = extraStats.cornerRoundness || "soft";
     const borderStyle = extraStats.borderStyle || "subtle";
 
-    import("./components/GardenSky").then(({ getGardenTimePhase }) => {
-      const phase = getGardenTimePhase();
-      const isNightPhase = phase === "Evening" || phase === "Night";
-      const actualTheme = (isNightPhase && (extraStats.matchTimeOfDay !== false) && themeId === "cream_butter")
-        ? "classic_obsidian"
-        : themeId;
-      applyAppTheme(actualTheme, accentColor, cornerRoundness, borderStyle);
-    });
-  }, [extraStats?.themeId, extraStats?.accentColor, extraStats?.cornerRoundness, extraStats?.borderStyle, extraStats?.matchTimeOfDay, date]);
+    applyAppTheme(themeId, accentColor, cornerRoundness, borderStyle);
+  }, [extraStats?.themeId, extraStats?.accentColor, extraStats?.cornerRoundness, extraStats?.borderStyle]);
 
   // Gardener's Streak Processing
   useEffect(() => {
@@ -1017,19 +1074,20 @@ function App() {
       }
       syncLock.current = true;
       try {
-         const stateStr = JSON.stringify(newState);
-         if (lastPersistedStateHash.current !== stateStr) {
-             lastPersistedStateHash.current = stateStr;
-             const cleanDataToSave = JSON.parse(stateStr);
+         const serialized = await asyncSerializeForPersist(newState);
+         if (lastPersistedStateHash.current !== serialized.full) {
+             lastPersistedStateHash.current = serialized.full;
+             // JSON.parse the full string for Firebase to ensure plain object without structured cloning artifacts
+             const cleanDataToSave = JSON.parse(serialized.full);
              
              if (user) {
                await saveUserData(user.uid, { habits: cleanDataToSave.h, logs: cleanDataToSave.l, extraStats: cleanDataToSave.s, activeRestMode: cleanDataToSave.r });
              }
 
-             localStorage.setItem('t2sar_offline_habits', JSON.stringify(cleanDataToSave.h));
-             localStorage.setItem('t2sar_offline_logs', JSON.stringify(cleanDataToSave.l));
-             localStorage.setItem('t2sar_offline_stats', JSON.stringify(cleanDataToSave.s));
-             localStorage.setItem('t2sar_offline_rest', JSON.stringify(cleanDataToSave.r));
+             localStorage.setItem('t2sar_offline_habits', serialized.h);
+             localStorage.setItem('t2sar_offline_logs', serialized.l);
+             localStorage.setItem('t2sar_offline_stats', serialized.s);
+             localStorage.setItem('t2sar_offline_rest', serialized.r);
              localStorage.setItem('t2sar_offline_meta', JSON.stringify({ lastUpdated: Date.now() }));
          }
       } catch (e) {
@@ -3468,24 +3526,6 @@ function App() {
 
                   <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
                      <div>
-                        <h3 className="text-primary-text font-bold text-sm">Garden Matches Time of Day</h3>
-                        <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Visuals change from dawn to night</p>
-                     </div>
-                     <button 
-                        onClick={() => {
-                           const currentMatch = extraStats.matchTimeOfDay ?? true;
-                           const newStats = { ...extraStats, matchTimeOfDay: !currentMatch };
-                           setExtraStats(newStats);
-                           persistData(habits, logs, newStats);
-                        }}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${(extraStats.matchTimeOfDay !== false) ? 'bg-cyan-500' : 'bg-slate-700'}`}
-                     >
-                        <div className={`w-4 h-4 bg-surface-card rounded-full absolute top-1 transition-transform ${(extraStats.matchTimeOfDay !== false) ? 'translate-x-7' : 'translate-x-1'}`} />
-                     </button>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-surface-alt/5 p-4 rounded-none border border-surface-alt mb-6">
-                     <div>
                         <h3 className="text-primary-text font-bold text-sm">Completion Sound Cue</h3>
                         <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-wider uppercase max-w-xs">Audio cue on habit completion</p>
                      </div>
@@ -3532,242 +3572,9 @@ function App() {
                     }}
                   />
 
-                  {/* DIAGNOSTIC TOOLS */}
-                  <div className="flex flex-col gap-6 bg-red-900/10 p-6 rounded-none border border-red-500/20 mb-6">
-                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                           <Activity className="w-5 h-5 text-red-400" />
-                           <h3 className="text-primary-text font-bold text-base">Debug Diagnostics</h3>
-                        </div>
-                        <p className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-                           Force sync and reconcile data state
-                        </p>
-                     </div>
-                     <button
-                       onClick={async () => {
-                         if (!user) return;
-                         console.log("=== STARTING CLOUD DIAGNOSTIC ===");
-                         console.log("Local Habits:", habits.length);
-                         console.log("Local Logs Keys:", Object.keys(logs).length);
-                         console.log("Local Data Hash:", JSON.stringify({h: habits, l: logs, s: extraStats}).length);
-                         
-                         import("firebase/firestore").then(async ({ doc, getDoc }) => {
-                           const { db } = await import("./services/firebase");
-                           if (!db) return;
-                           const snapshot = await getDoc(doc(db, "users", user.uid));
-                           if (snapshot.exists()) {
-                             const data = snapshot.data();
-                             console.log("Cloud Raw Object Size:", JSON.stringify(data).length);
-                             console.log("Cloud Habits:", data?.habits?.length);
-                             console.log("Cloud Last Updated:", data?.lastUpdated, "Local:", Date.now());
-                             if (data) {
-                               alert("Diagnostic Sent to Console. View DevTools.");
-                             }
-                           } else {
-                             console.log("Cloud Document does not exist.");
-                             alert("Diagnostic Sent to Console. Document does not exist.");
-                           }
-                         });
-                       }}
-                       className="px-4 py-2 bg-red-500/40 text-red-100 rounded border border-red-500/50 hover:bg-red-500/60 font-mono text-xs w-max"
-                     >
-                        Run Data Sync Console Report
-                     </button>
-                  </div>
 
-                   {/* APP DESIGN & VISUAL LAB */}
-                   <div className="flex flex-col gap-6 bg-surface-alt/5 p-6 rounded-none border border-surface-alt mb-6">
-                      <div>
-                         <div className="flex items-center gap-2 mb-1">
-                            <LucideIcons.Brush className="w-5 h-5 text-primary-mint" />
-                            <h3 className="text-primary-text font-bold text-base">Aesthetic & Layout Design Lab</h3>
-                         </div>
-                         <p className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-                            Fully customize your app canvas, boxes, elements and accent styling
-                         </p>
-                      </div>
 
-                      {/* Option 1: Full App Preset Themes */}
-                      <div className="space-y-3">
-                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">1. Canvas Presets (Body & Containers)</span>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {APP_THEMES.map((t) => {
-                               const isActive = (extraStats.themeId || 'cream_butter') === t.id;
-                               return (
-                                  <button
-                                     key={t.id}
-                                     onClick={() => {
-                                        const newStats = { ...extraStats, themeId: t.id };
-                                        setExtraStats(newStats);
-                                        persistData(habits, logs, newStats);
-                                     }}
-                                     className={`relative p-3 rounded text-left border cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex flex-col justify-between h-28 overflow-hidden group`}
-                                     style={{
-                                        backgroundColor: t.colors['--color-surface-card'],
-                                        borderColor: isActive ? t.colors['--color-primary-mint'] : 'rgba(148, 163, 184, 0.2)',
-                                        boxShadow: isActive ? `0 0 12px ${t.colors['--color-primary-mint']}40` : 'none',
-                                     }}
-                                  >
-                                     <div 
-                                        className="absolute -bottom-6 -right-6 w-16 h-16 rounded-full opacity-10 group-hover:scale-125 transition-transform"
-                                        style={{ backgroundColor: t.colors['--color-primary-mint'] }}
-                                     />
-                                     
-                                     <div>
-                                        <div className="flex items-center justify-between mb-1">
-                                           <span className="font-bold text-xs" style={{ color: t.colors['--color-primary-text'] }}>
-                                              {t.name}
-                                           </span>
-                                           {isActive ? (
-                                              <span className="text-[9px] font-mono uppercase bg-primary-mint/10 border border-primary-mint px-1.5 py-0.5 rounded text-primary-mint">
-                                                 Active
-                                              </span>
-                                           ) : (
-                                              t.isDark ? (
-                                                 <LucideIcons.Moon className="w-3 h-3 text-slate-500" />
-                                              ) : (
-                                                 <LucideIcons.Sun className="w-3 h-3 text-slate-400" />
-                                              )
-                                           )}
-                                        </div>
-                                        <p className="text-[10px] leading-relaxed block" style={{ color: t.colors['--color-secondary-text'] }}>
-                                           {t.description}
-                                        </p>
-                                     </div>
 
-                                     <div className="flex gap-1.5 items-center mt-2 relative z-10">
-                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-background-main'] }} title="BG" />
-                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-surface-card'] }} title="Card" />
-                                        <span className="w-3.5 h-3.5 rounded-full border border-slate-500/10" style={{ backgroundColor: t.colors['--color-surface-alt'] }} title="Border" />
-                                        <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: t.colors['--color-primary-mint'] }} title="Accent" />
-                                     </div>
-                                  </button>
-                               );
-                            })}
-                         </div>
-                      </div>
-
-                      {/* Option 2: Ambient Accent Tint Override */}
-                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
-                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">2. Ambient Accent Tint (Indicators & Action Buttons)</span>
-                         <div className="flex flex-wrap items-center gap-3">
-                            {[
-                               { name: 'Mint / Sage', value: '78 173 160', hex: '#4EADA0' },
-                               { name: 'Teal Bright', value: '143 207 173', hex: '#8FCFAD' },
-                               { name: 'Rose Petal', value: '251 113 133', hex: '#fb7185' },
-                               { name: 'Electric Cyan', value: '34 211 238', hex: '#22d3ee' },
-                               { name: 'Desert Amber', value: '251 191 36', hex: '#fbbf24' },
-                               { name: 'Pure Amethyst', value: '192 132 252', hex: '#c084fc' },
-                               { name: 'Harvest Rust', value: '208 90 63', hex: '#D05A3F' },
-                               { name: 'Obsidian Emerald', value: '16 185 129', hex: '#10B981' }
-                            ].map((color) => {
-                               const isSelected = extraStats.accentColor === color.value;
-                               return (
-                                  <button
-                                     key={color.name}
-                                     onClick={() => {
-                                        const newStats = { ...extraStats, accentColor: color.value };
-                                        setExtraStats(newStats);
-                                        persistData(habits, logs, newStats);
-                                     }}
-                                     className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center relative active:scale-95 cursor-pointer`}
-                                     style={{ 
-                                        backgroundColor: color.hex,
-                                        borderColor: isSelected ? '#FFFFFF' : 'rgba(255,255,255,0.1)'
-                                     }}
-                                     title={color.name}
-                                  >
-                                     {isSelected && (
-                                        <Check className="w-5 h-5 text-primary-text drop-shadow-md" />
-                                     )}
-                                  </button>
-                               );
-                            })}
-                         </div>
-                      </div>
-
-                      {/* Option 3: Corner Curvatures (Geometry style) */}
-                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
-                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">3. Box Corner Geometry (Curvatures)</span>
-                         <div className="grid grid-cols-3 gap-3">
-                            {[
-                               { id: 'sharp', label: 'Brutalist Sharp', desc: '0px corners', styleText: 'rounded-none' },
-                               { id: 'medium', label: 'Modern Elegant', desc: '12px corners', styleText: 'rounded-[12px]' },
-                               { id: 'soft', label: 'Playful Organic', desc: '32px round pill', styleText: 'rounded-[16px]' }
-                            ].map((item) => {
-                               const isActive = (extraStats.cornerRoundness || 'soft') === item.id;
-                               return (
-                                  <button
-                                     key={item.id}
-                                     onClick={() => {
-                                        const newStats = { ...extraStats, cornerRoundness: item.id as any };
-                                        setExtraStats(newStats);
-                                        persistData(habits, logs, newStats);
-                                     }}
-                                     className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
-                                        isActive ? 'bg-background-main/40 border-primary-mint text-primary-text' : 'bg-transparent border-slate-500/20 text-slate-300'
-                                     }`}
-                                  >
-                                     <div className="flex items-center justify-between gap-1 mb-1">
-                                        <span className="font-bold text-[11px] tracking-tight">{item.label}</span>
-                                        {isActive && <div className="w-2 h-2 rounded-full bg-primary-mint" />}
-                                     </div>
-                                     <p className="text-[9px] text-slate-400 font-mono leading-none">{item.desc}</p>
-                                     
-                                     <div className="mt-3 flex gap-1 justify-start">
-                                        <span className={`w-8 h-4 border border-slate-500/30 ${item.styleText}`} />
-                                        <span className={`w-4 h-4 border border-slate-500/30 ${item.styleText}`} />
-                                     </div>
-                                  </button>
-                               );
-                            })}
-                         </div>
-                      </div>
-
-                      {/* Option 4: Box Border Outlines */}
-                      <div className="space-y-3 pt-3 border-t border-slate-500/10">
-                         <span className="text-[11px] font-mono uppercase text-slate-400 tracking-wider block">4. Box Border Styles (Outlines)</span>
-                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {[
-                               { id: 'subtle', label: 'Default Subtle', desc: 'Standard soft outline' },
-                               { id: 'invisible', label: 'Seamless None', desc: 'Smooth flat bg' },
-                               { id: 'solid', label: 'Comic Bold', desc: 'High contrast black outline' },
-                               { id: 'neon', label: 'Cosmic Glow', desc: 'Glowing neon outline' }
-                            ].map((item) => {
-                               const isActive = (extraStats.borderStyle || 'subtle') === item.id;
-                               return (
-                                  <button
-                                     key={item.id}
-                                     onClick={() => {
-                                        const newStats = { ...extraStats, borderStyle: item.id as any };
-                                        setExtraStats(newStats);
-                                        persistData(habits, logs, newStats);
-                                     }}
-                                     className={`p-3 border text-left rounded cursor-pointer relative hover:border-slate-400 transition-colors ${
-                                        isActive ? 'bg-background-main/40 border-primary-mint text-primary-text' : 'bg-transparent border-slate-500/20 text-slate-300'
-                                     }`}
-                                  >
-                                     <div className="flex items-center justify-between gap-1 mb-1">
-                                        <span 
-                                           className="font-bold text-[11px] tracking-tight"
-                                           style={item.id === 'invisible' ? { color: '#000000' } : undefined}
-                                        >
-                                           {item.label}
-                                        </span>
-                                        {isActive && <div className="w-2 h-2 rounded-full bg-primary-mint" />}
-                                     </div>
-                                     <p 
-                                        className="text-[9px] text-slate-400 leading-normal"
-                                        style={item.id === 'solid' ? { backgroundColor: '#ffffff', color: '#080101', fontWeight: 'bold' } : undefined}
-                                     >
-                                        {item.desc}
-                                     </p>
-                                  </button>
-                               );
-                            })}
-                         </div>
-                      </div>
-                   </div>
 
                    {/* Recently Unlocked Badges */}
                    {extraStats.unlockedBadgeIds && Object.keys(extraStats.unlockedBadgeIds).length > 0 && (
@@ -3847,13 +3654,7 @@ function App() {
                   </Button>
                 </div>
 
-                <DataDiagnosticPanel 
-                  user={user} 
-                  habits={habits} 
-                  logs={logs} 
-                  extraStats={extraStats} 
-                  activeRestMode={activeRestMode} 
-                />
+
 
                 <div className="glass p-8 rounded-none border border-surface-alt relative mb-6">
                   <h2 className="text-sm font-mono uppercase tracking-widest text-[#00F5D4] mb-4" style={{ color: '#f57100' }}>
