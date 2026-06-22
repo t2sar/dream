@@ -23,6 +23,7 @@ interface HabitCardProps {
   isSlipped?: boolean;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit?: (id: string) => void;
   onChangeDifficulty?: (id: string, difficulty: 'easy'|'medium'|'hard') => void;
   onSlip?: (id: string) => void;
   undoSlip?: (id: string) => void;
@@ -35,6 +36,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   isSlipped,
   onToggle,
   onDelete,
+  onEdit,
   onChangeDifficulty,
   onSlip,
   undoSlip,
@@ -109,6 +111,8 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   return (
     <motion.div
       layout
+      animate={isCompleted ? { scale: [1, 1.02, 1], y: [0, -4, 0], backgroundColor: ['var(--surface)', 'rgba(78, 173, 160, 0.2)', 'rgba(255, 255, 255, 0.05)'] } : { scale: 1, y: 0, backgroundColor: 'var(--surface)' }}
+      transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
       className={`
       relative overflow-hidden group
       p-8 floating-card squircular transition-all duration-500
@@ -405,15 +409,24 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           {onArchive && (
             <button
               onClick={() => onArchive(habit.id)}
-              className="p-3 text-slate-500 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-indigo-500/20 hover:bg-indigo-500/5 rounded-none"
+              className="p-3 text-secondary-text hover:text-accent-periwinkle opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-periwinkle/20 hover:bg-accent-periwinkle/5 rounded-button"
               title="Archive to Garden History"
             >
               <LucideIcons.Archive className="w-4 h-4" />
             </button>
           )}
+          {onEdit && (
+            <button
+              onClick={() => onEdit(habit.id)}
+              className="p-3 text-secondary-text hover:text-accent-seafoam opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-seafoam/20 hover:bg-accent-seafoam/5 rounded-button"
+              title="Edit Habit"
+            >
+              <LucideIcons.Edit2 className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={() => onDelete(habit.id)}
-            className="p-3 text-slate-500 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all rounded-none border border-transparent hover:border-rose-500/20 hover:bg-rose-500/5"
+            className="p-3 text-secondary-text hover:text-accent-coral opacity-0 group-hover:opacity-100 transition-all rounded-button border border-transparent hover:border-accent-coral/20 hover:bg-accent-coral/5"
             title="Delete Permanently"
           >
             <Trash2 className="w-4 h-4" />

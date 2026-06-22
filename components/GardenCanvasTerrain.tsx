@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Habit, UserStats, HabitLog } from '../types';
-import { NativePlantCanvas } from './NativePlantCanvas';
+import { PlantIcon } from './PlantIcon';
 import { renderPot } from './DailyGarden';
 import { CompanionAssetsDictionary } from '../companionsData';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 interface GardenCanvasTerrainProps {
   habits: Habit[];
@@ -174,7 +175,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
       d.setDate(d.getDate() - i);
       return d.toISOString().split('T')[0];
     });
-    let totalPossible = habits.length * 7;
+    const totalPossible = habits.length * 7;
     let totalDone = 0;
     last7Days.forEach(date => {
       if (logs[date]) {
@@ -261,7 +262,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
     }
 
     // Mailbox logic - check for Perfect Week
-    let consecutivePerfectDays = 0;
+    const consecutivePerfectDays = 0;
     const todayDate = new Date();
     for (let i = 0; i < 7; i++) {
         const d = new Date(todayDate);
@@ -279,7 +280,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
         });
         
         let hasCompletedAny = false;
-        let missedAny = false;
+        const missedAny = false;
         scheduledToday.forEach(h => {
             const isCompleted = (logs[dateKey] || []).includes(h.id);
             if (isCompleted) hasCompletedAny = true;
@@ -329,8 +330,8 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
 
     if (stats.activeCompanionId && companionState) {
       // Use the dynamic companionState instead of a static random position
-      let x = companionState.gridX;
-      let y = companionState.gridY;
+      const x = companionState.gridX;
+      const y = companionState.gridY;
       
       if (!occupied.has(`${x},${y}`) || true) { // We can let it overlap optionally for hover
         items.push({ 
@@ -348,12 +349,26 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   }, [habits, stats.activeCompanionId, companionState, stats.perfectGardenDays, logs]);
 
   return (
-    <div className={`relative w-full h-[600px] border border-surface-alt rounded-2xl overflow-hidden ${seasonBg}`} style={{ perspective: '800px' }}>
-       
-       {/* Mist for Winter (Sheet) */}
-       {seasonWeather === 'sheet' && (
-          <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(255,255,255,0.4)_100%)] mix-blend-screen" />
-       )}
+    <div className={`relative w-full h-[600px] border border-surface-alt rounded-2xl overflow-hidden ${seasonBg}`}>
+      <TransformWrapper
+        initialScale={1}
+        minScale={0.5}
+        maxScale={4}
+        limitToBounds={false}
+      >
+        <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+          <div className="relative w-[1200px] h-[900px] shadow-inner flex items-center justify-center">
+             
+             {/* Background Grass Pattern */}
+             <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0l20 20-20 20L0 20z' fill='%237ba55a' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+                backgroundSize: '40px 40px'
+             }} />
+
+             {/* Mist for Winter (Sheet) */}
+             {seasonWeather === 'sheet' && (
+                <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(255,255,255,0.4)_100%)] mix-blend-screen" />
+             )}
 
        {/* Blooming Palash trees in Spring (Bashonto) behind the content */}
        {seasonWeather === 'bashonto' && (
@@ -413,36 +428,77 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
          </div>
        )}
 
-       {/* 2.5D Container */}
-       <div className="absolute inset-0 preserve-3d" style={{ transform: 'rotateX(45deg) scale(1.2)', transformOrigin: 'top center' }}>
-         
-         {/* Nakshi Kantha Walkways */}
-         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ overflow: 'visible' }}>
-           {renderItems.filter(i => i.type === 'plant' && i.habit && i.habit.streak >= 30).map((p, idx, arr) => {
-              if (idx === 0) return null;
-              const prev = arr[idx - 1];
-              return (
-                <line 
-                  key={`walkway_${idx}`}
-                  x1={`${(prev.gridX / GRID_COLS) * 100}%`}
-                  y1={`${(prev.gridY / GRID_ROWS) * 100}%`}
-                  x2={`${(p.gridX / GRID_COLS) * 100}%`}
-                  y2={`${(p.gridY / GRID_ROWS) * 100}%`}
-                  stroke="rgba(255,255,255,0.4)"
-                  strokeWidth="6"
-                  strokeDasharray="10,10"
-                />
-              );
-           })}
-         </svg>
+       {/* Isometric Grid Container */}
+       <div className="absolute inset-0 flex items-center justify-center mt-12">
+         <div className="relative preserve-3d w-[160%] sm:w-[120%] max-w-[800px] aspect-square pointer-events-auto" style={{ transform: 'rotateX(60deg) rotateZ(-45deg)' }}>
+           
+           {/* Ambient Shadow cast by the island */}
+           <div className="absolute inset-x-0 top-[20%] bottom-[-20%] bg-black/30 blur-[80px] rounded-[100px] translate-y-32 translate-x-12 z-0" style={{ transform: 'rotateX(0deg) rotateZ(0deg)' }} />
+           
+           {/* Grid Base Platform */}
+           <div className="absolute inset-0 bg-[#9CCC65] border-t-2 border-l-2 border-[#C5E1A5] border-r-2 border-b-2 border-[#689F38]">
+             {/* Left face of the platform */}
+             <div className="absolute top-full -left-[2px] w-[calc(100%+2px)] h-[80px] bg-[#795548] origin-top border-l-2 border-[#5D4037] border-b-2" style={{ transform: 'rotateX(-90deg)' }}>
+                <div className="absolute top-0 left-0 w-full h-4 bg-[#8BC34A] border-b-2 border-[#558B2F]" />
+             </div>
+             {/* Right face of the platform */}
+             <div className="absolute top-0 left-full w-[80px] h-full bg-[#5D4037] origin-left border-r-2 border-[#3E2723] border-b-2 border-t-2 border-t-[#795548]" style={{ transform: 'rotateY(90deg)' }}>
+                <div className="absolute top-0 left-0 w-4 h-full bg-[#7CB342] border-r-2 border-[#33691E]" />
+             </div>
+             
+             {/* Dirt block grid lines */}
+             {Array.from({ length: GRID_COLS }).map((_, x) => 
+               Array.from({ length: GRID_ROWS }).map((_, y) => (
+                 <div 
+                   key={`tile_${x}_${y}`} 
+                   className="absolute border border-[#7cb342] opacity-80 hover:opacity-100 bg-[#9ccc65]/40 hover:bg-white/30 transition-colors cursor-pointer"
+                   style={{ left: `${(x / GRID_COLS) * 100}%`, top: `${(y / GRID_ROWS) * 100}%`, width: `${100/GRID_COLS}%`, height: `${100/GRID_ROWS}%` }}
+                 />
+               ))
+             )}
+           </div>
+
+           {/* Nakshi Kantha Walkways */}
+           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ overflow: 'visible' }}>
+             {renderItems.filter(i => i.type === 'plant' && i.habit && i.habit.streak >= 30).map((p, idx, arr) => {
+                if (idx === 0) return null;
+                const prev = arr[idx - 1];
+                return (
+                  <line 
+                    key={`walkway_${idx}`}
+                    x1={`${(prev.gridX / GRID_COLS) * 100 + (50/GRID_COLS)}%`}
+                    y1={`${(prev.gridY / GRID_ROWS) * 100 + (50/GRID_ROWS)}%`}
+                    x2={`${(p.gridX / GRID_COLS) * 100 + (50/GRID_COLS)}%`}
+                    y2={`${(p.gridY / GRID_ROWS) * 100 + (50/GRID_ROWS)}%`}
+                    stroke="rgba(255,255,255,0.4)"
+                    strokeWidth="4"
+                    strokeDasharray="8,8"
+                  />
+                );
+             })}
+           </svg>
 
          {renderItems.map(item => {
-            const leftPercent = (item.gridX / GRID_COLS) * 100;
-            const topPercent = (item.gridY / GRID_ROWS) * 100;
+            const leftPercent = (item.gridX / GRID_COLS) * 100 + (50 / GRID_COLS);
+            const topPercent = (item.gridY / GRID_ROWS) * 100 + (50 / GRID_ROWS);
             
             if (item.type === 'fence') {
                return (
-                 <div key={item.id} className="absolute w-8 h-8 bg-amber-800 border border-amber-900 shadow-md" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: 'translate(-50%, -50%) rotateX(-45deg)' }} />
+                 <div key={item.id} className="absolute pointer-events-none" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: 'translate(-50%, -50%) rotateZ(45deg) rotateX(-60deg)', zIndex: item.gridY + item.gridX }}>
+                   <div className="w-16 h-20 flex flex-col items-center justify-end origin-bottom transform hover:scale-105 transition-transform duration-500">
+                     <svg viewBox="0 0 100 120" className="w-full h-full drop-shadow-xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+                       {/* Trunk */}
+                       <path d="M45 110 L55 110 L55 80 L45 80 Z" fill="#795548" />
+                       {/* Low poly tree top */}
+                       <path d="M50 20 L80 80 L20 80 Z" fill="#4CAF50" />
+                       <path d="M50 20 L80 80 L50 80 Z" fill="#388E3C" />
+                       {/* Second layer */}
+                       <path d="M50 40 L70 90 L30 90 Z" fill="#2E7D32" opacity="0.6"/>
+                       {/* Shadow base */}
+                       <ellipse cx="50" cy="110" rx="12" ry="4" fill="rgba(0,0,0,0.3)" />
+                     </svg>
+                   </div>
+                 </div>
                )
             } else if (item.type === 'pond') {
                const isHighCompletion = weeklyCompletionRate >= 0.8;
@@ -451,7 +507,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                const pondBg = isLowCompletion ? "bg-slate-600/80 border-slate-500" : "bg-cyan-500/50 border-cyan-400";
 
                return (
-                 <div key={item.id} className={`absolute w-[25%] h-[20%] ${pondBg} rounded-[100px] border-2 shadow-inner overflow-hidden transition-colors duration-1000`} style={{ left: `50%`, top: `50%`, transform: 'translate(-50%, -50%) rotateX(-20deg)' }}>
+                 <div key={item.id} className={`absolute w-[25%] h-[20%] ${pondBg} rounded-[100px] border-2 shadow-inner overflow-hidden transition-colors duration-1000`} style={{ left: `50%`, top: `50%`, transform: 'translate(-50%, -50%) rotateZ(45deg)' }}>
                     {/* Water ripples */}
                     <div className="absolute inset-0 opacity-30 animate-pulse bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent"></div>
                     
@@ -479,7 +535,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
             } else if (item.type === 'plant' && item.habit) {
                const isMaster = item.habit.streak >= 30;
                return (
-                 <div key={item.id} className="absolute" style={{ zIndex: item.gridY, left: `${leftPercent}%`, top: `${topPercent}%`, transform: 'translate(-50%, -100%) rotateX(-45deg)', transformOrigin: 'bottom center' }}>
+                 <div key={item.id} className="absolute" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: 'translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)', transformOrigin: 'bottom center' }}>
                     
                     {/* Alpana Decoration */}
                     {isMaster && (
@@ -491,13 +547,19 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                        </svg>
                     )}
 
-                    <div className="relative w-24 h-32 flex flex-col items-center justify-end cursor-pointer group" onClick={() => onWaterPlant(item.habit!.id)}>
-                      <NativePlantCanvas 
-                         habit={item.habit} 
-                         className="w-full h-full absolute bottom-4 z-10 drop-shadow-lg transition-transform group-hover:scale-[1.05]" 
-                      />
-                      {renderPot(stats.equippedPotId, 'absolute bottom-2 inset-x-2 h-4 z-20')}
-                      <div className={`bg-black/30 blur-[2px] transition-all duration-1000 ${shadowClass}`} />
+                    <div className="relative w-28 h-36 flex flex-col items-center justify-end cursor-pointer group" onClick={() => onWaterPlant(item.habit!.id)}>
+                      <div className="absolute inset-x-0 bottom-1 w-full h-[120%] z-10 transition-transform group-hover:scale-[1.05] origin-bottom overflow-hidden" style={{ clipPath: 'inset(0 0 15% 0)' }}>
+                        <PlantIcon 
+                           plantType={item.habit.plantType} 
+                           stage={item.habit.plantStage} 
+                           status={item.habit.plantStatus} 
+                           health={item.habit.plantHealth}
+                           isLegendary={item.habit.isLegendary}
+                           isArchived={item.habit.isArchived}
+                           className="w-full h-full absolute top-[10%] drop-shadow-xl object-contain origin-bottom" 
+                        />
+                      </div>
+                      <div className={`bg-black/30 blur-[3px] transition-all duration-1000 w-16 h-4 absolute bottom-0 z-0 rounded-full`} />
                     </div>
                  </div>
                )
@@ -506,8 +568,8 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                // Some companions hover out naturally, some are grounded
                const isFlying = ['moumachhi', 'ladybug', 'chorui', 'phoring', 'projapoti', 'jonaki'].includes(item.companionId);
                return (
-                 <div key={item.id} className="absolute transition-all duration-1000 ease-in-out" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateX(-45deg)`, transformOrigin: 'bottom center' }}>
-                    <div className={`relative w-12 h-12 flex flex-col items-center justify-end z-20 ${isFlying ? 'animate-bounce' : ''}`}>
+                 <div key={item.id} className="absolute transition-all duration-1000 ease-in-out" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)`, transformOrigin: 'bottom center' }}>
+                    <div className={`relative w-16 h-16 flex flex-col items-center justify-end z-20 ${isFlying ? 'animate-bounce' : ''}`}>
                        {companionState.status === 'water_alert' && (
                           <div className="absolute -top-6 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center">
                              <div className="w-5 h-5 bg-sky-100 border border-sky-300 rounded-full flex items-center justify-center shadow-sm">
@@ -516,43 +578,43 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                              <div className="w-1 h-1 bg-sky-200 mt-0.5 rounded-full" />
                           </div>
                        )}
-                       {AssetComp ? React.createElement(AssetComp, { className: "w-full h-full drop-shadow-lg" }) : <span className="text-3xl drop-shadow-lg">🐦‍⬛</span>}
+                       {AssetComp ? React.createElement(AssetComp, { className: "w-full h-full drop-shadow-xl" }) : <span className="text-3xl drop-shadow-lg">🐦‍⬛</span>}
                     </div>
                  </div>
                )
             } else if (item.type === 'npc' && item.npcType === 'baul') {
                return (
-                 <div key={item.id} className="absolute" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateX(-45deg)`, transformOrigin: 'bottom center' }}>
-                    <div className="relative w-16 h-20 flex flex-col items-center justify-end group z-20">
+                 <div key={item.id} className="absolute" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)`, transformOrigin: 'bottom center' }}>
+                    <div className="relative w-20 h-24 flex flex-col items-center justify-end group z-20">
                         {/* Simple Baul representation (Dotara + Ektara vibe) */}
-                        <div className="absolute top-0 w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center shadow-lg truncate border-2 border-orange-800">
-                          <span className="text-xl">🪕</span>
+                        <div className="absolute top-0 w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center shadow-lg truncate border-2 border-orange-800">
+                          <span className="text-2xl">🪕</span>
                         </div>
-                        <div className="absolute top-7 w-10 h-12 bg-amber-700/90 rounded-t-xl rounded-b-md shadow-md animate-breathe" />
-                        <div className="w-10 h-1.5 bg-black/40 rounded-full blur-[1px] absolute -bottom-1" />
+                        <div className="absolute top-8 w-12 h-14 bg-amber-700/90 rounded-t-xl rounded-b-md shadow-md animate-breathe" />
                         
                         {/* Music Notes */}
                         <div className="absolute -top-4 -right-4 text-xs font-serif animate-bounce text-orange-400 mix-blend-screen" style={{animationDuration: '2s'}}>🎵</div>
                         <div className="absolute -top-2 left-0 text-[10px] font-serif animate-bounce text-amber-300 mix-blend-screen" style={{animationDuration: '2.5s', animationDelay: '0.5s'}}>🎶</div>
+                        <div className="w-12 h-2 bg-black/40 rounded-full blur-[2px] absolute -bottom-1 z-0" />
                     </div>
                  </div>
                )
             } else if (item.type === 'npc' && item.npcType && item.npcType.startsWith('mailbox')) {
                const isRaised = item.npcType === 'mailbox_raised';
                return (
-                 <div key={item.id} className="absolute" style={{ left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateX(-45deg)`, transformOrigin: 'bottom center' }}>
-                     <div className={`relative w-12 h-20 flex flex-col items-center justify-end z-20 ${isRaised ? 'cursor-pointer hover:scale-105 transition-transform' : 'opacity-80'}`} onClick={isRaised && onMailboxClick ? onMailboxClick : undefined}>
-                        <div className="absolute top-0 w-12 h-10 bg-red-600 rounded-t-xl mx-auto shadow-lg border-b-4 border-red-800 flex items-center justify-center z-10">
-                           <div className="w-6 h-4 bg-zinc-800 opacity-50 rounded-md absolute top-2" />
+                 <div key={item.id} className="absolute" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)`, transformOrigin: 'bottom center' }}>
+                     <div className={`relative w-16 h-28 flex flex-col items-center justify-end z-20 ${isRaised ? 'cursor-pointer hover:scale-105 transition-transform' : 'opacity-80'}`} onClick={isRaised && onMailboxClick ? onMailboxClick : undefined}>
+                        <div className="absolute top-0 w-16 h-14 bg-red-600 rounded-t-xl mx-auto shadow-xl border-b-[6px] border-red-800 flex items-center justify-center z-10">
+                           <div className="w-8 h-6 bg-zinc-800 opacity-50 rounded-md absolute top-3" />
                         </div>
-                        <div className="w-2 h-12 bg-amber-900 mx-auto z-0" />
+                        <div className="w-3 h-16 bg-amber-900 mx-auto z-0" />
                         {/* Flag */}
-                        <div className={`absolute w-1 h-6 origin-bottom transform transition-all duration-500 bg-amber-400 rounded-t-full ${isRaised ? 'top-1 -right-1 -rotate-[20deg]' : 'top-4 -right-1 rotate-90'}`} />
-                        <div className={`absolute w-3 h-3 rounded-full transition-all duration-500 bg-amber-400 shadow-sm ${isRaised ? 'top-0 -right-2 transform -rotate-[20deg]' : 'top-9 -right-0'}`} />
+                        <div className={`absolute w-1.5 h-8 origin-bottom transform transition-all duration-500 bg-amber-400 rounded-t-full shadow-md ${isRaised ? 'top-1 -right-2 -rotate-[20deg]' : 'top-6 -right-2 rotate-90'}`} />
+                        <div className={`absolute w-4 h-4 rounded-full transition-all duration-500 bg-amber-400 shadow-md ${isRaised ? '-top-1 -right-3 transform -rotate-[20deg]' : 'top-12 -right-1'}`} />
                         {isRaised && (
-                           <div className="absolute -top-8 text-xl animate-bounce drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">💌</div>
+                           <div className="absolute -top-10 text-3xl animate-bounce drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] z-30">💌</div>
                         )}
-                        <div className="w-10 h-1.5 bg-black/40 rounded-full blur-[1px] absolute -bottom-1 z-0" />
+                        <div className={`bg-black/20 blur-[3px] transition-all duration-1000 w-16 h-4 absolute bottom-0 rounded-[50%] z-0`} />
                      </div>
                  </div>
                )
@@ -560,6 +622,10 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
             return null;
          })}
        </div>
+       </div>
+       </div>
+       </TransformComponent>
+      </TransformWrapper>
     </div>
   );
 };

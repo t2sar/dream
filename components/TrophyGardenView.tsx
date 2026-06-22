@@ -82,7 +82,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-           <div className="glass p-6 rounded-none border border-surface-alt">
+           <div className="bg-surface-card p-6 rounded-large-card shadow-sm border-0">
               <h3 className="text-xs font-mono tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
                  <CalendarDays className="w-4 h-4" /> Journey Log
               </h3>
@@ -106,7 +106,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
               </div>
            </div>
 
-           <div className="glass p-6 rounded-none border border-surface-alt flex flex-col">
+           <div className="bg-surface-card p-6 rounded-large-card shadow-sm border-0 flex flex-col">
               <div className="flex justify-between items-start mb-4">
                  <h3 className="text-xs font-mono tracking-widest text-slate-400 uppercase flex items-center gap-2">
                     <Edit3 className="w-4 h-4" /> Archive Note
@@ -139,7 +139,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
            </div>
         </div>
 
-        <div className="glass p-6 rounded-none border border-rose-500/20 bg-rose-500/5 mt-8">
+        <div className="bg-accent-coral/10 p-6 rounded-large-card shadow-sm border-0 mt-8">
            <h3 className="text-xs font-mono tracking-widest text-rose-400 uppercase mb-4 flex items-center gap-2">
               Danger Zone
            </h3>
@@ -198,7 +198,7 @@ export const TrophyGardenView: React.FC<TrophyGardenViewProps> = ({
       </div>
 
       {archivedHabits.length === 0 ? (
-        <div className="glass p-12 text-center rounded-none border border-surface-alt flex flex-col items-center justify-center">
+        <div className="bg-background-main p-12 text-center rounded-large-card shadow-sm border-0 flex flex-col items-center justify-center">
            <Archive className="w-12 h-12 text-slate-600 mb-6" />
            <h3 className="text-xl font-display font-bold text-primary-text mb-2">No Trophy Plants Yet</h3>
            <p className="text-slate-500 text-sm max-w-sm mx-auto">

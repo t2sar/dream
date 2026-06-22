@@ -4,7 +4,6 @@ export interface PlantSvgProps {
   primaryColor?: string;
   secondaryColor?: string;
   outlineColor?: string;
-  fruitColor?: string;
 }
 
 export type PlantSvgRenderer = React.FC<PlantSvgProps>;
@@ -26,7 +25,7 @@ function generateFruitGradients(baseColor: string, idPrefix: string) {
 
 export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
   'Mango / Aam': (props) => {
-    const fColor = props.fruitColor || "#FFC843";
+    const fColor = "#FFC843";
     return (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       {generateFruitGradients(fColor, 'mango')}
@@ -77,7 +76,7 @@ export const PlantSvgDictionary: Record<string, PlantSvgRenderer> = {
     </svg>
   ),
   'Jackfruit / Kathal': (props) => {
-    const fColor = props.fruitColor || "#88A825";
+    const fColor = "#88A825";
     return (
     <svg viewBox="0 0 100 120" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
       {generateFruitGradients(fColor, 'jackfruit')}

@@ -5,6 +5,7 @@ import { PlantSvgDictionary } from './PlantSvgDictionary';
 interface SvgProps extends React.SVGProps<SVGSVGElement> {
   config: PlantIconConfig;
   isGolden?: boolean;
+  fruitColor?: string;
 }
 
 // Larger Cute leaf

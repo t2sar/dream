@@ -92,86 +92,117 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="app-background-reset flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent-seafoam/10 rounded-full blur-[140px] opacity-40 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-accent-periwinkle/10 rounded-full blur-[140px] opacity-30 pointer-events-none" />
+    <div className="app-background-reset flex flex-col min-h-screen relative overflow-hidden font-sans">
+      {/* Vibrant Playful Top Background Overlay */}
+      <div className="absolute top-0 inset-x-0 h-[45%] bg-accent-coral rounded-b-[48px] shadow-sm z-0">
+        {/* Soft decorative blob 1 */}
+        <div className="absolute top-[-20%] left-[-10%] w-[300px] h-[300px] bg-white/10 rounded-full blur-[2px]" />
+        {/* Soft decorative blob 2 */}
+        <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] bg-white/10 rounded-full blur-[2px]" />
+      </div>
 
-      {/* Main Content */}
-      <div className="max-w-md w-full bg-surface-card p-8 md:p-10 rounded-large-card relative z-10 shadow-lg flex flex-col items-center">
-        {/* Top Section: Logo & Welcome */}
-        <div className="text-center mb-10 w-full">
-          <div className="w-32 h-32 flex items-center justify-center mx-auto mb-4 drop-shadow-md">
-            <img src="/logo.svg" alt="App Logo" className="w-full h-full object-contain" />
+      <div className="relative z-10 flex-col flex flex-1 items-center justify-center p-6 mt-16 sm:mt-24 w-full max-w-md mx-auto">
+        {/* Top Header Floating Element */}
+        <div className="absolute top-[-40px] flex items-center justify-between w-full px-4 mb-4">
+          <div className="text-white">
+            <h2 className="text-2xl font-display font-extrabold tracking-tight">Hi, Gardener ✨</h2>
+            <p className="text-white/80 font-medium text-sm">Let's grow today.</p>
           </div>
-          <h1 className="text-4xl font-extrabold mb-3 tracking-tight font-display text-primary-anchor">
-            Habit Garden
-          </h1>
-          <p className="text-slate-400 font-medium text-sm tracking-wide">
-            Cultivate your habits. Grow your life.
-          </p>
+          <div className="w-14 h-14 bg-accent-mustard rounded-full border-4 border-white shadow-sm flex items-center justify-center">
+            <span className="text-2xl">🌱</span>
+          </div>
         </div>
 
-        {/* Middle Section: Feature List */}
-        <div className="w-full space-y-6 mb-12">
-          <FeatureRow icon={Smartphone} text="Cross Platform Sync" />
-          <FeatureRow icon={ShieldCheck} text="Cloud Backup" />
-          <FeatureRow icon={Sparkles} text="Track Your Streaks" />
-        </div>
+        {/* Main Central Card container - Floating Depth */}
+        <div className="w-full bg-surface p-8 rounded-[40px] shadow-lg flex flex-col items-center mt-12 mb-8 relative">
+          
+          <div className="w-full text-center mb-8 mt-2">
+            <h1 className="text-3xl font-extrabold text-primary-anchor font-display tracking-tight mb-2">
+              Habit Garden
+            </h1>
+            <p className="text-text-muted font-medium text-sm">
+              Cultivate your daily habits.
+            </p>
+          </div>
 
-        {/* Bottom Section: Action Buttons */}
-        <div className="w-full flex flex-col gap-4">
-          {error && !activePopup && (
-            <div className="p-3 mb-2 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-300 text-xs font-mono uppercase tracking-widest">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-450" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {isNative && (
-            <div className="p-4 mb-2 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 text-amber-300">
-              <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500" />
-              <div className="text-xs font-mono uppercase leading-relaxed tracking-wider text-left">
-                <span className="text-white font-bold">Mobile App Notice:</span>{" "}
-                Google login popups are not supported inside Android webviews. Please use Email login instead.
+          {/* Quick stats / Features visual mockup (pill shaped UI) */}
+          <div className="flex gap-4 w-full mb-10">
+            <div className="flex-1 bg-accent-seafoam/10 rounded-[28px] p-4 flex flex-col items-center justify-center transition-transform hover:scale-105 cursor-pointer">
+              <div className="w-10 h-10 bg-accent-seafoam text-white rounded-full flex items-center justify-center mb-2 shadow-sm">
+                <Sparkles className="w-5 h-5" />
               </div>
+              <span className="font-bold text-primary-anchor text-xl">Sync</span>
+              <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Cloud</span>
             </div>
-          )}
+            
+            <div className="flex-1 bg-accent-mustard/10 rounded-[28px] p-4 flex flex-col items-center justify-center transition-transform hover:scale-105 cursor-pointer">
+              <div className="w-10 h-10 bg-accent-mustard text-white rounded-full flex items-center justify-center mb-2 shadow-sm">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <span className="font-bold text-primary-anchor text-xl">Any</span>
+              <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Device</span>
+            </div>
 
-          <Button
-            onClick={handleGoogleLogin}
-            isLoading={isLoading && !activePopup}
-            className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-[#00F5D4] text-zinc-950 hover:bg-[#00d8b9] shadow-[0_0_25px_rgba(0,245,212,0.3)] border-0 rounded-2xl transition-all flex items-center justify-center gap-3"
-          >
-            <img
-              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-              alt="Google"
-              className="w-5 h-5"
-            />
-            Continue with Google
-          </Button>
+            <div className="flex-1 bg-accent-periwinkle/10 rounded-[28px] p-4 flex flex-col items-center justify-center transition-transform hover:scale-105 cursor-pointer">
+              <div className="w-10 h-10 bg-accent-periwinkle text-white rounded-full flex items-center justify-center mb-2 shadow-sm">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <span className="font-bold text-primary-anchor text-xl">Safe</span>
+              <span className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Secure</span>
+            </div>
+          </div>
 
-          <Button
-            onClick={() => {
-              setError(null);
-              setActivePopup("login");
-            }}
-            variant="ghost"
-            className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-transparent text-white border-2 border-surface-alt hover:bg-white/5 rounded-2xl transition-all"
-          >
-            Login with Email
-          </Button>
+          <div className="w-full flex flex-col gap-4">
+            {error && !activePopup && (
+              <div className="p-4 bg-accent-coral text-white rounded-[24px] flex items-center gap-3 text-sm font-bold shadow-sm">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
-          <button
-            onClick={() => {
-              setError(null);
-              setActivePopup("register");
-            }}
-            className="w-full py-3 mt-2 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors"
-          >
-            Create a New Account
-          </button>
+            {isNative && (
+              <div className="p-4 bg-accent-mustard/20 border border-accent-mustard/30 text-primary-anchor rounded-[24px] flex gap-3 text-xs font-bold leading-relaxed mb-4">
+                <AlertTriangle className="w-5 h-5 shrink-0 text-accent-mustard" />
+                <div>
+                  Google login popups are not supported inside Android webviews. Please use Email login instead.
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full py-4 text-sm font-extrabold whitespace-nowrap bg-primary-anchor text-bg-base shadow-sm hover:opacity-90 rounded-full transition-all flex items-center justify-center gap-3"
+            >
+              <img
+                src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+                alt="Google"
+                className="w-5 h-5"
+              />
+              Continue with Google
+            </button>
+
+            <button
+              onClick={() => {
+                setError(null);
+                setActivePopup("login");
+              }}
+              className="w-full py-4 text-sm font-extrabold whitespace-nowrap bg-surface-alt text-primary-anchor hover:bg-surface-alt/80 rounded-full transition-all flex items-center justify-center"
+            >
+              Login with Email
+            </button>
+
+            <button
+              onClick={() => {
+                setError(null);
+                setActivePopup("register");
+              }}
+              className="w-full py-4 mt-2 text-sm font-bold text-text-muted hover:text-primary-anchor transition-colors"
+            >
+              Create a New Account
+            </button>
+          </div>
         </div>
+
       </div>
 
       {/* Popups */}
@@ -179,82 +210,86 @@ export const Login: React.FC = () => {
         isOpen={activePopup === "login"}
         onClose={handleClosePopup}
         alignment="bottom"
-        className="!max-w-md mx-auto !p-0"
+        className="!max-w-md mx-auto !p-0 !bg-transparent !shadow-none"
       >
-        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-surface-alt sm:border sm:rounded-[32px]">
+        <div className="relative p-8 pb-12 bg-surface shadow-xl rounded-t-[40px] sm:rounded-[40px] w-full">
           <button
             onClick={handleClosePopup}
-            className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
+            className="absolute top-6 right-6 p-3 bg-surface-alt text-primary-anchor transition-transform hover:scale-105 rounded-full"
           >
             <X className="w-5 h-5" />
           </button>
-          
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-            <p className="text-sm text-slate-400">Sign in to sync your garden.</p>
+
+          <div className="mb-8 mt-2">
+            <h2 className="text-3xl font-extrabold font-display text-primary-anchor mb-2">
+              Welcome Back
+            </h2>
+            <p className="text-base font-medium text-text-muted">
+              Sign in to sync your garden.
+            </p>
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    <Mail className="w-5 h-5" />
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
-                    placeholder="Enter your email"
-                  />
-                </div>
+          <form onSubmit={handleEmailLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2 pl-4">
+                Email Address
+              </label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted">
+                  <Mail className="w-5 h-5" />
+                </span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-surface-alt border-0 rounded-full pl-14 pr-6 py-4 text-base font-medium text-primary-anchor focus:ring-4 focus:ring-accent-seafoam/30 focus:outline-none transition-all placeholder:text-text-muted/60"
+                  placeholder="Enter your email"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                  Password
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    <Key className="w-5 h-5" />
-                  </span>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
-                    placeholder="Enter your password"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2 pl-4">
+                Password
+              </label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted">
+                  <Key className="w-5 h-5" />
+                </span>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-surface-alt border-0 rounded-full pl-14 pr-6 py-4 text-base font-medium text-primary-anchor focus:ring-4 focus:ring-accent-seafoam/30 focus:outline-none transition-all placeholder:text-text-muted/60"
+                  placeholder="Enter your password"
+                />
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-300 text-xs font-mono uppercase tracking-widest">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-450" />
+              <div className="p-4 bg-accent-coral/20 text-accent-coral rounded-[24px] flex items-center gap-3 text-sm font-bold mt-2">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <Button
+            <button
               type="submit"
-              isLoading={isLoading}
-              className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-[#00F5D4] text-zinc-950 hover:bg-[#00d8b9] border-0 rounded-2xl transition-all"
+              disabled={isLoading}
+              className="w-full py-5 mt-4 text-base font-extrabold bg-accent-seafoam text-white hover:opacity-90 shadow-sm border-0 rounded-full transition-transform active:scale-95"
             >
               Sign In
-            </Button>
+            </button>
 
             <button
               type="button"
               onClick={async () => {
                 if (!email) {
-                  setError("Enter your email address first, then tap Forgot Password.");
+                  setError(
+                    "Enter your email address first, then tap Forgot Password.",
+                  );
                   return;
                 }
                 setError(null);
@@ -266,14 +301,14 @@ export const Login: React.FC = () => {
                   setError(err.message || "Failed to send reset email.");
                 }
               }}
-              className="w-full text-center text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-[#00F5D4] transition-colors py-2"
+              className="w-full text-center text-sm font-bold text-text-muted hover:text-accent-seafoam transition-colors py-4 rounded-full"
             >
               Forgot Password?
             </button>
-            
+
             {resetSent && (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-3 text-emerald-300 text-xs font-mono uppercase tracking-widest">
-                <Mail className="w-4 h-4 shrink-0" />
+              <div className="p-4 bg-accent-seafoam/20 text-accent-seafoam rounded-[24px] flex items-center gap-3 text-sm font-bold mt-2">
+                <Mail className="w-5 h-5 shrink-0" />
                 <span>Reset email sent! Check your inbox.</span>
               </div>
             )}
@@ -285,101 +320,102 @@ export const Login: React.FC = () => {
         isOpen={activePopup === "register"}
         onClose={handleClosePopup}
         alignment="bottom"
-        className="!max-w-md mx-auto !p-0"
+        className="!max-w-md mx-auto !p-0 !bg-transparent !shadow-none"
       >
-        <div className="relative p-6 sm:p-8 bg-zinc-950 border-t border-surface-alt sm:border sm:rounded-[32px]">
+        <div className="relative p-8 pb-12 bg-surface shadow-xl rounded-t-[40px] sm:rounded-[40px] w-full">
           <button
             onClick={handleClosePopup}
-            className="absolute top-6 right-6 p-2 text-slate-500 hover:text-white transition-colors rounded-full hover:bg-white/5"
+            className="absolute top-6 right-6 p-3 bg-surface-alt text-primary-anchor transition-transform hover:scale-105 rounded-full"
           >
             <X className="w-5 h-5" />
           </button>
-          
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">Create Account</h2>
-            <p className="text-sm text-slate-400">Join and start growing today.</p>
+
+          <div className="mb-8 mt-2">
+            <h2 className="text-3xl font-extrabold font-display text-primary-anchor mb-2">
+              Create Account
+            </h2>
+            <p className="text-base font-medium text-text-muted">
+              Join and start growing today.
+            </p>
           </div>
 
-          <form onSubmit={handleEmailRegister} className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    <User className="w-5 h-5" />
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
-                    placeholder="e.g. John Doe"
-                  />
-                </div>
+          <form onSubmit={handleEmailRegister} className="space-y-5">
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2 pl-4">
+                Full Name
+              </label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted">
+                  <User className="w-5 h-5" />
+                </span>
+                <input
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full bg-surface-alt border-0 rounded-full pl-14 pr-6 py-4 text-base font-medium text-primary-anchor focus:ring-4 focus:ring-accent-periwinkle/30 focus:outline-none transition-all placeholder:text-text-muted/60"
+                  placeholder="e.g. John Doe"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    <Mail className="w-5 h-5" />
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
-                    placeholder="e.g. your@email.com"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2 pl-4">
+                Email Address
+              </label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted">
+                  <Mail className="w-5 h-5" />
+                </span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-surface-alt border-0 rounded-full pl-14 pr-6 py-4 text-base font-medium text-primary-anchor focus:ring-4 focus:ring-accent-periwinkle/30 focus:outline-none transition-all placeholder:text-text-muted/60"
+                  placeholder="e.g. your@email.com"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                  Password
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                    <Key className="w-5 h-5" />
-                  </span>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-zinc-900 border border-surface-alt rounded-2xl pl-12 pr-4 py-4 text-sm text-white focus:border-[#00F5D4]/50 focus:outline-none transition-all placeholder:text-slate-600"
-                    placeholder="Minimum 6 characters"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-bold text-text-secondary mb-2 pl-4">
+                Password
+              </label>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted">
+                  <Key className="w-5 h-5" />
+                </span>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-surface-alt border-0 rounded-full pl-14 pr-6 py-4 text-base font-medium text-primary-anchor focus:ring-4 focus:ring-accent-periwinkle/30 focus:outline-none transition-all placeholder:text-text-muted/60"
+                  placeholder="Minimum 6 characters"
+                />
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-300 text-xs font-mono uppercase tracking-widest">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-450" />
+               <div className="p-4 bg-accent-coral/20 text-accent-coral rounded-[24px] flex items-center gap-3 text-sm font-bold mt-2">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <Button
+            <button
               type="submit"
-              isLoading={isLoading}
-              className="w-full py-4 text-sm font-bold tracking-widest uppercase bg-[#00F5D4] text-zinc-950 hover:bg-[#00d8b9] border-0 rounded-2xl transition-all"
+              disabled={isLoading}
+              className="w-full py-5 mt-4 text-base font-extrabold bg-primary-anchor text-bg-base hover:opacity-90 shadow-sm border-0 rounded-full transition-transform active:scale-95"
             >
               Create Account
-            </Button>
+            </button>
 
-            <div className="p-4 bg-zinc-900 border border-cyan-500/10 rounded-2xl flex gap-3 text-slate-500 mt-4">
-              <Info className="w-4 h-4 shrink-0 text-cyan-400 mt-0.5" />
-              <div className="text-[10px] leading-relaxed">
-                <span className="text-white font-bold">Note:</span>{" "}
-                Ensure Email/Password provider is active inside your Cloud Console for the registration module to sync correctly.
+            <div className="p-4 bg-surface-alt/50 rounded-[24px] flex gap-3 text-text-secondary mt-4">
+              <Info className="w-5 h-5 shrink-0 text-accent-periwinkle" />
+              <div className="text-xs font-medium leading-relaxed">
+                Ensure Email/Password provider is active inside your Cloud Console.
               </div>
             </div>
           </form>
@@ -388,14 +424,3 @@ export const Login: React.FC = () => {
     </div>
   );
 };
-
-const FeatureRow = ({ icon: Icon, text }: { icon: any; text: string }) => (
-  <div className="flex items-center gap-5 w-full max-w-[280px] mx-auto group">
-    <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-surface-alt flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:border-[#00F5D4]/30 transition-all duration-300 shadow-inner">
-      <Icon className="w-5 h-5 text-[#00F5D4]" strokeWidth={1.5} />
-    </div>
-    <span className="font-semibold text-sm text-slate-300 tracking-wide">
-      {text}
-    </span>
-  </div>
-);

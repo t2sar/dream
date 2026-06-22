@@ -7,6 +7,65 @@ import { CATEGORIES } from '../categories';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueOnDate } from '../scheduleUtils';
 
+import * as d3 from 'd3';
+
+const TrendSparkline = React.memo(({ data }: { data: { date: Date; completed: number; scheduled: number; isPerfect: boolean; isRestDay: boolean; }[] }) => {
+  const width = 300;
+  const height = 40;
+  
+  if (!data || data.length === 0) return null;
+
+  const sparkData = data.map((d) => {
+    const isFuture = isBefore(startOfDay(new Date()), d.date) && !isSameDay(startOfDay(new Date()), d.date);
+    if (isFuture) return null;
+    
+    if (d.isRestDay) return 1; 
+    return d.scheduled > 0 ? d.completed / d.scheduled : 0;
+  }).filter(d => d !== null) as number[];
+
+  if (sparkData.length === 0) return null;
+
+  const xScale = d3.scaleLinear()
+    .domain([0, Math.max(0, sparkData.length - 1)]) // Max to prevent division by zero
+    .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, Math.max(1, ...sparkData)])
+    .range([height, 2]);
+
+  const lineGenerator = d3.line<number>()
+    .x((_, i) => xScale(i))
+    .y(d => yScale(d))
+    .curve(d3.curveMonotoneX);
+
+  const areaGenerator = d3.area<number>()
+    .x((_, i) => xScale(i))
+    .y0(height)
+    .y1(d => yScale(d))
+    .curve(d3.curveMonotoneX);
+
+  const pathData = lineGenerator(sparkData) || "";
+  const areaData = areaGenerator(sparkData) || "";
+
+  return (
+    <div className="w-full relative flex items-center justify-center mb-6 px-4">
+      <svg width="100%" viewBox={`0 0 ${width} ${height + 4}`} className="overflow-visible preserve-3d">
+        <defs>
+          <linearGradient id="sparkline-gradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#4EADA0" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#4EADA0" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <path d={areaData} fill="url(#sparkline-gradient)" />
+        <path d={pathData} fill="none" stroke="#4EADA0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {sparkData.map((d, i) => (
+          <circle key={i} cx={xScale(i)} cy={yScale(d)} r={4} fill="var(--surface)" stroke="#4EADA0" strokeWidth={2} />
+        ))}
+      </svg>
+    </div>
+  );
+});
+
 interface WeeklyReportViewProps {
   logs: HabitLog;
   habits: Habit[];
@@ -360,6 +419,9 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ l
       {/* Daily Breakdown */}
       <div className="bg-surface-card p-8 shadow-md rounded-[var(--radius-card)]">
         <h3 className="text-xs font-mono tracking-widest text-muted-text uppercase mb-6">Daily 7-Day Breakdown</h3>
+        
+        <TrendSparkline data={reportData.dailyBreakdown} />
+        
         <div className="grid grid-cols-7 gap-2">
           {reportData.dailyBreakdown.map((day, i) => {
             const isFuture = isBefore(startOfDay(new Date()), day.date) && !isSameDay(startOfDay(new Date()), day.date);

@@ -11,6 +11,7 @@ interface HabitFormProps {
   isOpen?: boolean;
   userMaxStreak: number;
   ownedSeeds?: string[];
+  initialHabit?: Habit | null;
   customCategories?: CustomCategory[];
   onAdd: (
     habit: Omit<
@@ -28,26 +29,30 @@ interface HabitFormProps {
       | "graceDays"
     >,
   ) => void;
+  onEdit?: (
+    id: string,
+    habit: Partial<Habit>
+  ) => void;
   onCancel: () => void;
 }
 
-export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStreak, ownedSeeds = [], customCategories = [], onAdd, onCancel }) => {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState<Habit["category"]>("health");
-  const [icon, setIcon] = useState("Activity");
-  const [plantType, setPlantType] = useState<PlantType>("Mango / Aam");
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
-  const [type, setType] = useState<"build" | "avoid">("build");
-  const [replacementAction, setReplacementAction] = useState("");
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [scheduleType, setScheduleType] = useState<Habit['scheduleType']>('daily');
-  const [scheduleDays, setScheduleDays] = useState<number[]>([]);
-  const [targetCount, setTargetCount] = useState<number>(3);
-  const [monthlyDay, setMonthlyDay] = useState<number>(1);
-  const [intervalValue, setIntervalValue] = useState<number>(2);
-  const [intervalUnit, setIntervalUnit] = useState<Habit['intervalUnit']>('days');
-  const [quantityTarget, setQuantityTarget] = useState<number>(8);
-  const [quantityUnit, setQuantityUnit] = useState<string>('glasses');
+export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStreak, ownedSeeds = [], initialHabit, customCategories = [], onAdd, onEdit, onCancel }) => {
+  const [name, setName] = useState(initialHabit?.name || "");
+  const [category, setCategory] = useState<Habit["category"]>(initialHabit?.category || "health");
+  const [icon, setIcon] = useState(initialHabit?.icon || "Activity");
+  const [plantType, setPlantType] = useState<PlantType>(initialHabit?.plantType || "Mango / Aam");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(initialHabit?.difficulty || "medium");
+  const [type, setType] = useState<"build" | "avoid">(initialHabit?.type || "build");
+  const [replacementAction, setReplacementAction] = useState(initialHabit?.replacementAction || "");
+  const [isPrivate, setIsPrivate] = useState(initialHabit?.isPrivate || false);
+  const [scheduleType, setScheduleType] = useState<Habit['scheduleType']>(initialHabit?.scheduleType || 'daily');
+  const [scheduleDays, setScheduleDays] = useState<number[]>(initialHabit?.scheduleDays || []);
+  const [targetCount, setTargetCount] = useState<number>(initialHabit?.targetCount || 3);
+  const [monthlyDay, setMonthlyDay] = useState<number>(initialHabit?.monthlyDay || 1);
+  const [intervalValue, setIntervalValue] = useState<number>(initialHabit?.intervalValue || 2);
+  const [intervalUnit, setIntervalUnit] = useState<Habit['intervalUnit']>(initialHabit?.intervalUnit || 'days');
+  const [quantityTarget, setQuantityTarget] = useState<number>(initialHabit?.quantityTarget || 8);
+  const [quantityUnit, setQuantityUnit] = useState<string>(initialHabit?.quantityUnit || 'glasses');
   const [plantSearch, setPlantSearch] = useState("");
 
   const filteredPlants = useMemo(() => {
@@ -82,7 +87,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({
+    const habitData = {
       name,
       category,
       icon,
@@ -100,7 +105,13 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
       intervalUnit: scheduleType === 'custom_interval' ? intervalUnit : undefined,
       quantityTarget: scheduleType === 'quantity' ? quantityTarget : undefined,
       quantityUnit: scheduleType === 'quantity' ? quantityUnit : undefined,
-    });
+    };
+    
+    if (initialHabit && onEdit) {
+      onEdit(initialHabit.id, habitData);
+    } else {
+      onAdd(habitData);
+    }
   };
 
   return (
@@ -108,7 +119,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
         <div className="flex justify-between items-center mb-8 relative z-10">
           <div>
             <h2 className="text-xl font-bold font-display text-primary-text tracking-wide uppercase">
-              Plant New Seed
+              {initialHabit ? 'Edit Habit' : 'Plant New Seed'}
             </h2>
             <p className="text-secondary-text font-bold text-[11px] uppercase tracking-wide mt-1">
               Configure habit details
@@ -188,7 +199,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
               type="text"
               value={replacementAction}
               onChange={(e) => setReplacementAction(e.target.value)}
-              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-amber-400/65 focus:outline-none transition-all placeholder:text-slate-700"
+              className="w-full bg-surface-soft border-0 rounded-input px-4 py-3.5 text-sm text-primary-anchor font-bold focus:ring-2 focus:ring-accent-mustard focus:outline-none transition-all placeholder:text-secondary-text"
               placeholder="e.g. Drink water or eat fruit"
             />
           </div>
@@ -202,7 +213,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             <select
               value={scheduleType}
               onChange={(e) => setScheduleType(e.target.value as Habit['scheduleType'])}
-              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
+              className="w-full bg-surface-soft border-0 rounded-input px-4 py-3.5 text-sm text-primary-anchor font-bold focus:ring-2 focus:ring-accent-seafoam focus:outline-none appearance-none cursor-pointer"
             >
               <option value="daily">Every day</option>
               <option value="specific_days">Specific days</option>
@@ -345,7 +356,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none appearance-none cursor-pointer"
+              className="w-full bg-surface-soft border-0 rounded-input px-4 py-3.5 text-sm text-primary-anchor font-bold focus:ring-2 focus:ring-accent-seafoam focus:outline-none appearance-none cursor-pointer"
             >
               <option value="health">Physical Health & Fitness</option>
               <option value="mind">Mental Rest & Focus</option>
@@ -487,7 +498,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
               type="text"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              className="w-full bg-background-main border border-surface-alt rounded-none px-4 py-3.5 text-sm text-primary-text font-mono focus:border-[#00F5D4]/65 focus:outline-none placeholder:text-slate-700"
+              className="w-full bg-surface-soft border-0 rounded-input px-4 py-3.5 text-sm text-primary-anchor font-bold focus:ring-2 focus:ring-accent-seafoam focus:outline-none placeholder:text-secondary-text"
               placeholder="e.g. Book, Sun, Sparkles"
             />
           </div>
@@ -506,7 +517,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
             type="submit"
             className="px-8 rounded-button text-[11px] font-bold tracking-wide uppercase py-3 bg-primary-mint text-primary-text hover:bg-[#a5d8bd] transition-all border-0 shadow-sm"
           >
-            Plant Seed
+            {initialHabit ? 'Save Changes' : 'Plant Seed'}
           </Button>
         </div>
       </form>

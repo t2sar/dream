@@ -1,50 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
   /* Playful Organic Modernism Palette - Light */
-  --bg-base: #FDFBF7;
-  --primary-anchor: #1C1B1F;
-  --surface: #FFFFFF;
-  --surface-soft: #FDFBF7;
-  --surface-alt: #F4EDE4;
+  --bg-base: #fdfbf7;
+  --primary-anchor: #1c1b1f;
+  --surface: #ffffff;
+  --surface-soft: #fdfbf7;
+  --surface-alt: #f4ede4;
 
+  --accent-coral: #e57c5d;
+  --accent-mustard: #f4c447;
+  --accent-seafoam: #4eada0;
+  --accent-periwinkle: #7f91f0;
+  --accent-blush: #f5b3be;
+
+  --text-secondary: #2b2d31;
+  --text-muted: #4b4f55;
+  --text-status-healthy: #276b60;
+}
+
+/* Dark mode is disabled dynamically per user request to force Playful Organic Modernism globally */
+.dark-theme-disabled {
+  --bg-base: #1a1c1e;
+  --primary-anchor: #1c1b1f;
+  --surface: #282a2e;
+  --surface-soft: #1a1c1e;
+  --surface-alt: #363a40;
+  --text-secondary: #e5e7eb;
+  --text-muted: #bec3c9;
+  --text-status-healthy: #5fd1c1;
+  
   --accent-coral: #E57C5D;
   --accent-mustard: #F4C447;
   --accent-seafoam: #4EADA0;
   --accent-periwinkle: #7F91F0;
   --accent-blush: #F5B3BE;
-
-  --text-secondary: #2B2D31;
-  --text-muted: #4B4F55;
-  --text-status-healthy: #276B60;
 }
-
-body[data-time-phase="Evening"],
-body[data-time-phase="Night"] {
-  --bg-base: #121315;
-  --primary-anchor: #FFFFFF;
-  --surface: #1E2023;
-  --surface-soft: #121315;
-  --surface-alt: #272A2E;
-  --text-secondary: #E5E7EB;
-  --text-muted: #BEC3C9;
-  --text-status-healthy: #5FD1C1;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-base: #121315;
-    --primary-anchor: #FFFFFF;
-    --surface: #1E2023;
-    --surface-soft: #121315;
-    --surface-alt: #272A2E;
-    --text-secondary: #E5E7EB;
-    --text-muted: #BEC3C9;
-    --text-status-healthy: #5FD1C1;
-  }
-}
-
 
 @theme {
   --animate-cloudPan: cloudPan 60s linear infinite;
@@ -77,7 +69,13 @@ body[data-time-phase="Night"] {
   }
 
   --color-background-main: var(--bg-base);
+  --color-bg-base: var(--bg-base);
   --color-primary-anchor: var(--primary-anchor);
+  --color-surface: var(--surface);
+  --color-text-muted: var(--text-muted);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-status-healthy: var(--text-status-healthy);
+  
   --color-accent-coral: var(--accent-coral);
   --color-accent-mustard: var(--accent-mustard);
   --color-accent-seafoam: var(--accent-seafoam);
@@ -96,7 +94,6 @@ body[data-time-phase="Night"] {
   --color-primary-blush: var(--accent-blush);
   --color-accent-peach: var(--accent-coral);
 
-  
   --color-status-excellent: var(--color-accent-seafoam);
   --color-status-healthy: var(--color-accent-seafoam);
   --color-status-healthy-text: var(--text-status-healthy);
@@ -108,23 +105,24 @@ body[data-time-phase="Night"] {
   --color-status-completed: var(--color-accent-seafoam);
 
   /* Friendly Typography */
-  --font-sans: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Quicksand', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Quicksand", ui-sans-serif, system-ui, sans-serif;
   --font-weight-body: 600;
   --font-weight-label: 600;
   --font-weight-display: 800;
+  --tracking-display: 0.02em; /* Increase horizontal tracking slightly for titles */
 
-  /* Geometry - STRICT RULE: NO 90-degree corners */
+  /* Geometry - STRICT RULE: NO 90-degree corners - Aggressive Squircular */
   --radius-none: 32px;
-  --radius-sm: 32px;
-  --radius-md: 32px;
+  --radius-sm: 28px;
+  --radius-md: 28px;
   --radius-lg: 32px;
   --radius-xl: 32px;
   --radius-2xl: 32px;
   --radius-3xl: 50px;
   --radius-full: 9999px;
-  
+
   --radius-card: 32px;
   --radius-large-card: 32px;
   --radius-surface: 32px;
@@ -136,39 +134,41 @@ body[data-time-phase="Night"] {
   --radius-progress: 9999px;
 
   /* Elevations - Floating Depth (Diffused Shadows) */
-  --shadow-none: 0 0 0 rgba(0,0,0,0);
+  --shadow-none: 0 0 0 rgba(0, 0, 0, 0);
   --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08); /* 8% opacity, blur 16dp, Y 4dp */
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.10); 
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 6px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 @layer base {
   html {
-    background-color: var(--color-background-main) !important;
+    background-color: var(--bg-base) !important;
   }
 
   body {
     font-family: var(--font-sans);
     font-weight: var(--font-weight-body);
-    background-color: var(--color-background-main) !important;
-    color: var(--color-primary-anchor) !important;
+    background-color: var(--bg-base) !important;
+    color: var(--primary-anchor) !important;
     line-height: 1.6;
     letter-spacing: 0.01em;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 3s ease-in-out, color 3s ease-in-out;
+    transition:
+      background-color 3s ease-in-out,
+      color 3s ease-in-out;
   }
 
-  body[data-time-phase="Evening"],
-  body[data-time-phase="Night"] {
-    background-color: var(--color-background-main) !important;
-    color: var(--color-primary-anchor) !important;
-  }
-  
-  h1, h2, h3, h4, h5, h6, .font-display {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-display {
     font-weight: var(--font-weight-display);
     letter-spacing: 0.02em;
-    color: var(--color-primary-anchor);
+    color: var(--primary-anchor);
   }
   .squircular {
     border-radius: var(--radius-lg); /* 32px squircular radius */
@@ -176,22 +176,30 @@ body[data-time-phase="Night"] {
 
   .floating-card {
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm); /* 8% opacity, blur 16dp, Y 4dp defined earlier */
-    background-color: var(--color-surface-card);
+    box-shadow: var(
+      --shadow-sm
+    ); /* 8% opacity, blur 16dp, Y 4dp defined earlier */
+    background-color: var(--surface);
   }
 
   /* Explicit background reset to prevent conflicting styles */
   .app-background-reset {
-    background-color: var(--color-background-main) !important;
-    color: var(--color-primary-anchor) !important;
+    background-color: var(--bg-base);
+    color: var(--primary-anchor);
     min-height: 100vh;
-    transition: background-color 3s ease-in-out, color 3s ease-in-out;
+    transition:
+      background-color 3s ease-in-out,
+      color 3s ease-in-out;
   }
 
-  body[data-time-phase="Evening"] .app-background-reset,
-  body[data-time-phase="Night"] .app-background-reset {
-    background-color: var(--color-background-main) !important;
-    color: var(--color-primary-anchor) !important;
+  .bg-background-main {
+    background-color: var(--bg-base) !important;
+  }
+  .bg-surface-card {
+    background-color: var(--surface) !important;
+  }
+  .text-primary-anchor {
+    color: var(--primary-anchor) !important;
   }
 }
 
@@ -212,42 +220,34 @@ body[data-time-phase="Night"] {
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--surface-card);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 12px 32px -8px rgba(0, 0, 0, 0.04), 0 4px 12px -4px rgba(0, 0, 0, 0.02);
-}
-
-body[data-time-phase="Evening"] .glass,
-body[data-time-phase="Night"] .glass {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 32px -8px rgba(0, 0, 0, 0.3), 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 12px 32px -8px rgba(0, 0, 0, 0.04),
+    0 4px 12px -4px rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-large);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--surface-card);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 16px 40px -12px rgba(0, 0, 0, 0.05), 0 8px 16px -6px rgba(0, 0, 0, 0.03);
-}
-
-body[data-time-phase="Evening"] .glass-card,
-body[data-time-phase="Night"] .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 40px -12px rgba(0, 0, 0, 0.4), 0 8px 16px -6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 16px 40px -12px rgba(0, 0, 0, 0.05),
+    0 8px 16px -6px rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-large);
 }
 
 /* Base card improvements */
 .bg-surface-card {
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
-}
-body[data-time-phase="Evening"] .bg-surface-card,
-body[data-time-phase="Night"] .bg-surface-card {
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.2), 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 24px -8px rgba(0, 0, 0, 0.04),
+    0 2px 8px -2px rgba(0, 0, 0, 0.02);
 }
 
 .bg-grain::before {
@@ -264,136 +264,304 @@ body[data-time-phase="Night"] .bg-surface-card {
 }
 
 .font-mono-extended {
-  font-family: 'Google Sans', sans-serif;
+  font-family: "Google Sans", sans-serif;
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 .font-display {
-  font-family: 'Google Sans', sans-serif;
+  font-family: "Google Sans", sans-serif;
   letter-spacing: -0.02em;
 }
 
 @keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 @keyframes sway {
-  0%, 100% { transform: rotate(-4deg) scale(1.01); }
-  50% { transform: rotate(4deg) scale(1.04); }
+  0%,
+  100% {
+    transform: rotate(-4deg) scale(1.01);
+  }
+  50% {
+    transform: rotate(4deg) scale(1.04);
+  }
 }
-.animate-sway { 
-  animation: sway 5s ease-in-out infinite; 
+.animate-sway {
+  animation: sway 5s ease-in-out infinite;
   transform-origin: bottom center;
 }
 
 @keyframes fluttering {
-  0% { transform: translate(0, 0) scaleX(1); opacity: 0; }
-  10% { opacity: 1; }
-  25% { transform: translate(30vw, -20px) scaleX(0.8) rotate(10deg); }
-  50% { transform: translate(60vw, 10px) scaleX(1) rotate(-5deg); }
-  75% { transform: translate(80vw, -15px) scaleX(0.8) rotate(15deg); }
-  90% { opacity: 1; }
-  100% { transform: translate(100vw, -50px) scaleX(1) rotate(0deg); opacity: 0; }
+  0% {
+    transform: translate(0, 0) scaleX(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  25% {
+    transform: translate(30vw, -20px) scaleX(0.8) rotate(10deg);
+  }
+  50% {
+    transform: translate(60vw, 10px) scaleX(1) rotate(-5deg);
+  }
+  75% {
+    transform: translate(80vw, -15px) scaleX(0.8) rotate(15deg);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100vw, -50px) scaleX(1) rotate(0deg);
+    opacity: 0;
+  }
 }
 @keyframes hovering {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(10px, -10px) rotate(5deg); }
-  50% { transform: translate(0, -15px) rotate(-5deg); }
-  75% { transform: translate(-10px, -10px) rotate(0deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(10px, -10px) rotate(5deg);
+  }
+  50% {
+    transform: translate(0, -15px) rotate(-5deg);
+  }
+  75% {
+    transform: translate(-10px, -10px) rotate(0deg);
+  }
 }
 @keyframes crawling {
-  0% { transform: translate(0, 0) rotate(0); }
-  100% { transform: translate(80vw, -5px) rotate(5deg); }
+  0% {
+    transform: translate(0, 0) rotate(0);
+  }
+  100% {
+    transform: translate(80vw, -5px) rotate(5deg);
+  }
 }
 @keyframes hopping {
-  0%, 10% { transform: translate(0, 0); }
-  15% { transform: translate(15px, -10px); }
-  20%, 30% { transform: translate(30px, 0); }
-  35% { transform: translate(45px, -10px); }
-  40%, 100% { transform: translate(60px, 0); }
+  0%,
+  10% {
+    transform: translate(0, 0);
+  }
+  15% {
+    transform: translate(15px, -10px);
+  }
+  20%,
+  30% {
+    transform: translate(30px, 0);
+  }
+  35% {
+    transform: translate(45px, -10px);
+  }
+  40%,
+  100% {
+    transform: translate(60px, 0);
+  }
 }
 @keyframes perch-flick {
-  0%, 90% { transform: rotate(0); }
-  92%, 96% { transform: rotate(-10deg); }
-  94%, 98% { transform: rotate(10deg); }
-  100% { transform: rotate(0); }
+  0%,
+  90% {
+    transform: rotate(0);
+  }
+  92%,
+  96% {
+    transform: rotate(-10deg);
+  }
+  94%,
+  98% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
 }
 @keyframes darting {
-  0% { transform: translate(0,0) scaleX(-1); opacity: 0; }
-  5% { opacity: 1; }
-  10%, 40% { transform: translate(-80px, 20px) scaleX(-1); }
-  45%, 80% { transform: translate(50px, 40px) scaleX(1); }
-  90% { opacity: 1; }
-  100% { transform: translate(120px, 10px) scaleX(1); opacity: 0; }
+  0% {
+    transform: translate(0, 0) scaleX(-1);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  10%,
+  40% {
+    transform: translate(-80px, 20px) scaleX(-1);
+  }
+  45%,
+  80% {
+    transform: translate(50px, 40px) scaleX(1);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(120px, 10px) scaleX(1);
+    opacity: 0;
+  }
 }
 @keyframes frog-hop {
-  0%, 90% { transform: scaleY(1); }
-  92% { transform: scaleY(0.8); }
-  94% { transform: translate(15px, -20px) scaleY(1.1); }
-  96% { transform: translate(30px, 0) scaleY(0.9); }
-  100% { transform: translate(30px, 0) scaleY(1); }
+  0%,
+  90% {
+    transform: scaleY(1);
+  }
+  92% {
+    transform: scaleY(0.8);
+  }
+  94% {
+    transform: translate(15px, -20px) scaleY(1.1);
+  }
+  96% {
+    transform: translate(30px, 0) scaleY(0.9);
+  }
+  100% {
+    transform: translate(30px, 0) scaleY(1);
+  }
 }
 @keyframes strutting {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(100px, 0) rotate(0); }
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(100px, 0) rotate(0);
+  }
 }
 @keyframes dive {
-  0%, 80% { transform: translate(0, 0); }
-  85% { transform: translate(50px, 100px) rotate(45deg); opacity: 1; }
-  90% { opacity: 0; transform: translate(50px, 100px); }
-  95% { opacity: 0; transform: translate(0, 0); }
-  100% { opacity: 1; transform: translate(0, 0); }
+  0%,
+  80% {
+    transform: translate(0, 0);
+  }
+  85% {
+    transform: translate(50px, 100px) rotate(45deg);
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+    transform: translate(50px, 100px);
+  }
+  95% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
 }
 
 @keyframes companionGentleBounce {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  50% { transform: translateY(-4px) scaleY(1.02); }
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-4px) scaleY(1.02);
+  }
 }
 
 @keyframes companionFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-6px) rotate(2deg); }
-  75% { transform: translateY(4px) rotate(-2deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(4px) rotate(-2deg);
+  }
 }
 
-.animate-companion-bounce { animation: companionGentleBounce 3.5s ease-in-out infinite; }
-.animate-companion-float { animation: companionFloat 5s ease-in-out infinite; }
+.animate-companion-bounce {
+  animation: companionGentleBounce 3.5s ease-in-out infinite;
+}
+.animate-companion-float {
+  animation: companionFloat 5s ease-in-out infinite;
+}
 
-.animate-breathe { animation: breathe 4s ease-in-out infinite; }
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
 .animate-gradient {
   background-size: 300%;
   animation: gradient 8s ease infinite;
 }
-.animate-fluttering { animation: fluttering infinite linear; }
-.animate-hovering { animation: hovering infinite ease-in-out; }
-.animate-crawling { animation: crawling infinite alternate-reverse linear; }
-.animate-hopping { animation: hopping infinite ease-in-out; }
-.animate-perch-flick { animation: perch-flick infinite ease-in-out; }
-.animate-darting { animation: darting infinite ease-in-out; }
-.animate-perch-sing { animation: perch-flick infinite ease-in-out; }
-.animate-frog-hop { animation: frog-hop infinite ease-in-out; }
-.animate-strutting { animation: strutting infinite alternate ease-in-out; }
-.animate-dive { animation: dive infinite ease-in-out; }
-.animate-perch-blink { animation: hovering infinite alternate linear; }
+.animate-fluttering {
+  animation: fluttering infinite linear;
+}
+.animate-hovering {
+  animation: hovering infinite ease-in-out;
+}
+.animate-crawling {
+  animation: crawling infinite alternate-reverse linear;
+}
+.animate-hopping {
+  animation: hopping infinite ease-in-out;
+}
+.animate-perch-flick {
+  animation: perch-flick infinite ease-in-out;
+}
+.animate-darting {
+  animation: darting infinite ease-in-out;
+}
+.animate-perch-sing {
+  animation: perch-flick infinite ease-in-out;
+}
+.animate-frog-hop {
+  animation: frog-hop infinite ease-in-out;
+}
+.animate-strutting {
+  animation: strutting infinite alternate ease-in-out;
+}
+.animate-dive {
+  animation: dive infinite ease-in-out;
+}
+.animate-perch-blink {
+  animation: hovering infinite alternate linear;
+}
 
 @keyframes companionNuzzle {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-4px) rotate(-10deg); }
-  50% { transform: translateY(0) rotate(5deg); }
-  75% { transform: translateY(-3px) rotate(-5deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(0) rotate(5deg);
+  }
+  75% {
+    transform: translateY(-3px) rotate(-5deg);
+  }
 }
 
 .animate-companion-nuzzle {
   animation: companionNuzzle 2.5s ease-in-out infinite;
 }
 
-.bg-surface-card, .bg-surface-soft, .bg-surface-alt, .glass, .glass-card {
-  transition: background-color 3s ease-in-out, border-color 3s ease-in-out;
+.bg-surface-card,
+.bg-surface-soft,
+.bg-surface-alt,
+.glass,
+.glass-card {
+  transition:
+    background-color 3s ease-in-out,
+    border-color 3s ease-in-out;
 }
 
 @layer utilities {
-  .text-status-healthy, .text-emerald-400, .text-emerald-300, .text-emerald-200, .text-emerald-400\/80 {
+  .text-status-healthy,
+  .text-emerald-400,
+  .text-emerald-300,
+  .text-emerald-200,
+  .text-emerald-400\/80 {
     color: var(--text-status-healthy) !important;
   }
   .bg-emerald-400 {

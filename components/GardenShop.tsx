@@ -48,15 +48,19 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
     <div className={`space-y-6 pb-20 fade-in animate-in duration-500 ${isNightMarket ? 'bg-indigo-950/20 p-4 rounded-3xl' : ''}`}>
       
       {/* Coin Balance Header */}
-      <div className={`border rounded-3xl p-6 flex items-center justify-between shadow-sm ${isNightMarket ? 'bg-indigo-900/40 border-indigo-500/30' : 'bg-surface-card border-surface-alt'}`}>
-        <div>
-           <div className={`text-[10px] font-bold tracking-widest uppercase italic ${isNightMarket ? 'text-indigo-300' : 'text-status-healthy'}`}>
-             {isNightMarket ? 'Jochona Night Market' : 'Your Pouch'}
+      <div className={`rounded-[32px] p-6 flex flex-col sm:flex-row gap-4 items-center justify-between shadow-sm border-2 ${isNightMarket ? 'bg-indigo-900/40 border-indigo-500/30' : 'bg-surface border-surface-alt'}`}>
+        <div className="flex items-center gap-4">
+           <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-inner border-4 ${isNightMarket ? 'bg-indigo-500 border-indigo-400' : 'bg-accent-mustard border-white text-white'}`}>
+             <Coins className="w-7 h-7" />
            </div>
-           <h2 className="text-2xl font-bold font-display text-primary-text mt-1 flex items-center gap-2">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] text-white font-bold border shadow-sm ${isNightMarket ? 'bg-indigo-500 border-indigo-400' : 'bg-status-needsCare border-surface-alt'}`}>C</span>
-              {Math.floor(currentCoins)}
-           </h2>
+           <div>
+              <div className={`text-xs font-extrabold tracking-widest uppercase ${isNightMarket ? 'text-indigo-300' : 'text-text-muted'}`}>
+                {isNightMarket ? 'Jochona Night Market' : 'Your Pouch'}
+              </div>
+              <h2 className="text-3xl font-extrabold font-display text-primary-anchor mt-1">
+                 {Math.floor(currentCoins)}
+              </h2>
+           </div>
         </div>
         <button 
            onClick={() => {
@@ -64,7 +68,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                    onEquipItem({ id: 'reset', type: 'boost', price: 0, name: '', description: '', iconName: '' } as ShopItem);
                }
            }}
-           className="px-3 py-1 bg-surface-alt/50 text-secondary-text rounded-lg text-xs font-bold border border-surface-alt hover:text-primary-text transition-colors"
+           className="px-4 py-3 bg-surface-alt text-text-secondary rounded-full text-xs font-bold border-2 border-transparent hover:border-text-muted transition-all active:scale-95 whitespace-nowrap"
         >
            Reset Garden
         </button>
@@ -76,8 +80,8 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
            <button
              key={tab}
              onClick={() => setActiveTab(tab as any)}
-             className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap border ${
-               activeTab === tab ? 'bg-primary-mint text-white border-transparent shadow-sm' : 'bg-surface-card text-secondary-text hover:text-primary-text border-surface-alt focus:outline-none focus:ring-2 focus:ring-primary-mint/50 flex-shrink-0'
+             className={`px-5 py-3 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all whitespace-nowrap border-2 ${
+               activeTab === tab ? 'bg-primary-anchor text-bg-base border-primary-anchor shadow-md' : 'bg-surface text-text-muted hover:text-primary-anchor border-surface-alt hover:border-text-muted focus:outline-none flex-shrink-0'
              }`}
            >
              {tab}
@@ -87,8 +91,8 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
 
       {/* Item Grid */}
       {activeTab === 'companions' ? (
-        <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative mt-8 shadow-sm">
-          <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-8">
+        <div className="bg-surface p-8 rounded-[40px] border-2 border-surface-alt relative mt-8 shadow-sm">
+          <p className="text-sm font-extrabold tracking-wide text-accent-seafoam uppercase mb-8">
             {stats.companions?.length || 0} / {COMPANIONS.length} Discovered
           </p>
           
@@ -100,8 +104,8 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
               
               const isHoverAnimatedCompanion = ['moumachhi', 'ladybug', 'chorui', 'phoring', 'pecha', 'shalik', 'jonaki'].includes(comp.id);
               return (
-                <div key={comp.id} className={`p-4 rounded-xl border ${isUnlocked ? 'border-primary-mint/50 bg-primary-mint/10' : 'border-surface-alt bg-surface-alt/50 opacity-60'} flex flex-col items-center text-center transition-all group`}>
-                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface-card shadow-sm' : 'bg-surface-alt text-xl'} relative`}>
+                <div key={comp.id} className={`p-4 rounded-[32px] border-2 ${isUnlocked ? 'border-accent-seafoam/30 bg-surface-alt/30' : 'border-transparent bg-surface-alt opacity-60'} flex flex-col items-center text-center transition-all group`}>
+                  <div className={`w-12 h-12 flex items-center justify-center rounded-full mb-3 ${isUnlocked ? 'bg-surface shadow-sm' : 'bg-surface text-xl'} relative`}>
                     {CompanionAssetsDictionary[comp.id] ? (
                       React.createElement(CompanionAssetsDictionary[comp.id], { 
                         className: `w-8 h-8 ${showDetails ? 'drop-shadow-sm' : 'brightness-0 opacity-20 grayscale'} ${isHoverAnimatedCompanion ? 'transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110' : ''}` 
@@ -110,19 +114,19 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                       <span className={`text-2xl ${!showDetails && 'grayscale opacity-50'} ${isHoverAnimatedCompanion ? 'transition-transform duration-300 group-hover:-translate-y-2 group-hover:scale-110' : ''}`}>{showDetails ? '🐦‍⬛' : '❓'}</span>
                     )}
                   </div>
-                  <h4 className="font-bold text-primary-text text-sm mb-0.5">{showDetails ? comp.name : '???'}</h4>
-                  <h5 className="font-bold text-[10px] text-status-healthy mb-2 uppercase">{showDetails ? comp.banglaName : 'Unknown'}</h5>
-                  <p className="text-[11px] text-secondary-text leading-tight md:block hidden mb-3">
+                  <h4 className="font-extrabold font-display text-primary-anchor text-sm mb-0.5">{showDetails ? comp.name : '???'}</h4>
+                  <h5 className="font-bold text-[10px] text-accent-seafoam mb-2 uppercase tracking-wide">{showDetails ? comp.banglaName : 'Unknown'}</h5>
+                  <p className="text-[11px] text-text-muted font-medium leading-tight md:block hidden mb-3">
                     {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : (showDetails ? `Locked (${comp.unlockConditionStr})` : 'Condition locked')}
                   </p>
                   
                   {isUnlocked && onEquipCompanion && (
                     <button
                       onClick={() => onEquipCompanion(isEquipped ? null : comp.id)}
-                      className={`mt-auto px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      className={`mt-auto px-5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 ${
                         isEquipped 
-                          ? 'bg-status-healthy text-white shadow-md shadow-status-healthy/30' 
-                          : 'bg-white shadow-[0_4px_0_#CBD5E1] text-secondary-text hover:-translate-y-0.5 hover:shadow-[0_6px_0_#CBD5E1] active:translate-y-1 active:shadow-[0_0_0_#CBD5E1]'
+                          ? 'bg-accent-seafoam text-white shadow-md' 
+                          : 'bg-surface border-2 border-surface-alt text-text-secondary hover:border-text-muted'
                       }`}
                     >
                       {isEquipped ? 'Active' : 'Equip'}
@@ -171,22 +175,22 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
           
           if (isLevelLocked) {
               statusText = lockReason;
-              buttonStyle = "bg-status-critical/10 text-status-critical border border-status-critical/30 opacity-50 cursor-not-allowed";
+              buttonStyle = "bg-accent-coral/10 text-accent-coral border-2 border-accent-coral/30 opacity-50 cursor-not-allowed";
               isDisabled = true;
           } else if (isEquipped) {
               statusText = item.type === 'seed' ? "Unlocked" : "Equipped";
-              buttonStyle = "bg-surface-alt/50 text-muted-text border border-surface-alt";
+              buttonStyle = "bg-surface-alt text-text-muted border-2 border-surface-alt";
               isDisabled = true;
           } else if (isOwned) {
               statusText = "Equip";
               buttonAction = () => onEquipItem(item);
-              buttonStyle = "bg-secondary-blue/10 text-secondary-blue border border-secondary-blue/30 hover:bg-secondary-blue/20";
+              buttonStyle = "bg-accent-periwinkle/10 text-accent-periwinkle border-2 border-accent-periwinkle/30 hover:bg-accent-periwinkle/20";
           } else {
               statusText = `${item.price} coins`;
               buttonAction = () => onBuyItem(item);
               buttonStyle = canAfford 
-                 ? "bg-primary-mint/10 text-primary-mint border border-primary-mint/30 hover:bg-primary-mint/20" 
-                 : "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
+                 ? "bg-accent-coral/10 text-accent-coral border-2 border-accent-coral/30 hover:bg-accent-coral/20" 
+                 : "bg-surface-alt/50 text-text-muted border-2 border-surface-alt opacity-50 cursor-not-allowed";
               isDisabled = !canAfford;
           }
           
@@ -208,31 +212,31 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
 
               if (isCapped) {
                  statusText = "Max Capacity";
-                 buttonStyle = "bg-status-needsCare/10 text-status-needsCare border border-status-needsCare/30 opacity-60 cursor-not-allowed";
+                 buttonStyle = "bg-orange-500/10 text-orange-500 border-2 border-orange-500/30 opacity-60 cursor-not-allowed";
                  isDisabled = true;
               } else if (isOnCooldown) {
                  statusText = "Cooldown";
-                 buttonStyle = "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
+                 buttonStyle = "bg-surface-alt text-text-muted border-2 border-surface-alt opacity-50 cursor-not-allowed";
                  isDisabled = true;
               } else {
                  statusText = `${item.price} coins`;
                  buttonAction = () => onBuyItem(item);
                  buttonStyle = canAfford 
-                    ? "bg-primary-mint/10 text-primary-mint border border-primary-mint/30 hover:bg-primary-mint/20" 
-                    : "bg-surface-alt/30 text-muted-text border border-surface-alt opacity-50 cursor-not-allowed";
+                    ? "bg-accent-coral/10 text-accent-coral border-2 border-accent-coral/30 hover:bg-accent-coral/20" 
+                    : "bg-surface-alt/50 text-text-muted border-2 border-surface-alt opacity-50 cursor-not-allowed";
                  isDisabled = !canAfford;
               }
           }
           
           return (
-            <div key={item.id} className="rounded-2xl p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-visible group">
+            <div key={item.id} className="rounded-[32px] p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-visible group bg-surface shadow-[0_8px_32px_rgba(28,27,31,0.08)] border-0">
                {/* Background Hint */}
                {item.type === 'background' && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5 opacity-50 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent to-surface-alt opacity-50 pointer-events-none rounded-[32px]" />
                )}
                
                <div className="w-20 h-28 mb-3 mx-auto flex flex-col items-center justify-end relative group-hover:scale-105 transition-transform duration-300">
-                  <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-emerald-400 animate-spin mx-auto" />}>
+                  <React.Suspense fallback={<div className="w-4 h-4 rounded-full border border-surface-alt border-t-accent-seafoam animate-spin mx-auto" />}>
                      {item.type === 'seed' ? (
                         <PlantIcon plantType={item.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-20 h-24 absolute bottom-[5%] z-10" />
                      ) : (
@@ -240,11 +244,11 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                      )}
                   </React.Suspense>
                </div>
-               <h3 className="text-sm font-bold text-white text-center line-clamp-1 leading-tight">{item.name}</h3>
-               <p className="text-[10px] text-slate-500 font-mono text-center leading-tight line-clamp-3">{item.description}</p>
+               <h3 className="text-sm font-extrabold text-primary-anchor text-center line-clamp-1 leading-tight font-display">{item.name}</h3>
+               <p className="text-[10px] text-text-muted font-medium text-center leading-tight line-clamp-3">{item.description}</p>
                
                {item.isConsumable && (
-                   <div className="text-[9px] text-zinc-500 uppercase font-mono tracking-widest text-center">Owned: {item.id === 'item_streak_freeze' ? (stats.streakFreezes || 0) : (stats.boostItemCounts?.[item.id] || 0)} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
+                   <div className="text-[9px] text-text-muted font-bold uppercase tracking-widest text-center mt-1">Owned: {item.id === 'item_streak_freeze' ? (stats.streakFreezes || 0) : (stats.boostItemCounts?.[item.id] || 0)} {item.maxCapacity ? `/ ${item.maxCapacity}` : ''}</div>
                )}
                
                <button
@@ -258,7 +262,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                      }
                   }}
                   disabled={isDisabled}
-                  className={`w-full py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-colors ${buttonStyle}`}
+                  className={`w-full py-3 mt-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all active:scale-95 ${buttonStyle}`}
                >
                   {statusText}
                </button>
@@ -268,28 +272,28 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
         </div>
       )}
 
-      <AnimatedModal isOpen={!!confirmPurchaseItem} onClose={() => setConfirmPurchaseItem(null)} alignment="bottom" className="!p-0 !max-w-md mx-auto !rounded-t-3xl !rounded-b-none overflow-hidden bg-surface-card border border-surface-alt">
+      <AnimatedModal isOpen={!!confirmPurchaseItem} onClose={() => setConfirmPurchaseItem(null)} alignment="center" className="!p-0 !max-w-md mx-auto !rounded-[40px] overflow-hidden bg-surface border-2 border-surface-alt shadow-xl">
         {confirmPurchaseItem && (
-           <div className="p-6">
+           <div className="p-8">
              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold font-display text-lg text-primary-text uppercase tracking-widest flex items-center gap-2">
-                  <Package className="w-5 h-5 text-amber-500" /> Confirm Purchase
+                <h3 className="font-extrabold font-display text-xl text-primary-anchor uppercase tracking-widest flex items-center gap-2">
+                  <Package className="w-6 h-6 text-accent-coral" /> Confirm Purchase
                 </h3>
-                <button onClick={() => setConfirmPurchaseItem(null)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+                <button onClick={() => setConfirmPurchaseItem(null)} className="p-2 -mr-2 text-text-muted hover:text-primary-anchor bg-surface-alt rounded-full transition-transform hover:scale-105">
                   <X className="w-5 h-5" />
                 </button>
              </div>
-             <div className="flex items-start gap-4 mb-8 bg-surface-alt/10 p-4 rounded-xl border border-surface-alt/50">
+             <div className="flex items-start gap-4 mb-8 bg-accent-mustard/10 p-6 rounded-[32px] border-2 border-accent-mustard/20">
                <div className="w-24 h-32 shrink-0 relative flex flex-col items-center justify-end">
                   {confirmPurchaseItem.type === 'seed' ? (
                       <PlantIcon plantType={confirmPurchaseItem.id.replace('seed_', '') as any} stage="Fruiting Plant" className="w-20 h-28 absolute bottom-[5%] z-10" />
                    ) : (
-                      <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-20 h-28 absolute bottom-[5%] z-10" />
+                      <ShopItemSvg itemId={confirmPurchaseItem.id} className="w-20 h-28 absolute bottom-[5%] z-10 drop-shadow-sm" />
                    )}
                </div>
                <div>
-                  <h4 className="font-bold text-white mb-1">{confirmPurchaseItem.name}</h4>
-                  <p className="text-xs font-mono text-slate-400">{confirmPurchaseItem.description}</p>
+                  <h4 className="font-extrabold text-primary-anchor text-lg mb-1">{confirmPurchaseItem.name}</h4>
+                  <p className="text-sm font-medium text-text-muted leading-tight">{confirmPurchaseItem.description}</p>
                </div>
              </div>
              
@@ -298,7 +302,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                   onBuyItem(confirmPurchaseItem);
                   setConfirmPurchaseItem(null);
                }}
-               className="w-full py-4 bg-primary-mint text-zinc-900 font-bold font-mono tracking-widest uppercase rounded-xl flex items-center justify-center gap-2 transition-all hover:bg-[#00d8b9] shadow-[0_0_20px_rgba(0,245,212,0.2)] active:scale-95"
+               className="w-full py-5 bg-accent-coral text-[var(--bg-base)] font-extrabold tracking-widest uppercase rounded-full flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-md hover:opacity-90"
              >
                 <Coins className="w-5 h-5" />
                 Purchase for {confirmPurchaseItem.price} Coins
