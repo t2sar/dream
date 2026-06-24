@@ -186,7 +186,7 @@ import { WeatherParticles } from './WeatherParticles';
 
 import { GardenCanvasTerrain } from './GardenCanvasTerrain';
 
-const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.ReactNode, id?: string, status?: string }>(({ children, id, status }, ref) => {
+const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.ReactNode, id?: string, status?: string, index?: number }>(({ children, id, status, index = 0 }, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const internalRef = React.useRef<HTMLDivElement>(null);
 
@@ -203,10 +203,10 @@ const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.R
     <motion.div 
       key={id}
       layout
-      initial={{ opacity: 0, scale: 0.5, y: 30 }}
+      initial={{ opacity: 0, scale: 0.95, y: 40 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.8, y: -20 }}
-      transition={{ type: "spring", stiffness: 250, damping: 25 }}
+      exit={{ opacity: 0, scale: 0.95, y: -20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25, delay: index * 0.08 }}
       ref={(node) => {
         // @ts-ignore
         internalRef.current = node;
@@ -700,10 +700,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <ShieldAlert className="w-4 h-4" /> Fresh Start Needed (Withered)
               </motion.h3>
             )}
-            {dead.map(habit => {
+            {dead.map((habit, i) => {
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
-                <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                   <MemoizedPlantHabitCard habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                 </ViewportLazyWrapper>
                );
@@ -714,10 +714,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <ShieldAlert className="w-4 h-4" /> At Risk Plants
               </motion.h3>
             )}
-            {[...critical, ...wilting].map(habit => {
+            {[...critical, ...wilting].map((habit, i) => {
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
-                <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                   <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                 </ViewportLazyWrapper>
                );
@@ -729,10 +729,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <Droplet className="w-4 h-4" /> Needs Water
               </motion.h3>
             )}
-            {plantsNeedingWater.map(habit => {
+            {plantsNeedingWater.map((habit, i) => {
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
-                <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                   <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                 </ViewportLazyWrapper>
                );
@@ -744,10 +744,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <AlertCircle className="w-4 h-4" /> Failed to Water
               </motion.h3>
             )}
-            {slipped.map(habit => {
+            {slipped.map((habit, i) => {
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
-                <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                   <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                 </ViewportLazyWrapper>
                );
@@ -759,7 +759,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <Check className="w-4 h-4" /> Watered Today
               </motion.h3>
             )}
-            {completed.map(habit => {
+            {completed.map((habit, i) => {
                const isCompletedToday = completedTodayIds.includes(habit.id);
                const statusText = isCompletedToday 
                   ? (habit.type === 'avoid' ? 'Protected Today' : 'Completed Today')
@@ -768,7 +768,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                
                return (
-                 <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                    <div className="opacity-80 hover:opacity-100 transition-opacity h-full">
                      <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                    </div>
@@ -782,10 +782,10 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                 <Moon className="w-4 h-4" /> Resting Plants
               </motion.h3>
             )}
-            {resting.map(habit => {
+            {resting.map((habit, i) => {
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
-                 <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                    <div className="opacity-60 hover:opacity-100 transition-opacity h-full">
                      <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                    </div>
@@ -1172,37 +1172,39 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
             
             <div className="w-full flex justify-center">
             {canHarvest ? (
-               <button 
-                  onClick={onHarvest}
-                  className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
-               >
-                  Harvest 🧺
-               </button>
+               <div className="flex flex-row justify-center items-center gap-3 w-full">
+                 <button 
+                    onClick={onHarvest}
+                    className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
+                 >
+                    Harvest 🧺
+                 </button>
+               </div>
             ) : habit.scheduleType === 'quantity' && quantityCurrent < (habit.quantityTarget || 1) ? (
-               <div className="flex gap-2 relative w-full">
+               <div className="flex flex-row justify-center items-center gap-3 w-full">
                  <button 
                     onClick={() => onWater(true)}
                     disabled={isSlipped}
-                    className={`px-4 py-3 min-h-[44px] flex-1 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
+                    className={`px-4 py-3 min-h-[44px] flex-1 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
                  >
                     +1
                  </button>
                  <button 
                     onClick={() => setShowQuantityModal(true)}
                     disabled={isSlipped}
-                    className={`px-3 py-3 min-h-[44px] flex-1 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 bg-surface-alt text-white border border-transparent hover:bg-zinc-700 disabled:opacity-50`}
+                    className={`px-3 py-3 min-h-[44px] flex-1 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 bg-surface-alt text-white border border-transparent hover:bg-zinc-700 disabled:opacity-50`}
                  >
                     Log...
                  </button>
                </div>
             ) : (
-               <div className="flex items-center gap-3 w-full">
+               <div className="flex flex-row justify-center items-center gap-3 w-full">
                  <button 
                     onClick={() => {
                       if (isSlipped && onUndo) onUndo();
                       else if (!isSlipped) onWater();
                     }} 
-                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
+                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
                  >
                     {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
                     {isSlipped ? "Undo Missed" : buttonText === "Water" ? "Water Plant" : buttonText}
@@ -1210,9 +1212,9 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  {!isCompleted && !isSlipped && habit.type !== 'avoid' && onSlip && (
                    <button
                      onClick={() => onSlip()}
-                     className="px-4 py-3 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
+                     className="px-4 py-3 flex-1 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
                    >
-                     Missed Today
+                     Missed
                    </button>
                  )}
                </div>
