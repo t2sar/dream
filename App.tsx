@@ -3279,12 +3279,12 @@ function App() {
   return (
     <div className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-screen">
       {/* Playful Organic Ambience - Vibrant */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal bg-grain opacity-80">
-        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-60 animate-breathe mix-blend-multiply" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 70%)' }} />
-        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-50 animate-breathe mix-blend-multiply" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 70%)', animationDelay: '2s' }} />
-        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-60 animate-breathe mix-blend-multiply" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 70%)', animationDelay: '4s' }} />
-        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-50 animate-breathe mix-blend-multiply" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 70%)', animationDelay: '3s' }} />
-        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-40 animate-breathe mix-blend-multiply" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 70%)', animationDelay: '1s' }} />
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal bg-grain opacity-100">
+        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-100 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 50%)' }} />
+        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-90 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 50%)', animationDelay: '2s' }} />
+        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-100 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 50%)', animationDelay: '4s' }} />
+        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-90 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 50%)', animationDelay: '3s' }} />
+        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 50%)', animationDelay: '1s' }} />
       </div>
 
       {/* Sync Status Indicator (Absolute Top Right) */}
@@ -3487,7 +3487,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 className="space-y-8"
               >
                 {/* Weekly Report Banner (Shows on Sun/Mon) */}
@@ -3680,7 +3680,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 className="space-y-6"
               >
                 <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg mb-4">
@@ -3887,7 +3887,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
               >
               <GardenShop
                 stats={stats}
@@ -3909,7 +3909,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 className="space-y-6"
               >
                 {/* Status Tab Toggle */}
@@ -4175,7 +4175,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
               >
               <GardenCalendar
                 logs={logs}
@@ -4192,7 +4192,7 @@ function App() {
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 className="space-y-8"
               >
                 <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">

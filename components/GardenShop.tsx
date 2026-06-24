@@ -39,8 +39,8 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
 
   if (isNightMarket && activeTab === 'seeds') {
      filteredItems.unshift(
-        { id: 'seed_lychee', name: 'Lychee Seed', type: 'seed', price: 800, requiredLevel: 5, description: 'Exclusive night market item. Grows into a rare Lychee tree.', iconName: 'plant' },
-        { id: 'seed_papaya', name: 'Papaya Seed', type: 'seed', price: 600, requiredLevel: 3, description: 'Exclusive night market item. Grows into a fast Papaya tree.', iconName: 'plant' }
+        { id: 'seed_lychee', name: 'Lychee Seed', type: 'seed', price: 8000, requiredLevel: 5, description: 'Exclusive night market item. Grows into a rare Lychee tree.', iconName: 'plant' },
+        { id: 'seed_papaya', name: 'Papaya Seed', type: 'seed', price: 6000, requiredLevel: 3, description: 'Exclusive night market item. Grows into a fast Papaya tree.', iconName: 'plant' }
      );
   }
 

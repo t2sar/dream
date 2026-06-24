@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Check,
   Flame,
@@ -42,6 +42,26 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   undoSlip,
   onArchive,
 }) => {
+  const [justCompleted, setJustCompleted] = useState(false);
+  const [showMilestoneBurst, setShowMilestoneBurst] = useState(false);
+  const prevCompletedRef = useRef(isCompleted);
+
+  useEffect(() => {
+    if (!prevCompletedRef.current && isCompleted) {
+      setJustCompleted(true);
+      const isMilestone = habit.streak === 7 || habit.streak === 30 || habit.streak === 100;
+      if (isMilestone) {
+        setShowMilestoneBurst(true);
+      }
+      const timer = setTimeout(() => {
+        setJustCompleted(false);
+        setShowMilestoneBurst(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+    prevCompletedRef.current = isCompleted;
+  }, [isCompleted, habit.streak]);
+
   const IconComponent =
     (LucideIcons as any)[habit.icon] || LucideIcons.Activity;
 
@@ -145,18 +165,23 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
               borderColor: "transparent"
             }
           : {
-              scale: 1,
+              scale: [1, 1.01, 1],
               y: 0,
               backgroundColor: "var(--surface)",
               boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               borderColor: "transparent"
             }
       }
-      transition={{ duration: 1.2, ease: "easeInOut" }}
+      transition={{ 
+        duration: isSlipped || isCompleted ? 1.2 : 4, 
+        ease: "easeInOut",
+        repeat: isSlipped || isCompleted ? 0 : Infinity,
+      }}
       className={`
       relative overflow-hidden group border
       p-8 floating-card squircular transition-all duration-500
       ${isSlipped ? "failed" : ""}
+      ${justCompleted ? "animate-pop-card" : ""}
       ${
         habit.isGolden 
           ? `border-accent-mustard/50 shadow-lg shadow-accent-mustard/20 bg-accent-mustard/10`
@@ -168,16 +193,42 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
       }
     `}
     >
+      {showMilestoneBurst && (
+        <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
+          {[...Array(12)].map((_, i) => {
+            const angle = (i / 12) * Math.PI * 2;
+            const tx = `${Math.cos(angle) * 100}px`;
+            const ty = `${Math.sin(angle) * 100}px`;
+            return (
+              <div
+                key={i}
+                className="absolute left-1/2 top-1/2 w-2 h-2 rounded-full bg-accent-mustard animate-particle-burst"
+                style={{
+                  '--tx': tx,
+                  '--ty': ty,
+                  animationDelay: `${Math.random() * 0.2}s`
+                } as any}
+              />
+            );
+          })}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 animate-[popCard_1.5s_ease-out_forwards]">
+            <span className="text-accent-mustard font-bold text-4xl drop-shadow-lg">
+              {habit.streak} DAY STREAK!
+            </span>
+          </div>
+        </div>
+      )}
+
       <div
         className={`absolute -top-24 -right-24 w-52 h-52 rounded-full transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-[0.03] bg-accent-periwinkle mix-blend-screen" : "opacity-0"}`}
       />
       
       <div
-        className={`absolute inset-0 z-0 pointer-events-none transition-all duration-1000 ${isSlipped ? "bg-slate-900/30 backdrop-grayscale-[0.8]" : "opacity-0"}`}
+        className={`absolute inset-0 z-0 pointer-events-none transition-all duration-[2000ms] ease-in-out ${isSlipped ? "bg-slate-900/30 backdrop-grayscale-[0.8]" : "opacity-0"}`}
       />
 
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between relative z-10 gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className="flex flex-col gap-2">
             <button
               onClick={() => {
@@ -191,11 +242,11 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 if (!isSlipped) onToggle(habit.id);
               }}
               className={`
-                relative w-12 h-12 rounded-3xl flex items-center justify-center transition-all duration-500 group/btn border
+                relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 group/btn border
                 ${
                   isCompleted
-                    ? habit.type === 'avoid' ? "bg-emerald-500/20 shadow-[0_0_25px_rgba(16,185,129,0.45)] border-emerald-500 text-emerald-400 scale-105" : "bg-blue-500/20 shadow-[0_0_25px_rgba(59,130,246,0.45)] border-blue-500 text-blue-400 scale-105"
-                    : "bg-transparent text-slate-500 border-surface-alt hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10"
+                    ? habit.type === 'avoid' ? "bg-emerald-500/20 shadow-[0_0_25px_rgba(16,185,129,0.45)] border-emerald-500 text-emerald-400 scale-105 hover:scale-110" : "bg-blue-500/20 shadow-[0_0_25px_rgba(59,130,246,0.45)] border-blue-500 text-blue-400 scale-105 hover:scale-110"
+                    : "bg-transparent text-slate-500 border-surface-alt hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 hover:scale-[1.02]"
                 }
                 ${isSlipped ? "opacity-30 cursor-not-allowed" : ""}
               `}
@@ -229,7 +280,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                    }
                  }}
                  disabled={isCompleted}
-                 className={`text-[9px] font-mono tracking-widest uppercase transition-colors px-1 py-1 border ${
+                 className={`text-[9px] font-mono tracking-widest uppercase transition-all duration-300 px-3 py-1 border rounded-full hover:scale-[1.02] ${
                    isCompleted ? 'opacity-30 cursor-not-allowed border-transparent text-slate-600' : 
                    isSlipped ? 'bg-rose-500/20 text-rose-400 border-rose-500/50' : 'bg-transparent text-slate-500 border-surface-alt hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
                  }`}
@@ -440,7 +491,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 self-end xl:self-auto">
           {onChangeDifficulty && (
              <select
                value={habit.difficulty || 'medium'}
@@ -456,7 +507,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           {onArchive && (
             <button
               onClick={() => onArchive(habit.id)}
-              className="p-3 text-secondary-text hover:text-accent-periwinkle opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-periwinkle/20 hover:bg-accent-periwinkle/5 rounded-button"
+              className="p-3 text-secondary-text hover:text-accent-periwinkle opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-periwinkle/20 hover:bg-accent-periwinkle/5 rounded-full hover:scale-[1.02]"
               title="Archive to Garden History"
             >
               <LucideIcons.Archive className="w-4 h-4" />
@@ -465,7 +516,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           {onEdit && (
             <button
               onClick={() => onEdit(habit.id)}
-              className="p-3 text-secondary-text hover:text-accent-seafoam opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-seafoam/20 hover:bg-accent-seafoam/5 rounded-button"
+              className="p-3 text-secondary-text hover:text-accent-seafoam opacity-0 group-hover:opacity-100 transition-all border border-transparent hover:border-accent-seafoam/20 hover:bg-accent-seafoam/5 rounded-full hover:scale-[1.02]"
               title="Edit Habit"
             >
               <LucideIcons.Edit2 className="w-4 h-4" />
@@ -473,7 +524,7 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
           )}
           <button
             onClick={() => onDelete(habit.id)}
-            className="p-3 text-secondary-text hover:text-accent-coral opacity-0 group-hover:opacity-100 transition-all rounded-button border border-transparent hover:border-accent-coral/20 hover:bg-accent-coral/5"
+            className="p-3 text-secondary-text hover:text-accent-coral opacity-0 group-hover:opacity-100 transition-all rounded-full hover:scale-[1.02] border border-transparent hover:border-accent-coral/20 hover:bg-accent-coral/5"
             title="Delete Permanently"
           >
             <Trash2 className="w-4 h-4" />

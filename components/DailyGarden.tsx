@@ -692,7 +692,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         )}
 
         {habits.length > 0 && (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch content-start">
             <AnimatePresence mode="popLayout">
             {/* Urgent section */}
             {[...dead].length > 0 && (
@@ -913,31 +913,37 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   const prettyCreationDate = format(creationDateObj, "MMM d, yyyy");
 
   let cardBg = 'glass-card';
+  let cardBorder = 'border-status-healthy/30';
   let statusColor = 'text-status-healthy';
-  let buttonBg = 'bg-primary-mint text-white border-transparent shadow-sm';
+  let buttonBg = 'bg-primary-mint text-white border border-transparent shadow-sm';
   let buttonHover = 'hover:bg-[#00c98f]';
   let iconBg = 'bg-primary-mint/20';
 
   if (isCompleted) {
     cardBg = 'glass-card bg-status-completed/10';
+    cardBorder = 'border-primary-mint/30';
     buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (isDanger) {
-    cardBg = 'glass-card bg-status-wilting/5 border-status-wilting/20';
+    cardBg = 'glass-card bg-status-wilting/5';
+    cardBorder = 'border-status-wilting/40';
+    if (status === 'Critical' || isSlipped) cardBorder = 'border-status-critical/40';
     statusColor = 'text-status-wilting';
-    buttonBg = 'bg-status-needsCare text-white border-transparent shadow-sm';
+    buttonBg = 'bg-status-needsCare text-white border border-transparent shadow-sm';
     buttonHover = 'hover:bg-[#d4b060]';
     iconBg = 'bg-status-wilting/20';
   } else if (status === 'Resting') {
     cardBg = 'glass-card bg-status-resting/10';
+    cardBorder = 'border-status-resting/40';
     statusColor = 'text-status-resting';
-    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border-surface-alt';
+    buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (canHarvest) {
-    cardBg = 'glass-card bg-accent-peach/10 border-accent-peach/30';
-    buttonBg = 'bg-accent-peach text-white shadow-sm border-transparent';
+    cardBg = 'glass-card bg-accent-peach/10';
+    cardBorder = 'border-accent-peach/40';
+    buttonBg = 'bg-accent-peach text-white shadow-sm border border-transparent';
     buttonHover = 'hover:bg-[#F4C5A5]';
     iconBg = 'bg-accent-peach/30';
   }
@@ -947,9 +953,9 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
       ref={cardRef}
       layout 
       initial={false}
-      animate={justCompleted ? { scale: [1, 1.03, 1], y: [0, -6, 0] } : { scale: 1, y: 0 }}
-      transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
-      className={`${justCompleted ? '!bg-primary-mint/20 shadow-[0_0_40px_rgba(78,173,160,0.3)]' : cardBg + ' hover:shadow-md hover:-translate-y-0.5'} rounded-card p-8 flex flex-col justify-between group transition-colors duration-1000 relative h-full overflow-hidden border border-surface-alt`}
+      animate={justCompleted ? { scale: [1, 1.03, 1], y: [0, -6, 0] } : { scale: [1, 1.01, 1], y: 0 }}
+      transition={justCompleted ? { duration: 0.6, type: "spring", bounce: 0.4 } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      className={`${justCompleted ? '!bg-primary-mint/20 shadow-[0_0_40px_rgba(78,173,160,0.3)]' : cardBg + ' hover:-translate-y-1 hover:scale-[1.02]'} rounded-card p-8 flex flex-col justify-between group transition-all duration-500 relative h-[380px] overflow-hidden border ${cardBorder} [box-shadow:var(--shadow-sm)] hover:[box-shadow:var(--shadow-lg)]`}
     >
       {justCompleted && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
@@ -1134,8 +1140,8 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
       </div>
       
       <div className="flex flex-col gap-3 mt-auto pt-2">
-         <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1">
+         <div className="flex flex-col gap-3 w-full">
+            <div className="flex items-center justify-between w-full px-1">
                <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1">
                  <div className="relative inline-flex items-center">
                     <Flame className={`w-3.5 h-3.5 ${habit.streak >= 30 ? 'text-accent-coral animate-pulse' : habit.streak >= 21 ? 'text-accent-mustard animate-pulse' : habit.streak >= 14 ? 'text-accent-coral animate-pulse' : habit.streak >= 5 ? 'text-accent-mustard animate-pulse' : ''}`}/>
@@ -1164,26 +1170,27 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <span className="text-[11px] font-bold text-status-healthy flex items-center gap-1"><Leaf className="w-3.5 h-3.5"/> Health: {habit.plantHealth ?? 100}%</span>
             </div>
             
+            <div className="w-full flex justify-center">
             {canHarvest ? (
                <button 
                   onClick={onHarvest}
-                  className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
+                  className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
                >
                   Harvest 🧺
                </button>
             ) : habit.scheduleType === 'quantity' && quantityCurrent < (habit.quantityTarget || 1) ? (
-               <div className="flex gap-2 relative">
+               <div className="flex gap-2 relative w-full">
                  <button 
                     onClick={() => onWater(true)}
                     disabled={isSlipped}
-                    className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
+                    className={`px-4 py-3 min-h-[44px] flex-1 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
                  >
                     +1
                  </button>
                  <button 
                     onClick={() => setShowQuantityModal(true)}
                     disabled={isSlipped}
-                    className={`px-3 py-3 min-h-[44px] flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 bg-surface-alt text-white hover:bg-zinc-700 disabled:opacity-50`}
+                    className={`px-3 py-3 min-h-[44px] flex-1 rounded-full hover:scale-[1.02] font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 bg-surface-alt text-white border border-transparent hover:bg-zinc-700 disabled:opacity-50`}
                  >
                     Log...
                  </button>
@@ -1195,7 +1202,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                       if (isSlipped && onUndo) onUndo();
                       else if (!isSlipped) onWater();
                     }} 
-                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white hover:bg-[#2A292D] shadow-md'}`}
+                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
                  >
                     {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
                     {isSlipped ? "Undo Missed" : buttonText === "Water" ? "Water Plant" : buttonText}
@@ -1203,13 +1210,14 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  {!isCompleted && !isSlipped && habit.type !== 'avoid' && onSlip && (
                    <button
                      onClick={() => onSlip()}
-                     className="px-4 py-3 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
+                     className="px-4 py-3 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
                    >
                      Missed Today
                    </button>
                  )}
                </div>
             )}
+            </div>
          </div>
 
          {/* Action Row Removed (Now in settings dropdown) */}
@@ -1251,7 +1259,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  else if (!isSlipped && onSlip && !isCompleted) setShowSlipModal(true);
                }}
                disabled={isCompleted}
-               className={`w-full py-1.5 mt-1 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-colors ${
+               className={`w-full py-1.5 mt-1 rounded-full text-[11px] font-bold uppercase tracking-wide transition-all duration-300 hover:scale-[1.02] ${
                   isCompleted ? 'opacity-0 cursor-default pointer-events-none' :
                   isSlipped ? 'bg-status-critical/10 text-status-critical hover:bg-status-critical/20' :
                   'bg-surface-card text-muted-text border border-surface-alt hover:bg-surface-alt hover:text-primary-text'

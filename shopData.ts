@@ -2,9 +2,9 @@ import { ShopItem, ShopItemCategory, ShopItemTier } from './types';
 
 // The Economy Pricing Matrix (Rebalanced for 120-Day challenging model, x20)
 const PRICING_MATRIX = {
-  1: { minPrice: 1600, maxPrice: 3000, unlockLevel: 1 },
-  2: { minPrice: 4000, maxPrice: 8000, unlockLevel: 5 },
-  3: { minPrice: 24000, maxPrice: 50000, unlockLevel: 15 }
+  1: { minPrice: 4000, maxPrice: 7500, unlockLevel: 1 },
+  2: { minPrice: 10000, maxPrice: 20000, unlockLevel: 5 },
+  3: { minPrice: 60000, maxPrice: 125000, unlockLevel: 15 }
 };
 
 const CATEGORY_MULTIPLIERS: Record<ShopItemCategory, number> = {
@@ -24,13 +24,13 @@ function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { 
     return { ...item, price: 0, requiredLevel: 1, tier: 1 };
   }
   if (item.id === 'dec_nakshi_kantha') {
-     return { ...item, price: 24000, requiredLevel: 15, tier: 3 };
+     return { ...item, price: 60000, requiredLevel: 15, tier: 3 };
   }
   if (item.id === 'bg_zamindar_palace') {
-     return { ...item, price: 36000, requiredLevel: 25, tier: 3 };
+     return { ...item, price: 90000, requiredLevel: 25, tier: 3 };
   }
   if (item.id === 'dec_golden_rickshaw') {
-     return { ...item, price: 50000, requiredLevel: 35, tier: 3 };
+     return { ...item, price: 125000, requiredLevel: 35, tier: 3 };
   }
   if (item.price !== undefined) {
      return { ...item, price: item.price, requiredLevel: item.requiredLevel || 1 } as ShopItem;
@@ -314,7 +314,7 @@ const RAW_SHOP_ITEMS: (Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: num
     name: 'Streak Freeze',
     type: 'boost',
     description: "Protects your garden's streak for one full day of missed habits.",
-    price: 500,
+    price: 1500,
     iconName: 'Snowflake',
     isConsumable: true,
     maxCapacity: 2,
@@ -363,7 +363,7 @@ import { PLANTS } from './plants';
 
 export const SEED_SHOP_ITEMS: ShopItem[] = PLANTS.map(plant => {
   let tier: ShopItemTier = 1;
-  let price = 600; // base generic
+  let price = 6000; // base generic
   
   if (plant.unlockStreak <= 10) {
     tier = 1;
@@ -378,9 +378,9 @@ export const SEED_SHOP_ITEMS: ShopItem[] = PLANTS.map(plant => {
   for (let i = 0; i < plant.type.length; i++) hash = (Math.imul(31, hash) + plant.type.charCodeAt(i)) | 0;
   const variation = (Math.abs(hash) % 100) / 100;
 
-  if (tier === 1) price = 400 + variation * 400; // 400-800
-  else if (tier === 2) price = 1000 + variation * 1000; // 1000-2000
-  else price = 3000 + variation * 2000; // 3000-5000
+  if (tier === 1) price = 4000 + variation * 4000; // 4000-8000
+  else if (tier === 2) price = 10000 + variation * 10000; // 10000-20000
+  else price = 30000 + variation * 20000; // 30000-50000
 
   price = Math.round(price / 10) * 10;
 

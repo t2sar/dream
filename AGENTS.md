@@ -24,3 +24,7 @@ Any modification to state management (`App.tsx`), database synchronization (`ser
 1. Ensure all local changes are fully saved, flushed, and confirmed to the database (Firestore) before unmounting components or terminating sessions.
 2. Synchronize local and remote state properly during authentication and session recovery to never overwrite user progress with empty or disconnected states.
 3. Be verified against data preservation standards before deploying.
+
+# Automatic Version Bumping Rule
+
+Whenever you update or implement features in the app, you MUST automatically increment the version number in `package.json` (e.g., from `"1.0.1"` to `"1.0.2"`). This ensures the version name in system settings will automatically and always update to reflect changes.
