@@ -165,7 +165,7 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
         }}
       >
          <div 
-            className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-sway' : ''}`}
+            className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-breeze' : ''}`}
             style={{ filter: getGrayscaleFilter(), willChange: 'transform', transformOrigin: 'bottom center' }}
          >
             <AnimatePresence mode="wait">

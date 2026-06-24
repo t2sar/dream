@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard,
   BarChart2,
@@ -1737,15 +1738,6 @@ function App() {
     const changedHabit = habits.find((h) => h.id === id);
     if (!changedHabit) return;
 
-    const ownedFreezes = newExtraStats.streakFreezes || 0;
-    let usedFreeze = false;
-
-    if (ownedFreezes > 0) {
-      usedFreeze = true;
-      newExtraStats.streakFreezes = ownedFreezes - 1;
-      setExtraStats(newExtraStats);
-    }
-
     const diff = changedHabit.difficulty || "medium";
     const healthLoss =
       changedHabit.type === "avoid"
@@ -1762,7 +1754,7 @@ function App() {
       if (h.id !== id) return h;
       return {
         ...h,
-        streak: usedFreeze ? h.streak : 0,
+        streak: 0,
         plantHealth: newHealth,
         plantStatus: getPlantStatus(newHealth),
       };
@@ -3488,8 +3480,16 @@ function App() {
               </div>
             }
           >
+            <AnimatePresence mode="wait">
             {activeTab === Tab.TRACKER && (
-              <div className="space-y-8">
+              <motion.div
+                key="tracker"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                className="space-y-8"
+              >
                 {/* Weekly Report Banner (Shows on Sun/Mon) */}
                 {[0, 1].includes(new Date().getDay()) && (
                   <div className="p-6 rounded-card bg-surface-soft border border-surface-alt flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative shadow-sm">
@@ -3671,11 +3671,18 @@ function App() {
                     onClaimReward={claimEventReward}
                   />
                 )}
-              </div>
+              </motion.div>
             )}
 
             {activeTab === Tab.PROGRESS && (
-              <div className="space-y-6">
+              <motion.div
+                key="progress"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                className="space-y-6"
+              >
                 <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg mb-4">
                   <button
                     onClick={() => setProgressSubTab("virtual_garden")}
@@ -3871,10 +3878,17 @@ function App() {
                     activeRestMode={activeRestMode}
                   />
                 )}
-              </div>
+              </motion.div>
             )}
 
             {activeTab === Tab.SHOP && (
+              <motion.div
+                key="shop"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              >
               <GardenShop
                 stats={stats}
                 onBuyItem={handleBuyItem}
@@ -3886,10 +3900,18 @@ function App() {
                   }))
                 }
               />
+              </motion.div>
             )}
 
             {activeTab === Tab.STATS && (
-              <div className="space-y-6">
+              <motion.div
+                key="stats"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                className="space-y-6"
+              >
                 {/* Status Tab Toggle */}
                 <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
                   <button
@@ -4144,20 +4166,35 @@ function App() {
                     />
                   </React.Suspense>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {activeTab === Tab.CALENDAR && (
+              <motion.div
+                key="calendar"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              >
               <GardenCalendar
                 logs={logs}
                 habits={habits}
                 stats={stats}
                 activeRestMode={activeRestMode}
               /> // Keep all
+              </motion.div>
             )}
 
             {activeTab === Tab.SETTINGS && (
-              <div className="space-y-8">
+              <motion.div
+                key="settings"
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                className="space-y-8"
+              >
                 <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
                   <div className="flex items-center gap-6 mb-8">
                     {user.photoURL ? (
@@ -4573,8 +4610,9 @@ function App() {
                     Version {pkg.version}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
           </React.Suspense>
         )}
 

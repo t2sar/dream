@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek, differenceInCalendarDays } from 'date-fns';
 import { PlantIcon } from './PlantIcon';
-import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical } from 'lucide-react';
+import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle } from 'lucide-react';
 import { getChallengeTemplate } from '../challengesData';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueToday, isHabitDueOnDate, getCompletedCountThisWeek, isPeriodTargetReached } from '../scheduleUtils';
@@ -273,16 +273,18 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
     return historyMap;
   }, [habits, logs, recentDays]);
 
-  const { scheduled, completed, wilting, critical, dead, resting } = useMemo(() => {
+  const { scheduled, completed, wilting, critical, dead, resting, slipped } = useMemo(() => {
     const s: Habit[] = [];
     const c: Habit[] = [];
     const w: Habit[] = [];
     const crit: Habit[] = [];
     const d: Habit[] = [];
     const r: Habit[] = []; 
+    const slip: Habit[] = [];
 
     habits.forEach(habit => {
       const isCompleted = completedTodayIds.includes(habit.id);
+      const isSlipped = slippedTodayIds.includes(habit.id);
       const isPaused = isHabitPaused(habit.id, dateKey, activeRestMode || null);
       
       const isDue = isHabitDueOnDate(habit, dateKey);
@@ -296,6 +298,8 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         else c.push(habit);
       } else if (isCompleted) {
         c.push(habit);
+      } else if (isSlipped) {
+        slip.push(habit);
       } else if (isPeriodTargetDone) {
         c.push(habit); // Target reached for flexible habit, count it as completed
       } else if (!isDue) {
@@ -310,11 +314,11 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
       }
     });
 
-    return { scheduled: s, completed: c, wilting: w, critical: crit, dead: d, resting: r };
-  }, [habits, completedTodayIds, activeRestMode, dateKey, logs]);
+    return { scheduled: s, completed: c, wilting: w, critical: crit, dead: d, resting: r, slipped: slip };
+  }, [habits, completedTodayIds, slippedTodayIds, activeRestMode, dateKey, logs]);
 
   const { activeHabits, avgHealth } = useMemo(() => {
-    const active = [...scheduled, ...completed, ...wilting, ...critical].filter(h => (h.plantHealth ?? 100) > 0);
+    const active = [...scheduled, ...completed, ...wilting, ...critical, ...slipped].filter(h => (h.plantHealth ?? 100) > 0);
     const avg = active.length > 0
       ? Math.round(active.reduce((acc, curr) => acc + (curr.plantHealth ?? 100), 0) / active.length)
       : 100;
@@ -730,6 +734,21 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                return (
                 <ViewportLazyWrapper key={habit.id} id={habit.id}>
                   <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                </ViewportLazyWrapper>
+               );
+            })}
+
+            {/* Failed to Water */}
+            {slipped.length > 0 && (
+              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="failed-to-water-heading" className="col-span-full text-xs font-bold tracking-widest text-[#E57C5D] uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+                <AlertCircle className="w-4 h-4" /> Failed to Water
+              </motion.h3>
+            )}
+            {slipped.map(habit => {
+               const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
+               return (
+                <ViewportLazyWrapper key={habit.id} id={habit.id}>
+                  <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
                 </ViewportLazyWrapper>
                );
             })}
@@ -1170,17 +1189,26 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  </button>
                </div>
             ) : (
-               <button 
-                  onClick={() => {
-                    if (isSlipped && onUndo) onUndo();
-                    else if (!isSlipped) onWater();
-                  }} 
-                  disabled={isSlipped}
-                  className={`px-4 py-2 flex-grow-0 rounded-button font-bold text-sm tracking-wide transition-transform active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-gray-200 text-muted-text cursor-not-allowed' : buttonBg + ' ' + buttonHover}`}
-               >
-                  {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
-                  {buttonText}
-               </button>
+               <div className="flex items-center gap-3 w-full">
+                 <button 
+                    onClick={() => {
+                      if (isSlipped && onUndo) onUndo();
+                      else if (!isSlipped) onWater();
+                    }} 
+                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white hover:bg-[#2A292D] shadow-md'}`}
+                 >
+                    {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
+                    {isSlipped ? "Undo Missed" : buttonText === "Water" ? "Water Plant" : buttonText}
+                 </button>
+                 {!isCompleted && !isSlipped && habit.type !== 'avoid' && onSlip && (
+                   <button
+                     onClick={() => onSlip()}
+                     className="px-4 py-3 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
+                   >
+                     Missed Today
+                   </button>
+                 )}
+               </div>
             )}
          </div>
 

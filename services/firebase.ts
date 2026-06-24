@@ -25,7 +25,7 @@ import {
 import { Habit, HabitLog } from "../types";
 import firebaseConfig from "../firebase-applet-config.json";
 
-const apiKey = firebaseConfig.apiKey || (firebaseConfig as any).default?.apiKey;
+const apiKey = firebaseConfig?.apiKey || (firebaseConfig as any)?.default?.apiKey;
 
 console.error("DEBUG FIREBASE CONFIG:", firebaseConfig);
 
@@ -69,27 +69,37 @@ const filterFirestoreQuotaLog = (msg: string) => {
   return false;
 };
 
+const safeJoin = (args: any[]) => {
+  try {
+    return args.map(a => {
+      try { return String(a); } catch(e) { return ''; }
+    }).join(' ');
+  } catch(e) {
+    return '';
+  }
+};
+
 console.error = function (...args) {
-  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  if (filterFirestoreQuotaLog(safeJoin(args))) return;
   originalConsoleError.apply(console, args);
 };
 
 console.warn = function (...args) {
-  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  if (filterFirestoreQuotaLog(safeJoin(args))) return;
   originalConsoleWarn.apply(console, args);
 };
 
 console.log = function (...args) {
-  if (filterFirestoreQuotaLog(args.join(' '))) return;
+  if (filterFirestoreQuotaLog(safeJoin(args))) return;
   originalConsoleLog.apply(console, args);
 };
 
-const configToUse = firebaseConfig.apiKey ? firebaseConfig : (firebaseConfig as any).default;
+const configToUse = firebaseConfig?.apiKey ? firebaseConfig : (firebaseConfig as any)?.default;
 if (configToUse && configToUse.apiKey) {
   configToUse.apiKey = configToUse.apiKey.trim();
 }
 
-if (apiKey && apiKey.length > 10) {
+if (configToUse?.apiKey && configToUse.apiKey.length > 10) {
   try {
     app = initializeApp(configToUse);
     authInstance = getAuth(app);
@@ -232,7 +242,10 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
       onUpdate(null);
       unsubDoc();
     } else {
-      handleFirestoreError(error, OperationType.GET, pathForGetDocs);
+      const errInfo = { error: error instanceof Error ? error.message : String(error), operationType: OperationType.GET, path: pathForGetDocs, authInfo: { userId: auth?.currentUser?.uid, email: auth?.currentUser?.email } };
+      console.error('Firestore Error: ', JSON.stringify(errInfo));
+      onUpdate(null);
+      unsubDoc();
     }
   });
 
@@ -251,7 +264,10 @@ export const subscribeToUserData = (userId: string, onUpdate: (data: any) => voi
       onUpdate(null);
       unsubLogs();
     } else {
-      handleFirestoreError(error, OperationType.LIST, `${pathForGetDocs}/logs`);
+      const errInfo = { error: error instanceof Error ? error.message : String(error), operationType: OperationType.LIST, path: `${pathForGetDocs}/logs`, authInfo: { userId: auth?.currentUser?.uid, email: auth?.currentUser?.email } };
+      console.error('Firestore Error: ', JSON.stringify(errInfo));
+      onUpdate(null);
+      unsubLogs();
     }
   });
 

@@ -111,14 +111,57 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
   return (
     <motion.div
       layout
-      animate={isCompleted ? { scale: [1, 1.02, 1], y: [0, -4, 0], backgroundColor: ['var(--surface)', 'rgba(78, 173, 160, 0.2)', 'rgba(255, 255, 255, 0.05)'] } : { scale: 1, y: 0, backgroundColor: 'var(--surface)' }}
-      transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+      animate={
+        isSlipped
+          ? {
+              scale: [1, 0.98, 1],
+              y: [0, 2, 0],
+              backgroundColor: [
+                "var(--surface)",
+                "rgba(229, 124, 93, 0.15)",
+                "rgba(229, 124, 93, 0.05)"
+              ],
+              boxShadow: [
+                "0 4px 12px rgba(0,0,0,0.05)",
+                "0 12px 32px rgba(229, 124, 93, 0.3)",
+                "0 8px 24px rgba(229, 124, 93, 0.1)"
+              ],
+              borderColor: "rgba(229, 124, 93, 0.3)"
+            }
+          : isCompleted
+          ? {
+              scale: [1, 1.015, 1],
+              y: [0, -2, 0],
+              backgroundColor: [
+                "var(--surface)",
+                "rgba(127, 145, 240, 0.1)",
+                "rgba(255, 255, 255, 0.04)"
+              ],
+              boxShadow: [
+                "0 4px 12px rgba(0,0,0,0.05)",
+                "0 12px 32px rgba(127, 145, 240, 0.2)",
+                "0 8px 24px rgba(0,0,0,0.08)"
+              ],
+              borderColor: "transparent"
+            }
+          : {
+              scale: 1,
+              y: 0,
+              backgroundColor: "var(--surface)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              borderColor: "transparent"
+            }
+      }
+      transition={{ duration: 1.2, ease: "easeInOut" }}
       className={`
-      relative overflow-hidden group
+      relative overflow-hidden group border
       p-8 floating-card squircular transition-all duration-500
+      ${isSlipped ? "failed" : ""}
       ${
         habit.isGolden 
           ? `border-accent-mustard/50 shadow-lg shadow-accent-mustard/20 bg-accent-mustard/10`
+          : isSlipped
+          ? ``
           : isCompleted
           ? `border-surface-alt shadow-[0_0_40px_-10px_rgba(255,255,255,0.05)]`
           : "border-surface-alt hover:border-surface-alt hover:bg-surface-alt/40"
@@ -127,6 +170,10 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
     >
       <div
         className={`absolute -top-24 -right-24 w-52 h-52 rounded-full transition-opacity duration-1000 pointer-events-none ${isCompleted ? "opacity-[0.03] bg-accent-periwinkle mix-blend-screen" : "opacity-0"}`}
+      />
+      
+      <div
+        className={`absolute inset-0 z-0 pointer-events-none transition-all duration-1000 ${isSlipped ? "bg-slate-900/30 backdrop-grayscale-[0.8]" : "opacity-0"}`}
       />
 
       <div className="flex items-center justify-between relative z-10">

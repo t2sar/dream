@@ -1,9 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Habit, UserStats, HabitLog } from '../types';
 import { PlantIcon } from './PlantIcon';
-import { renderPot } from './DailyGarden';
 import { CompanionAssetsDictionary } from '../companionsData';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+
+export const renderPot = (equippedPotId?: string, className: string = "inset-x-2 bottom-1 h-3") => {
+  if (equippedPotId === 'pot_clay_colorful') return <div className={`absolute ${className} bg-gradient-to-r from-orange-600 via-yellow-500 to-red-500 rounded-b-xl opacity-80`} />;
+  if (equippedPotId === 'pot_clay_basic') return <div className={`absolute ${className} bg-amber-700 rounded-b-xl opacity-80`} />;
+  if (equippedPotId === 'pot_bamboo_basket') return <div className={`absolute ${className} bg-[repeating-linear-gradient(45deg,#d97706,#d97706_2px,#b45309_2px,#b45309_4px)] rounded-b-sm opacity-90`} />;
+  if (equippedPotId === 'pot_rooftop_tub') return <div className={`absolute ${className} bg-slate-400 border-t border-slate-300 rounded-b-md opacity-90 shadow-inner`} />;
+  return null;
+};
 
 interface GardenCanvasTerrainProps {
   habits: Habit[];
@@ -119,7 +126,6 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const [companionState, setCompanionState] = useState<{gridX: number, gridY: number, status: 'idle' | 'water_alert'}>({gridX: 4, gridY: 4, status: 'idle'});
   
   useEffect(() => {
-    verifyCanvasEngine();
     const timer = setInterval(() => setHour(new Date().getHours()), 60000);
     return () => clearInterval(timer);
   }, []);
@@ -556,7 +562,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                            health={item.habit.plantHealth}
                            isLegendary={item.habit.isLegendary}
                            isArchived={item.habit.isArchived}
-                           className="w-full h-full absolute top-[10%] drop-shadow-xl object-contain origin-bottom" 
+                           className="w-full h-full absolute top-[10%] drop-shadow-xl object-contain origin-bottom animate-breeze" 
                         />
                       </div>
                       <div className={`bg-black/30 blur-[3px] transition-all duration-1000 w-16 h-4 absolute bottom-0 z-0 rounded-full`} />
