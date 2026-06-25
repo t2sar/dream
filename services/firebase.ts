@@ -27,7 +27,7 @@ import firebaseConfig from "../firebase-applet-config.json";
 
 const apiKey = firebaseConfig?.apiKey || (firebaseConfig as any)?.default?.apiKey;
 
-console.error("DEBUG FIREBASE CONFIG:", firebaseConfig);
+console.log("DEBUG FIREBASE CONFIG:", firebaseConfig);
 
 if (!apiKey) {
   console.log("Firebase config loaded as:", firebaseConfig);

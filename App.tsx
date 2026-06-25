@@ -27,12 +27,14 @@ import {
   Check,
   Quote,
   Coins,
+  Sparkles,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import {
   format,
   differenceInCalendarDays,
   subDays,
+  addDays,
   startOfWeek,
   endOfWeek,
   subWeeks,
@@ -97,6 +99,7 @@ import { GardenShop } from "./components/GardenShop";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { RestModeSetup } from "./components/RestModeSetup";
+import { SmartPauseModal } from "./components/SmartPauseModal";
 import { isDateInRestMode, isHabitPaused } from "./restModeUtils";
 const AlmanacView = React.lazy(() =>
   import("./components/AlmanacView").then((m) => ({ default: m.AlmanacView })),
@@ -487,6 +490,8 @@ function App() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showRestModeModal, setShowRestModeModal] = useState(false);
   const [activeRestMode, setActiveRestMode] = useState<RestMode | null>(null);
+  const [smartPauseHabit, setSmartPauseHabit] = useState<Habit | null>(null);
+  const [dismissedSmartPauses, setDismissedSmartPauses] = useState<Record<string, boolean>>({});
   const [recentlyUnlockedCompanions, setRecentlyUnlockedCompanions] = useState<
     string[]
   >([]);
@@ -1073,27 +1078,156 @@ function App() {
 
     if (changed || freezesUsed > 0) {
       setTimeout(() => {
-        setHabits(updatedHabits);
-
-        const newExtraStats = { ...extraStats };
         if (freezesUsed > 0) {
-          newExtraStats.streakFreezes = Math.max(
-            0,
-            (newExtraStats.streakFreezes || 0) - freezesUsed,
-          );
+          setExtraStats((prevStats) => ({
+            ...prevStats,
+            streakFreezes: Math.max(0, (prevStats.streakFreezes || 0) - freezesUsed),
+          }));
         }
 
-        if (freezesUsed > 0) {
-          setExtraStats(newExtraStats);
-        }
+        setHabits((prevHabits) => {
+          return prevHabits.map((habit) => {
+            const missedCount = simulatedMissCounts.get(habit.id) || 0;
+            if (missedCount > 0) {
+              let newHealth = habit.plantHealth ?? 100;
+              let remainingMisses = missedCount;
+              let grace = habit.graceDays || 0;
+              if (grace >= remainingMisses) { grace -= remainingMisses; remainingMisses = 0; }
+              else { remainingMisses -= grace; grace = 0; }
+              const diff = habit.difficulty || "medium";
+              const missLoss = diff === "easy" ? 15 : diff === "medium" ? 20 : 25;
+              newHealth = Math.max(0, newHealth - (remainingMisses * missLoss));
+              const status = newHealth <= 0 ? "Dead" : newHealth < 20 ? "Critical" : newHealth < 50 ? "Wilting" : newHealth < 80 ? "Normal" : "Healthy";
+              return {
+                ...habit,
+                streak: remainingMisses > 0 ? 0 : habit.streak,
+                graceDays: grace,
+                plantHealth: newHealth,
+                plantStatus: status as PlantHealthStatus,
+                lastMissCheckedDate: dateKey,
+              };
+            }
+            if (changed) return { ...habit, lastMissCheckedDate: dateKey };
+            return habit;
+          });
+        });
       }, 500);
     }
   }, [dataLoading, dateKey]);
 
+  // Smart Pause checking utility
+  const checkSmartPause = (
+    habit: Habit,
+    baseDateStr: string,
+    currentLogs: HabitLog,
+    currentSlips: Record<string, any[]> | undefined,
+    currentRestMode: RestMode | null,
+  ): boolean => {
+    if (
+      currentRestMode &&
+      currentRestMode.isActive &&
+      (currentRestMode.scopeType === "all_habits" ||
+        currentRestMode.habitIds?.includes(habit.id))
+    ) {
+      return false; // Already paused/resting
+    }
+
+    try {
+      const baseDate = parseISO(baseDateStr);
+      for (let i = 0; i < 5; i++) {
+        const checkDate = subDays(baseDate, i);
+        const checkDateStr = format(checkDate, "yyyy-MM-dd");
+
+        const daySlips = currentSlips?.[checkDateStr] || [];
+        const wasExplicitlySlipped = daySlips.some((s) => s.id === habit.id);
+
+        if (wasExplicitlySlipped) {
+          continue;
+        }
+
+        const wasDue = isHabitDueOnDate(habit, checkDateStr);
+        const wasCompleted = currentLogs[checkDateStr]?.includes(habit.id);
+        const wasPaused = isHabitPaused(habit.id, checkDateStr, currentRestMode);
+
+        if (wasDue && !wasCompleted && !wasPaused) {
+          continue;
+        }
+
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Error in checkSmartPause:", err);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (dataLoading || habits.length === 0 || smartPauseHabit) return;
+
+    const candidate = habits.find((habit) => {
+      if (habit.isArchived) return false;
+      if (dismissedSmartPauses[habit.id]) return false;
+
+      return checkSmartPause(
+        habit,
+        dateKey,
+        logs,
+        extraStats.slipLogs,
+        activeRestMode,
+      );
+    });
+
+    if (candidate) {
+      setSmartPauseHabit(candidate);
+    }
+  }, [
+    dataLoading,
+    habits,
+    logs,
+    extraStats.slipLogs,
+    activeRestMode,
+    dateKey,
+    dismissedSmartPauses,
+    smartPauseHabit,
+  ]);
+
+  const handleTriggerSmartPauseRest = (
+    habit: Habit,
+    scope: RestScopeType,
+    duration: "3days" | "1week" | "2weeks",
+  ) => {
+    let days = 0;
+    if (duration === "3days") days = 2;
+    if (duration === "1week") days = 6;
+    if (duration === "2weeks") days = 13;
+
+    const startDate = new Date();
+    const endDate = addDays(startDate, days);
+
+    const mode: RestMode = {
+      id: Date.now().toString(),
+      modeType: RestModeType.CUSTOM_PAUSE,
+      scopeType: scope,
+      startDate: format(startDate, "yyyy-MM-dd"),
+      endDate: format(endDate, "yyyy-MM-dd"),
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      habitIds: scope === RestScopeType.ALL_HABITS ? [] : [habit.id],
+      streakBehavior: "freeze",
+      reminderBehavior: "pause",
+      reasonLabel: `Smart Pause for ${habit.name}`,
+    };
+
+    setActiveRestMode(mode);
+    persistData(habits, logs, extraStats, mode);
+
+    setDismissedSmartPauses((prev) => ({ ...prev, [habit.id]: true }));
+    setSmartPauseHabit(null);
+  };
+
   // 3. Stats Calculation
   const stats = React.useMemo<UserStats>(() => {
-    // Instead of recalculating from full history scan (Object.values(logs).reduce):
-    // Use the cached extraStats if it exists, or compute purely incrementally.
     const totalHabitsCompleted = extraStats.totalHabitsCompleted || 0;
     const totalXp =
       (extraStats.xp || 0) +
@@ -1114,6 +1248,18 @@ function App() {
       plantsRevived: extraStats.plantsRevived || 0,
     };
   }, [extraStats, habits]);
+
+  const prevLevelRef = React.useRef(stats.level);
+  const [justLeveledUp, setJustLeveledUp] = React.useState(false);
+
+  React.useEffect(() => {
+    if (stats.level > prevLevelRef.current) {
+        setJustLeveledUp(true);
+        setTimeout(() => setJustLeveledUp(false), 3000);
+        import("./haptics").then(({ playHaptic }) => playHaptic("unlock"));
+    }
+    prevLevelRef.current = stats.level;
+  }, [stats.level]);
 
   // 4. Save to Cloud Helper
   const lastPersistedStateHash = React.useRef<string>("");
@@ -1168,7 +1314,7 @@ function App() {
         xp: newStats.xp,
         coins: newStats.coins,
       });
-      setExtraStats(statsToSave);
+      setExtraStats(prev => ({ ...prev, ...statsToSave }));
 
       try {
         const locallyShownBadges = JSON.parse(
@@ -1221,7 +1367,7 @@ function App() {
       Object.assign(statsToSave, {
         companions: companionResults.updatedCompanions,
       });
-      setExtraStats(statsToSave);
+      setExtraStats(prev => ({ ...prev, ...statsToSave }));
 
       const isHydrationLoad = Date.now() - APP_START_TIME < 5000;
       if (!isHydrationLoad) {
@@ -1762,6 +1908,19 @@ function App() {
 
     setHabits(updatedHabits);
     persistData(updatedHabits, logs, newExtraStats);
+
+    setTimeout(() => {
+      const hasSlipped5 = checkSmartPause(
+        changedHabit,
+        dateKey,
+        logs,
+        newExtraStats.slipLogs,
+        activeRestMode,
+      );
+      if (hasSlipped5 && !dismissedSmartPauses[changedHabit.id]) {
+        setSmartPauseHabit(changedHabit);
+      }
+    }, 100);
   };
 
   const undoSlipHabit = (id: string) => {
@@ -3202,6 +3361,71 @@ function App() {
       : sortedActiveHabits.filter((h) => h.category === categoryFilter);
   }, [categoryFilter, sortedActiveHabits]);
 
+  // Swipe Detection Logic
+  const touchStartX = React.useRef<number | null>(null);
+  const touchEndX = React.useRef<number | null>(null);
+
+  const handleTouchStart = React.useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = React.useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  }, []);
+
+  const handleSwipe = React.useCallback(() => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const diffX = touchStartX.current - touchEndX.current;
+      const SWIPE_THRESHOLD = 50;
+
+      if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+        const tabsOrder = [Tab.TRACKER, Tab.PROGRESS, Tab.SHOP, Tab.STATS, Tab.SETTINGS];
+        const currentIndex = tabsOrder.indexOf(activeTab);
+        
+        if (diffX > 0 && currentIndex < tabsOrder.length - 1) {
+          // Swipe left -> next
+          setActiveTab(tabsOrder[currentIndex + 1]);
+          playHaptic('thump');
+        } else if (diffX < 0 && currentIndex > 0) {
+          // Swipe right -> prev
+          setActiveTab(tabsOrder[currentIndex - 1]);
+          playHaptic('thump');
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  }, [activeTab]);
+
+  const dragProps = React.useMemo(() => ({
+    drag: "x" as const,
+    dragDirectionLock: true,
+    dragConstraints: { left: 0, right: 0 },
+    dragElastic: 0.35,
+    onDragEnd: (_event: any, info: any) => {
+      const SWIPE_THRESHOLD = 80;
+      const offset = info.offset.x;
+      const velocity = info.velocity.x;
+      const tabsOrder = [Tab.TRACKER, Tab.PROGRESS, Tab.SHOP, Tab.STATS, Tab.SETTINGS];
+      const currentIndex = tabsOrder.indexOf(activeTab);
+      
+      if (currentIndex === -1) return;
+      
+      if (offset < -SWIPE_THRESHOLD || (offset < -30 && velocity < -400)) {
+        if (currentIndex < tabsOrder.length - 1) {
+          setActiveTab(tabsOrder[currentIndex + 1]);
+          playHaptic('thump');
+        }
+      } else if (offset > SWIPE_THRESHOLD || (offset > 30 && velocity > 400)) {
+        if (currentIndex > 0) {
+          setActiveTab(tabsOrder[currentIndex - 1]);
+          playHaptic('thump');
+        }
+      }
+    }
+  }), [activeTab]);
+
   // -- Render Logic --
 
   if (showSplash) {
@@ -3277,25 +3501,27 @@ function App() {
   }
 
   return (
-    <div className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-screen">
+    <div 
+      className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-screen"
+    >
       {/* Playful Organic Ambience - Vibrant */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal bg-grain opacity-100">
-        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-100 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 50%)' }} />
-        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-90 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 50%)', animationDelay: '2s' }} />
-        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-100 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 50%)', animationDelay: '4s' }} />
-        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-90 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 50%)', animationDelay: '3s' }} />
-        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 animate-breathe blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 50%)', animationDelay: '1s' }} />
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal opacity-100">
+        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 50%)' }} />
+        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 50%)' }} />
+        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 50%)' }} />
+        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 50%)' }} />
+        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 50%)' }} />
       </div>
 
       {/* Sync Status Indicator (Absolute Top Right) */}
       <div className="fixed top-6 right-6 z-50 flex items-center gap-2">
         {!isOnline ? (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-rose-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md animate-pulse">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-rose-400 text-xs font-bold uppercase tracking-wider animate-pulse">
             <WifiOff className="w-3 h-3" />
             Offline
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md transition-all duration-1000 opacity-50 hover:opacity-100">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-wider transition-all duration-1000 opacity-50 hover:opacity-100">
             <Cloud className="w-3 h-3" />
             Synced
           </div>
@@ -3304,36 +3530,39 @@ function App() {
 
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-6 left-6 right-6 h-20 bg-[var(--primary-anchor)] text-[var(--bg-base)] shadow-[0_8px_32px_rgba(28,27,31,0.15)] rounded-[32px] z-50 flex justify-between items-center px-8 text-xs font-bold overflow-x-auto gap-3">
-        <button
-          onClick={() => setActiveTab(Tab.TRACKER)}
-          className={`flex flex-col items-center justify-center p-3 rounded-full transition-all duration-300 ${activeTab === Tab.TRACKER ? "bg-[var(--accent-seafoam)] text-[var(--primary-anchor)] scale-110 shadow-[0_4px_16px_rgba(78,173,160,0.4)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
-        >
-          <LayoutDashboard className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.PROGRESS)}
-          className={`flex flex-col items-center justify-center p-3 rounded-full transition-all duration-300 ${activeTab === Tab.PROGRESS ? "bg-[var(--accent-mustard)] text-[var(--primary-anchor)] scale-110 shadow-[0_4px_16px_rgba(244,196,71,0.4)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
-        >
-          <BarChart2 className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.SHOP)}
-          className={`flex flex-col items-center justify-center p-3 rounded-full transition-all duration-300 ${activeTab === Tab.SHOP ? "bg-[var(--accent-coral)] text-[var(--primary-anchor)] scale-110 shadow-[0_4px_16px_rgba(229,124,93,0.4)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
-        >
-          <Store className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.STATS)}
-          className={`flex flex-col items-center justify-center p-3 rounded-full transition-all duration-300 ${activeTab === Tab.STATS ? "bg-[var(--accent-periwinkle)] text-[var(--primary-anchor)] scale-110 shadow-[0_4px_16px_rgba(127,145,240,0.4)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
-        >
-          <Activity className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => setActiveTab(Tab.SETTINGS)}
-          className={`flex flex-col items-center justify-center p-3 rounded-full transition-all duration-300 ${activeTab === Tab.SETTINGS ? "bg-[var(--accent-blush)] text-[var(--primary-anchor)] scale-110 shadow-[0_4px_16px_rgba(245,179,190,0.4)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
-        >
-          <Settings className="w-6 h-6" />
-        </button>
+        {[
+          { id: Tab.TRACKER, icon: LayoutDashboard, color: "var(--accent-seafoam)", shadow: "rgba(78,173,160,0.4)" },
+          { id: Tab.PROGRESS, icon: BarChart2, color: "var(--accent-mustard)", shadow: "rgba(244,196,71,0.4)" },
+          { id: Tab.SHOP, icon: Store, color: "var(--accent-coral)", shadow: "rgba(229,124,93,0.4)" },
+          { id: Tab.STATS, icon: Activity, color: "var(--accent-periwinkle)", shadow: "rgba(127,145,240,0.4)" },
+          { id: Tab.SETTINGS, icon: Settings, color: "var(--accent-blush)", shadow: "rgba(245,179,190,0.4)" },
+        ].map((item) => {
+          const isActive = activeTab === item.id;
+          return (
+            <motion.button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+              className={`relative flex flex-col items-center justify-center p-3 rounded-full transition-colors duration-300 ${isActive ? "text-[var(--primary-anchor)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
+              animate={{ scale: isActive ? 1.1 : 1.0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabMobileIndicator"
+                  className="absolute inset-0 rounded-full -z-10"
+                  style={{
+                    backgroundColor: item.color,
+                    boxShadow: `0 4px 16px ${item.shadow}`
+                  }}
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              )}
+              <item.icon className="w-6 h-6 relative z-10" />
+            </motion.button>
+          );
+        })}
       </nav>
 
       {/* Desktop Navigation */}
@@ -3345,16 +3574,33 @@ function App() {
             { id: Tab.SHOP, icon: Store, color: "var(--accent-coral)", shadow: "rgba(229,124,93,0.4)" },
             { id: Tab.STATS, icon: Activity, color: "var(--accent-periwinkle)", shadow: "rgba(127,145,240,0.4)" },
             { id: Tab.SETTINGS, icon: Settings, color: "var(--accent-blush)", shadow: "rgba(245,179,190,0.4)" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              style={activeTab === item.id ? { backgroundColor: item.color, color: "var(--primary-anchor)", boxShadow: `0 8px 24px ${item.shadow}` } : {}}
-              className={`w-full aspect-square rounded-[28px] flex items-center justify-center transition-all duration-300 shrink-0 ${activeTab === item.id ? "scale-110" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5 hover:scale-105"}`}
-            >
-              <item.icon className="w-7 h-7" />
-            </button>
-          ))}
+          ].map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <motion.button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05 }}
+                className={`relative w-full aspect-square rounded-[28px] flex items-center justify-center transition-colors duration-300 shrink-0 ${isActive ? "text-[var(--primary-anchor)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
+                animate={{ scale: isActive ? 1.1 : 1.0 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabDesktopIndicator"
+                    className="absolute inset-0 rounded-[28px] -z-10"
+                    style={{
+                      backgroundColor: item.color,
+                      boxShadow: `0 8px 24px ${item.shadow}`
+                    }}
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                  />
+                )}
+                <item.icon className="w-7 h-7 relative z-10" />
+              </motion.button>
+            );
+          })}
         </div>
 
         {deferredPrompt && (
@@ -3423,17 +3669,58 @@ function App() {
 
             {/* XP Bar */}
             {activeTab === Tab.TRACKER && (
-              <div className="mt-8 max-w-sm">
+              <motion.div 
+                animate={justLeveledUp ? { scale: [1, 1.05, 1], y: [0, -5, 0] } : {}}
+                transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
+                className="mt-8 max-w-sm relative"
+              >
+                {justLeveledUp && (
+                   <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                       <Sparkles className="w-8 h-8 text-yellow-400 animate-spin-slow opacity-80" />
+                   </div>
+                )}
                 <div className="flex justify-between text-[11px] text-[var(--text-muted)] mb-3 font-extrabold uppercase tracking-widest">
-                  <span>
+                  <motion.span animate={justLeveledUp ? { color: ["#64748b", "#00c98f", "#64748b"] } : {}} transition={{ duration: 1.5 }}>
                     {stats.rank} · LVL {stats.level}
-                  </span>
-                  <span className="text-[var(--accent-seafoam)]">
+                  </motion.span>
+                  <motion.span 
+                    animate={justLeveledUp ? { scale: [1, 1.2, 1], color: ["#10b981", "#3b82f6", "#10b981"] } : {}}
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="text-[var(--accent-seafoam)] relative flex items-center gap-1"
+                  >
+                    {justLeveledUp && (
+                      <>
+                        <motion.span 
+                          initial={{ opacity: 0, scale: 0, x: -10 }}
+                          animate={{ opacity: [0, 1, 1, 0], scale: [0, 1.2, 1.2, 0], y: [-10, -20] }}
+                          transition={{ duration: 1.5, repeat: 1 }}
+                          className="absolute text-yellow-400 text-xs pointer-events-none"
+                        >
+                          ✨
+                        </motion.span>
+                        <motion.span 
+                          initial={{ opacity: 0, scale: 0, x: 20 }}
+                          animate={{ opacity: [0, 1, 1, 0], scale: [0, 1.2, 1.2, 0], y: [-5, -15] }}
+                          transition={{ duration: 1.2, delay: 0.2, repeat: 1 }}
+                          className="absolute text-yellow-300 text-[10px] pointer-events-none"
+                        >
+                          ✨
+                        </motion.span>
+                        <motion.span 
+                          initial={{ opacity: 0, scale: 0, x: 5 }}
+                          animate={{ opacity: [0, 1, 1, 0], scale: [0, 1, 1, 0], y: [5, 15] }}
+                          transition={{ duration: 1.4, delay: 0.1, repeat: 1 }}
+                          className="absolute text-emerald-400 text-[10px] pointer-events-none"
+                        >
+                          ✨
+                        </motion.span>
+                      </>
+                    )}
                     XP · {stats.xp} /{" "}
                     {LEVEL_THRESHOLDS[stats.level + 1] || "Max"}
-                  </span>
+                  </motion.span>
                 </div>
-                <div className="h-3 w-full bg-[var(--surface)] rounded-full overflow-hidden shadow-inner border-2 border-[var(--surface-alt)] p-0.5">
+                <div className={`h-3 w-full bg-[var(--surface)] rounded-full overflow-hidden shadow-inner border-2 p-0.5 transition-colors duration-500 ${justLeveledUp ? 'border-[var(--accent-seafoam)]' : 'border-[var(--surface-alt)]'}`}>
                   <div
                     className="h-full bg-[var(--accent-seafoam)] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(78,173,160,0.4)]"
                     style={{
@@ -3443,7 +3730,7 @@ function App() {
                     }}
                   />
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 
@@ -3484,11 +3771,13 @@ function App() {
             {activeTab === Tab.TRACKER && (
               <motion.div
                 key="tracker"
+                layoutId="mainTabContent"
+                {...dragProps}
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="space-y-8"
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="space-y-8 touch-pan-y"
               >
                 {/* Weekly Report Banner (Shows on Sun/Mon) */}
                 {[0, 1].includes(new Date().getDay()) && (
@@ -3583,6 +3872,9 @@ function App() {
                 </div>
 
                 {/* Daily Garden Main View */}
+                <React.Profiler id="DailyGarden" onRender={(id, phase, actualDuration) => {
+                  if (actualDuration > 16) console.log(`[Profiler] ${id} (${phase}) took ${actualDuration.toFixed(2)}ms`);
+                }}>
                 <DailyGarden
                   habits={sortedActiveHabits}
                   logs={logs}
@@ -3620,6 +3912,7 @@ function App() {
                   onSnoozeHabit={stableSnoozeHabit}
                   onMailboxClick={handleMailboxClick}
                 />
+                </React.Profiler>
 
                 {showAddForm && (
                   <HabitForm
@@ -3663,6 +3956,23 @@ function App() {
                   />
                 )}
 
+                {smartPauseHabit && (
+                  <SmartPauseModal
+                    isOpen={!!smartPauseHabit}
+                    onClose={() => {
+                      setDismissedSmartPauses((prev) => ({
+                        ...prev,
+                        [smartPauseHabit.id]: true,
+                      }));
+                      setSmartPauseHabit(null);
+                    }}
+                    habit={smartPauseHabit}
+                    onConfirm={(scope, duration) => {
+                      handleTriggerSmartPauseRest(smartPauseHabit, scope, duration);
+                    }}
+                  />
+                )}
+
                 {showEventModal && activeEvent && eventProgress && (
                   <EventDetailModal
                     event={activeEvent}
@@ -3677,11 +3987,13 @@ function App() {
             {activeTab === Tab.PROGRESS && (
               <motion.div
                 key="progress"
+                layoutId="mainTabContent"
+                {...dragProps}
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="space-y-6"
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="space-y-6 touch-pan-y"
               >
                 <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg mb-4">
                   <button
@@ -3698,196 +4010,217 @@ function App() {
                   </button>
                 </div>
 
-                {progressSubTab === "virtual_garden" ? (
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Zap className="w-4 h-4 text-secondary-blue" />
-                          <span className="text-[10px] text-muted-text font-bold uppercase tracking-widest">
-                            Completed
-                          </span>
-                        </div>
-                        <span className="text-3xl font-bold font-display text-primary-text tracking-tight">
-                          {stats.totalHabitsCompleted}
-                        </span>
-                      </div>
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Trophy className="w-4 h-4 text-accent-peach" />
-                          <span className="text-[10px] text-muted-text font-bold uppercase tracking-widest">
-                            Level
-                          </span>
-                        </div>
-                        <span className="text-3xl font-bold font-display text-primary-text tracking-tight">
-                          {stats.level}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`p-8 rounded-[32px] border relative shadow-sm ${getSeasonThemeClasses(getBengaliSeason(new Date()))}`}
+                <AnimatePresence mode="wait">
+                  {progressSubTab === "virtual_garden" ? (
+                    <motion.div
+                      key="virtual_garden"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="space-y-8 w-full"
                     >
-                      <h2 className="text-xl font-bold font-display text-primary-text mb-6 flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-status-healthy" />
-                        Habit Garden{" "}
-                        <span className="text-[10px] uppercase font-mono tracking-widest ml-2 bg-black/5 px-2 py-1 rounded-md">
-                          {getBengaliSeason(new Date())}
-                        </span>
-                      </h2>
-                      <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-4">
-                        <button
-                          onClick={() => setCategoryFilter("all")}
-                          className={`px-4 py-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${categoryFilter === "all" ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
-                        >
-                          All
-                        </button>
-                        {Array.from(new Set(habits.map((h) => h.category))).map(
-                          (cat) => {
-                            if (!cat || !CATEGORIES[cat]) return null;
-                            const isSelected = categoryFilter === cat;
-                            return (
-                              <button
-                                key={cat}
-                                onClick={() =>
-                                  setCategoryFilter(isSelected ? "all" : cat)
-                                }
-                                className={`px-4 py-2 flex items-center gap-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${isSelected ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
-                              >
-                                {CATEGORIES[cat].name}
-                              </button>
-                            );
-                          },
-                        )}
-                      </div>
-                      <div
-                        ref={gardenGridRef}
-                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative"
-                      >
-                        {masterKanthaPoints && (
-                          <svg
-                            className="absolute inset-0 w-full h-full pointer-events-none"
-                            style={{ zIndex: 0 }}
-                          >
-                            <polyline
-                              points={masterKanthaPoints}
-                              fill="none"
-                              stroke="#E57C5D"
-                              strokeWidth="2"
-                              strokeDasharray="8 6"
-                              opacity="0.4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
-                        {filteredTrackerHabits.map((habit) => {
-                          const isMaster = habit.streak >= 30;
-                          return (
-                            <div
-                              key={habit.id}
-                              id={`habit-card-${habit.id}`}
-                              data-status={habit.plantStatus || "Normal"}
-                              data-habit-name={habit.name}
-                              draggable={
-                                categoryFilter === "all" &&
-                                sortType === "custom"
-                              }
-                              onDragStart={(e) => handleDragStart(e, habit.id)}
-                              onDragOver={handleDragOver}
-                              onDrop={(e) => handleDrop(e, habit.id)}
-                              className={`habit-card-visit-node ${isMaster ? "master-card ring-2 ring-primary-mint/40 border-primary-mint/50" : ""} relative z-10 grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-[var(--surface)] border border-surface-alt rounded-2xl hover:border-primary-mint transition-all group shadow-sm max-w-[140px] mx-auto w-full overflow-hidden ${draggedHabitId === habit.id ? "opacity-50" : ""}`}
-                            >
-                              {isMaster && (
-                                <svg
-                                  className="absolute inset-x-0 bottom-0 top-auto w-full h-24 text-primary-mint/10 z-0 pointer-events-none transform -translate-y-2 opacity-60"
-                                  viewBox="0 0 100 100"
-                                  preserveAspectRatio="xMidYMid slice"
-                                >
-                                  <path
-                                    d="M50 10 Q60 50 90 50 Q60 50 50 90 Q40 50 10 50 Q40 50 50 10 Z"
-                                    fill="currentColor"
-                                  />
-                                  <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="10"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  />
-                                  <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="2"
-                                    fill="currentColor"
-                                  />
-                                  <path
-                                    d="M20 20 L30 30 M80 20 L70 30 M20 80 L30 70 M80 80 L70 70"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                  />
-                                </svg>
-                              )}
-                              <div className="w-16 h-20 flex flex-col items-center justify-end relative mb-3 group-hover:scale-105 transition-transform duration-300 z-10">
-                                <PlantIcon
-                                  plantType={habit.plantType}
-                                  stage={habit.plantStage}
-                                  status={habit.plantStatus}
-                                  isPrivate={habit.isPrivate}
-                                  health={habit.plantHealth}
-                                  isLegendary={habit.isLegendary}
-                                  isArchived={habit.isArchived}
-                                  className="w-16 h-20 absolute bottom-[5%] z-10 drop-shadow-md"
-                                />
-                                {/* Elliptical shadow under the plant */}
-                                <div className="w-10 h-2 bg-black/15 shadow-[0_0_8px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
-                              </div>
-                              <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize leading-tight z-10">
-                                {habit.type === "avoid" && habit.isPrivate
-                                  ? "Protected"
-                                  : habit.name}
-                              </h3>
-                              <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full mt-1 z-10">
-                                <Flame className="w-3 h-3" />
-                                Streak: {habit.streak} days
-                              </div>
-                              <div className="text-[10px] text-secondary-text font-bold text-center w-full z-10">
-                                Status: {habit.plantStatus || "Healthy"}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {filteredTrackerHabits.length === 0 && (
-                        <div className="text-center text-muted-text text-sm py-10 font-bold uppercase tracking-wide">
-                          Your garden is empty. Plant a new seed today.
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Zap className="w-4 h-4 text-secondary-blue" />
+                            <span className="text-[10px] text-muted-text font-bold uppercase tracking-widest">
+                              Completed
+                            </span>
+                          </div>
+                          <span className="text-3xl font-bold font-display text-primary-text tracking-tight">
+                            {stats.totalHabitsCompleted}
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt relative shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Trophy className="w-4 h-4 text-accent-peach" />
+                            <span className="text-[10px] text-muted-text font-bold uppercase tracking-widest">
+                              Level
+                            </span>
+                          </div>
+                          <span className="text-3xl font-bold font-display text-primary-text tracking-tight">
+                            {stats.level}
+                          </span>
+                        </div>
+                      </div>
 
-                    <Heatmap logs={logs} />
-                    <ProgressChart logs={logs} habits={habits} />
-                  </div>
-                ) : (
-                  <GardenCalendar
-                    logs={logs}
-                    habits={habits}
-                    stats={stats}
-                    activeRestMode={activeRestMode}
-                  />
-                )}
+                      <div
+                        className={`p-8 rounded-[32px] border relative shadow-sm ${getSeasonThemeClasses(getBengaliSeason(new Date()))}`}
+                      >
+                        <h2 className="text-xl font-bold font-display text-primary-text mb-6 flex items-center gap-2">
+                          <Trophy className="w-5 h-5 text-status-healthy" />
+                          Habit Garden{" "}
+                          <span className="text-[10px] uppercase font-mono tracking-widest ml-2 bg-black/5 px-2 py-1 rounded-md">
+                            {getBengaliSeason(new Date())}
+                          </span>
+                        </h2>
+                        <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-4">
+                          <button
+                            onClick={() => setCategoryFilter("all")}
+                            className={`px-4 py-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${categoryFilter === "all" ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
+                          >
+                            All
+                          </button>
+                          {Array.from(new Set(habits.map((h) => h.category))).map(
+                            (cat) => {
+                              if (!cat || !CATEGORIES[cat]) return null;
+                              const isSelected = categoryFilter === cat;
+                              return (
+                                <button
+                                  key={cat}
+                                  onClick={() =>
+                                    setCategoryFilter(isSelected ? "all" : cat)
+                                  }
+                                  className={`px-4 py-2 flex items-center gap-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${isSelected ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
+                                >
+                                  {CATEGORIES[cat].name}
+                                </button>
+                              );
+                            },
+                          )}
+                        </div>
+                        <div
+                          ref={gardenGridRef}
+                          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 relative"
+                        >
+                          {masterKanthaPoints && (
+                            <svg
+                              className="absolute inset-0 w-full h-full pointer-events-none"
+                              style={{ zIndex: 0 }}
+                            >
+                              <polyline
+                                points={masterKanthaPoints}
+                                fill="none"
+                                stroke="#E57C5D"
+                                strokeWidth="2"
+                                strokeDasharray="8 6"
+                                opacity="0.4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                          {filteredTrackerHabits.map((habit) => {
+                            const isMaster = habit.streak >= 30;
+                            return (
+                              <div
+                                key={habit.id}
+                                id={`habit-card-${habit.id}`}
+                                data-status={habit.plantStatus || "Normal"}
+                                data-habit-name={habit.name}
+                                draggable={
+                                  categoryFilter === "all" &&
+                                  sortType === "custom"
+                                }
+                                onDragStart={(e) => handleDragStart(e, habit.id)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, habit.id)}
+                                className={`habit-card-visit-node ${isMaster ? "master-card ring-2 ring-primary-mint/40 border-primary-mint/50" : ""} relative z-10 grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-[var(--surface)] border border-surface-alt rounded-2xl hover:border-primary-mint hover:scale-[1.05] hover:shadow-md transition-all group shadow-sm max-w-[140px] mx-auto w-full overflow-hidden ${draggedHabitId === habit.id ? "opacity-50" : ""}`}
+                              >
+                                {isMaster && (
+                                  <svg
+                                    className="absolute inset-x-0 bottom-0 top-auto w-full h-24 text-primary-mint/10 z-0 pointer-events-none transform -translate-y-2 opacity-60"
+                                    viewBox="0 0 100 100"
+                                    preserveAspectRatio="xMidYMid slice"
+                                  >
+                                    <path
+                                      d="M50 10 Q60 50 90 50 Q60 50 50 90 Q40 50 10 50 Q40 50 50 10 Z"
+                                      fill="currentColor"
+                                    />
+                                    <circle
+                                      cx="50"
+                                      cy="50"
+                                      r="10"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                    />
+                                    <circle
+                                      cx="50"
+                                      cy="50"
+                                      r="2"
+                                      fill="currentColor"
+                                    />
+                                    <path
+                                      d="M20 20 L30 30 M80 20 L70 30 M20 80 L30 70 M80 80 L70 70"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                    />
+                                  </svg>
+                                )}
+                                <div className="w-16 h-20 flex flex-col items-center justify-end relative mb-3 group-hover:scale-105 transition-transform duration-300 z-10">
+                                  <PlantIcon
+                                    plantType={habit.plantType}
+                                    stage={habit.plantStage}
+                                    status={habit.plantStatus}
+                                    isPrivate={habit.isPrivate}
+                                    health={habit.plantHealth}
+                                    isLegendary={habit.isLegendary}
+                                    isArchived={habit.isArchived}
+                                    className="w-16 h-20 absolute bottom-[5%] z-10 drop-shadow-md"
+                                  />
+                                  {/* Elliptical shadow under the plant */}
+                                  <div className="w-10 h-2 bg-black/15 shadow-[0_0_8px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
+                                </div>
+                                <h3 className="text-sm font-bold text-primary-text font-display text-center capitalize leading-tight z-10">
+                                  {habit.type === "avoid" && habit.isPrivate
+                                    ? "Protected"
+                                    : habit.name}
+                                </h3>
+                                <div className="text-[10px] text-status-needsCare font-bold flex items-center justify-center gap-1 w-full mt-1 z-10">
+                                  <Flame className="w-3 h-3" />
+                                  Streak: {habit.streak} days
+                                </div>
+                                <div className="text-[10px] text-secondary-text font-bold text-center w-full z-10">
+                                  Status: {habit.plantStatus || "Healthy"}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {filteredTrackerHabits.length === 0 && (
+                          <div className="text-center text-muted-text text-sm py-10 font-bold uppercase tracking-wide">
+                            Your garden is empty. Plant a new seed today.
+                          </div>
+                        )}
+                      </div>
+
+                      <Heatmap logs={logs} />
+                      <ProgressChart logs={logs} habits={habits} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="calendar"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="w-full"
+                    >
+                      <GardenCalendar
+                        logs={logs}
+                        habits={habits}
+                        stats={stats}
+                        activeRestMode={activeRestMode}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
             {activeTab === Tab.SHOP && (
               <motion.div
                 key="shop"
+                layoutId="mainTabContent"
+                {...dragProps}
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="touch-pan-y"
               >
               <GardenShop
                 stats={stats}
@@ -3906,11 +4239,13 @@ function App() {
             {activeTab === Tab.STATS && (
               <motion.div
                 key="stats"
+                layoutId="mainTabContent"
+                {...dragProps}
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="space-y-6"
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="space-y-6 touch-pan-y"
               >
                 {/* Status Tab Toggle */}
                 <div className="flex flex-wrap gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
@@ -3952,230 +4287,284 @@ function App() {
                   </button>
                 </div>
 
-                {statsSubTab === "profile" && (
-                  <div className="space-y-8">
-                    {/* Profile Header Card */}
-                    <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative flex flex-col md:flex-row items-center gap-8 shadow-sm">
-                      <div className="w-24 h-24 rounded-full bg-[var(--surface)] border border-surface-alt flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-                        {user.photoURL ? (
-                          <img
-                            src={user.photoURL}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <UserIcon className="w-10 h-10 text-primary-mint" />
-                        )}
-                      </div>
-                      <div className="flex-1 text-center md:text-left">
-                        <h2 className="text-2xl font-bold font-display text-primary-text mb-1">
-                          {user.displayName || "Gardener"}
-                        </h2>
-                        <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-4">
-                          {stats.rank} (Level {stats.level})
-                        </p>
-
-                        {/* XP Progress Bar */}
-                        <div className="w-full max-w-md mx-auto md:mx-0">
-                          <div className="flex justify-between items-end mb-2">
-                            <span className="text-[11px] font-bold tracking-wide text-secondary-text uppercase">
-                              Total XP: {stats.xp}
-                            </span>
-                            <span className="text-[11px] font-bold tracking-wide text-muted-text uppercase">
-                              Next Lvl:{" "}
-                              {LEVEL_THRESHOLDS[stats.level + 1]
-                                ? LEVEL_THRESHOLDS[stats.level + 1]
-                                : "Max"}
-                            </span>
-                          </div>
-                          <div className="h-3 w-full bg-[var(--surface)] rounded-progress overflow-hidden border border-surface-alt p-0.5 shadow-inner-sm">
-                            <div
-                              className="h-full bg-status-healthy rounded-progress transition-all duration-1000"
-                              style={{
-                                width: LEVEL_THRESHOLDS[stats.level + 1]
-                                  ? `${((stats.xp - LEVEL_THRESHOLDS[stats.level]) / (LEVEL_THRESHOLDS[stats.level + 1] - LEVEL_THRESHOLDS[stats.level])) * 100}%`
-                                  : "100%",
-                              }}
+                <AnimatePresence mode="wait">
+                  {statsSubTab === "profile" && (
+                    <motion.div
+                      key="profile"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="space-y-8 w-full"
+                    >
+                      {/* Profile Header Card */}
+                      <div className="bg-surface-soft p-8 rounded-[32px] border border-surface-alt relative flex flex-col md:flex-row items-center gap-8 shadow-sm">
+                        <div className="w-24 h-24 rounded-full bg-[var(--surface)] border border-surface-alt flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                          {user.photoURL ? (
+                            <img
+                              src={user.photoURL}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
                             />
+                          ) : (
+                            <UserIcon className="w-10 h-10 text-primary-mint" />
+                          )}
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                          <h2 className="text-2xl font-bold font-display text-primary-text mb-1">
+                            {user.displayName || "Gardener"}
+                          </h2>
+                          <p className="text-sm font-bold tracking-wide text-status-healthy uppercase mb-4">
+                            {stats.rank} (Level {stats.level})
+                          </p>
+
+                          {/* XP Progress Bar */}
+                          <div className="w-full max-w-md mx-auto md:mx-0">
+                            <div className="flex justify-between items-end mb-2">
+                              <span className="text-[11px] font-bold tracking-wide text-secondary-text uppercase">
+                                Total XP: {stats.xp}
+                              </span>
+                              <span className="text-[11px] font-bold tracking-wide text-muted-text uppercase">
+                                Next Lvl:{" "}
+                                {LEVEL_THRESHOLDS[stats.level + 1]
+                                  ? LEVEL_THRESHOLDS[stats.level + 1]
+                                  : "Max"}
+                              </span>
+                            </div>
+                            <div className="h-3 w-full bg-[var(--surface)] rounded-progress overflow-hidden border border-surface-alt p-0.5 shadow-inner-sm">
+                              <div
+                                className="h-full bg-status-healthy rounded-progress transition-all duration-1000"
+                                style={{
+                                  width: LEVEL_THRESHOLDS[stats.level + 1]
+                                    ? `${((stats.xp - LEVEL_THRESHOLDS[stats.level]) / (LEVEL_THRESHOLDS[stats.level + 1] - LEVEL_THRESHOLDS[stats.level])) * 100}%`
+                                    : "100%",
+                                }}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Profile Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                        <Zap className="w-6 h-6 text-yellow-400 mb-3" />
-                        <div className="text-2xl font-display font-bold text-primary-text mb-1">
-                          {stats.currentLoginStreak || 0}
+                      {/* Profile Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                          <Zap className="w-6 h-6 text-yellow-400 mb-3" />
+                          <div className="text-2xl font-display font-bold text-primary-text mb-1">
+                            {stats.currentLoginStreak || 0}
+                          </div>
+                          <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
+                            Login Streak
+                          </div>
                         </div>
-                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
-                          Login Streak
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                          <Trophy className="w-6 h-6 text-accent-peach mb-3" />
+                          <div className="text-2xl font-display font-bold text-primary-text mb-1">
+                            {stats.totalHabitsCompleted}
+                          </div>
+                          <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
+                            Habits Built
+                          </div>
+                        </div>
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                          <Flame className="w-6 h-6 text-status-wilting mb-3" />
+                          <div className="text-2xl font-display font-bold text-primary-text mb-1">
+                            {stats.perfectGardenDays}
+                          </div>
+                          <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
+                            Perfect Days
+                          </div>
+                        </div>
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                          <Cloud className="w-6 h-6 text-status-healthy mb-3" />
+                          <div className="text-2xl font-display font-bold text-primary-text mb-1">
+                            {
+                              habits.filter(
+                                (h) => h.plantStage === "Fruiting Plant",
+                              ).length
+                            }
+                          </div>
+                          <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
+                            Plants Matured
+                          </div>
+                        </div>
+                        <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
+                          <Zap className="w-6 h-6 text-secondary-blue mb-3" />
+                          <div className="text-2xl font-display font-bold text-primary-text mb-1">
+                            {stats.plantsRevived}
+                          </div>
+                          <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
+                            Plants Saved
+                          </div>
                         </div>
                       </div>
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                        <Trophy className="w-6 h-6 text-accent-peach mb-3" />
-                        <div className="text-2xl font-display font-bold text-primary-text mb-1">
-                          {stats.totalHabitsCompleted}
-                        </div>
-                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
-                          Habits Built
-                        </div>
+                    </motion.div>
+                  )}
+
+                  {statsSubTab === "overview" && (
+                    <motion.div
+                      key="overview"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="w-full"
+                    >
+                      <SimpleGardenStatsDashboard
+                        habits={habits}
+                        logs={logs}
+                        stats={stats}
+                        setActiveTab={setActiveTab}
+                        userName={user?.displayName || "Gardener"}
+                        onViewReports={() => setStatsSubTab("reports")}
+                        onViewHistory={() => setStatsSubTab("history")}
+                      />
+                    </motion.div>
+                  )}
+
+                  {statsSubTab === "reports" && (
+                    <motion.div
+                      key="reports"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="space-y-6 w-full"
+                    >
+                      <div className="flex gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
+                        <button
+                          onClick={() => setReportViewMode("weekly")}
+                          className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === "weekly" ? "bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold" : "text-slate-400 hover:text-primary-text border border-transparent"}`}
+                        >
+                          Weekly Report
+                        </button>
+                        <button
+                          onClick={() => setReportViewMode("monthly")}
+                          className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === "monthly" ? "bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold" : "text-slate-400 hover:text-primary-text border border-transparent"}`}
+                        >
+                          Monthly Report
+                        </button>
                       </div>
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                        <Flame className="w-6 h-6 text-status-wilting mb-3" />
-                        <div className="text-2xl font-display font-bold text-primary-text mb-1">
-                          {stats.perfectGardenDays}
-                        </div>
-                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
-                          Perfect Days
-                        </div>
-                      </div>
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                        <Cloud className="w-6 h-6 text-status-healthy mb-3" />
-                        <div className="text-2xl font-display font-bold text-primary-text mb-1">
-                          {
-                            habits.filter(
-                              (h) => h.plantStage === "Fruiting Plant",
-                            ).length
+                      {reportViewMode === "weekly" ? (
+                        <React.Suspense
+                          fallback={
+                            <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
+                              Loading Report Module...
+                            </div>
                           }
-                        </div>
-                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
-                          Plants Matured
-                        </div>
-                      </div>
-                      <div className="bg-surface-soft p-6 rounded-[24px] border border-surface-alt flex flex-col items-center justify-center text-center shadow-sm">
-                        <Zap className="w-6 h-6 text-secondary-blue mb-3" />
-                        <div className="text-2xl font-display font-bold text-primary-text mb-1">
-                          {stats.plantsRevived}
-                        </div>
-                        <div className="text-[10px] font-bold tracking-wide uppercase text-muted-text">
-                          Plants Saved
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                        >
+                          <WeeklyReportView
+                            logs={logs}
+                            habits={habits}
+                            stats={stats}
+                            activeEvent={activeEvent}
+                            eventProgress={eventProgress}
+                            activeRestMode={activeRestMode}
+                          />
+                        </React.Suspense>
+                      ) : (
+                        <React.Suspense
+                          fallback={
+                            <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
+                              Loading Report Module...
+                            </div>
+                          }
+                        >
+                          <MonthlyReportView
+                            logs={logs}
+                            habits={habits}
+                            activeRestMode={activeRestMode}
+                          />
+                        </React.Suspense>
+                      )}
+                    </motion.div>
+                  )}
 
-                {statsSubTab === "overview" && (
-                  <SimpleGardenStatsDashboard
-                    habits={habits}
-                    logs={logs}
-                    stats={stats}
-                    setActiveTab={setActiveTab}
-                    userName={user?.displayName || "Gardener"}
-                    onViewReports={() => setStatsSubTab("reports")}
-                    onViewHistory={() => setStatsSubTab("history")}
-                  />
-                )}
-
-                {statsSubTab === "reports" && (
-                  <div className="space-y-6">
-                    <div className="flex gap-2 p-1 bg-surface-alt/5 border border-surface-alt w-fit rounded-lg">
-                      <button
-                        onClick={() => setReportViewMode("weekly")}
-                        className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === "weekly" ? "bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold" : "text-slate-400 hover:text-primary-text border border-transparent"}`}
-                      >
-                        Weekly Report
-                      </button>
-                      <button
-                        onClick={() => setReportViewMode("monthly")}
-                        className={`px-4 py-2 text-[10px] font-mono tracking-widest uppercase transition-all rounded-md ${reportViewMode === "monthly" ? "bg-primary-mint/10 text-status-healthy border border-primary-mint/20 shadow-sm font-semibold" : "text-slate-400 hover:text-primary-text border border-transparent"}`}
-                      >
-                        Monthly Report
-                      </button>
-                    </div>
-                    {reportViewMode === "weekly" ? (
+                  {statsSubTab === "challenges" && (
+                    <motion.div
+                      key="challenges"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="w-full"
+                    >
                       <React.Suspense
                         fallback={
                           <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
-                            Loading Report Module...
+                            Loading Challenges...
                           </div>
                         }
                       >
-                        <WeeklyReportView
-                          logs={logs}
-                          habits={habits}
+                        <ChallengesView
+                          habits={activeHabitsList}
                           stats={stats}
-                          activeEvent={activeEvent}
-                          eventProgress={eventProgress}
-                          activeRestMode={activeRestMode}
+                          onJoinChallenge={handleJoinChallenge}
+                          onQuitChallenge={handleQuitChallenge}
+                          onClaimChallengeReward={handleClaimChallengeReward}
                         />
                       </React.Suspense>
-                    ) : (
+                    </motion.div>
+                  )}
+
+                  {statsSubTab === "badges" && (
+                    <motion.div
+                      key="badges"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="w-full"
+                    >
                       <React.Suspense
                         fallback={
                           <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
-                            Loading Report Module...
+                            Loading Badges...
                           </div>
                         }
                       >
-                        <MonthlyReportView
-                          logs={logs}
-                          habits={habits}
-                          activeRestMode={activeRestMode}
+                        <GardenBadgesView stats={stats} />
+                      </React.Suspense>
+                    </motion.div>
+                  )}
+
+                  {statsSubTab === "history" && (
+                    <motion.div
+                      key="history"
+                      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.99 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="w-full"
+                    >
+                      <React.Suspense
+                        fallback={
+                          <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
+                            Loading Record...
+                          </div>
+                        }
+                      >
+                        <GardenHistoryView
+                          archivedHabits={habits.filter((h) => h.isArchived)}
+                          onRestore={restoreArchivedHabit}
+                          onDeletePermanently={(id) => deleteHabit(id, true)}
+                          onUpdateNote={updateArchiveNote}
                         />
                       </React.Suspense>
-                    )}
-                  </div>
-                )}
-
-                {statsSubTab === "challenges" && (
-                  <React.Suspense
-                    fallback={
-                      <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
-                        Loading Challenges...
-                      </div>
-                    }
-                  >
-                    <ChallengesView
-                      habits={activeHabitsList}
-                      stats={stats}
-                      onJoinChallenge={handleJoinChallenge}
-                      onQuitChallenge={handleQuitChallenge}
-                      onClaimChallengeReward={handleClaimChallengeReward}
-                    />
-                  </React.Suspense>
-                )}
-
-                {statsSubTab === "badges" && (
-                  <React.Suspense
-                    fallback={
-                      <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
-                        Loading Badges...
-                      </div>
-                    }
-                  >
-                    <GardenBadgesView stats={stats} />
-                  </React.Suspense>
-                )}
-
-                {statsSubTab === "history" && (
-                  <React.Suspense
-                    fallback={
-                      <div className="p-8 text-center text-slate-500 font-mono text-sm opacity-60 animate-pulse">
-                        Loading Record...
-                      </div>
-                    }
-                  >
-                    <GardenHistoryView
-                      archivedHabits={habits.filter((h) => h.isArchived)}
-                      onRestore={restoreArchivedHabit}
-                      onDeletePermanently={(id) => deleteHabit(id, true)}
-                      onUpdateNote={updateArchiveNote}
-                    />
-                  </React.Suspense>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
 
             {activeTab === Tab.CALENDAR && (
               <motion.div
                 key="calendar"
+                layoutId="mainTabContent"
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="touch-pan-y"
               >
               <GardenCalendar
                 logs={logs}
@@ -4189,11 +4578,13 @@ function App() {
             {activeTab === Tab.SETTINGS && (
               <motion.div
                 key="settings"
+                layoutId="mainTabContent"
+                {...dragProps}
                 initial={{ opacity: 0, y: 15, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="space-y-8"
+                transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                className="space-y-8 touch-pan-y"
               >
                 <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
                   <div className="flex items-center gap-6 mb-8">

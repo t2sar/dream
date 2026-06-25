@@ -18,51 +18,56 @@ const CATEGORY_MULTIPLIERS: Record<ShopItemCategory, number> = {
 };
 
 // Deterministic pricing and level calculation
-function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: number, requiredLevel?: number }): ShopItem {
+function applyPricingEngine(item: Omit<ShopItem, 'price' | 'requiredLevel'> & { price?: number, requiredLevel?: number, rarity?: 'Common' | 'Rare' | 'Legendary' }): ShopItem {
+  let result: ShopItem;
   // Hardcoded premium exceptions
   if (item.id === 'bg_default') {
-    return { ...item, price: 0, requiredLevel: 1, tier: 1 };
-  }
-  if (item.id === 'dec_nakshi_kantha') {
-     return { ...item, price: 60000, requiredLevel: 15, tier: 3 };
-  }
-  if (item.id === 'bg_zamindar_palace') {
-     return { ...item, price: 90000, requiredLevel: 25, tier: 3 };
-  }
-  if (item.id === 'dec_golden_rickshaw') {
-     return { ...item, price: 125000, requiredLevel: 35, tier: 3 };
-  }
-  if (item.price !== undefined) {
-     return { ...item, price: item.price, requiredLevel: item.requiredLevel || 1 } as ShopItem;
+    result = { ...item, price: 0, requiredLevel: 1, tier: 1 } as ShopItem;
+  } else if (item.id === 'dec_nakshi_kantha') {
+     result = { ...item, price: 60000, requiredLevel: 15, tier: 3 } as ShopItem;
+  } else if (item.id === 'bg_zamindar_palace') {
+     result = { ...item, price: 90000, requiredLevel: 25, tier: 3 } as ShopItem;
+  } else if (item.id === 'dec_golden_rickshaw') {
+     result = { ...item, price: 125000, requiredLevel: 35, tier: 3 } as ShopItem;
+  } else if (item.price !== undefined) {
+     result = { ...item, price: item.price, requiredLevel: item.requiredLevel || 1 } as unknown as ShopItem;
+  } else {
+     const tier: ShopItemTier = item.tier || 1;
+     const config = PRICING_MATRIX[tier];
+     
+     // Create deterministic pseudo-random variation based on item ID
+     let hash = 0;
+     for (let i = 0; i < item.id.length; i++) hash = (Math.imul(31, hash) + item.id.charCodeAt(i)) | 0;
+     const variation = (Math.abs(hash) % 100) / 100; // 0.0 to 1.0
+     
+     // Base calculation applying category multiplier
+     const baseAvg = (config.minPrice + config.maxPrice) / 2;
+     let calculatedPrice = baseAvg * CATEGORY_MULTIPLIERS[item.type];
+     
+     // Add variation
+     calculatedPrice = calculatedPrice * (0.8 + (variation * 0.4)); // +/- 20%
+     
+     // Round to nearest 10
+     calculatedPrice = Math.round(calculatedPrice / 10) * 10;
+     
+     // Clamp to tier boundaries
+     calculatedPrice = Math.max(config.minPrice, Math.min(config.maxPrice, calculatedPrice));
+
+     const reqLevel = item.requiredLevel ?? config.unlockLevel;
+
+     result = {
+       ...item,
+       price: calculatedPrice,
+       requiredLevel: reqLevel
+     } as ShopItem;
   }
 
-  const tier: ShopItemTier = item.tier || 1;
-  const config = PRICING_MATRIX[tier];
-  
-  // Create deterministic pseudo-random variation based on item ID
-  let hash = 0;
-  for (let i = 0; i < item.id.length; i++) hash = (Math.imul(31, hash) + item.id.charCodeAt(i)) | 0;
-  const variation = (Math.abs(hash) % 100) / 100; // 0.0 to 1.0
-  
-  // Base calculation applying category multiplier
-  const baseAvg = (config.minPrice + config.maxPrice) / 2;
-  let calculatedPrice = baseAvg * CATEGORY_MULTIPLIERS[item.type];
-  
-  // Add variation
-  calculatedPrice = calculatedPrice * (0.8 + (variation * 0.4)); // +/- 20%
-  
-  // Round to nearest 10
-  calculatedPrice = Math.round(calculatedPrice / 10) * 10;
-  
-  // Clamp to tier boundaries
-  calculatedPrice = Math.max(config.minPrice, Math.min(config.maxPrice, calculatedPrice));
-
-  const reqLevel = item.requiredLevel ?? config.unlockLevel;
-
+  // Inject Rarity
+  const tier = result.tier || item.tier || 1;
+  const rarity = item.rarity || (tier === 3 ? 'Legendary' : tier === 2 ? 'Rare' : 'Common');
   return {
-    ...item,
-    price: calculatedPrice,
-    requiredLevel: reqLevel
+    ...result,
+    rarity
   };
 }
 

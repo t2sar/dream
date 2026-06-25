@@ -1,4 +1,4 @@
-export type HapticEvent = 'water' | 'allDone' | 'grow' | 'protect' | 'complete' | 'harvest' | 'unlock' | 'slip';
+export type HapticEvent = 'water' | 'allDone' | 'grow' | 'protect' | 'complete' | 'harvest' | 'unlock' | 'slip' | 'thump';
 
 export const playHaptic = (event: HapticEvent, enabled: boolean = true) => {
   if (!enabled) return;
@@ -9,6 +9,9 @@ export const playHaptic = (event: HapticEvent, enabled: boolean = true) => {
 
   try {
     switch (event) {
+      case 'thump':
+        navigator.vibrate([15]); // A very short, subtle thump pulse
+        break;
       case 'water':
         navigator.vibrate([30, 60, 30]);
         break;

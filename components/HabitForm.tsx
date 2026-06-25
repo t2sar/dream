@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Plus, X, Search } from "lucide-react";
 import { Button } from "./Button";
 import { Habit, PlantType, CustomCategory } from "../types";
@@ -54,6 +54,39 @@ export const HabitForm: React.FC<HabitFormProps> = ({ isOpen = true, userMaxStre
   const [quantityTarget, setQuantityTarget] = useState<number>(initialHabit?.quantityTarget || 8);
   const [quantityUnit, setQuantityUnit] = useState<string>(initialHabit?.quantityUnit || 'glasses');
   const [plantSearch, setPlantSearch] = useState("");
+
+  // Implement a helper function that automatically assigns a category to a new habit based on its name
+  useEffect(() => {
+    if (initialHabit) return; // Only auto-assign for new habits
+
+    const autoCategoryMap: Record<string, { category: string, icon: string }> = {
+      'read': { category: 'personal_growth', icon: 'BookOpen' },
+      'study': { category: 'personal_growth', icon: 'GraduationCap' },
+      'meditate': { category: 'mindfulness', icon: 'Flower' },
+      'water': { category: 'hydration', icon: 'Droplets' },
+      'drink': { category: 'hydration', icon: 'Droplets' },
+      'workout': { category: 'fitness', icon: 'Dumbbell' },
+      'run': { category: 'fitness', icon: 'Activity' },
+      'walk': { category: 'fitness', icon: 'Footprints' },
+      'gym': { category: 'fitness', icon: 'Dumbbell' },
+      'sleep': { category: 'health', icon: 'Moon' },
+      'code': { category: 'personal_growth', icon: 'Terminal' },
+      'learn': { category: 'personal_growth', icon: 'Brain' },
+      'journal': { category: 'mindfulness', icon: 'Book' },
+      'smoke': { category: 'bad_habit_control', icon: 'Cigarette' },
+      'sugar': { category: 'food_nutrition', icon: 'Cookie' },
+      'eat': { category: 'food_nutrition', icon: 'Utensils' },
+    };
+
+    const lowercaseName = name.toLowerCase();
+    for (const [keyword, data] of Object.entries(autoCategoryMap)) {
+      if (lowercaseName.includes(keyword)) {
+        setCategory(data.category);
+        setIcon(data.icon);
+        break;
+      }
+    }
+  }, [name, initialHabit]);
 
   const filteredPlants = useMemo(() => {
     if (!plantSearch.trim()) return PLANTS;

@@ -1,13 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserStats, ShopItem } from '../types';
 import { SHOP_ITEMS } from '../shopData';
 import { COMPANIONS, CompanionAssetsDictionary } from '../companionsData';
 import { Button } from './Button';
 import { AnimatedModal } from './AnimatedModal';
-import { X, Coins, Package } from 'lucide-react';
+import { X, Coins, Package, Clock, Zap } from 'lucide-react';
 import { PlantIcon } from './PlantIcon';
+import { motion } from 'motion/react';
 
 const ShopItemSvg = React.lazy(() => import('./ShopItemAssets').then(m => ({ default: m.ShopItemSvg })));
+
+const getRarityBadge = (rarity?: 'Common' | 'Rare' | 'Legendary') => {
+  if (rarity === 'Legendary') {
+    return (
+      <span className="text-[8px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+        Legendary
+      </span>
+    );
+  }
+  if (rarity === 'Rare') {
+    return (
+      <span className="text-[8px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+        Rare
+      </span>
+    );
+  }
+  return (
+    <span className="text-[8px] font-medium tracking-widest uppercase px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400 border border-zinc-500/10">
+      Common
+    </span>
+  );
+};
 
 interface GardenShopProps {
   stats: UserStats;
@@ -19,6 +42,32 @@ interface GardenShopProps {
 export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: GardenShopProps) {
   const [activeTab, setActiveTab] = useState<'pots' | 'decorations' | 'fences' | 'seasonal' | 'backgrounds' | 'boosts' | 'seeds' | 'companions'>('seeds');
   const [confirmPurchaseItem, setConfirmPurchaseItem] = useState<ShopItem | null>(null);
+  const [saleState, setSaleState] = useState<{ items: string[], saleEnd: number, nextSaleStart: number } | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('weekly_flash_sale');
+    let parsed = saved ? JSON.parse(saved) : null;
+    
+    if (!parsed || Date.now() >= parsed.nextSaleStart) {
+       const allIds = SHOP_ITEMS.filter(i => i.price > 0 && !i.isConsumable).map(i => i.id);
+       const shuffled = allIds.sort(() => 0.5 - Math.random());
+       parsed = {
+          items: shuffled.slice(0, 2),
+          saleEnd: Date.now() + 24 * 60 * 60 * 1000,
+          nextSaleStart: Date.now() + 7 * 24 * 60 * 60 * 1000
+       };
+       localStorage.setItem('weekly_flash_sale', JSON.stringify(parsed));
+    }
+    setSaleState(parsed);
+  }, []);
+
+  const activeSaleItems = saleState && now < saleState.saleEnd ? saleState.items : [];
   
   const currentCoins = stats.coins || 0;
   const ownedItemIds = stats.ownedItemIds || [];
@@ -35,6 +84,11 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
     if (activeTab === 'boosts') return item.type === 'boost';
     if (activeTab === 'seeds') return item.type === 'seed';
     return true;
+  }).map(item => {
+    if (activeSaleItems.includes(item.id)) {
+      return { ...item, price: Math.floor(item.price * 0.5), isSale: true };
+    }
+    return item;
   });
 
   if (isNightMarket && activeTab === 'seeds') {
@@ -43,6 +97,14 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
         { id: 'seed_papaya', name: 'Papaya Seed', type: 'seed', price: 6000, requiredLevel: 3, description: 'Exclusive night market item. Grows into a fast Papaya tree.', iconName: 'plant' }
      );
   }
+
+  const formatTimeLeft = (endTime: number) => {
+    const diff = Math.max(0, endTime - now);
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${h}h ${m}m ${s}s`;
+  };
 
   return (
     <div className={`space-y-6 pb-20 fade-in animate-in duration-500 ${isNightMarket ? 'bg-indigo-950/20 p-4 rounded-3xl' : ''}`}>
@@ -228,8 +290,72 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
               }
           }
           
+          let rarityBorderClass = "border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)]";
+          if (item.rarity === 'Legendary') {
+             rarityBorderClass = "border-2 border-amber-500/40 shadow-[0_0_20px_rgba(244,196,71,0.35)] hover:shadow-[0_0_35px_rgba(244,196,71,0.65)] hover:border-amber-500 transition-all duration-300";
+          } else if (item.rarity === 'Rare') {
+             rarityBorderClass = "border-2 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] hover:border-emerald-500 transition-all duration-300";
+          } else {
+             rarityBorderClass = "border border-surface-alt/80 hover:border-text-muted/30 transition-all duration-300";
+          }
+          
           return (
-            <div key={item.id} className="rounded-[32px] p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-visible group bg-surface shadow-[0_8px_32px_rgba(28,27,31,0.08)] border-0">
+            <div key={item.id} className={`rounded-[32px] p-4 grid grid-rows-[auto,auto,1fr,auto,auto] gap-2 pt-6 relative overflow-visible group bg-surface ${rarityBorderClass}`}>
+               {item.isSale && (
+                  <div className="absolute -top-3 -right-2 z-20 flex flex-col items-end gap-1 pointer-events-none">
+                     <motion.div 
+                        animate={{
+                           scale: [1, 1.06, 1],
+                           boxShadow: [
+                              "0 4px 12px rgba(244, 63, 94, 0.3)",
+                              "0 4px 22px rgba(244, 63, 94, 0.6)",
+                              "0 4px 12px rgba(244, 63, 94, 0.3)"
+                           ]
+                        }}
+                        transition={{
+                           duration: 2,
+                           repeat: Infinity,
+                           ease: "easeInOut"
+                        }}
+                        className="bg-rose-500 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1"
+                     >
+                        <Zap className="w-3 h-3 text-amber-300 fill-amber-300 animate-pulse" />
+                        50% OFF
+                     </motion.div>
+                     {saleState && (() => {
+                        const diff = Math.max(0, saleState.saleEnd - now);
+                        const isUrgent = diff < 60 * 60 * 1000; // Less than 1 hour
+                        
+                        if (isUrgent) {
+                           return (
+                              <motion.div 
+                                 animate={{
+                                    scale: [1, 1.04, 1],
+                                    backgroundColor: ["#e11d48", "#be123c", "#e11d48"]
+                                 }}
+                                 transition={{
+                                    duration: 1.5,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                 }}
+                                 className="bg-rose-600 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md border border-rose-400 flex items-center gap-1"
+                              >
+                                 <Clock className="w-3 h-3 animate-spin [animation-duration:6s]" />
+                                 <span>Ends in: {formatTimeLeft(saleState.saleEnd).replace(/^0h\s*/, '')}</span>
+                              </motion.div>
+                           );
+                        } else {
+                           return (
+                              <div className="bg-surface text-rose-500 text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-md border border-rose-500/20 flex items-center gap-1">
+                                 <Clock className="w-3 h-3" />
+                                 <span>Ends in: {formatTimeLeft(saleState.saleEnd)}</span>
+                              </div>
+                           );
+                        }
+                     })()}
+                  </div>
+               )}
+               
                {/* Background Hint */}
                {item.type === 'background' && (
                   <div className="absolute inset-0 bg-gradient-to-t from-transparent to-surface-alt opacity-50 pointer-events-none rounded-[32px]" />
@@ -243,6 +369,9 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                         <ShopItemSvg itemId={item.id} className="w-20 h-24 absolute bottom-[5%] z-10" />
                      )}
                   </React.Suspense>
+               </div>
+               <div className="flex justify-center mb-1">
+                  {getRarityBadge(item.rarity)}
                </div>
                <h3 className="text-sm font-extrabold text-primary-anchor text-center line-clamp-1 leading-tight font-display">{item.name}</h3>
                <p className="text-[10px] text-text-muted font-medium text-center leading-tight line-clamp-3">{item.description}</p>
@@ -292,7 +421,10 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                    )}
                </div>
                <div>
-                  <h4 className="font-extrabold text-primary-anchor text-lg mb-1">{confirmPurchaseItem.name}</h4>
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                     <h4 className="font-extrabold text-primary-anchor text-lg">{confirmPurchaseItem.name}</h4>
+                     {getRarityBadge(confirmPurchaseItem.rarity)}
+                  </div>
                   <p className="text-sm font-medium text-text-muted leading-tight">{confirmPurchaseItem.description}</p>
                </div>
              </div>

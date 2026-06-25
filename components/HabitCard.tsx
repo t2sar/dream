@@ -16,6 +16,7 @@ import { PlantIcon } from "./PlantIcon";
 import { motion, AnimatePresence } from "motion/react";
 import * as LucideIcons from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import confetti from "canvas-confetti";
 
 interface HabitCardProps {
   habit: Habit;
@@ -231,9 +232,19 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className="flex flex-col gap-2">
             <button
-              onClick={() => {
+              onClick={(e) => {
                 if (!isCompleted) {
-                  playHaptic('complete');
+                  playHaptic('thump');
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = (rect.left + rect.width / 2) / window.innerWidth;
+                  const y = (rect.top + rect.height / 2) / window.innerHeight;
+                  confetti({
+                    particleCount: 40,
+                    spread: 70,
+                    origin: { x, y },
+                    colors: ['#00c98f', '#a8e6cf', '#dcedc1', '#3b82f6'],
+                    zIndex: 100,
+                  });
                 } else {
                   playHaptic('water'); // or slight tap when un-completing
                 }
@@ -334,11 +345,16 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                 </div>
               )}
 
-              <span
-                className={`text-[10px] font-mono uppercase tracking-widest transition-all duration-500 ${healthColor}`}
+              <motion.span
+                layout
+                className={`text-[10px] font-mono uppercase tracking-widest transition-colors duration-500 flex items-center gap-1.5 ${healthColor}`}
               >
+                {habit.plantStatus === 'Critical' ? <LucideIcons.AlertTriangle className="w-3.5 h-3.5 animate-pulse" /> : 
+                 habit.plantStatus === 'Wilting' ? <LucideIcons.AlertTriangle className="w-3.5 h-3.5" /> : 
+                 habit.plantStatus === 'Resting' ? <LucideIcons.Moon className="w-3.5 h-3.5" /> : 
+                 <LucideIcons.Leaf className="w-3.5 h-3.5" />}
                 {habit.plantStatus || "Healthy"} ({habit.plantHealth ?? 100}%)
-              </span>
+              </motion.span>
 
               <AnimatePresence mode="popLayout">
                 <motion.span

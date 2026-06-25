@@ -59,7 +59,7 @@ export const GardenTerrainView: React.FC<GardenTerrainViewProps> = ({ habits, eq
                     </div>
                     
                     {/* Floating Name/Level indicator */}
-                    <div className="absolute -bottom-6 bg-surface-card/90 backdrop-blur-sm border border-surface-alt px-2 py-0.5 rounded-md text-[10px] font-bold text-primary-text flex items-center gap-1 shadow-sm whitespace-nowrap z-20">
+                    <div className="absolute -bottom-6 bg-surface-card/90 border border-surface-alt px-2 py-0.5 rounded-md text-[10px] font-bold text-primary-text flex items-center gap-1 shadow-sm whitespace-nowrap z-20">
                       {habit.name}
                     </div>
                   </div>
@@ -77,7 +77,7 @@ export const GardenTerrainView: React.FC<GardenTerrainViewProps> = ({ habits, eq
         </TransformComponent>
       </TransformWrapper>
       
-      <div className="absolute bottom-4 left-4 bg-surface-card/60 backdrop-blur border border-surface-alt px-3 py-1.5 rounded-lg text-xs font-bold text-muted-text pointer-events-none z-10">
+      <div className="absolute bottom-4 left-4 bg-surface-card/80 border border-surface-alt px-3 py-1.5 rounded-lg text-xs font-bold text-muted-text pointer-events-none z-10">
         Pinch or scroll to zoom. Drag to pan.
       </div>
     </div>

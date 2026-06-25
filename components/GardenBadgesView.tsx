@@ -61,7 +61,7 @@ export const GardenBadgesView: React.FC<GardenBadgesViewProps> = ({ stats }) => 
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Header Panel */}
-      <div className="relative z-10 bg-white/10 backdrop-blur-2xl p-8 rounded-[32px] border border-surface-alt shadow-[0_8px_32px_rgba(0,0,0,0.3)] mb-10">
+      <div className="relative z-10 bg-white/10 p-8 rounded-[32px] border border-surface-alt shadow-[0_8px_32px_rgba(0,0,0,0.3)] mb-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-6">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-[#00F5D4]/20 rounded-2xl shadow-[0_0_25px_rgba(0,245,212,0.3)] border border-[#00F5D4]/30">
@@ -94,7 +94,7 @@ export const GardenBadgesView: React.FC<GardenBadgesViewProps> = ({ stats }) => 
           <button
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`px-5 py-2.5 rounded-2xl text-xs font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-300 backdrop-blur-md border ${
+            className={`px-5 py-2.5 rounded-2xl text-xs font-mono uppercase tracking-widest whitespace-nowrap transition-all duration-300 border ${
               filter === cat 
                 ? 'bg-[#00F5D4]/20 text-[#00F5D4] border-[#00F5D4]/40 shadow-[0_0_15px_rgba(0,245,212,0.2)]' 
                 : 'bg-white/5 text-slate-300 border-surface-alt hover:bg-white/15 hover:text-white'
@@ -117,7 +117,7 @@ export const GardenBadgesView: React.FC<GardenBadgesViewProps> = ({ stats }) => 
           return (
             <div 
               key={badge.badgeId} 
-              className={`relative bg-white/10 backdrop-blur-xl p-6 rounded-[24px] border border-surface-alt flex gap-5 overflow-hidden transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] ${
+              className={`relative bg-white/10 p-6 rounded-[24px] border border-surface-alt flex gap-5 overflow-hidden transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] ${
                 isUnlocked ? '' : 'opacity-80'
               }`}
             >
@@ -127,7 +127,7 @@ export const GardenBadgesView: React.FC<GardenBadgesViewProps> = ({ stats }) => 
                <div className={`shrink-0 w-14 h-14 flex items-center justify-center rounded-[18px] transition-all duration-500 z-10 ${
                  isUnlocked 
                    ? 'bg-[#00F5D4]/20 text-[#00F5D4] shadow-[0_0_20px_rgba(0,245,212,0.4)] border border-[#00F5D4]/30 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(0,245,212,0.6)]' 
-                   : 'bg-white/5 text-white/50 border border-surface-alt backdrop-blur-md'
+                   : 'bg-white/5 text-white/50 border border-surface-alt'
                }`}>
                  {isUnlocked ? <Icon className="w-7 h-7 drop-shadow-md" /> : <Lock className="w-6 h-6" />}
                </div>
@@ -174,7 +174,7 @@ export const GardenBadgesView: React.FC<GardenBadgesViewProps> = ({ stats }) => 
           );
         })}
         {filteredBadges.length === 0 && (
-          <div className="col-span-full py-16 text-center text-slate-400 font-mono text-sm uppercase tracking-widest bg-white/5 backdrop-blur-md border border-surface-alt rounded-[32px]">
+          <div className="col-span-full py-16 text-center text-slate-400 font-mono text-sm uppercase tracking-widest bg-white/5 border border-surface-alt rounded-[32px]">
              No badges found in this category.
           </div>
         )}

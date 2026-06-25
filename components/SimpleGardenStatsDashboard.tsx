@@ -3,6 +3,7 @@ import { Habit, HabitLog, UserStats, SimpleStatsDashboardSummary, DashboardSetti
 import * as LucideIcons from 'lucide-react';
 import { Leaf, Award, Star, Activity, Flame, Coins, CheckCircle2, TrendingUp, HeartPulse, Target, ShieldCheck, HeartHandshake } from 'lucide-react';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, format, parseISO } from 'date-fns';
+import { isHabitDueToday } from '../scheduleUtils';
 
 interface SimpleGardenStatsDashboardProps {
   habits: Habit[];
@@ -147,6 +148,19 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
     };
   }, [period, habits, logs, stats]);
 
+  const missedTodayCount = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const activeHabits = habits.filter(h => !h.isArchived);
+    let count = 0;
+    activeHabits.forEach(h => {
+        if (isHabitDueToday(h) && h.type !== 'avoid') {
+            const isCompleted = logs[todayStr]?.includes(h.id);
+            if (!isCompleted) count++;
+        }
+    });
+    return count;
+  }, [habits, logs]);
+
   const bestHabit = habits.find(h => h.id === computedSummary.currentBestStreakHabitId);
   const isBestHabitSensitive = bestHabit && SENSITIVE_CATEGORIES.includes(bestHabit.category);
   const bestHabitDisplay = isBestHabitSensitive && !defaultSettings.showSensitiveHabitNames ? 'Private Plant' : (bestHabit?.name || 'Habit Garden');
@@ -246,6 +260,16 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
                  <div className="bg-gradient-to-r from-accent-blush to-accent-seafoam h-full" style={{ width: `${computedSummary.gardenHealthScore}%` }} />
               </div>
               <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">{computedSummary.gardenHealthLabel}</p>
+            </div>
+
+            {/* Missed Today */}
+            <div className={`p-4 sm:p-5 shadow-md rounded-[var(--radius-card)] active:scale-95 transition-transform ${missedTodayCount > 0 ? 'bg-status-wilting/10 border border-status-wilting/30' : 'bg-surface-card'}`} onClick={() => setActiveTab(Tab.TRACKER)}>
+              <div className="flex items-center gap-2 text-muted-text mb-2">
+                <ShieldCheck className={`w-4 h-4 ${missedTodayCount > 0 ? 'text-status-wilting' : 'text-accent-seafoam'}`} />
+                <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest truncate">Missed Today</span>
+              </div>
+              <div className={`text-2xl sm:text-3xl font-display font-bold mb-1 ${missedTodayCount > 0 ? 'text-status-wilting' : 'text-primary-anchor'}`}>{missedTodayCount}</div>
+              <p className="text-[9px] sm:text-[10px] text-muted-text font-mono uppercase truncate">Needs attention to prevent wilting</p>
             </div>
 
             {/* XP */}

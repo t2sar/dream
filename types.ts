@@ -331,6 +331,8 @@ export interface ShopItem {
   maxCapacity?: number;
   cooldownHours?: number;
   tier?: ShopItemTier;
+  isSale?: boolean;
+  rarity?: 'Common' | 'Rare' | 'Legendary';
 }
 
 export type EventQuestType = 'water_plants' | 'complete_habit' | 'perfect_day' | 'save_wilting' | 'create_habit';

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek, differenceInCalendarDays } from 'date-fns';
 import { PlantIcon } from './PlantIcon';
-import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle } from 'lucide-react';
+import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle, ChevronDown, Sparkles } from 'lucide-react';
 import { getChallengeTemplate } from '../challengesData';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueToday, isHabitDueOnDate, getCompletedCountThisWeek, isPeriodTargetReached } from '../scheduleUtils';
@@ -10,6 +10,7 @@ import { getBengaliSeason } from '../seasonalUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedModal } from './AnimatedModal';
 import confetti from 'canvas-confetti';
+import { playHaptic } from '../haptics';
 
 const WeatherOverlay = () => {
     const season = getBengaliSeason(new Date());
@@ -186,6 +187,57 @@ import { WeatherParticles } from './WeatherParticles';
 
 import { GardenCanvasTerrain } from './GardenCanvasTerrain';
 
+export const PlantHabitCardSkeleton: React.FC = () => {
+  return (
+    <div className="glass-card rounded-card p-5 flex flex-col justify-between relative min-h-[390px] md:min-h-[400px] h-full overflow-hidden border border-surface-alt/40 [box-shadow:var(--shadow-sm)] habit-card animate-pulse">
+      {/* Subtle glow accent */}
+      <div className="absolute top-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none" />
+      
+      <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col">
+          {/* Top Row: Plant Showcase & Info Details */}
+          <div className="flex flex-row items-start gap-4 mb-3.5">
+            {/* Premium Glass Showcase Container skeleton */}
+            <div className="w-20 h-24 shrink-0 bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 rounded-2xl p-1.5 shadow-inner flex items-end justify-center relative">
+              <div className="w-12 h-16 bg-slate-300/10 dark:bg-white/10 rounded-lg" />
+              <div className="w-10 h-2 bg-slate-300/20 dark:bg-white/20 rounded-full absolute bottom-2" />
+            </div>
+            
+            {/* Right Column: Title, Category, Status, Descs */}
+            <div className="flex-1 flex flex-col justify-start min-w-0 pr-2 h-24">
+              <div className="flex flex-col">
+                {/* Category/Status badge skeleton */}
+                <div className="w-16 h-3.5 bg-slate-300/15 dark:bg-white/10 rounded-md mb-2" />
+                {/* Title skeleton */}
+                <div className="w-28 h-5 bg-slate-300/20 dark:bg-white/15 rounded-md mb-1.5" />
+              </div>
+              {/* Description skeleton line 1 */}
+              <div className="w-full h-3 bg-slate-300/10 dark:bg-white/5 rounded-md mb-1" />
+              {/* Description skeleton line 2 */}
+              <div className="w-3/4 h-3 bg-slate-300/10 dark:bg-white/5 rounded-md" />
+            </div>
+          </div>
+
+          {/* Sparkline Toggle skeleton */}
+          <div className="w-24 h-3 bg-slate-300/10 dark:bg-white/5 rounded-md mt-2" />
+        </div>
+        
+        {/* Actions Button skeleton at the bottom */}
+        <div className="flex flex-col gap-3 mt-auto pt-2">
+          {/* Streak details row skeleton */}
+          <div className="flex items-center justify-between border-t border-surface-alt/40 pt-3">
+            <div className="w-14 h-3 bg-slate-300/10 dark:bg-white/5 rounded-md" />
+            <div className="w-16 h-3 bg-slate-300/10 dark:bg-white/5 rounded-md" />
+          </div>
+          
+          {/* Big action button skeleton */}
+          <div className="w-full h-[56px] bg-slate-300/15 dark:bg-white/10 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.ReactNode, id?: string, status?: string, index?: number }>(({ children, id, status, index = 0 }, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const internalRef = React.useRef<HTMLDivElement>(null);
@@ -202,7 +254,6 @@ const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.R
   return (
     <motion.div 
       key={id}
-      layout
       initial={{ opacity: 0, scale: 0.95, y: 40 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -20 }}
@@ -216,13 +267,46 @@ const ViewportLazyWrapper = React.forwardRef<HTMLDivElement, { children: React.R
           (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }} 
-      className="min-h-[140px] w-full"
+      className="min-h-[390px] md:min-h-[400px] h-full w-full flex flex-col"
     >
-      {isVisible ? children : null}
+      {isVisible ? children : <PlantHabitCardSkeleton />}
     </motion.div>
   );
 });
 ViewportLazyWrapper.displayName = 'ViewportLazyWrapper';
+
+const THEME_INFOS = {
+  cream_butter: {
+    name: "Cream Butter",
+    description: "Playful organic light theme with warm cream canvas & sage accent.",
+    isDark: false,
+  },
+  midnight_slate: {
+    name: "Midnight Slate",
+    description: "Sleek blue tech theme with carbon panels and cool slate colors.",
+    isDark: true,
+  },
+  cosmic_cyber: {
+    name: "Cyberpunk Neon",
+    description: "Immersive synthwave dark purple featuring hot neon pink actions.",
+    isDark: true,
+  },
+  forest_zen: {
+    name: "Forest Zen",
+    description: "Peaceful forest floor greens, dark moss, and soft birch details.",
+    isDark: true,
+  },
+  retro_paper: {
+    name: "Retro Paper",
+    description: "Classic tactile feel of vintage journals with rust/coral dyes.",
+    isDark: false,
+  },
+  classic_obsidian: {
+    name: "Classic Obsidian",
+    description: "Pure contrast deep space theme with emerald habit trackers.",
+    isDark: true,
+  },
+};
 
 export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   habits,
@@ -249,6 +333,34 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   onMailboxClick
 }) => {
   const [greeting, setGreeting] = useState('');
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const prevLevelRef = React.useRef(stats.level);
+
+  useEffect(() => {
+    if (stats.level > prevLevelRef.current) {
+      setShowLevelUp(true);
+      playHaptic('unlock');
+    }
+    prevLevelRef.current = stats.level;
+  }, [stats.level]);
+
+  const currentThemeId = stats.themeId || 'cream_butter';
+  // @ts-ignore
+  const activeTheme = THEME_INFOS[currentThemeId] || THEME_INFOS.cream_butter;
+  
+  const habitatTextColors = useMemo(() => {
+    if (activeTheme.isDark) {
+      return {
+        labelColor: "text-accent-seafoam font-semibold drop-shadow-sm",
+        descColor: "text-slate-200 font-medium leading-relaxed drop-shadow-sm",
+      };
+    } else {
+      return {
+        labelColor: "text-primary-anchor font-bold",
+        descColor: "text-slate-800 font-medium leading-relaxed",
+      };
+    }
+  }, [activeTheme]);
   
   useEffect(() => {
     const phase = getGardenTimePhase();
@@ -563,12 +675,26 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         <div className="relative z-10">
           <h2 className="text-2xl font-display font-bold text-primary-text mb-1">{greeting}</h2>
           <p 
-            className="text-secondary-text text-sm mb-6 flex items-center gap-2"
+            className="text-secondary-text text-sm mb-3 flex items-center gap-2"
             style={{ color: '#ffffff', fontWeight: 'bold', fontStyle: 'italic' }}
           >
             <Sun className="w-4 h-4 text-status-needsCare" />
             {new Date().toLocaleDateString('en-BD', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
+
+          {/* Habitat Description with Dynamic Contrast Adjustment */}
+          {activeTheme && (
+            <div className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 max-w-xl transition-all duration-300">
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`text-[11px] font-extrabold uppercase tracking-widest ${habitatTextColors.labelColor}`}>
+                  🏝️ {activeTheme.name} Habitat
+                </span>
+              </div>
+              <p className={`text-xs leading-relaxed ${habitatTextColors.descColor}`}>
+                {activeTheme.description}
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="glass-card rounded-card p-4">
@@ -692,11 +818,11 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         )}
 
         {habits.length > 0 && (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch content-start">
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch content-start">
             <AnimatePresence mode="popLayout">
             {/* Urgent section */}
             {[...dead].length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="dead-heading" className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="dead-heading" className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2">
                 <ShieldAlert className="w-4 h-4" /> Fresh Start Needed (Withered)
               </motion.h3>
             )}
@@ -704,13 +830,13 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
-                  <MemoizedPlantHabitCard habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                  <MemoizedPlantHabitCard habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                 </ViewportLazyWrapper>
                );
             })}
 
             {[...critical, ...wilting].length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="at-risk-heading" className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="at-risk-heading" className="col-span-full text-xs font-bold tracking-widest text-status-wilting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
                 <ShieldAlert className="w-4 h-4" /> At Risk Plants
               </motion.h3>
             )}
@@ -718,14 +844,14 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
-                  <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                  <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                 </ViewportLazyWrapper>
                );
             })}
 
             {/* Needs Water */}
             {plantsNeedingWater.length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="needs-water-heading" className="col-span-full text-xs font-bold tracking-widest text-secondary-text uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="needs-water-heading" className="col-span-full text-xs font-bold tracking-widest text-secondary-text uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
                 <Droplet className="w-4 h-4" /> Needs Water
               </motion.h3>
             )}
@@ -733,14 +859,14 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
-                  <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                  <MemoizedPlantHabitCard habit={habit} status={getUrgencyText(habit)} buttonText={getButtonText(habit)} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={slippedTodayIds.includes(habit.id)} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                 </ViewportLazyWrapper>
                );
             })}
 
             {/* Failed to Water */}
             {slipped.length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="failed-to-water-heading" className="col-span-full text-xs font-bold tracking-widest text-[#E57C5D] uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="failed-to-water-heading" className="col-span-full text-xs font-bold tracking-widest text-[#E57C5D] uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
                 <AlertCircle className="w-4 h-4" /> Failed to Water
               </motion.h3>
             )}
@@ -748,14 +874,14 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                return (
                 <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
-                  <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                  <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                 </ViewportLazyWrapper>
                );
             })}
 
             {/* Completed */}
             {completed.length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="watered-today-heading" className="col-span-full text-xs font-bold tracking-widest text-status-healthy uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="watered-today-heading" className="col-span-full text-xs font-bold tracking-widest text-status-healthy uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
                 <Check className="w-4 h-4" /> Watered Today
               </motion.h3>
             )}
@@ -770,7 +896,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                return (
                  <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                    <div className="opacity-80 hover:opacity-100 transition-opacity h-full">
-                     <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                     <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                    </div>
                  </ViewportLazyWrapper>
                );
@@ -778,7 +904,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
 
             {/* Resting Plants */}
             {resting.length > 0 && (
-              <motion.h3 layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="resting-heading" className="col-span-full text-xs font-bold tracking-widest text-status-resting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
+              <motion.h3 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key="resting-heading" className="col-span-full text-xs font-bold tracking-widest text-status-resting uppercase flex items-center gap-2 border-b border-surface-alt pb-2 mb-2 mt-4">
                 <Moon className="w-4 h-4" /> Resting Plants
               </motion.h3>
             )}
@@ -787,7 +913,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                return (
                  <ViewportLazyWrapper key={habit.id} id={habit.id} index={i}>
                    <div className="opacity-60 hover:opacity-100 transition-opacity h-full">
-                     <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} />
+                     <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
                    </div>
                  </ViewportLazyWrapper>
                );
@@ -797,6 +923,97 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         )}
       </div>
       </div>
+
+      {/* Level Up Celebratory Animation Overlay with Sparkle Layer and Bounce */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 flex flex-col items-center justify-center p-6 text-center overflow-hidden"
+          >
+            {/* Sparkle Confetti Layer */}
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(16)].map((_, i) => {
+                const randomX = Math.random() * 100 - 50;
+                const delay = Math.random() * 1.5;
+                const duration = 2 + Math.random() * 2.5;
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0, y: 150, x: randomX * 4 }}
+                    animate={{ 
+                      opacity: [0, 1, 1, 0], 
+                      scale: [0.5, 1.6, 1.6, 0.5], 
+                      y: [150, -250 - Math.random() * 150],
+                      x: [randomX * 4, randomX * 4 + (Math.random() * 60 - 30)]
+                    }}
+                    transition={{ 
+                      duration: duration, 
+                      delay: delay, 
+                      repeat: Infinity,
+                      ease: "easeOut"
+                    }}
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl select-none"
+                  >
+                    {['✨', '⭐', '🌸', '💫', '🎉', '🌱'][i % 6]}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            <motion.div
+              initial={{ scale: 0.8, y: 50, opacity: 0 }}
+              animate={{ 
+                scale: [0.8, 1.08, 0.98, 1], 
+                y: 0, 
+                opacity: 1 
+              }}
+              exit={{ scale: 0.8, y: -20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="bg-[var(--surface-card)] border-4 border-accent-mustard rounded-[32px] p-8 max-w-sm shadow-2xl relative z-10"
+            >
+              <div className="w-24 h-24 bg-accent-mustard/15 rounded-full flex items-center justify-center mx-auto mb-5 border-2 border-accent-mustard/30 relative shadow-inner">
+                <Sparkles className="w-12 h-12 text-accent-mustard animate-pulse" />
+                <motion.div 
+                  animate={{ scale: [1, 1.25, 1], rotate: 360 }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 border-2 border-dashed border-accent-mustard rounded-full opacity-60"
+                />
+              </div>
+
+              <h3 className="text-3xl font-black font-display text-primary-text uppercase tracking-widest mb-2">
+                LEVEL UP!
+              </h3>
+              <p className="text-sm text-secondary-text mb-5 leading-relaxed">
+                Your garden blooms with new vitality! Keep watering your habits to unlock new rare seeds and rewards.
+              </p>
+
+              <div className="bg-[var(--surface-soft)] border-2 border-[var(--surface-alt)] rounded-2xl py-4 px-8 mb-5 inline-block shadow-sm">
+                <div className="text-[10px] font-mono tracking-widest text-muted-text uppercase font-semibold mb-1">New Garden Tier</div>
+                <div className="text-4xl font-black text-accent-mustard font-display tracking-tight">
+                  LEVEL {stats.level}
+                </div>
+              </div>
+
+              {stats.rank && (
+                <div className="text-xs font-bold text-accent-seafoam uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                  <span>🏆</span>
+                  <span>{stats.rank}</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowLevelUp(false)}
+                className="mt-6 px-8 py-3 bg-accent-mustard text-primary-anchor rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-accent-mustard/90 transition-all shadow-lg hover:shadow-accent-mustard/25 active:scale-95"
+              >
+                Keep Blooming!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
@@ -811,7 +1028,7 @@ export const renderPot = (equippedPotId?: string, className: string = "inset-x-2
 };
 
 // Wrapper correctly memoizes inline functions to prevent re-renders
-const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onArchiveHabit, onDeletePlant, onEditHabit, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentHistoryStr, onSnooze, dateKey }) => {
+const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onArchiveHabit, onDeletePlant, onEditHabit, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentHistoryStr, onSnooze, dateKey, themeId }) => {
    const handleWater = React.useCallback((isMini?: boolean, customAmount?: number) => onWaterPlant(habit.id, isMini, customAmount), [onWaterPlant, habit.id]);
    const handleSlip = React.useCallback(() => onSlipHabit && onSlipHabit(habit.id), [onSlipHabit, habit.id]);
    const handleUndo = React.useCallback(() => onUndoSlip && onUndoSlip(habit.id), [onUndoSlip, habit.id]);
@@ -822,7 +1039,7 @@ const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, butto
    const handleBackdate = React.useCallback((d: string) => onBackdate && onBackdate(habit.id, d), [onBackdate, habit.id]);
    const handleSnooze = React.useCallback(() => onSnooze && onSnooze(habit.id, dateKey), [onSnooze, habit.id, dateKey]);
 
-   return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={onSlipHabit ? handleSlip : undefined} onUndo={onUndoSlip ? handleUndo : undefined} onArchive={onArchiveHabit ? handleArchive : undefined} onDelete={onDeletePlant ? handleDelete : undefined} onEdit={onEditHabit ? handleEdit : undefined} onHarvest={onHarvestPlant ? handleHarvest : undefined} isDarkPhase={isDarkPhase} equippedPotId={equippedPotId} eligibleBackdates={eligibleBackdates} onBackdate={onBackdate ? handleBackdate : undefined} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} onSnooze={onSnooze ? handleSnooze : undefined} dateKey={dateKey} />;
+   return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={onSlipHabit ? handleSlip : undefined} onUndo={onUndoSlip ? handleUndo : undefined} onArchive={onArchiveHabit ? handleArchive : undefined} onDelete={onDeletePlant ? handleDelete : undefined} onEdit={onEditHabit ? handleEdit : undefined} onHarvest={onHarvestPlant ? handleHarvest : undefined} isDarkPhase={isDarkPhase} equippedPotId={equippedPotId} eligibleBackdates={eligibleBackdates} onBackdate={onBackdate ? handleBackdate : undefined} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} onSnooze={onSnooze ? handleSnooze : undefined} dateKey={dateKey} themeId={themeId} />;
 }, (prev, next) => {
   return prev.habit === next.habit &&
          prev.status === next.status &&
@@ -830,17 +1047,35 @@ const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, butto
          prev.equippedPotId === next.equippedPotId &&
          prev.isSlipped === next.isSlipped &&
          prev.isDarkPhase === next.isDarkPhase &&
+         prev.themeId === next.themeId &&
          prev.backdatesLeftThisWeek === next.backdatesLeftThisWeek &&
          prev.quantityCurrent === next.quantityCurrent &&
          prev.recentHistoryStr === next.recentHistoryStr &&
          prev.eligibleBackdates?.join(',') === next.eligibleBackdates?.join(',');
 });
 
-const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onArchive, onDelete, onEdit, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "", onSnooze }) => {
+const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onArchive, onDelete, onEdit, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "", onSnooze, themeId }) => {
   const isDanger = status === 'Critical' || status === 'Wilting' || isSlipped;
   const isCompleted = status === 'Completed Today' || status === 'Protected Today' || status === 'Resting' || status === 'Target Met';
   const isPacha = habit.plantStage === 'Fruiting Plant' && habit.streak >= 21 && (habit.streak - (habit.lastHarvestStreak ?? 21) >= 7);
   const canHarvest = isPacha && !!onHarvest;
+
+  const health = habit.plantHealth ?? 100;
+  const healthColor = health < 25 ? 'text-accent-coral font-extrabold animate-pulse' : health < 50 ? 'text-accent-mustard font-bold' : 'text-primary-mint font-bold';
+
+  const isTwoButtons = !isCompleted && !isSlipped && habit.type !== 'avoid' && !!onSlip;
+  const getDisplayButtonText = () => {
+    if (isSlipped) return "Undo Missed";
+    const label = buttonText === "Water" ? "Water Plant" : buttonText;
+    if (isTwoButtons) {
+      if (label === "Water Plant") return "Water";
+      if (label === "Revive Today") return "Revive";
+      if (label === "Save Plant") return "Save";
+      if (label === "Start Recovery") return "Recover";
+      if (label === "Extra Care") return "Care";
+    }
+    return label;
+  };
   
   const recentHistory = React.useMemo(() => {
     return recentHistoryStr.split('').map((s: string) => s === '1');
@@ -853,13 +1088,16 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   useEffect(() => {
     if (!prevCompletedRef.current && isCompleted && (status === 'Completed Today' || status === 'Protected Today' || status === 'Target Met')) {
       setJustCompleted(true);
+      playHaptic('thump');
       
-      if (habit.streak > 0 && (habit.streak === 7 || habit.streak === 14 || habit.streak === 30 || habit.streak % 30 === 0)) {
-         if (cardRef.current) {
-            const rect = cardRef.current.getBoundingClientRect();
-            const y = (rect.top + rect.height / 2) / window.innerHeight;
-            const x = (rect.left + rect.width / 2) / window.innerWidth;
-            
+      if (cardRef.current) {
+         const rect = cardRef.current.getBoundingClientRect();
+         const y = (rect.top + rect.height / 2) / window.innerHeight;
+         const x = (rect.left + rect.width / 2) / window.innerWidth;
+         
+         const isMilestone = habit.streak > 0 && (habit.streak === 7 || habit.streak === 14 || habit.streak === 30 || habit.streak % 30 === 0);
+         
+         if (isMilestone) {
             const duration = 2000;
             const end = Date.now() + duration;
             const fireColors = ['#ff0000', '#ff4500', '#ffa500', '#ffd700'];
@@ -880,6 +1118,16 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  requestAnimationFrame(frame);
                }
             }());
+         } else {
+            confetti({
+              particleCount: 40,
+              spread: 70,
+              origin: { x, y },
+              colors: ['#00c98f', '#a8e6cf', '#dcedc1', '#f5f5f5'],
+              zIndex: 100,
+              scalar: 0.8,
+              startVelocity: 25
+            });
          }
       }
 
@@ -907,6 +1155,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   const [manualQuantity, setManualQuantity] = useState('');
   const [showAgeInfo, setShowAgeInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const creationDateObj = habit.creationDate ? new Date(habit.creationDate) : new Date(habit.createdAt || Date.now());
   const activeDays = differenceInCalendarDays(new Date(), creationDateObj);
@@ -951,11 +1200,10 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   return (
     <motion.div 
       ref={cardRef}
-      layout 
       initial={false}
-      animate={justCompleted ? { scale: [1, 1.03, 1], y: [0, -6, 0] } : { scale: [1, 1.01, 1], y: 0 }}
-      transition={justCompleted ? { duration: 0.6, type: "spring", bounce: 0.4 } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      className={`${justCompleted ? '!bg-primary-mint/20 shadow-[0_0_40px_rgba(78,173,160,0.3)]' : cardBg + ' hover:-translate-y-1 hover:scale-[1.02]'} rounded-card p-8 flex flex-col justify-between group transition-all duration-500 relative h-[380px] overflow-hidden border ${cardBorder} [box-shadow:var(--shadow-sm)] hover:[box-shadow:var(--shadow-lg)]`}
+      animate={justCompleted ? { scale: [1, 1.03, 1], y: [0, -6, 0] } : { }}
+      transition={justCompleted ? { duration: 0.6, type: "spring", bounce: 0.4 } : { }}
+      className={`${justCompleted ? '!bg-primary-mint/20 shadow-[0_0_40px_rgba(78,173,160,0.3)]' : cardBg} rounded-2xl p-4 flex flex-col justify-between group transition-transform duration-300 relative h-full overflow-hidden border ${cardBorder} [box-shadow:var(--shadow-sm)] habit-card bg-clip-padding`}
     >
       {justCompleted && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
@@ -970,7 +1218,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
            ))}
         </div>
       )}
-      <div className="relative z-10 flex flex-col justify-between h-full">
+      <div className="relative z-10 flex flex-col gap-2.5 h-full w-full justify-between">
       <AnimatePresence>
         {justCompleted && (
           <motion.div 
@@ -1043,104 +1291,189 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
           )}
         </div>
       </div>
-      <div className="flex flex-row items-center gap-4 mb-4">
-           {/* Display Case Container for PlantAssetsDictionary SVG */}
-           <div onClick={() => setShowAgeInfo(!showAgeInfo)} className={`w-20 h-24 shrink-0 flex flex-col items-center justify-end relative group cursor-pointer`}>
-             <AnimatePresence>
-                 {showAgeInfo && (
-                   <motion.div
-                     initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                     exit={{ opacity: 0, y: 5, scale: 0.9 }}
-                     className="absolute -top-[4.5rem] left-1/2 -translate-x-1/2 z-40 bg-surface text-primary-text text-[10px] whitespace-nowrap p-2 rounded-lg shadow-xl border border-surface-alt font-sans pointer-events-none"
+
+      <div className="flex flex-col gap-2 w-full">
+        {/* Top Row: Plant Showcase & Info Details */}
+        <div className="flex flex-row items-stretch gap-3 w-full">
+             {/* Premium Glass Showcase Container for Plant Icon */}
+             <div 
+               onClick={() => setShowAgeInfo(!showAgeInfo)} 
+               className="w-[74px] h-[92px] shrink-0 flex flex-col items-center justify-end relative group cursor-pointer bg-gradient-to-b from-slate-900/10 to-slate-900/5 dark:from-white/10 dark:to-white/5 border border-slate-900/15 dark:border-white/15 rounded-xl p-1 shadow-inner transition-all duration-300 hover:scale-[1.03] active:scale-95 pt-1 overflow-hidden"
+             >
+               {/* Ambient grid background pattern inside display case */}
+               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:8px_8px] pointer-events-none" />
+               <AnimatePresence>
+                   {showAgeInfo && (
+                     <motion.div
+                       initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                       animate={{ opacity: 1, y: 0, scale: 1 }}
+                       exit={{ opacity: 0, y: 5, scale: 0.9 }}
+                       className="absolute -top-[4.5rem] left-1/2 -translate-x-1/2 z-40 bg-surface text-primary-text text-[10px] whitespace-nowrap p-2 rounded-lg shadow-xl border border-surface-alt font-sans pointer-events-none animate-in fade-in-50 zoom-in-95 duration-150"
+                     >
+                       <div className="font-bold text-center mb-0.5 text-primary-mint text-[11px]">Lifespan</div>
+                       <div className="opacity-90">Planted: {prettyCreationDate}</div>
+                       <div className="opacity-90">Days active: {activeDays}</div>
+                       <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface border-b border-r border-surface-alt rotate-45" />
+                     </motion.div>
+                   )}
+               </AnimatePresence>
+               <AnimatePresence>
+                 {justCompleted && (
+                   <motion.div 
+                     initial={{ opacity: 1 }} 
+                     animate={{ opacity: 1 }} 
+                     exit={{ opacity: 0 }} 
+                     className="absolute inset-0 z-30 pointer-events-none overflow-hidden"
                    >
-                     <div className="font-bold text-center mb-0.5 text-primary-mint text-[11px]">Lifespan</div>
-                     <div className="opacity-90">Planted: {prettyCreationDate}</div>
-                     <div className="opacity-90">Days active: {activeDays}</div>
-                     <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface border-b border-r border-surface-alt rotate-45" />
+                     {[...Array(6)].map((_, i) => (
+                       <motion.div
+                         key={`water-${i}`}
+                         initial={{ top: -20, left: 10 + Math.random() * 60, scale: 0, opacity: 0 }}
+                         animate={{ top: 80, scale: 1, opacity: [0, 1, 0] }}
+                         transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeIn' }}
+                         className="absolute w-2 h-3 bg-blue-400/80 rounded-full drop-shadow-sm"
+                         style={{ borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%' }}
+                       />
+                     ))}
                    </motion.div>
                  )}
-             </AnimatePresence>
-             <AnimatePresence>
-               {justCompleted && (
-                 <motion.div 
-                   initial={{ opacity: 1 }} 
-                   animate={{ opacity: 1 }} 
-                   exit={{ opacity: 0 }} 
-                   className="absolute inset-0 z-30 pointer-events-none overflow-hidden"
-                 >
-                   {[...Array(6)].map((_, i) => (
-                     <motion.div
-                       key={`water-${i}`}
-                       initial={{ top: -20, left: 10 + Math.random() * 60, scale: 0, opacity: 0 }}
-                       animate={{ top: 80, scale: 1, opacity: [0, 1, 0] }}
-                       transition={{ duration: 0.6, delay: i * 0.1, ease: 'easeIn' }}
-                       className="absolute w-2 h-3 bg-blue-400/80 rounded-full drop-shadow-sm"
-                       style={{ borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%' }}
-                     />
-                   ))}
-                 </motion.div>
-               )}
-             </AnimatePresence>
-             <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-20 h-24 absolute bottom-[5%] z-10 drop-shadow-md animate-breathe transform-gpu will-change-transform group-hover:scale-[1.03] transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-105' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'opacity-95' : ''}`} />
-             {/* Position custom pot exactly overlapping the base */}
-             {renderPot(equippedPotId, 'absolute bottom-[10%] inset-x-4 h-4 z-20')}
-             {/* Elliptical shadow under the plant */}
-             <div className="w-14 h-2 bg-black/15 shadow-[0_0_10px_4px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[-5%] z-0" />
-           </div>
-           
-           <div className="flex-1 flex flex-col justify-center">
-             <div className="text-[11px] font-bold tracking-wide uppercase mb-1.5 flex items-center gap-1">
-               {isDanger ? <AlertTriangle className="w-3.5 h-3.5 text-status-wilting" /> : isCompleted ? <Check className="w-3.5 h-3.5 text-status-healthy" /> : <div className="w-2 h-2 rounded-full bg-status-healthy" />}
-               <span className={statusColor}>{isSlipped ? "Slipped Today" : status}</span>
+               </AnimatePresence>
+               <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-16 h-20 absolute bottom-[8%] z-10 drop-shadow-md animate-breathe transform-gpu will-change-transform group-hover:scale-[1.05] transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-105' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'opacity-95' : ''}`} />
+               {/* Position custom pot exactly overlapping the base */}
+               {renderPot(equippedPotId, 'absolute bottom-[12%] inset-x-3.5 h-3 z-20')}
+               {/* Elliptical shadow under the plant */}
+               <div className="w-12 h-1.5 bg-black/15 shadow-[0_0_8px_3px_rgba(0,0,0,0.15)] rounded-[100%] absolute bottom-[4%] z-0" />
              </div>
-             <h4 className="font-bold text-primary-text text-base lg:text-lg capitalize flex items-center gap-2 leading-tight">
-               {habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}
-               {(() => {
-                  if (!habit.category) return null;
-                   const custom = customCategories.find((c: any) => c.id === habit.category || c.name === habit.category);
-                   if (custom) {
-                      return (
-                         <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: `${custom.color}20`, color: custom.color, border: `1px solid ${custom.color}40` }}>
-                           {custom.name}
+             
+             {/* Right Column: Title, Category, Status, Descs */}
+             <div className="flex-1 flex flex-col justify-between min-w-0 pr-1 py-0.5">
+               <div className="flex flex-col gap-1">
+                 <div className="flex items-center justify-between gap-1 flex-wrap">
+                   <motion.div className="text-[8px] font-extrabold tracking-widest uppercase flex items-center gap-1 leading-none px-1.5 py-0.5 rounded-full bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 shadow-sm">
+                     {isCompleted ? <Check className="w-2.5 h-2.5 text-status-healthy" /> : status === 'Critical' ? <AlertTriangle className="w-2.5 h-2.5 text-status-critical animate-pulse" /> : status === 'Wilting' ? <AlertTriangle className="w-2.5 h-2.5 text-status-wilting" /> : isSlipped ? <ShieldAlert className="w-2.5 h-2.5 text-[#E57C5D]" /> : status === 'Resting' ? <Moon className="w-2.5 h-2.5 text-status-resting" /> : <Leaf className="w-2.5 h-2.5 text-status-healthy" />}
+                     <motion.span className={`transition-colors duration-500 font-mono text-[8px] ${statusColor}`}>{isSlipped ? "Slipped" : status}</motion.span>
+                   </motion.div>
+                   {(() => {
+                      if (!habit.category) return null;
+                       const custom = customCategories.find((c: any) => c.id === habit.category || c.name === habit.category);
+                       if (custom) {
+                          return (
+                             <span className="text-[7.5px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0" style={{ backgroundColor: `${custom.color}20`, color: custom.color, border: `1px solid ${custom.color}30` }}>
+                               {custom.name}
+                             </span>
+                          );
+                       }
+                       return (
+                         <span className="text-[7.5px] px-1.5 py-0.5 rounded-full border border-surface-alt bg-surface-alt/20 text-slate-400 uppercase tracking-wider font-bold shrink-0">
+                           {habit.category.replace('_', ' ')}
                          </span>
-                      );
-                   }
-                   return (
-                     <span className="text-[9px] px-1.5 py-0.5 rounded border border-surface-alt bg-surface-alt/20 text-slate-400">
-                       {habit.category.replace('_', ' ')}
-                     </span>
-                   );
-                })()}
-             </h4>
-             {habit.scheduleType && habit.scheduleType !== 'daily' && (
-                <div className="inline-block mt-1 px-2 py-0.5 bg-surface-alt/40 border border-black/5 rounded-chip text-[10px] font-bold text-muted-text tracking-wide uppercase">
-                   {formattedSchedule()}
-                </div>
-             )}
-             {habit.scheduleType === 'quantity' && habit.quantityTarget !== undefined && habit.quantityTarget > 0 && (
-                <div className="mt-1 text-[11px] font-bold text-status-healthy">
-                   Progress: {quantityCurrent} / {habit.quantityTarget} {habit.quantityUnit}
-                </div>
-             )}
-            
-            {/* Sparkline */}
-            {recentHistory && recentHistory.length > 0 && (
-               <div className="flex items-end gap-1 mt-3 h-4 opacity-80" aria-label="7-day sparkline">
-                 {recentHistory.map((completed: boolean, idx: number) => (
-                    <div 
-                       key={idx} 
-                       className={`w-1.5 rounded-t-sm transition-all ${completed ? 'bg-status-healthy h-full shadow-[0_0_5px_rgba(34,197,94,0.3)]' : 'bg-surface-alt h-1.5'}`}
-                       title={completed ? 'Completed' : 'Missed/Not Scheduled'}
-                    />
-                 ))}
+                       );
+                    })()}
+                 </div>
+
+                 <h4 className="font-extrabold text-primary-text text-[13px] lg:text-[14px] capitalize tracking-tight leading-snug truncate mt-0.5">
+                   <span className="truncate max-w-[130px] sm:max-w-none">{habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}</span>
+                 </h4>
+
+                 {/* Advanced Health Vitality Bar */}
+                 <div className="flex flex-col gap-0.5 mt-1">
+                   <div className="flex items-center justify-between text-[8.5px] font-bold text-muted-text">
+                     <span className="flex items-center gap-0.5"><Leaf className="w-2 h-2 text-primary-mint"/> Vitality</span>
+                     <span className={healthColor}>{health}%</span>
+                   </div>
+                   <div className="w-full h-1 bg-slate-200 dark:bg-neutral-800 rounded-full overflow-hidden p-[1px] border border-slate-300/20 dark:border-white/5">
+                     <motion.div 
+                       initial={{ width: 0 }}
+                       animate={{ width: `${health}%` }}
+                       transition={{ duration: 0.8, ease: "easeOut" }}
+                       className={`h-full rounded-full ${
+                         health < 25 ? 'bg-gradient-to-r from-red-500 to-status-critical shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 
+                         health < 50 ? 'bg-gradient-to-r from-amber-500 to-status-needsCare' : 
+                         'bg-gradient-to-r from-emerald-500 to-status-healthy shadow-[0_0_8px_rgba(34,197,94,0.3)]'
+                       }`}
+                     />
+                   </div>
+                 </div>
+               </div>
+               
+               {habit.description && (() => {
+                  const isDarkTheme = (THEME_INFOS[themeId as keyof typeof THEME_INFOS]?.isDark ?? false);
+                  const descTextColor = isDarkTheme 
+                    ? (isDarkPhase ? 'text-slate-200/80' : 'text-slate-300/85')
+                    : (isDarkPhase ? 'text-slate-600' : 'text-slate-700');
+                  return (
+                    <p className={`text-[9px] mt-1 leading-snug line-clamp-1 transition-colors ${descTextColor} opacity-90 font-medium tracking-wide`}>
+                       {habit.description}
+                    </p>
+                  );
+               })()}
+             </div>
+        </div>
+
+
+        {/* Schedule and Targets Row */}
+        {((habit.scheduleType && habit.scheduleType !== 'daily') || (habit.scheduleType === 'quantity' && habit.quantityTarget !== undefined && habit.quantityTarget > 0)) && (
+          <div className="flex flex-wrap items-center gap-1 mb-1.5 h-[16px]">
+            {habit.scheduleType && habit.scheduleType !== 'daily' && (
+               <div className="inline-flex items-center px-1.5 py-0.5 bg-surface-alt/40 border border-black/5 rounded-chip text-[8px] font-bold text-muted-text tracking-wide uppercase shrink-0">
+                  {formattedSchedule()}
                </div>
             )}
+            {habit.scheduleType === 'quantity' && habit.quantityTarget !== undefined && habit.quantityTarget > 0 && (
+               <div className="inline-flex items-center px-1.5 py-0.5 bg-status-healthy/10 border border-status-healthy/20 rounded-chip text-[8px] font-extrabold text-status-healthy tracking-wider uppercase shrink-0">
+                  Progress: {quantityCurrent} / {habit.quantityTarget} {habit.quantityUnit}
+               </div>
+            )}
+          </div>
+        )}
+
+        {/* Full Width Collapsible Sparkline Panel */}
+        {recentHistory && recentHistory.length > 0 && (
+           <div className="w-full">
+             <button
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setIsExpanded(!isExpanded);
+               }}
+               className="text-[9px] font-mono tracking-widest uppercase text-muted-text hover:text-primary-text flex items-center gap-1 transition-colors mb-1"
+             >
+               <span>{isExpanded ? "Hide History" : "Show History"}</span>
+               <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+             </button>
+             
+             <motion.div
+               initial={false}
+               animate={{ 
+                 height: isExpanded ? "auto" : 0,
+                 opacity: isExpanded ? 1 : 0,
+                 marginTop: isExpanded ? 4 : 0
+               }}
+               transition={{ 
+                 type: "spring", 
+                 stiffness: 220, 
+                 damping: 24 
+               }}
+               className="overflow-hidden"
+             >
+               <div className="bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-xl p-2.5 shadow-inner">
+                 <div className="text-[9px] text-muted-text font-bold uppercase tracking-wider mb-1.5">7-Day Completion History</div>
+                 <div className="flex items-end gap-1.5 h-6 opacity-95 justify-between px-1" aria-label="7-day sparkline">
+                   {recentHistory.map((completed: boolean, idx: number) => (
+                      <div 
+                         key={idx} 
+                         className={`w-2.5 rounded-sm transition-all ${completed ? 'bg-status-healthy h-full shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-surface-alt/40 h-2'}`}
+                         title={completed ? 'Completed' : 'Missed/Not Scheduled'}
+                      />
+                   ))}
+                 </div>
+               </div>
+             </motion.div>
            </div>
+        )}
       </div>
       
-      <div className="flex flex-col gap-3 mt-auto pt-2">
-         <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col gap-2 mt-auto w-full">
+         <div className="flex flex-col gap-2.5 w-full">
             <div className="flex items-center justify-between w-full px-1">
                <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1">
                  <div className="relative inline-flex items-center">
@@ -1167,7 +1500,6 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                     </motion.span>
                  </AnimatePresence>
                </span>
-               <span className="text-[11px] font-bold text-status-healthy flex items-center gap-1"><Leaf className="w-3.5 h-3.5"/> Health: {habit.plantHealth ?? 100}%</span>
             </div>
             
             <div className="w-full flex justify-center">
@@ -1175,7 +1507,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <div className="flex flex-row justify-center items-center gap-3 w-full">
                  <button 
                     onClick={onHarvest}
-                    className={`px-4 py-3 min-h-[44px] flex-grow-0 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover}`}
+                    className={`px-4 py-2 min-h-[38px] h-[38px] w-full rounded-xl hover:scale-[1.02] font-extrabold text-xs tracking-wide transition-all duration-300 active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${buttonBg} ${buttonHover}`}
                  >
                     Harvest 🧺
                  </button>
@@ -1185,14 +1517,14 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  <button 
                     onClick={() => onWater(true)}
                     disabled={isSlipped}
-                    className={`px-4 py-3 min-h-[44px] flex-1 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${buttonBg} ${buttonHover} disabled:opacity-50`}
+                    className={`px-3 py-2 min-h-[38px] h-[38px] flex-1 rounded-xl hover:scale-[1.02] font-extrabold text-xs tracking-wide transition-all duration-300 active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${buttonBg} ${buttonHover} disabled:opacity-50`}
                  >
                     +1
                  </button>
                  <button 
                     onClick={() => setShowQuantityModal(true)}
                     disabled={isSlipped}
-                    className={`px-3 py-3 min-h-[44px] flex-1 rounded-full hover:scale-105 font-bold text-sm tracking-wide transition-all duration-300 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 bg-surface-alt text-white border border-transparent hover:bg-zinc-700 disabled:opacity-50`}
+                    className={`px-3 py-2 min-h-[38px] h-[38px] flex-1 rounded-xl hover:scale-[1.02] font-extrabold text-xs tracking-wide transition-all duration-300 active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 bg-surface-alt text-white border border-transparent hover:bg-zinc-700 disabled:opacity-50`}
                  >
                     Log...
                  </button>
@@ -1204,17 +1536,17 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                       if (isSlipped && onUndo) onUndo();
                       else if (!isSlipped) onWater();
                     }} 
-                    className={`flex-1 py-3 px-4 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center gap-2 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
+                    className={`flex-1 py-2 px-3 min-h-[38px] h-[38px] rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
                  >
                     {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
-                    {isSlipped ? "Undo Missed" : buttonText === "Water" ? "Water Plant" : buttonText}
+                    <span className="truncate">{getDisplayButtonText()}</span>
                  </button>
                  {!isCompleted && !isSlipped && habit.type !== 'avoid' && onSlip && (
                    <button
                      onClick={() => onSlip()}
-                     className="px-4 py-3 flex-1 rounded-full font-bold text-sm tracking-wide transition-all duration-300 hover:scale-105 active:scale-95 active:shadow-inner active:opacity-80 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10 shrink-0"
+                     className="px-3 py-2 min-h-[38px] h-[38px] flex-1 rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10"
                    >
-                     Missed
+                     <span className="truncate">Missed</span>
                    </button>
                  )}
                </div>
