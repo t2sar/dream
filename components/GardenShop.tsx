@@ -82,7 +82,10 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
     if (activeTab === 'seasonal') return item.type === 'seasonal';
     if (activeTab === 'backgrounds') return item.type === 'background';
     if (activeTab === 'boosts') return item.type === 'boost';
-    if (activeTab === 'seeds') return item.type === 'seed';
+    if (activeTab === 'seeds') {
+      if (item.id === 'seed_Litchi / Lichu' || item.id === 'seed_Papaya / Pepe') return false;
+      return item.type === 'seed';
+    }
     return true;
   }).map(item => {
     if (activeSaleItems.includes(item.id)) {
@@ -91,10 +94,10 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
     return item;
   });
 
-  if (isNightMarket && activeTab === 'seeds') {
+  if (activeTab === 'seeds') {
      filteredItems.unshift(
-        { id: 'seed_lychee', name: 'Lychee Seed', type: 'seed', price: 8000, requiredLevel: 5, description: 'Exclusive night market item. Grows into a rare Lychee tree.', iconName: 'plant' },
-        { id: 'seed_papaya', name: 'Papaya Seed', type: 'seed', price: 6000, requiredLevel: 3, description: 'Exclusive night market item. Grows into a fast Papaya tree.', iconName: 'plant' }
+        { id: 'seed_Litchi / Lichu', name: 'Lychee Seed', type: 'seed', price: 8000, requiredLevel: 5, description: 'Exclusive market item. Grows into a rare Lychee tree.', iconName: 'plant' },
+        { id: 'seed_Papaya / Pepe', name: 'Papaya Seed', type: 'seed', price: 6000, requiredLevel: 3, description: 'Exclusive market item. Grows into a fast Papaya tree.', iconName: 'plant' }
      );
   }
 

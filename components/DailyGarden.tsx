@@ -1490,8 +1490,18 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
          <div className="flex flex-col gap-2.5 w-full">
             <div className="flex items-center justify-between w-full px-1">
                <span className="text-[11px] font-bold text-status-needsCare flex items-center gap-1">
-                 <div className="relative inline-flex items-center">
-                    <Flame className={`w-3.5 h-3.5 ${habit.streak >= 30 ? 'text-accent-coral animate-pulse' : habit.streak >= 21 ? 'text-accent-mustard animate-pulse' : habit.streak >= 14 ? 'text-accent-coral animate-pulse' : habit.streak >= 5 ? 'text-accent-mustard animate-pulse' : ''}`}/>
+                   <div className="relative inline-flex items-center">
+                    <Flame
+                      className={`w-3.5 h-3.5 origin-bottom ${habit.streak >= 30 ? 'text-accent-coral animate-flameFlicker' : habit.streak >= 21 ? 'text-accent-mustard animate-flameFlicker' : habit.streak >= 14 ? 'text-accent-coral animate-flameFlicker' : habit.streak >= 5 ? 'text-accent-mustard animate-flameFlicker' : habit.streak > 0 ? 'animate-flameFlicker' : ''}`}
+                      style={{
+                        animationDuration: habit.streak >= 30 ? '0.2s' : habit.streak >= 21 ? '0.3s' : habit.streak >= 14 ? '0.5s' : habit.streak >= 5 ? '0.8s' : '1.2s',
+                        filter: habit.streak >= 30 ? 'drop-shadow(0 0 8px rgba(229,124,93,0.8)) brightness(1.5)' : 
+                                habit.streak >= 21 ? 'drop-shadow(0 0 6px rgba(244,196,71,0.7)) brightness(1.3)' : 
+                                habit.streak >= 14 ? 'drop-shadow(0 0 4px rgba(229,124,93,0.6)) brightness(1.1)' : 
+                                habit.streak >= 5 ? 'drop-shadow(0 0 2px rgba(244,196,71,0.4))' : 'none',
+                        transform: habit.streak >= 30 ? 'scale(1.25)' : habit.streak >= 21 ? 'scale(1.15)' : 'scale(1)'
+                      }}
+                    />
                     {/* Sparks/Fire Particles for Multiplier Tiers */}
                     {habit.streak >= 5 && (
                       <div className="absolute inset-0 pointer-events-none overflow-visible">
