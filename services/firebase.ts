@@ -3,6 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithRedirect,
   signOut,
   AuthError,
   signInWithEmailAndPassword,
@@ -65,6 +66,9 @@ const filterFirestoreQuotaLog = (msg: string) => {
   if (typeof msg === 'string' && (msg.includes('resource-exhausted') || msg.includes('Quota exceeded') || msg.includes('Quota limit exceeded') || msg.includes('Using maximum backoff delay'))) {
     enterOfflineMode();
     return true; // Should filter
+  }
+  if (typeof msg === 'string' && msg.includes('Detected an update time that is in the future')) {
+    return true; // Benign warning due to slight clock skew
   }
   return false;
 };
@@ -457,7 +461,12 @@ export const loginWithGoogle = async () => {
   }
   
   try {
-    await signInWithPopup(authInstance, googleProvider);
+    const isNative = (window as any).Capacitor?.isNative;
+    if (isNative) {
+      await signInWithRedirect(authInstance, googleProvider);
+    } else {
+      await signInWithPopup(authInstance, googleProvider);
+    }
   } catch (error: any) {
     // Handle specific error codes
     const code = error.code;

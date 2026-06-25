@@ -194,6 +194,33 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
       }
     `}
     >
+      {justCompleted && (
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen overflow-hidden">
+           <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent animate-pulse duration-500" />
+           {[...Array(24)].map((_, i) => {
+             const angle = Math.random() * Math.PI * 2;
+             const velocity = 30 + Math.random() * 50;
+             const tx = Math.cos(angle) * velocity;
+             const ty = Math.sin(angle) * velocity;
+             const colors = ['bg-[#00c98f]', 'bg-[#a8e6cf]', 'bg-[#dcedc1]', 'bg-[#3b82f6]', 'bg-accent-mustard', 'bg-accent-coral'];
+             const color = colors[Math.floor(Math.random() * colors.length)];
+             return (
+               <motion.div
+                 key={`jc-${i}`}
+                 initial={{ top: '50%', left: '50%', scale: 0, opacity: 1 }}
+                 animate={{ 
+                   top: `calc(50% + ${ty}px)`, 
+                   left: `calc(50% + ${tx}px)`, 
+                   scale: [0, 1.2, 0.8, 0], 
+                   opacity: [1, 1, 0] 
+                 }}
+                 transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
+                 className={`absolute w-1.5 h-1.5 rounded-full ${color} shadow-sm`}
+               />
+             );
+           })}
+        </div>
+      )}
       {showMilestoneBurst && (
         <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
           {[...Array(12)].map((_, i) => {

@@ -599,7 +599,8 @@
 
 /* Premium Habit Card Alignment, Uniform Grid and Aspect Ratio styles */
 .habit-card {
-  height: 320px !important;
+  min-height: 320px !important;
+  height: 100% !important;
   border-width: 4px !important;
   background-color: #827676 !important;
   display: flex !important;

@@ -361,6 +361,8 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
         minScale={0.5}
         maxScale={4}
         limitToBounds={false}
+        doubleClick={{ disabled: true }}
+        wheel={{ step: 0.1 }}
       >
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
           <div className="relative w-[1200px] h-[900px] shadow-inner flex items-center justify-center">

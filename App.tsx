@@ -99,7 +99,6 @@ import { GardenShop } from "./components/GardenShop";
 import { ConfirmDialog } from "./components/ConfirmDialog";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { RestModeSetup } from "./components/RestModeSetup";
-import { SmartPauseModal } from "./components/SmartPauseModal";
 import { isDateInRestMode, isHabitPaused } from "./restModeUtils";
 const AlmanacView = React.lazy(() =>
   import("./components/AlmanacView").then((m) => ({ default: m.AlmanacView })),
@@ -451,6 +450,8 @@ function checkWeeklyConsistencyThreeWeeks(
   return true;
 }
 
+import { SplashScreen } from '@capacitor/splash-screen';
+
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -458,6 +459,11 @@ function App() {
     runEconomyDiagnostics();
     const timer = setTimeout(() => {
       setShowSplash(false);
+      try {
+        SplashScreen.hide();
+      } catch (e) {
+        console.error("Failed to hide Capacitor splash screen", e);
+      }
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -490,8 +496,6 @@ function App() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showRestModeModal, setShowRestModeModal] = useState(false);
   const [activeRestMode, setActiveRestMode] = useState<RestMode | null>(null);
-  const [smartPauseHabit, setSmartPauseHabit] = useState<Habit | null>(null);
-  const [dismissedSmartPauses, setDismissedSmartPauses] = useState<Record<string, boolean>>({});
   const [recentlyUnlockedCompanions, setRecentlyUnlockedCompanions] = useState<
     string[]
   >([]);
@@ -527,6 +531,13 @@ function App() {
   >("custom");
   const [date, setDate] = useState(new Date());
   const dateKey = format(date, "yyyy-MM-dd");
+
+  // Refs for data persistence
+  const lastPersistedStateHash = React.useRef<string>("");
+  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const syncLock = React.useRef<boolean>(false);
+  const syncQueue = React.useRef<(() => void) | null>(null);
+  const lastStateHash = React.useRef<string>("");
 
   React.useEffect(() => {
     // Throttled background side-effects loop (time updates, midnight rollover)
@@ -1115,117 +1126,6 @@ function App() {
     }
   }, [dataLoading, dateKey]);
 
-  // Smart Pause checking utility
-  const checkSmartPause = (
-    habit: Habit,
-    baseDateStr: string,
-    currentLogs: HabitLog,
-    currentSlips: Record<string, any[]> | undefined,
-    currentRestMode: RestMode | null,
-  ): boolean => {
-    if (
-      currentRestMode &&
-      currentRestMode.isActive &&
-      (currentRestMode.scopeType === "all_habits" ||
-        currentRestMode.habitIds?.includes(habit.id))
-    ) {
-      return false; // Already paused/resting
-    }
-
-    try {
-      const baseDate = parseISO(baseDateStr);
-      for (let i = 0; i < 5; i++) {
-        const checkDate = subDays(baseDate, i);
-        const checkDateStr = format(checkDate, "yyyy-MM-dd");
-
-        const daySlips = currentSlips?.[checkDateStr] || [];
-        const wasExplicitlySlipped = daySlips.some((s) => s.id === habit.id);
-
-        if (wasExplicitlySlipped) {
-          continue;
-        }
-
-        const wasDue = isHabitDueOnDate(habit, checkDateStr);
-        const wasCompleted = currentLogs[checkDateStr]?.includes(habit.id);
-        const wasPaused = isHabitPaused(habit.id, checkDateStr, currentRestMode);
-
-        if (wasDue && !wasCompleted && !wasPaused) {
-          continue;
-        }
-
-        return false;
-      }
-      return true;
-    } catch (err) {
-      console.error("Error in checkSmartPause:", err);
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    if (dataLoading || habits.length === 0 || smartPauseHabit) return;
-
-    const candidate = habits.find((habit) => {
-      if (habit.isArchived) return false;
-      if (dismissedSmartPauses[habit.id]) return false;
-
-      return checkSmartPause(
-        habit,
-        dateKey,
-        logs,
-        extraStats.slipLogs,
-        activeRestMode,
-      );
-    });
-
-    if (candidate) {
-      setSmartPauseHabit(candidate);
-    }
-  }, [
-    dataLoading,
-    habits,
-    logs,
-    extraStats.slipLogs,
-    activeRestMode,
-    dateKey,
-    dismissedSmartPauses,
-    smartPauseHabit,
-  ]);
-
-  const handleTriggerSmartPauseRest = (
-    habit: Habit,
-    scope: RestScopeType,
-    duration: "3days" | "1week" | "2weeks",
-  ) => {
-    let days = 0;
-    if (duration === "3days") days = 2;
-    if (duration === "1week") days = 6;
-    if (duration === "2weeks") days = 13;
-
-    const startDate = new Date();
-    const endDate = addDays(startDate, days);
-
-    const mode: RestMode = {
-      id: Date.now().toString(),
-      modeType: RestModeType.CUSTOM_PAUSE,
-      scopeType: scope,
-      startDate: format(startDate, "yyyy-MM-dd"),
-      endDate: format(endDate, "yyyy-MM-dd"),
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      habitIds: scope === RestScopeType.ALL_HABITS ? [] : [habit.id],
-      streakBehavior: "freeze",
-      reminderBehavior: "pause",
-      reasonLabel: `Smart Pause for ${habit.name}`,
-    };
-
-    setActiveRestMode(mode);
-    persistData(habits, logs, extraStats, mode);
-
-    setDismissedSmartPauses((prev) => ({ ...prev, [habit.id]: true }));
-    setSmartPauseHabit(null);
-  };
-
   // 3. Stats Calculation
   const stats = React.useMemo<UserStats>(() => {
     const totalHabitsCompleted = extraStats.totalHabitsCompleted || 0;
@@ -1262,11 +1162,6 @@ function App() {
   }, [stats.level]);
 
   // 4. Save to Cloud Helper
-  const lastPersistedStateHash = React.useRef<string>("");
-  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const syncLock = React.useRef<boolean>(false);
-  const syncQueue = React.useRef<(() => void) | null>(null);
-
   const persistData = (
     newHabits: Habit[],
     newLogs: HabitLog,
@@ -1439,8 +1334,6 @@ function App() {
       }
     }, 1500);
   };
-
-  const lastStateHash = React.useRef<string>("");
 
   // Cleanup debouncers on unmount
   useEffect(() => {
@@ -1908,19 +1801,6 @@ function App() {
 
     setHabits(updatedHabits);
     persistData(updatedHabits, logs, newExtraStats);
-
-    setTimeout(() => {
-      const hasSlipped5 = checkSmartPause(
-        changedHabit,
-        dateKey,
-        logs,
-        newExtraStats.slipLogs,
-        activeRestMode,
-      );
-      if (hasSlipped5 && !dismissedSmartPauses[changedHabit.id]) {
-        setSmartPauseHabit(changedHabit);
-      }
-    }, 100);
   };
 
   const undoSlipHabit = (id: string) => {
@@ -3502,7 +3382,7 @@ function App() {
 
   return (
     <div 
-      className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-screen"
+      className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-[100dvh]"
     >
       {/* Playful Organic Ambience - Vibrant */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal opacity-100">
@@ -3616,7 +3496,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-screen pb-32 md:pb-16 md:pl-40">
+      <main className="relative z-10 w-full px-6 py-8 sm:px-8 sm:py-10 md:p-12 lg:p-16 min-h-[100dvh] pb-32 md:pb-16 md:pl-40">
         {/* Garden Companions Ambient Layer */}
         <React.Suspense fallback={null}>
           {activeTab === Tab.TRACKER && <GardenCompanions stats={extraStats} />}
@@ -3953,23 +3833,6 @@ function App() {
                     }}
                     habits={activeHabitsList}
                     currentRestMode={activeRestMode}
-                  />
-                )}
-
-                {smartPauseHabit && (
-                  <SmartPauseModal
-                    isOpen={!!smartPauseHabit}
-                    onClose={() => {
-                      setDismissedSmartPauses((prev) => ({
-                        ...prev,
-                        [smartPauseHabit.id]: true,
-                      }));
-                      setSmartPauseHabit(null);
-                    }}
-                    habit={smartPauseHabit}
-                    onConfirm={(scope, duration) => {
-                      handleTriggerSmartPauseRest(smartPauseHabit, scope, duration);
-                    }}
                   />
                 )}
 

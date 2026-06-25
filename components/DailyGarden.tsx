@@ -818,7 +818,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         )}
 
         {habits.length > 0 && (
-          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch content-start">
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 items-stretch content-start">
             <AnimatePresence mode="popLayout">
             {/* Urgent section */}
             {[...dead].length > 0 && (
@@ -1208,14 +1208,28 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
       {justCompleted && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
            <div className="absolute inset-0 bg-gradient-to-tr from-status-healthy/30 to-transparent animate-pulse duration-500" />
-           {[...Array(12)].map((_, i) => (
-              <div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-status-healthy opacity-60 animate-ping" style={{
-                 top: `${Math.floor(Math.random() * 80) + 10}%`,
-                 left: `${Math.floor(Math.random() * 80) + 10}%`,
-                 animationDelay: `${i * 0.1}s`,
-                 animationDuration: '1s'
-              }} />
-           ))}
+           {[...Array(24)].map((_, i) => {
+             const angle = Math.random() * Math.PI * 2;
+             const velocity = 30 + Math.random() * 50;
+             const tx = Math.cos(angle) * velocity;
+             const ty = Math.sin(angle) * velocity;
+             const colors = ['bg-[#00c98f]', 'bg-[#a8e6cf]', 'bg-[#dcedc1]', 'bg-[#3b82f6]', 'bg-accent-mustard', 'bg-accent-coral'];
+             const color = colors[Math.floor(Math.random() * colors.length)];
+             return (
+               <motion.div
+                 key={i}
+                 initial={{ top: '50%', left: '50%', scale: 0, opacity: 1 }}
+                 animate={{ 
+                   top: `calc(50% + ${ty}px)`, 
+                   left: `calc(50% + ${tx}px)`, 
+                   scale: [0, 1.2, 0.8, 0], 
+                   opacity: [1, 1, 0] 
+                 }}
+                 transition={{ duration: 0.6 + Math.random() * 0.4, ease: "easeOut" }}
+                 className={`absolute w-1.5 h-1.5 rounded-full ${color} shadow-sm`}
+               />
+             );
+           })}
         </div>
       )}
       <div className="relative z-10 flex flex-col gap-2.5 h-full w-full justify-between">
