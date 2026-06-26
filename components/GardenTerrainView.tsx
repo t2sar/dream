@@ -17,10 +17,13 @@ export const GardenTerrainView: React.FC<GardenTerrainViewProps> = ({ habits, eq
   return (
     <div className="w-full h-[60vh] bg-surface-card border border-surface-alt rounded-2xl overflow-hidden relative shadow-inner">
       <TransformWrapper
-        initialScale={1}
-        minScale={0.5}
+        initialScale={typeof window !== 'undefined' && window.innerWidth < 768 ? 0.35 : 0.6}
+        minScale={0.2}
         maxScale={4}
+        centerOnInit={true}
         limitToBounds={false}
+        doubleClick={{ disabled: true }}
+        wheel={{ step: 0.1 }}
       >
         <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
           <div className="p-20 relative w-full h-full min-w-[800px] min-h-[800px] flex items-center justify-center bg-[#a8c985]">

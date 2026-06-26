@@ -436,7 +436,18 @@ export const HabitCard: React.FC<HabitCardProps> = React.memo(({
                         </svg>
                       )}
                     </div>
-                    <span>{habit.streak} Day Streak</span>
+                    <span className="flex items-center gap-1">
+                      <motion.span
+                        key={habit.streak}
+                        initial={{ scale: 1.5, color: '#FACC15' }}
+                        animate={{ scale: 1, color: 'inherit' }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                        className="inline-block"
+                      >
+                        {habit.streak}
+                      </motion.span>
+                      Day Streak
+                    </span>
                     
                     {/* Tooltip trigger */}
                     <Tooltip.Provider delayDuration={200}>

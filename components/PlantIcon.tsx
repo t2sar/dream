@@ -166,16 +166,16 @@ export const PlantIcon: React.FC<PlantIconProps> = React.memo(({
       >
          <div 
             className={`w-full h-full flex items-center justify-center ${health !== undefined && health > 90 && !isLocked && status !== 'Dead' && status !== 'Critical' ? 'animate-breeze' : ''}`}
-            style={{ filter: getGrayscaleFilter(), willChange: 'transform', transformOrigin: 'bottom center' }}
+            style={{ filter: getGrayscaleFilter(), willChange: 'transform', transformOrigin: 'bottom center', position: 'relative' }}
          >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
                <motion.div
                  key={stage}
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 exit={{ opacity: 0, scale: 1.2 }}
-                 transition={{ duration: 0.3 }}
-                 className="w-full h-full flex items-center justify-center"
+                 initial={{ opacity: 0, scale: 0.9, filter: 'blur(8px)' }}
+                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                 exit={{ opacity: 0, scale: 1.1, filter: 'blur(8px)' }}
+                 transition={{ duration: 0.6, ease: "easeInOut" }}
+                 className="absolute inset-0 w-full h-full flex items-center justify-center"
                >
                  {renderBaseIcon()}
                </motion.div>
