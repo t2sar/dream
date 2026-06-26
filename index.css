@@ -1,13 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
 :root {
   /* Playful Organic Modernism Palette - Light */
   --bg-base: #fdfbf7;
   --primary-anchor: #1c1b1f;
-  --surface: #ffffff;
-  --surface-soft: #fdfbf7;
-  --surface-alt: #f4ede4;
+  --surface: #fdfbf7;
+  --surface-soft: #f4ede4;
+  --surface-alt: #eae0d5;
 
   --accent-coral: #e57c5d;
   --accent-mustard: #f4c447;
@@ -20,22 +20,23 @@
   --text-status-healthy: #276b60;
 }
 
-/* Dark mode is disabled dynamically per user request to force Playful Organic Modernism globally */
-.dark-theme-disabled {
-  --bg-base: #1a1c1e;
-  --primary-anchor: #1c1b1f;
-  --surface: #282a2e;
-  --surface-soft: #1a1c1e;
-  --surface-alt: #363a40;
-  --text-secondary: #e5e7eb;
-  --text-muted: #bec3c9;
-  --text-status-healthy: #5fd1c1;
-  
-  --accent-coral: #E57C5D;
-  --accent-mustard: #F4C447;
-  --accent-seafoam: #4EADA0;
-  --accent-periwinkle: #7F91F0;
-  --accent-blush: #F5B3BE;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-base: #1a1c1e;
+    --primary-anchor: #fdfbf7;
+    --surface: #282a2e;
+    --surface-soft: #1a1c1e;
+    --surface-alt: #363a40;
+    --text-secondary: #e5e7eb;
+    --text-muted: #bec3c9;
+    --text-status-healthy: #5fd1c1;
+    
+    --accent-coral: #E57C5D;
+    --accent-mustard: #F4C447;
+    --accent-seafoam: #4EADA0;
+    --accent-periwinkle: #7F91F0;
+    --accent-blush: #F5B3BE;
+  }
 }
 
 @theme {
@@ -127,13 +128,13 @@
   --color-status-completed: var(--color-accent-seafoam);
 
   /* Friendly Typography */
-  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Quicksand", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", ui-sans-serif, system-ui, sans-serif;
   --font-weight-body: 600;
   --font-weight-label: 600;
-  --font-weight-display: 800;
-  --tracking-display: 0.02em; /* Increase horizontal tracking slightly for titles */
+  --font-weight-display: 900;
+  --tracking-display: 0.03em; /* Increase horizontal tracking slightly for titles */
 
   /* Geometry - STRICT RULE: NO 90-degree corners - Aggressive Squircular */
   --radius-none: 32px;
@@ -164,6 +165,16 @@
 }
 
 @layer base {
+  /* Force rounded classes to respect playful theme */
+  .rounded { border-radius: 28px !important; }
+  .rounded-sm { border-radius: 28px !important; }
+  .rounded-md { border-radius: 28px !important; }
+  .rounded-lg { border-radius: 32px !important; }
+  .rounded-xl { border-radius: 9999px !important; } /* Pill shapes for buttons */
+  .rounded-2xl { border-radius: 32px !important; }
+  .rounded-3xl { border-radius: 40px !important; }
+  .rounded-full { border-radius: 9999px !important; }
+  
   html {
     background-color: var(--bg-base) !important;
   }
@@ -196,21 +207,26 @@
     border-radius: var(--radius-lg); /* 32px squircular radius */
   }
 
+  .glass-card {
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
   .floating-card {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm); 
-    background-color: rgba(255, 255, 255, 0.75);
-    border: 2px solid rgba(255, 255, 255, 0.85);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.4s ease;
+    background-color: var(--surface);
+    border: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .floating-card:hover {
     transform: translateY(-8px) scale(1.03);
-    border-color: #ffffff;
   }
 
   .floating-card.failed {
-    border-color: rgba(229, 124, 93, 0.4);
     box-shadow: 0 0 30px -5px rgba(229, 124, 93, 0.25);
     animation: failed-pulse 2s infinite ease-in-out;
   }
@@ -267,33 +283,7 @@
   background: var(--text-secondary);
 }
 
-.glass {
-  background: var(--surface-card);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 12px 32px -8px rgba(0, 0, 0, 0.04),
-    0 4px 12px -4px rgba(0, 0, 0, 0.02);
-  border-radius: var(--radius-large);
-}
-
-.glass-card {
-  background: var(--surface-card);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 16px 40px -12px rgba(0, 0, 0, 0.05),
-    0 8px 16px -6px rgba(0, 0, 0, 0.03);
-  border-radius: var(--radius-large);
-}
-
-/* Base card improvements */
-.bg-surface-card {
-  box-shadow:
-    0 8px 24px -8px rgba(0, 0, 0, 0.04),
-    0 2px 8px -2px rgba(0, 0, 0, 0.02);
-}
-
+/* Legacy structural elements */
 .font-mono-extended {
   font-family: "Google Sans", sans-serif;
   letter-spacing: 0.15em;
@@ -607,27 +597,9 @@
 }
 
 /* Premium Habit Card Alignment, Uniform Grid and Aspect Ratio styles */
-.premium-shadow {
-  box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.08),
-    0 4px 6px -4px rgba(0, 0, 0, 0.08),
-    0 25px 50px -12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
-}
-
-.dark .premium-shadow {
-  box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.4),
-    0 4px 6px -4px rgba(0, 0, 0, 0.4),
-    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
-}
-
 .habit-card {
   min-height: 320px !important;
   height: 100% !important;
-  border-width: 4px !important;
-  background-color: #827676 !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
@@ -639,20 +611,7 @@
 }
 
 .habit-card:hover {
-  transform: perspective(1000px) translateY(-6px) scale(1.01) rotateX(2deg) rotateY(-2deg) !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
-              0 10px 10px -5px rgba(0, 0, 0, 0.04), 
-              0 0 20px 4px rgba(255, 255, 255, 0.18),
-              inset 0 0 12px rgba(255, 255, 255, 0.1) !important;
-}
-
-.dark .habit-card:hover {
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 
-              0 10px 10px -5px rgba(0, 0, 0, 0.2), 
-              0 0 24px 6px rgba(255, 255, 255, 0.1),
-              inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-6px) scale(1.01) !important;
 }
 
 @media (max-width: 640px) {

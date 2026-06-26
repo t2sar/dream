@@ -1,0 +1,100 @@
+3313:      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500" style={{ backgroundColor: 'var(--bg-base)' }}>
+3321:        <h1 className="font-display font-extrabold tracking-tight text-3xl text-[var(--primary-anchor)]">
+3389:        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 50%)' }} />
+3390:        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 50%)' }} />
+3391:        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 50%)' }} />
+3392:        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 50%)' }} />
+3393:        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 50%)' }} />
+3412:      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-20 bg-[var(--primary-anchor)] text-[var(--bg-base)] shadow-[0_8px_32px_rgba(28,27,31,0.15)] rounded-[32px] z-50 flex justify-between items-center px-8 text-xs font-bold overflow-x-auto gap-3">
+3414:          { id: Tab.TRACKER, icon: LayoutDashboard, color: "var(--accent-seafoam)", shadow: "rgba(78,173,160,0.4)" },
+3415:          { id: Tab.PROGRESS, icon: BarChart2, color: "var(--accent-mustard)", shadow: "rgba(244,196,71,0.4)" },
+3416:          { id: Tab.SHOP, icon: Store, color: "var(--accent-coral)", shadow: "rgba(229,124,93,0.4)" },
+3417:          { id: Tab.STATS, icon: Activity, color: "var(--accent-periwinkle)", shadow: "rgba(127,145,240,0.4)" },
+3418:          { id: Tab.SETTINGS, icon: Settings, color: "var(--accent-blush)", shadow: "rgba(245,179,190,0.4)" },
+3427:              className={`relative flex flex-col items-center justify-center p-3 rounded-full transition-colors duration-300 ${isActive ? "text-[var(--primary-anchor)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
+3449:      <nav className="hidden md:flex fixed top-0 left-0 bottom-0 w-32 bg-[var(--primary-anchor)] text-[var(--bg-base)] shadow-[4px_0_32px_rgba(28,27,31,0.08)] flex-col items-center py-12 z-50 rounded-r-[40px]">
+3452:            { id: Tab.TRACKER, icon: LayoutDashboard, color: "var(--accent-seafoam)", shadow: "rgba(78,173,160,0.4)" },
+3453:            { id: Tab.PROGRESS, icon: BarChart2, color: "var(--accent-mustard)", shadow: "rgba(244,196,71,0.4)" },
+3454:            { id: Tab.SHOP, icon: Store, color: "var(--accent-coral)", shadow: "rgba(229,124,93,0.4)" },
+3455:            { id: Tab.STATS, icon: Activity, color: "var(--accent-periwinkle)", shadow: "rgba(127,145,240,0.4)" },
+3456:            { id: Tab.SETTINGS, icon: Settings, color: "var(--accent-blush)", shadow: "rgba(245,179,190,0.4)" },
+3465:                className={`relative w-full aspect-square rounded-[28px] flex items-center justify-center transition-colors duration-300 shrink-0 ${isActive ? "text-[var(--primary-anchor)]" : "text-[var(--bg-base)]/60 hover:text-[var(--bg-base)] hover:bg-white/5"}`}
+3490:              className="w-full aspect-square flex flex-col items-center justify-center gap-1 text-[var(--bg-base)]/60 hover:text-[var(--accent-seafoam)] transition-all rounded-[28px] hover:bg-white/5 hover:scale-105"
+3523:              <h1 className="text-4xl font-extrabold tracking-tight font-display text-[var(--primary-anchor)]">
+3543:                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-seafoam)]/10 text-[var(--accent-seafoam)] text-[10px] font-extrabold tracking-widest uppercase shadow-sm">
+3562:                <div className="flex justify-between text-[11px] text-[var(--text-muted)] mb-3 font-extrabold uppercase tracking-widest">
+3569:                    className="text-[var(--accent-seafoam)] relative flex items-center gap-1"
+3603:                <div className={`h-3 w-full bg-[var(--surface)] rounded-full overflow-hidden shadow-inner border-2 p-0.5 transition-colors duration-500 ${justLeveledUp ? 'border-[var(--accent-seafoam)]' : 'border-[var(--surface-alt)]'}`}>
+3605:                    className="h-full bg-[var(--accent-seafoam)] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(78,173,160,0.4)]"
+3621:                className="bg-[var(--primary-anchor)] hover:bg-[var(--primary-anchor)] text-[var(--bg-base)] rounded-full p-4 md:px-8 md:py-4 flex items-center justify-center gap-3 shadow-[0_8px_24px_rgba(28,27,31,0.2)] font-extrabold text-sm tracking-widest uppercase transition-all hover:scale-105 active:scale-95"
+3680:                      className="px-6 py-3 bg-[var(--surface)] hover:bg-surface-alt text-secondary-text font-bold text-[11px] uppercase tracking-wide border border-surface-alt rounded-button transition-colors shrink-0 shadow-sm"
+3924:                            className={`px-4 py-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${categoryFilter === "all" ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
+3938:                                  className={`px-4 py-2 flex items-center gap-2 font-bold text-[11px] uppercase tracking-wide whitespace-nowrap transition-colors border rounded-chip ${isSelected ? "bg-primary-mint/20 text-status-healthy border-primary-mint shadow-sm" : "bg-[var(--surface)] text-secondary-text border-surface-alt hover:bg-surface-alt"}`}
+3982:                                className={`habit-card-visit-node ${isMaster ? "master-card ring-2 ring-primary-mint/40 border-primary-mint/50" : ""} relative z-10 grid grid-rows-[auto,auto,auto,auto] justify-items-center gap-1 p-4 bg-[var(--surface)] border border-surface-alt rounded-2xl hover:border-primary-mint hover:scale-[1.05] hover:shadow-md transition-all group shadow-sm max-w-[140px] mx-auto w-full overflow-hidden ${draggedHabitId === habit.id ? "opacity-50" : ""}`}
+4165:                        <div className="w-24 h-24 rounded-full bg-[var(--surface)] border border-surface-alt flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+4197:                            <div className="h-3 w-full bg-[var(--surface)] rounded-progress overflow-hidden border border-surface-alt p-0.5 shadow-inner-sm">
+4452:                <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
+4461:                      <div className="w-16 h-16 rounded-full bg-[var(--accent-periwinkle)]/20 flex items-center justify-center border-4 border-white shadow-sm">
+4462:                        <LucideIcons.User className="w-8 h-8 text-[var(--accent-periwinkle)]" />
+4466:                      <h2 className="text-3xl font-extrabold text-[var(--primary-anchor)] font-display tracking-tight">
+4469:                      <p className="text-[var(--text-secondary)] font-medium text-sm mt-1">
+4475:                  <div className="flex items-center gap-3 text-[var(--accent-seafoam)] text-xs font-bold tracking-widest uppercase bg-[var(--accent-seafoam)]/10 border-2 border-[var(--accent-seafoam)]/20 p-4 rounded-full mb-8 shadow-sm">
+4477:                      className={`w-3 h-3 rounded-full ${isOnline ? "bg-[var(--accent-seafoam)] shadow-[0_0_8px_var(--accent-seafoam)]" : "bg-[var(--accent-coral)]"} animate-pulse`}
+4484:                  <div className="flex items-center justify-between bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-4 shadow-sm transition-all hover:bg-[var(--surface-alt)]">
+4486:                      <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4489:                      <p className="text-[var(--text-muted)] font-medium text-xs mt-1 max-w-xs">
+4502:                      className={`w-14 h-8 rounded-full transition-colors relative shadow-inner ${extraStats.isSimpleMode ? "bg-[var(--accent-seafoam)]" : "bg-[var(--surface-alt)] border-2 border-[var(--text-muted)]/30"}`}
+4510:                  <div className="flex items-center justify-between bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-4 shadow-sm transition-all hover:bg-[var(--surface-alt)]">
+4512:                      <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4515:                      <p className="text-[var(--text-muted)] font-medium text-xs mt-1 max-w-xs">
+4530:                      className={`w-14 h-8 rounded-full transition-colors relative shadow-inner ${extraStats.hapticsEnabled !== false ? "bg-[var(--accent-seafoam)]" : "bg-[var(--surface-alt)] border-2 border-[var(--text-muted)]/30"}`}
+4538:                  <div className="flex bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-4 flex-col gap-4 shadow-sm hover:bg-[var(--surface-alt)] transition-colors">
+4541:                        <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4544:                        <p className="text-[var(--text-muted)] font-medium text-xs mt-1 max-w-xs">
+4563:                        className={`w-14 h-8 rounded-full transition-colors relative shadow-inner ${extraStats.eveningSummaryEnabled !== false ? "bg-[var(--accent-seafoam)]" : "bg-[var(--surface-alt)] border-2 border-[var(--text-muted)]/30"}`}
+4572:                      <div className="flex items-center justify-between border-t-2 border-[var(--surface-alt)] pt-4 mt-2">
+4574:                          <p className="text-[var(--text-muted)] font-bold text-xs uppercase tracking-wider">
+4589:                          className="bg-[var(--surface)] border-0 text-[var(--primary-anchor)] font-bold text-sm px-4 py-2 rounded-full outline-none focus:border-[var(--accent-seafoam)] transition-colors cursor-pointer shadow-inner"
+4596:                  <div className="bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-6 flex flex-col gap-4 shadow-sm hover:bg-[var(--surface-alt)] transition-colors">
+4599:                        <h3 className="text-[var(--primary-anchor)] font-bold text-base text-balance">
+4602:                        <p className="text-[var(--text-muted)] font-medium text-xs mt-1 max-w-[200px] leading-relaxed">
+4621:                        className={`w-14 h-8 rounded-full transition-colors relative shadow-inner ${extraStats.dailyReminderEnabled === true ? "bg-[var(--accent-seafoam)]" : "bg-[var(--surface-alt)] border-2 border-[var(--text-muted)]/30"}`}
+4630:                      <div className="flex items-center justify-between border-t-2 border-[var(--surface-alt)] pt-4 mt-2">
+4632:                          <p className="text-[var(--text-muted)] font-bold text-xs uppercase tracking-wider">
+4647:                          className="bg-[var(--surface)] border-0 text-[var(--primary-anchor)] font-bold text-sm px-4 py-2 rounded-full outline-none focus:border-[var(--accent-seafoam)] transition-colors cursor-pointer shadow-inner"
+4653:                  <div className="flex items-center justify-between bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-8 shadow-sm transition-all hover:bg-[var(--surface-alt)]">
+4655:                      <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4658:                      <p className="text-[var(--text-muted)] font-medium text-xs mt-1 max-w-xs">
+4680:                      className="bg-[var(--surface)] fill-[var(--primary-anchor)] border-0 text-[var(--primary-anchor)] font-bold text-sm px-4 py-2 rounded-full outline-none focus:border-[var(--accent-seafoam)] transition-colors cursor-pointer shadow-inner"
+4725:                      <div className="bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-6 shadow-sm mt-8 transition-colors hover:bg-[var(--surface-alt)]">
+4728:                            <div className="w-10 h-10 rounded-full bg-[var(--accent-mustard)]/20 flex flex-col items-center justify-center">
+4729:                               <LucideIcons.Award className="w-5 h-5 text-[var(--accent-mustard)]" />
+4731:                            <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4740:                            className="px-4 py-2 bg-[var(--surface)] rounded-full text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] border-0 hover:text-[var(--accent-mustard)] transition-all active:scale-95"
+4764:                                  className="flex items-center gap-4 p-4 bg-[var(--surface)] border-0 rounded-[24px] shadow-sm w-full md:w-auto md:flex-1 md:min-w-[200px]"
+4766:                                  <div className="w-12 h-12 rounded-full bg-[var(--accent-seafoam)]/20 flex items-center justify-center shrink-0">
+4767:                                    <Icon className="w-6 h-6 text-[var(--accent-seafoam)]" />
+4770:                                    <p className="text-[var(--primary-anchor)] font-bold text-sm truncate">
+4773:                                    <p className="text-[10px] font-bold tracking-widest text-[var(--text-muted)] uppercase truncate mt-1">
+4786:                      <div className="bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-8 shadow-sm transition-colors hover:bg-[var(--surface-alt)]">
+4788:                          <div className="w-10 h-10 rounded-full bg-[var(--accent-periwinkle)]/20 flex flex-col items-center justify-center">
+4789:                            <LucideIcons.Library className="w-5 h-5 text-[var(--accent-periwinkle)]" />
+4791:                          <h3 className="text-[var(--primary-anchor)] font-bold text-base">
+4805:                                className="flex flex-col items-center justify-center p-6 bg-[var(--surface)] border-0 rounded-[28px] shadow-sm hover:border-[var(--accent-periwinkle)] transition-all hover:scale-105 min-w-[100px]"
+4807:                                <LucideIcons.Book className="w-8 h-8 text-[var(--accent-periwinkle)] mb-3" />
+4808:                                <span className="text-[var(--primary-anchor)] font-display font-extrabold text-lg">
+4833:                    className="w-full md:w-auto px-8 rounded-full font-bold text-sm tracking-widest bg-[var(--accent-coral)]/10 text-[var(--accent-coral)] hover:bg-[var(--accent-coral)]/20 border-2 border-[var(--accent-coral)]/30 mt-4 active:scale-95 transition-transform"
+4840:                <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative mb-6">
+4842:                    className="text-sm font-extrabold uppercase tracking-widest text-[var(--accent-mustard)] mb-2"
+4846:                  <p className="text-[var(--text-muted)] font-medium text-sm leading-relaxed mb-6">
+4851:                    className="w-full py-5 text-sm font-extrabold bg-transparent border-0 text-[var(--text-secondary)] hover:text-[var(--primary-anchor)] hover:border-[var(--text-muted)] rounded-full transition-all flex items-center justify-center shadow-sm active:scale-95"
+4859:                <div className="bg-[var(--surface)] px-10 py-8 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
+4860:                  <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--accent-seafoam)] mb-1">
+4863:                  <p className="text-[var(--text-muted)] font-medium text-sm leading-relaxed uppercase tracking-wider">
+4964:          className="!max-w-md mx-auto !p-0 overflow-hidden bg-[var(--surface)] border border-surface-alt shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
+4999:          className="!max-w-md mx-auto !p-0 overflow-hidden bg-[var(--surface)] border border-amber-400/20 shadow-[0_20px_60px_rgba(251,191,36,0.15)]"
+5033:          className="!max-w-md mx-auto !p-0 overflow-hidden bg-[var(--surface)] border border-amber-400/40 rounded-dialog drop-shadow-xl relative"
+5104:          className="!max-w-md mx-auto !p-0 overflow-hidden bg-[var(--surface)] border border-[#00F5D4]/20 shadow-[0_20px_60px_rgba(0,245,212,0.15)]"
+5123:              <div className="w-full border border-surface-alt rounded-2xl p-4 text-left space-y-3 mb-6 relative z-10" style={{ backgroundColor: 'var(--bg-base)' }}>
+5186:          className="!max-w-md mx-auto !p-0 overflow-hidden bg-[var(--surface)] border border-red-500/20 shadow-[0_20px_60px_rgba(239,68,68,0.15)]"
+5227:          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-[var(--surface)] text-[var(--primary-anchor)] px-6 py-3 border-0 rounded-full text-sm font-bold shadow-xl z-50 flex items-center gap-3 animate-in slide-in-from-bottom-5 whitespace-nowrap">

@@ -4449,7 +4449,7 @@ function App() {
                 transition={{ type: "spring", stiffness: 450, damping: 34 }}
                 className="space-y-8 touch-pan-y"
               >
-                <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
+                <div className="bg-[var(--surface)] p-10 rounded-[32px] border-0 shadow-sm relative">
                   <div className="flex items-center gap-6 mb-8">
                     {user.photoURL ? (
                       <img
@@ -4837,7 +4837,7 @@ function App() {
                   </Button>
                 </div>
 
-                <div className="bg-[var(--surface)] p-10 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative mb-6">
+                <div className="bg-[var(--surface)] p-10 rounded-[32px] border-0 shadow-sm relative mb-6">
                   <h2
                     className="text-sm font-extrabold uppercase tracking-widest text-[var(--accent-mustard)] mb-2"
                   >
@@ -4856,7 +4856,7 @@ function App() {
 
                 </div>
 
-                <div className="bg-[var(--surface)] px-10 py-8 rounded-[40px] border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)] relative">
+                <div className="bg-[var(--surface)] px-10 py-8 rounded-[32px] border-0 shadow-sm relative">
                   <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--accent-seafoam)] mb-1">
                     System Settings
                   </h2>

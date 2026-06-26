@@ -1666,7 +1666,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                       if (isSlipped && onUndo) onUndo();
                       else if (!isSlipped) onWater();
                     }} 
-                    className={`flex-1 py-2 px-3 min-h-[38px] h-[38px] rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[#1C1B1F] text-white border border-transparent hover:bg-[#2A292D] shadow-md'}`}
+                    className={`flex-1 py-2 px-3 min-h-[38px] h-[38px] rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[var(--primary-anchor)] text-[var(--bg-base)] border border-transparent hover:opacity-90 shadow-md'}`}
                  >
                     {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
                     <span className="truncate">{getDisplayButtonText()}</span>
@@ -1741,7 +1741,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
                  <ShieldAlert className="w-5 h-5 text-accent-mustard" /> Plant Protection
                </h3>
-               <button onClick={() => setShowSlipModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+               <button onClick={() => setShowSlipModal(false)} className="p-2 -mr-2 text-muted-text hover:text-primary-text transition-colors">
                  <X className="w-5 h-5" />
                </button>
             </div>
@@ -1771,7 +1771,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <h3 className="font-bold font-display text-lg text-primary-text flex items-center gap-2">
                  <Target className="w-5 h-5 text-accent-seafoam" /> Log Progress
                </h3>
-               <button onClick={() => setShowQuantityModal(false)} className="p-2 -mr-2 text-muted-text hover:text-white transition-colors">
+               <button onClick={() => setShowQuantityModal(false)} className="p-2 -mr-2 text-muted-text hover:text-primary-text transition-colors">
                  <X className="w-5 h-5" />
                </button>
             </div>
@@ -1793,7 +1793,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                <input 
                   type="number" 
                   autoFocus
-                  className="flex-1 bg-surface-soft border border-surface-alt rounded-xl px-4 py-3 text-white font-mono outline-none focus:border-accent-seafoam transition-colors"
+                  className="flex-1 bg-surface-soft border border-surface-alt rounded-xl px-4 py-3 text-primary-text font-mono outline-none focus:border-accent-seafoam transition-colors"
                   placeholder={`Amount of ${habit.quantityUnit || 'units'}`}
                   value={manualQuantity}
                   onChange={e => setManualQuantity(e.target.value)}

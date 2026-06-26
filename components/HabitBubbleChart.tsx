@@ -21,7 +21,7 @@ export const HabitBubbleChart: React.FC<HabitBubbleChartProps> = ({ habits, logs
 
       // Calculate real average streak
       let currentStreak = 0;
-      let allStreaks: number[] = [];
+      const allStreaks: number[] = [];
       
       const sortedDates = Object.keys(logs).sort();
       for (const date of sortedDates) {

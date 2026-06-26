@@ -293,7 +293,7 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
               }
           }
           
-          let rarityBorderClass = "border-0 shadow-[0_8px_32px_rgba(28,27,31,0.08)]";
+          let rarityBorderClass = "border-0 shadow-sm";
           if (item.rarity === 'Legendary') {
              rarityBorderClass = "border-2 border-amber-500/40 shadow-[0_0_20px_rgba(244,196,71,0.35)] hover:shadow-[0_0_35px_rgba(244,196,71,0.65)] hover:border-amber-500 transition-all duration-300";
           } else if (item.rarity === 'Rare') {
