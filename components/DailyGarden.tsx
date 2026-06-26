@@ -189,7 +189,7 @@ import { GardenCanvasTerrain } from './GardenCanvasTerrain';
 
 export const PlantHabitCardSkeleton: React.FC = () => {
   return (
-    <div className="glass-card rounded-card p-5 flex flex-col justify-between relative min-h-[390px] md:min-h-[400px] h-full overflow-hidden border border-surface-alt/40 [box-shadow:var(--shadow-sm)] habit-card animate-pulse">
+    <div className="glass-card rounded-card p-5 flex flex-col justify-between relative min-h-[390px] md:min-h-[400px] h-full overflow-hidden border border-surface-alt/40 [box-shadow:var(--shadow-sm)] habit-card premium-shadow animate-pulse">
       {/* Subtle glow accent */}
       <div className="absolute top-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none" />
       
@@ -1108,59 +1108,71 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   }, [recentHistoryStr]);
   
   const [justCompleted, setJustCompleted] = useState(false);
+  const [sheenActive, setSheenActive] = useState(false);
   const prevCompletedRef = React.useRef(isCompleted);
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!prevCompletedRef.current && isCompleted && (status === 'Completed Today' || status === 'Protected Today' || status === 'Target Met')) {
-      setJustCompleted(true);
-      playHaptic('thump');
+    if (prevCompletedRef.current !== isCompleted) {
+      setSheenActive(true);
+      const sheenTimer = setTimeout(() => setSheenActive(false), 850);
       
-      if (cardRef.current) {
-         const rect = cardRef.current.getBoundingClientRect();
-         const y = (rect.top + rect.height / 2) / window.innerHeight;
-         const x = (rect.left + rect.width / 2) / window.innerWidth;
-         
-         const isMilestone = habit.streak > 0 && (habit.streak === 7 || habit.streak === 14 || habit.streak === 30 || habit.streak % 30 === 0);
-         
-         if (isMilestone) {
-            const duration = 2000;
-            const end = Date.now() + duration;
-            const fireColors = ['#ff0000', '#ff4500', '#ffa500', '#ffd700'];
+      if (!prevCompletedRef.current && isCompleted && (status === 'Completed Today' || status === 'Protected Today' || status === 'Target Met')) {
+        setJustCompleted(true);
+        playHaptic('thump');
+        
+        if (cardRef.current) {
+           const rect = cardRef.current.getBoundingClientRect();
+           const y = (rect.top + rect.height / 2) / window.innerHeight;
+           const x = (rect.left + rect.width / 2) / window.innerWidth;
+           
+           const isMilestone = habit.streak > 0 && (habit.streak === 7 || habit.streak === 14 || habit.streak === 30 || habit.streak % 30 === 0);
+           
+           if (isMilestone) {
+              const duration = 2000;
+              const end = Date.now() + duration;
+              const fireColors = ['#ff0000', '#ff4500', '#ffa500', '#ffd700'];
 
-            (function frame() {
-               confetti({
-                 particleCount: 5,
-                 startVelocity: 30,
-                 spread: 360,
-                 ticks: 40,
-                 origin: { x, y },
-                 colors: fireColors,
-                 zIndex: 100,
-                 gravity: 0.5,
-                 scalar: 1.2
-               });
-               if (Date.now() < end) {
-                 requestAnimationFrame(frame);
-               }
-            }());
-         } else {
-            confetti({
-              particleCount: 40,
-              spread: 70,
-              origin: { x, y },
-              colors: ['#00c98f', '#a8e6cf', '#dcedc1', '#f5f5f5'],
-              zIndex: 100,
-              scalar: 0.8,
-              startVelocity: 25
-            });
-         }
+              (function frame() {
+                 confetti({
+                   particleCount: 5,
+                   startVelocity: 30,
+                   spread: 360,
+                   ticks: 40,
+                   origin: { x, y },
+                   colors: fireColors,
+                   zIndex: 100,
+                   gravity: 0.5,
+                   scalar: 1.2
+                 });
+                 if (Date.now() < end) {
+                   requestAnimationFrame(frame);
+                 }
+              }());
+           } else {
+              confetti({
+                particleCount: 40,
+                spread: 70,
+                origin: { x, y },
+                colors: ['#00c98f', '#a8e6cf', '#dcedc1', '#f5f5f5'],
+                zIndex: 100,
+                scalar: 0.8,
+                startVelocity: 25
+              });
+           }
+        }
+
+        const timer = setTimeout(() => setJustCompleted(false), 2000);
+        prevCompletedRef.current = isCompleted;
+        return () => {
+          clearTimeout(timer);
+          clearTimeout(sheenTimer);
+        };
       }
-
-      const timer = setTimeout(() => setJustCompleted(false), 2000);
-      return () => clearTimeout(timer);
+      
+      prevCompletedRef.current = isCompleted;
+      return () => clearTimeout(sheenTimer);
     }
-    prevCompletedRef.current = isCompleted;
   }, [isCompleted, status, habit.streak]);
 
   const formattedSchedule = () => {
@@ -1267,10 +1279,29 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       initial={false}
-      animate={justCompleted ? { scale: [1, 1.03, 1], y: [0, -6, 0] } : { }}
-      transition={justCompleted ? { duration: 0.6, type: "spring", bounce: 0.4 } : { }}
-      className={`${justCompleted ? '!bg-primary-mint/20 shadow-[0_0_40px_rgba(78,173,160,0.3)]' : cardBg} rounded-2xl p-4 flex flex-col justify-between group transition-transform duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card bg-clip-padding`}
+      animate={justCompleted ? { 
+        scale: [1, 1.04, 1], 
+        y: [0, -6, 0],
+        borderColor: ["rgba(78, 173, 160, 0.3)", "#00f2fe", "rgba(78, 173, 160, 0.3)"],
+        boxShadow: [
+          "0 0 0px rgba(0, 242, 254, 0)",
+          "0 0 40px rgba(0, 242, 254, 0.8), inset 0 0 20px rgba(0, 242, 254, 0.4)",
+          "0 0 0px rgba(0, 242, 254, 0)"
+        ],
+        backgroundColor: [
+          "rgba(78, 173, 160, 0.1)",
+          "rgba(0, 242, 254, 0.2)",
+          "rgba(78, 173, 160, 0.1)"
+        ]
+      } : { 
+        scale: 1, y: 0, borderColor: "", boxShadow: "", backgroundColor: "" 
+      }}
+      transition={justCompleted ? { duration: 0.8, type: "spring", bounce: 0.5 } : { }}
+      className={`${cardBg} rounded-2xl p-4 flex flex-col justify-between group transition-transform duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card premium-shadow bg-clip-padding`}
     >
+      {sheenActive && (
+        <div className="sheen-layer sheen-active" />
+      )}
       {justCompleted && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-screen">
            <div className="absolute inset-0 bg-gradient-to-tr from-status-healthy/30 to-transparent animate-pulse duration-500" />

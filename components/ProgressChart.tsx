@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { HabitLog, Habit } from "../types";
 import { format } from "date-fns";
+import { HabitBubbleChart } from "./HabitBubbleChart";
 
 interface ProgressChartProps {
   logs: HabitLog;
@@ -329,6 +330,8 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      <HabitBubbleChart habits={habits} logs={logs} />
     </div>
   );
 });
