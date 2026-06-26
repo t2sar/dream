@@ -10,6 +10,7 @@ import {
   Cell,
   LineChart,
   Line,
+  Legend,
 } from "recharts";
 import { HabitLog, Habit } from "../types";
 import { format } from "date-fns";
@@ -51,6 +52,33 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
       rate: Math.min(100, rate),
       completed: completedCount,
     };
+  });
+
+  // Calculate 30-day Streak Progression for Individual Habits
+  const runningStreaks: Record<string, number> = {};
+  habits.forEach(h => {
+    runningStreaks[h.id] = 0;
+  });
+
+  const habitGrowthData = Array.from({ length: 30 }).map((_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (29 - i));
+    const dateStr = format(date, "yyyy-MM-dd");
+    
+    const dayData: any = {
+      date: format(date, "MMM dd"),
+    };
+
+    habits.forEach(h => {
+      if (logs[dateStr]?.includes(h.id)) {
+        runningStreaks[h.id] += 1;
+      } else {
+        runningStreaks[h.id] = 0; // Reset streak if missed on this day
+      }
+      dayData[h.id] = runningStreaks[h.id];
+    });
+
+    return dayData;
   });
 
   // Calculate overall completion rate
@@ -98,13 +126,149 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
         </div>
       </div>
 
-      <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative">
+          <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6">
+            Daily Activity Logs
+          </h3>
+          <ResponsiveContainer width="100%" height="80%">
+            <BarChart
+              data={data}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#1f232b"
+                opacity={0.4}
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                stroke="#64748b"
+                tick={{
+                  fill: "#64748b",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  fontFamily: '"Google Sans", sans-serif',
+                }}
+                tickLine={false}
+                axisLine={false}
+                dy={10}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{
+                  fill: "#64748b",
+                  fontSize: 10,
+                  fontFamily: '"Google Sans", sans-serif',
+                }}
+                tickLine={false}
+                axisLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1f232b",
+                  borderColor: "#333d4f",
+                  borderRadius: "16px",
+                  color: "#f8fafc",
+                  fontFamily: '"Google Sans", sans-serif',
+                  fontSize: "10px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                }}
+                itemStyle={{ color: "#A8C3A6" }}
+                cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
+              />
+              <Bar dataKey="completed" radius={[4, 4, 0, 0]} maxBarSize={30}>
+                {data.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      entry.completed >= habits.length && habits.length > 0
+                        ? "#A8C3A6"
+                        : "#8D99AE"
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative">
+          <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6">
+            30-Day Completion Consistency (%)
+          </h3>
+          <ResponsiveContainer width="100%" height="80%">
+            <LineChart
+              data={data30Days}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#1f232b"
+                opacity={0.4}
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                stroke="#64748b"
+                tick={{
+                  fill: "#64748b",
+                  fontSize: 10,
+                  fontWeight: 500,
+                  fontFamily: '"Google Sans", sans-serif',
+                }}
+                tickLine={false}
+                axisLine={false}
+                dy={10}
+              />
+              <YAxis
+                stroke="#64748b"
+                tick={{
+                  fill: "#64748b",
+                  fontSize: 10,
+                  fontFamily: '"Google Sans", sans-serif',
+                }}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, 100]}
+                tickFormatter={(val) => `${val}%`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1f232b",
+                  borderColor: "#333d4f",
+                  borderRadius: "16px",
+                  color: "#f8fafc",
+                  fontFamily: '"Google Sans", sans-serif',
+                  fontSize: "10px",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                }}
+                itemStyle={{ color: "#F2CC8F" }}
+                cursor={{ stroke: "rgba(255, 255, 255, 0.05)" }}
+              />
+              <Line
+                type="monotone"
+                dataKey="rate"
+                name="Completion Rate"
+                stroke="#F2CC8F"
+                strokeWidth={3}
+                dot={{ r: 3, strokeWidth: 1, fill: "#0c0f12" }}
+                activeDot={{ r: 6, strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative mt-6">
         <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6">
-          Daily Activity Logs
+          Growth Trend: Habit Streak Progression
         </h3>
         <ResponsiveContainer width="100%" height="80%">
-          <BarChart
-            data={data}
+          <LineChart
+            data={habitGrowthData}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <CartesianGrid
@@ -147,90 +311,25 @@ export const ProgressChart: React.FC<ProgressChartProps> = React.memo(({
                 fontSize: "10px",
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
               }}
-              itemStyle={{ color: "#A8C3A6" }}
-              cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
-            />
-            <Bar dataKey="completed" radius={[4, 4, 0, 0]} maxBarSize={30}>
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={
-                    entry.completed >= habits.length && habits.length > 0
-                      ? "#A8C3A6"
-                      : "#8D99AE"
-                  }
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="bg-surface-soft p-6 md:p-8 rounded-[32px] border border-surface-alt shadow-sm h-[400px] relative">
-        <h3 className="text-sm font-bold tracking-wide uppercase text-secondary-text mb-6">
-          30-Day Completion Consistency (%)
-        </h3>
-        <ResponsiveContainer width="100%" height="80%">
-          <LineChart
-            data={data30Days}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#1f232b"
-              opacity={0.4}
-              vertical={false}
-            />
-            <XAxis
-              dataKey="date"
-              stroke="#64748b"
-              tick={{
-                fill: "#64748b",
-                fontSize: 10,
-                fontWeight: 500,
-                fontFamily: '"Google Sans", sans-serif',
-              }}
-              tickLine={false}
-              axisLine={false}
-              dy={10}
-            />
-            <YAxis
-              stroke="#64748b"
-              tick={{
-                fill: "#64748b",
-                fontSize: 10,
-                fontFamily: '"Google Sans", sans-serif',
-              }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
-              tickFormatter={(val) => `${val}%`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#1f232b",
-                borderColor: "#333d4f",
-                borderRadius: "16px",
-                color: "#f8fafc",
-                fontFamily: '"Google Sans", sans-serif',
-                fontSize: "10px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-              }}
-              itemStyle={{ color: "#F2CC8F" }}
               cursor={{ stroke: "rgba(255, 255, 255, 0.05)" }}
             />
-            <Line
-              type="monotone"
-              dataKey="rate"
-              name="Completion Rate"
-              stroke="#F2CC8F"
-              strokeWidth={3}
-              dot={{ r: 3, strokeWidth: 1, fill: "#0c0f12" }}
-              activeDot={{ r: 6, strokeWidth: 0 }}
-            />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+            {habits.map((habit) => (
+              <Line
+                key={habit.id}
+                type="monotone"
+                dataKey={habit.id}
+                name={habit.name}
+                stroke={habit.color || "#8884d8"}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+            ))}
           </LineChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 });
+

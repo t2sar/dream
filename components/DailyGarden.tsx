@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek, differenceInCalendarDays } from 'date-fns';
 import { PlantIcon } from './PlantIcon';
-import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle, ChevronDown, Sparkles, TrendingUp, TrendingDown } from 'lucide-react';
+import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle, ChevronDown, Sparkles, TrendingUp, TrendingDown, Snowflake } from 'lucide-react';
 import { getChallengeTemplate } from '../challengesData';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueToday, isHabitDueOnDate, getCompletedCountThisWeek, isPeriodTargetReached } from '../scheduleUtils';
@@ -825,7 +825,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                         const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                         return (
                          <ViewportLazyWrapper key={habit.id} id={habit.id} index={globalIndex++}>
-                           <MemoizedPlantHabitCard habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
+                           <MemoizedPlantHabitCard habit={habit} status="Withered (Needs Restart)" buttonText="Start New Seed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} isFrozen={isHabitPaused(habit.id, dateKey, activeRestMode || null) || !!habit.snoozedDates?.includes(dateKey)} />
                          </ViewportLazyWrapper>
                         );
                      })}
@@ -869,7 +869,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                         const quantityCurrent = stats.quantityLogs?.[dateKey]?.[habit.id] || 0;
                         return (
                          <ViewportLazyWrapper key={habit.id} id={habit.id} index={globalIndex++}>
-                  <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
+                  <MemoizedPlantHabitCard habit={habit} status="Missed Today" buttonText="Undo Missed" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} isSlipped={true} onSlipHabit={onSlipHabit} onUndoSlip={onUndoSlip} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} isFrozen={isHabitPaused(habit.id, dateKey, activeRestMode || null) || !!habit.snoozedDates?.includes(dateKey)} />
                 </ViewportLazyWrapper>
                );
             })}
@@ -891,7 +891,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                return (
                  <ViewportLazyWrapper key={habit.id} id={habit.id} index={globalIndex++}>
                    <div className="opacity-80 hover:opacity-100 transition-opacity h-full">
-                     <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
+                     <MemoizedPlantHabitCard habit={habit} status={statusText} buttonText={buttonText} onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} isFrozen={isHabitPaused(habit.id, dateKey, activeRestMode || null) || !!habit.snoozedDates?.includes(dateKey)} />
                    </div>
                  </ViewportLazyWrapper>
                );
@@ -908,7 +908,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
                return (
                  <ViewportLazyWrapper key={habit.id} id={habit.id} index={globalIndex++}>
                    <div className="opacity-60 hover:opacity-100 transition-opacity h-full">
-                     <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} />
+                     <MemoizedPlantHabitCard habit={habit} status="Resting" buttonText="Water" onWaterPlant={onWaterPlant} equippedPotId={stats.equippedPotId} onArchiveHabit={onArchiveHabit} onDeletePlant={onDeletePlant} onEditHabit={onEditHabit} onHarvestPlant={onHarvestPlant} isDarkPhase={isDarkPhase} eligibleBackdates={getEligibleBackdates(habit)} onBackdate={onBackdate} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={stats.customCategories} recentHistoryStr={recentHistoryStrings[habit.id] || ""} onSnooze={onSnoozeHabit} dateKey={dateKey} themeId={stats.themeId || 'cream_butter'} isFrozen={isHabitPaused(habit.id, dateKey, activeRestMode || null) || !!habit.snoozedDates?.includes(dateKey)} />
                    </div>
                  </ViewportLazyWrapper>
                );
@@ -1040,7 +1040,7 @@ export const renderPot = (equippedPotId?: string, className: string = "inset-x-2
 };
 
 // Wrapper correctly memoizes inline functions to prevent re-renders
-const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onArchiveHabit, onDeletePlant, onEditHabit, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentHistoryStr, onSnooze, dateKey, themeId }) => {
+const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWaterPlant, equippedPotId, isSlipped, onSlipHabit, onUndoSlip, onArchiveHabit, onDeletePlant, onEditHabit, onHarvestPlant, isDarkPhase, eligibleBackdates, onBackdate, backdatesLeftThisWeek, quantityCurrent, customCategories, recentHistoryStr, onSnooze, dateKey, themeId, isFrozen }) => {
    const handleWater = React.useCallback((isMini?: boolean, customAmount?: number) => onWaterPlant(habit.id, isMini, customAmount), [onWaterPlant, habit.id]);
    const handleSlip = React.useCallback(() => onSlipHabit && onSlipHabit(habit.id), [onSlipHabit, habit.id]);
    const handleUndo = React.useCallback(() => onUndoSlip && onUndoSlip(habit.id), [onUndoSlip, habit.id]);
@@ -1051,7 +1051,7 @@ const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, butto
    const handleBackdate = React.useCallback((d: string) => onBackdate && onBackdate(habit.id, d), [onBackdate, habit.id]);
    const handleSnooze = React.useCallback(() => onSnooze && onSnooze(habit.id, dateKey), [onSnooze, habit.id, dateKey]);
 
-   return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={onSlipHabit ? handleSlip : undefined} onUndo={onUndoSlip ? handleUndo : undefined} onArchive={onArchiveHabit ? handleArchive : undefined} onDelete={onDeletePlant ? handleDelete : undefined} onEdit={onEditHabit ? handleEdit : undefined} onHarvest={onHarvestPlant ? handleHarvest : undefined} isDarkPhase={isDarkPhase} equippedPotId={equippedPotId} eligibleBackdates={eligibleBackdates} onBackdate={onBackdate ? handleBackdate : undefined} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} onSnooze={onSnooze ? handleSnooze : undefined} dateKey={dateKey} themeId={themeId} />;
+   return <PlantHabitCard habit={habit} status={status} buttonText={buttonText} onWater={handleWater} isSlipped={isSlipped} onSlip={onSlipHabit ? handleSlip : undefined} onUndo={onUndoSlip ? handleUndo : undefined} onArchive={onArchiveHabit ? handleArchive : undefined} onDelete={onDeletePlant ? handleDelete : undefined} onEdit={onEditHabit ? handleEdit : undefined} onHarvest={onHarvestPlant ? handleHarvest : undefined} isDarkPhase={isDarkPhase} equippedPotId={equippedPotId} eligibleBackdates={eligibleBackdates} onBackdate={onBackdate ? handleBackdate : undefined} backdatesLeftThisWeek={backdatesLeftThisWeek} quantityCurrent={quantityCurrent} customCategories={customCategories} recentHistoryStr={recentHistoryStr} onSnooze={onSnooze ? handleSnooze : undefined} dateKey={dateKey} themeId={themeId} isFrozen={isFrozen} />;
 }, (prev, next) => {
   return prev.habit === next.habit &&
          prev.status === next.status &&
@@ -1060,15 +1060,17 @@ const MemoizedPlantHabitCard: React.FC<any> = React.memo(({ habit, status, butto
          prev.isSlipped === next.isSlipped &&
          prev.isDarkPhase === next.isDarkPhase &&
          prev.themeId === next.themeId &&
+         prev.isFrozen === next.isFrozen &&
          prev.backdatesLeftThisWeek === next.backdatesLeftThisWeek &&
          prev.quantityCurrent === next.quantityCurrent &&
          prev.recentHistoryStr === next.recentHistoryStr &&
          prev.eligibleBackdates?.join(',') === next.eligibleBackdates?.join(',');
 });
 
-const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onArchive, onDelete, onEdit, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "", onSnooze, themeId }) => {
+const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, onWater, isSlipped, onSlip, onUndo, equippedPotId, onArchive, onDelete, onEdit, onHarvest, isDarkPhase, eligibleBackdates = [], onBackdate, backdatesLeftThisWeek = 3, quantityCurrent = 0, customCategories = [], recentHistoryStr = "", onSnooze, dateKey, themeId, isFrozen }) => {
   const isDanger = status === 'Critical' || status === 'Wilting' || isSlipped;
   const isCompleted = status === 'Completed Today' || status === 'Protected Today' || status === 'Resting' || status === 'Target Met';
+  
   const isPacha = habit.plantStage === 'Fruiting Plant' && habit.streak >= 21 && (habit.streak - (habit.lastHarvestStreak ?? 21) >= 7);
   const canHarvest = isPacha && !!onHarvest;
 
@@ -1187,7 +1189,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
 
   let cardBg = 'glass-card';
   let cardBorder = 'border-status-healthy/30';
-  let cardGlow = 'shadow-[0_0_15px_rgba(78,173,160,0.15)]';
+  let cardGlow = 'shadow-[0_0_15px_rgba(78,173,160,0.15),inset_0_0_25px_rgba(78,173,160,0.4)]';
   let statusColor = 'text-status-healthy';
   let buttonBg = 'bg-primary-mint text-white border border-transparent shadow-sm';
   let buttonHover = 'hover:bg-[#00c98f]';
@@ -1196,17 +1198,17 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   if (isCompleted) {
     cardBg = 'glass-card bg-status-completed/10';
     cardBorder = 'border-primary-mint/30';
-    cardGlow = 'shadow-[0_0_15px_rgba(78,173,160,0.1)]';
+    cardGlow = 'shadow-[0_0_15px_rgba(78,173,160,0.1),inset_0_0_10px_rgba(78,173,160,0.1)]';
     buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
     iconBg = 'bg-surface-alt/50';
   } else if (isDanger) {
     cardBg = 'glass-card bg-status-wilting/5';
     cardBorder = 'border-status-wilting/40';
-    cardGlow = 'shadow-[0_0_15px_rgba(229,183,105,0.2)] animate-[pulse_3s_ease-in-out_infinite]';
+    cardGlow = 'shadow-[0_0_15px_rgba(229,183,105,0.2),inset_0_0_10px_rgba(229,183,105,0.1)] animate-[pulse_3s_ease-in-out_infinite]';
     if (status === 'Critical' || isSlipped) {
       cardBorder = 'border-status-critical/40';
-      cardGlow = 'shadow-[0_0_20px_rgba(229,124,93,0.3)] animate-[pulse_2s_ease-in-out_infinite]';
+      cardGlow = 'shadow-[0_0_20px_rgba(229,124,93,0.3),inset_0_0_15px_rgba(229,124,93,0.2)] animate-[pulse_2s_ease-in-out_infinite]';
     }
     statusColor = 'text-status-wilting';
     buttonBg = 'bg-status-needsCare text-white border border-transparent shadow-sm';
@@ -1215,7 +1217,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   } else if (status === 'Resting') {
     cardBg = 'glass-card bg-status-resting/10';
     cardBorder = 'border-status-resting/40';
-    cardGlow = 'shadow-[0_0_15px_rgba(100,116,139,0.15)]';
+    cardGlow = 'shadow-[0_0_15px_rgba(100,116,139,0.15),inset_0_0_10px_rgba(100,116,139,0.1)]';
     statusColor = 'text-status-resting';
     buttonBg = 'bg-surface-alt/50 text-secondary-text shadow-sm border border-surface-alt';
     buttonHover = 'hover:bg-surface-alt';
@@ -1223,7 +1225,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
   } else if (canHarvest) {
     cardBg = 'glass-card bg-accent-peach/10';
     cardBorder = 'border-accent-peach/40';
-    cardGlow = 'shadow-[0_0_20px_rgba(247,211,186,0.3)] animate-[pulse_3s_ease-in-out_infinite]';
+    cardGlow = 'shadow-[0_0_20px_rgba(247,211,186,0.3),inset_0_0_20px_rgba(247,211,186,0.25)] animate-[pulse_3s_ease-in-out_infinite]';
     buttonBg = 'bg-accent-peach text-white shadow-sm border border-transparent';
     buttonHover = 'hover:bg-[#F4C5A5]';
     iconBg = 'bg-accent-peach/30';
@@ -1449,8 +1451,13 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                     })()}
                  </div>
 
-                 <h4 className="font-extrabold text-primary-text text-[13px] lg:text-[14px] capitalize tracking-tight leading-snug truncate mt-0.5">
+                 <h4 className="font-extrabold text-primary-text text-[13px] lg:text-[14px] capitalize tracking-tight leading-snug truncate mt-0.5 flex items-center gap-1.5">
                    <span className="truncate max-w-[130px] sm:max-w-none">{habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}</span>
+                   {isFrozen && (
+                     <div title="Streak Protected" className="bg-[#E0F7FA]/20 text-[#00BCD4] p-0.5 rounded-full ring-1 ring-[#00BCD4]/30 shadow-[0_0_8px_rgba(0,188,212,0.3)]">
+                       <Snowflake className="w-3 h-3" />
+                     </div>
+                   )}
                  </h4>
 
                  {/* Advanced Health Vitality Bar */}

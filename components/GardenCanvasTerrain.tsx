@@ -101,6 +101,26 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const [companionState, setCompanionState] = useState<{gridX: number, gridY: number, status: 'idle' | 'water_alert'}>({gridX: 4, gridY: 4, status: 'idle'});
   const [companionMessage, setCompanionMessage] = useState<{id: string, text: string} | null>(null);
 
+  const [critterState, setCritterState] = useState<{gridX: number, gridY: number, active: boolean} | null>(null);
+
+  useEffect(() => {
+    // Spawn a wandering critter (hedgehog) for users with a high perfect garden streak!
+    if ((stats.perfectGardenDays || 0) >= 5) {
+      setCritterState({ gridX: 3, gridY: 3, active: true });
+      const critterInterval = setInterval(() => {
+        setCritterState(prev => {
+          if (!prev) return null;
+          return {
+             ...prev,
+             gridX: Math.max(1, Math.min(GRID_COLS-2, prev.gridX + (Math.floor(Math.random() * 3) - 1))),
+             gridY: Math.max(1, Math.min(GRID_ROWS-2, prev.gridY + (Math.floor(Math.random() * 3) - 1))),
+          }
+        });
+      }, 4000);
+      return () => clearInterval(critterInterval);
+    }
+  }, [stats.perfectGardenDays, GRID_COLS, GRID_ROWS]);
+
   const handleCompanionClick = (companionId: string) => {
     const seasonMonth = new Date().getMonth();
     let season = 'sharat';
@@ -202,9 +222,9 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const isEvening = hour >= 17 && hour < 20;
 
   let tintClass = "bg-transparent";
-  if (isMorning) tintClass = "bg-[#fcdab7]/15 mix-blend-color-burn"; // 15% soft rose/gold
-  else if (isEvening) tintClass = "bg-[#d97743]/25 mix-blend-color-burn"; // 25% deep terracotta/amber
-  else if (isNight) tintClass = "bg-[#312e81]/40 mix-blend-multiply pointer-events-none"; // 40% translucent deep indigo
+  if (isMorning) tintClass = "bg-[#fcdab7]/15 mix-blend-overlay"; // 15% soft rose/gold
+  else if (isEvening) tintClass = "bg-[#d97743]/20 mix-blend-overlay"; // 20% deep terracotta/amber
+  else if (isNight) tintClass = "bg-[#312e81]/25 mix-blend-overlay pointer-events-none"; // Lighter overlay for night
 
   // Weekly Completion Rate Calculation
   const weeklyCompletionRate = useMemo(() => {
@@ -422,9 +442,19 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
       });
     }
 
+    if (critterState && critterState.active) {
+      items.push({ 
+        id: `npc_critter`, 
+        type: 'npc', 
+        npcType: 'critter',
+        gridX: critterState.gridX, 
+        gridY: critterState.gridY, 
+      });
+    }
+
     // 3. Y-Sorting
     return items.sort((a, b) => a.gridY - b.gridY);
-  }, [staticItems, stats.activeCompanionId, companionState]);
+  }, [staticItems, stats.activeCompanionId, companionState, critterState]);
 
   // Dynamic Weather / Time Overlay
   const currentHour = new Date().getHours();
@@ -433,19 +463,19 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const isNightMode = currentHour >= 22 || currentHour < 5;
 
   if (currentHour >= 5 && currentHour < 8) {
-    timeOverlay = "bg-gradient-to-tr from-orange-500/20 to-pink-500/10 mix-blend-color-burn"; // Dawn
+    timeOverlay = "bg-gradient-to-tr from-orange-500/10 to-pink-500/5 mix-blend-overlay"; // Dawn
     timeAtmosphere = <div className="absolute inset-0 bg-yellow-500/10 mix-blend-overlay pointer-events-none z-50" />;
   } else if (currentHour >= 8 && currentHour < 17) {
     timeOverlay = "bg-gradient-to-b from-blue-300/10 to-transparent mix-blend-overlay"; // Day
   } else if (currentHour >= 17 && currentHour < 19) {
-    timeOverlay = "bg-gradient-to-tr from-orange-600/30 to-purple-600/20 mix-blend-multiply"; // Sunset
+    timeOverlay = "bg-gradient-to-tr from-orange-600/20 to-purple-600/10 mix-blend-overlay"; // Sunset
     timeAtmosphere = <div className="absolute inset-0 bg-orange-500/10 mix-blend-overlay pointer-events-none z-50" />;
   } else if (isNightMode) {
-    timeOverlay = "bg-gradient-to-b from-indigo-950/80 to-slate-950/90 mix-blend-multiply"; // Deep Night
-    timeAtmosphere = <div className="absolute inset-0 bg-blue-950/50 mix-blend-color-burn pointer-events-none z-50" />;
+    timeOverlay = "bg-gradient-to-b from-indigo-900/30 to-slate-900/40 mix-blend-overlay"; // Deep Night
+    timeAtmosphere = <div className="absolute inset-0 bg-blue-900/30 mix-blend-overlay pointer-events-none z-50" />;
   } else {
-    timeOverlay = "bg-gradient-to-b from-indigo-900/50 to-slate-900/60 mix-blend-multiply"; // Night/Evening
-    timeAtmosphere = <div className="absolute inset-0 bg-blue-900/20 mix-blend-color-burn pointer-events-none z-50" />;
+    timeOverlay = "bg-gradient-to-b from-indigo-900/20 to-slate-900/30 mix-blend-overlay"; // Night/Evening
+    timeAtmosphere = <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay pointer-events-none z-50" />;
   }
 
   return (
@@ -725,6 +755,18 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                         <div className="absolute -top-2 left-0 text-[10px] font-serif animate-bounce text-amber-300 mix-blend-screen" style={{animationDuration: '2.5s', animationDelay: '0.5s'}}>🎶</div>
                         <div className="w-12 h-2 bg-black/40 rounded-full blur-[2px] absolute -bottom-1 z-0" />
                     </div>
+                 </div>
+               )
+            } else if (item.type === 'npc' && item.npcType === 'critter') {
+               return (
+                 <div key={item.id} className="absolute transition-all duration-[4000ms] ease-linear" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)`, transformOrigin: 'bottom center' }}>
+                     <div className="relative w-12 h-12 flex flex-col items-center justify-end z-20">
+                        {/* Wiggling hedgehog */}
+                        <div className="text-3xl drop-shadow-md animate-bounce" style={{ animationDuration: '1s' }}>
+                           🦔
+                        </div>
+                        <div className={`bg-black/20 blur-[2px] w-8 h-2 absolute bottom-0 rounded-[50%] z-0`} />
+                     </div>
                  </div>
                )
             } else if (item.type === 'npc' && item.npcType && item.npcType.startsWith('mailbox')) {
