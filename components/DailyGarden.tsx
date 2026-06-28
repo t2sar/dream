@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek, differenceInCalendarDays } from 'date-fns';
 import { PlantIcon } from './PlantIcon';
-import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle, ChevronDown, Sparkles, TrendingUp, TrendingDown, Snowflake } from 'lucide-react';
+import { Droplet, Flame, Gift, Leaf, AlertTriangle, Moon, Check, X, ShieldAlert, Sunrise, Sun, Sunset, Coffee, Target, Settings, Info, Clock, Edit2, Archive, Trash2, MoreVertical, AlertCircle, ChevronDown, Sparkles, TrendingUp, TrendingDown, Snowflake, Plus, Wrench, Grid } from 'lucide-react';
 import { getChallengeTemplate } from '../challengesData';
+import { SHOP_ITEMS } from '../shopData';
 import { isHabitPaused } from '../restModeUtils';
 import { isHabitDueToday, isHabitDueOnDate, getCompletedCountThisWeek, isPeriodTargetReached } from '../scheduleUtils';
 import { getBengaliSeason } from '../seasonalUtils';
@@ -180,6 +181,7 @@ interface DailyGardenProps {
   onBackdate?: (habitId: string, dateKey: string) => void;
   onSnoozeHabit?: (habitId: string, dateKey: string) => void;
   onMailboxClick?: () => void;
+  onUpdateStats?: (stats: Partial<UserStats>) => void;
 }
 
 import { GardenSky, getGardenTimePhase } from './GardenSky';
@@ -308,6 +310,176 @@ const THEME_INFOS = {
   },
 };
 
+const SLOT_DEFINITIONS = [
+  { id: 'slot1', label: 'Left Back (Background)', className: 'absolute bottom-[18%] left-[8%] z-10', scaleClass: 'scale-90' },
+  { id: 'slot2', label: 'Left Front (Foreground)', className: 'absolute bottom-[6%] left-[28%] z-30', scaleClass: 'scale-110' },
+  { id: 'slot3', label: 'Center Back (Midground)', className: 'absolute bottom-[20%] left-[50%] -translate-x-1/2 z-10', scaleClass: 'scale-95' },
+  { id: 'slot4', label: 'Right Back (Background)', className: 'absolute bottom-[16%] right-[24%] z-15', scaleClass: 'scale-100' },
+  { id: 'slot5', label: 'Right Front (Foreground)', className: 'absolute bottom-[5%] right-[6%] z-35', scaleClass: 'scale-115' },
+];
+
+const renderAnchoredItemGraphics = (itemId: string) => {
+  if (itemId === 'pot_clay_colorful') {
+    return (
+      <div className="relative w-12 h-10 flex items-end justify-center">
+        <div className="w-10 h-7 bg-gradient-to-r from-orange-600 via-yellow-500 to-red-500 rounded-b-xl border-t-2 border-orange-400 shadow-md flex items-center justify-center">
+          <div className="text-[6px] text-white font-extrabold uppercase select-none opacity-80 scale-75">ART</div>
+        </div>
+      </div>
+    );
+  }
+  if (itemId === 'pot_clay_basic') {
+    return (
+      <div className="relative w-12 h-10 flex items-end justify-center">
+        <div className="w-9 h-7 bg-amber-700 rounded-b-xl border-t-2 border-amber-600 shadow-md" />
+      </div>
+    );
+  }
+  if (itemId === 'pot_bamboo_basket') {
+    return (
+      <div className="relative w-12 h-10 flex items-end justify-center">
+        <div className="w-10 h-8 bg-[repeating-linear-gradient(45deg,#d97706,#d97706_2px,#b45309_2px,#b45309_4px)] rounded-b-md border-t border-amber-500 shadow-md" />
+      </div>
+    );
+  }
+  if (itemId === 'pot_rooftop_tub') {
+    return (
+      <div className="relative w-12 h-10 flex items-end justify-center">
+        <div className="w-11 h-8 bg-slate-400 border-t border-slate-300 rounded-b-md shadow-inner flex items-center justify-between px-1">
+          <div className="w-1.5 h-3.5 bg-slate-600 rounded-full" />
+          <div className="w-1.5 h-3.5 bg-slate-600 rounded-full" />
+        </div>
+      </div>
+    );
+  }
+
+  // Decorations
+  if (itemId === 'dec_butterfly') {
+    return (
+      <div className="relative w-10 h-10 flex items-center justify-center">
+        <motion.div 
+          animate={{ y: [0, -6, 0], rotate: [-5, 5, -5] }}
+          transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+          className="w-4 h-4 bg-fuchsia-500 rounded-full blur-[0.5px] shadow-[0_0_8px_rgba(217,70,239,0.8)] flex items-center justify-center relative"
+        >
+          <div className="absolute -left-2 w-3.5 h-3.5 bg-fuchsia-400 rounded-full opacity-80" />
+          <div className="absolute -right-2 w-3.5 h-3.5 bg-fuchsia-400 rounded-full opacity-80" />
+        </motion.div>
+      </div>
+    );
+  }
+  if (itemId === 'dec_bird') {
+    return (
+      <div className="relative w-12 h-10 flex items-center justify-center">
+        <motion.div
+          animate={{ y: [0, -4, 0] }}
+          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+          className="w-6 h-4 bg-blue-400 rounded-full blur-[0.5px] shadow-[0_2px_4px_rgba(0,0,0,0.15)] relative flex items-center justify-end"
+        >
+          <div className="w-1.5 h-1 bg-yellow-400 rotate-45 rounded-r-full absolute right-0" />
+          <div className="w-3 h-2 bg-blue-300 rounded-full absolute top-1 left-1" />
+        </motion.div>
+      </div>
+    );
+  }
+  if (itemId === 'dec_fruit_basket') {
+    return (
+      <div className="relative w-12 h-8 flex flex-col items-center">
+        <div className="flex gap-0.5 justify-center mb-[-4px] z-10">
+          <div className="w-2 h-2 bg-red-500 rounded-full shadow-sm" />
+          <div className="w-2.5 h-2.5 bg-red-600 rounded-full shadow-sm" />
+          <div className="w-2 h-2 bg-red-500 rounded-full shadow-sm" />
+        </div>
+        <div className="w-9 h-5 bg-amber-700 rounded-b-xl border-t-2 border-amber-500 shadow-md" />
+      </div>
+    );
+  }
+  if (itemId === 'dec_mango_basket') {
+    return (
+      <div className="relative w-12 h-8 flex flex-col items-center">
+        <div className="flex gap-0.5 justify-center mb-[-4px] z-10">
+          <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full shadow-sm rotate-12" />
+          <div className="w-3 h-3 bg-amber-500 rounded-full shadow-sm -rotate-12" />
+          <div className="w-2.5 h-2.5 bg-yellow-400 rounded-full shadow-sm rotate-45" />
+        </div>
+        <div className="w-9 h-5 bg-amber-800 rounded-b-xl border-t border-amber-600 shadow-md" />
+      </div>
+    );
+  }
+  if (itemId === 'dec_small_pond') {
+    return (
+      <div className="relative w-16 h-4 bg-gradient-to-r from-cyan-500/50 to-blue-500/40 rounded-full blur-[1px] shadow-[inner_0_2px_4px_rgba(0,0,0,0.2)] flex items-center justify-center">
+        <div className="w-3 h-1.5 bg-emerald-600/80 rounded-full absolute left-3 animate-pulse" />
+      </div>
+    );
+  }
+  if (itemId === 'dec_clay_lamp') {
+    return (
+      <div className="relative w-8 h-6 flex flex-col items-center">
+        <div className="w-2 h-2.5 bg-amber-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(250,204,21,1)] mb-[-2px] z-10" />
+        <div className="w-5 h-2.5 bg-orange-800 rounded-b-full border-t border-orange-700" />
+      </div>
+    );
+  }
+  if (itemId === 'dec_kolshi') {
+    return (
+      <div className="relative w-8 h-8 flex flex-col items-center">
+        <div className="w-3 h-1.5 bg-slate-400 rounded-full border border-slate-300" />
+        <div className="w-5 h-6 bg-gradient-to-br from-slate-200 to-slate-400 rounded-full border border-slate-400 shadow-md -mt-0.5" />
+      </div>
+    );
+  }
+  if (itemId === 'dec_rickshaw_sign') {
+    return (
+      <div className="relative w-12 h-8 bg-rose-600 rounded-md border-2 border-yellow-400 text-[6px] text-yellow-300 text-center font-bold font-mono tracking-tight shadow-md flex items-center justify-center flex-col p-0.5 select-none">
+        <div className="leading-none">BANGLA</div>
+        <div className="text-[7px] text-white font-black">ART</div>
+      </div>
+    );
+  }
+  if (itemId === 'fence_bamboo') {
+    return (
+       <div className="relative w-12 h-14 flex items-end justify-center pointer-events-none">
+         <div className="flex gap-[3px] items-end h-full">
+           <div className="w-2.5 h-11 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+           <div className="w-2.5 h-13 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+           <div className="w-2.5 h-10 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+         </div>
+         <div className="absolute bottom-3 left-0 right-0 h-1 bg-lime-900/80 rounded" />
+         <div className="absolute bottom-7 left-0 right-0 h-1 bg-lime-900/80 rounded" />
+       </div>
+    );
+  }
+  if (itemId === 'fence_wooden') {
+    return (
+       <div className="relative w-12 h-14 flex items-end justify-center pointer-events-none">
+         <div className="flex gap-[3px] items-end h-full">
+           <div className="relative w-2.5 h-10 bg-amber-700 border border-amber-950 rounded-b">
+             <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+           </div>
+           <div className="relative w-2.5 h-12 bg-amber-700 border border-amber-950 rounded-b">
+             <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+           </div>
+           <div className="relative w-2.5 h-10 bg-amber-700 border border-amber-950 rounded-b">
+             <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+           </div>
+         </div>
+         <div className="absolute bottom-2.5 left-0 right-0 h-1.5 bg-amber-800 border-t border-b border-amber-950" />
+         <div className="absolute bottom-7 left-0 right-0 h-1.5 bg-amber-800 border-t border-b border-amber-950" />
+       </div>
+    );
+  }
+  if (itemId === 'fence_clay_wall') {
+    return (
+       <div className="relative w-12 h-12 flex items-end justify-center pointer-events-none">
+         <div className="w-12 h-7 bg-gradient-to-t from-amber-900 to-amber-700 border border-amber-950 rounded-t-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] flex items-center justify-center" />
+       </div>
+    );
+  }
+
+  return null;
+};
+
 export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   habits,
   logs,
@@ -330,7 +502,8 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
   onOpenOrchard,
   onBackdate,
   onSnoozeHabit,
-  onMailboxClick
+  onMailboxClick,
+  onUpdateStats
 }) => {
   const [greeting, setGreeting] = useState('');
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -343,6 +516,338 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
     }
     prevLevelRef.current = stats.level;
   }, [stats.level]);
+
+  const [isCustomizingTerrain, setIsCustomizingTerrain] = useState(false);
+  const [activeAnchorSlot, setActiveAnchorSlot] = useState<string | null>(null);
+  const [draggedSlotId, setDraggedSlotId] = useState<string | null>(null);
+  const [selectedSlotForMove, setSelectedSlotForMove] = useState<string | null>(null);
+  const [enableSnapGuide, setEnableSnapGuide] = useState(false);
+
+  const [localToast, setLocalToast] = useState<{ message: string; type: 'info' | 'error' | 'success' } | null>(null);
+
+  useEffect(() => {
+    if (localToast) {
+      const timer = setTimeout(() => {
+        setLocalToast(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [localToast]);
+
+  const showLocalToast = (message: string, type: 'info' | 'error' | 'success' = 'info') => {
+    setLocalToast({ message, type });
+  };
+
+  const getMaxFencesAllowed = (level: number): number => {
+    if (level <= 2) return 1;
+    if (level <= 4) return 2;
+    if (level <= 6) return 3;
+    if (level <= 8) return 4;
+    return 5;
+  };
+
+  const handleSnapToGridAutoArrange = () => {
+    const ownedPotsAndDecors = placeableItems;
+    
+    if (ownedPotsAndDecors.length === 0) {
+      showLocalToast("You don't own any placeable items yet! Visit the Garden Shop to buy pots, fences, or decorations.", 'error');
+      playHaptic('thump');
+      return;
+    }
+
+    const newSlots = {
+      slot1: null as string | null,
+      slot2: null as string | null,
+      slot3: null as string | null,
+      slot4: null as string | null,
+      slot5: null as string | null,
+    };
+
+    const fences = ownedPotsAndDecors.filter(item => item.type === 'fence');
+    const tallDecors = ownedPotsAndDecors.filter(item => 
+      item.type === 'decoration' && ['dec_butterfly', 'dec_bird', 'dec_rickshaw_sign'].includes(item.id)
+    );
+    const potsAndShortDecors = ownedPotsAndDecors.filter(item => 
+      item.type === 'pot' || (item.type === 'decoration' && !['dec_butterfly', 'dec_bird', 'dec_rickshaw_sign'].includes(item.id))
+    );
+
+    const usedItems = new Set<string>();
+
+    const getNextUnused = (list: typeof ownedPotsAndDecors) => {
+      return list.find(item => !usedItems.has(item.id));
+    };
+
+    const maxFencesAllowed = getMaxFencesAllowed(stats.level || 1);
+    let fencesPlacedCount = 0;
+
+    // slot1: Left Background (Fence or Tall Decor)
+    let itemForSlot1 = null;
+    if (fences.length > 0 && fencesPlacedCount < maxFencesAllowed) {
+      const fenceItem = fences[0];
+      itemForSlot1 = fenceItem.id;
+      fencesPlacedCount++;
+    } else {
+      const tallDecor = getNextUnused(tallDecors);
+      if (tallDecor) {
+        itemForSlot1 = tallDecor.id;
+        usedItems.add(tallDecor.id);
+      } else {
+        const fallback = getNextUnused(potsAndShortDecors);
+        if (fallback) {
+          itemForSlot1 = fallback.id;
+          usedItems.add(fallback.id);
+        }
+      }
+    }
+    newSlots.slot1 = itemForSlot1;
+
+    // slot4: Right Background (Fence or Tall Decor)
+    let itemForSlot4 = null;
+    if (fences.length > 0 && fencesPlacedCount < maxFencesAllowed) {
+      const fenceItem = fences[1] || fences[0];
+      itemForSlot4 = fenceItem.id;
+      fencesPlacedCount++;
+    } else {
+      const tallDecor = getNextUnused(tallDecors);
+      if (tallDecor) {
+        itemForSlot4 = tallDecor.id;
+        usedItems.add(tallDecor.id);
+      } else {
+        const fallback = getNextUnused(potsAndShortDecors);
+        if (fallback) {
+          itemForSlot4 = fallback.id;
+          usedItems.add(fallback.id);
+        }
+      }
+    }
+    newSlots.slot4 = itemForSlot4;
+
+    // slot3: Center Background (Focal centerpiece decor)
+    let itemForSlot3 = null;
+    const centerpieceDecor = getNextUnused(tallDecors);
+    if (centerpieceDecor) {
+      itemForSlot3 = centerpieceDecor.id;
+      usedItems.add(centerpieceDecor.id);
+    } else {
+      const shortCenter = getNextUnused(potsAndShortDecors);
+      if (shortCenter) {
+        itemForSlot3 = shortCenter.id;
+        usedItems.add(shortCenter.id);
+      }
+    }
+    newSlots.slot3 = itemForSlot3;
+
+    // slot2: Left Foreground (Pots or Short Decor)
+    let itemForSlot2 = null;
+    const foreground1 = getNextUnused(potsAndShortDecors);
+    if (foreground1) {
+      itemForSlot2 = foreground1.id;
+      usedItems.add(foreground1.id);
+    } else {
+      const tallFallback = getNextUnused(tallDecors);
+      if (tallFallback) {
+        itemForSlot2 = tallFallback.id;
+        usedItems.add(tallFallback.id);
+      }
+    }
+    newSlots.slot2 = itemForSlot2;
+
+    // slot5: Right Foreground (Pots or Short Decor)
+    let itemForSlot5 = null;
+    const foreground2 = getNextUnused(potsAndShortDecors);
+    if (foreground2) {
+      itemForSlot5 = foreground2.id;
+      usedItems.add(foreground2.id);
+    } else {
+      const tallFallback = getNextUnused(tallDecors);
+      if (tallFallback) {
+        itemForSlot5 = tallFallback.id;
+        usedItems.add(tallFallback.id);
+      }
+    }
+    newSlots.slot5 = itemForSlot5;
+
+    if (onUpdateStats) {
+      onUpdateStats({
+        anchorSlots: newSlots
+      });
+    }
+
+    showLocalToast("✨ Snap-to-Grid Optimized: Tall decors placed in back, pots in front, visual overlaps resolved!", 'success');
+    playHaptic('unlock');
+  };
+
+  const handleSlotDragStart = (e: React.DragEvent, slotId: string) => {
+    setDraggedSlotId(slotId);
+    e.dataTransfer.setData('text/plain', slotId);
+    playHaptic('thump');
+  };
+
+  const handleSlotDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleSlotDrop = (e: React.DragEvent, targetSlotId: string) => {
+    e.preventDefault();
+    const sourceSlotId = draggedSlotId || e.dataTransfer.getData('text/plain');
+    if (!sourceSlotId || sourceSlotId === targetSlotId) return;
+
+    const sourceItem = anchorSlots[sourceSlotId as keyof typeof anchorSlots];
+    const targetItem = anchorSlots[targetSlotId as keyof typeof anchorSlots];
+
+    // Helper checking
+    const isSourceFence = sourceItem && sourceItem.startsWith('fence_');
+    const isTargetFence = targetItem && targetItem.startsWith('fence_');
+    const isSourcePotOrDecor = sourceItem && (sourceItem.startsWith('pot_') || sourceItem.startsWith('dec_') || sourceItem.startsWith('decor_'));
+    const isTargetPotOrDecor = targetItem && (targetItem.startsWith('pot_') || targetItem.startsWith('dec_') || targetItem.startsWith('decor_'));
+
+    if ((isSourceFence && isTargetPotOrDecor) || (isSourcePotOrDecor && isTargetFence)) {
+      showLocalToast("Fence pieces cannot be dropped onto grid slots already occupied by pots or decorations!", 'error');
+      playHaptic('thump');
+      setDraggedSlotId(null);
+      return;
+    }
+
+    const currentSlots = { ...anchorSlots };
+    currentSlots[sourceSlotId] = targetItem || null;
+    currentSlots[targetSlotId] = sourceItem || null;
+
+    if (onUpdateStats) {
+      onUpdateStats({
+        anchorSlots: currentSlots
+      });
+    }
+    setDraggedSlotId(null);
+    playHaptic('thump');
+  };
+
+  const handleSlotTap = (slotId: string, isOccupied: boolean) => {
+    if (isCustomizingTerrain) {
+      if (selectedSlotForMove) {
+        if (selectedSlotForMove === slotId) {
+          // Deselect
+          setSelectedSlotForMove(null);
+          playHaptic('thump');
+        } else {
+          // Swap/Move item
+          const sourceItem = anchorSlots[selectedSlotForMove as keyof typeof anchorSlots];
+          const targetItem = anchorSlots[slotId as keyof typeof anchorSlots];
+
+          const isSourceFence = sourceItem && sourceItem.startsWith('fence_');
+          const isTargetFence = targetItem && targetItem.startsWith('fence_');
+          const isSourcePotOrDecor = sourceItem && (sourceItem.startsWith('pot_') || sourceItem.startsWith('dec_') || sourceItem.startsWith('decor_'));
+          const isTargetPotOrDecor = targetItem && (targetItem.startsWith('pot_') || targetItem.startsWith('dec_') || targetItem.startsWith('decor_'));
+
+          if ((isSourceFence && isTargetPotOrDecor) || (isSourcePotOrDecor && isTargetFence)) {
+            showLocalToast("Fence pieces cannot be placed/swapped onto slots occupied by pots or decorations!", 'error');
+            playHaptic('thump');
+            setSelectedSlotForMove(null);
+            return;
+          }
+
+          const currentSlots = { ...anchorSlots };
+          currentSlots[selectedSlotForMove] = targetItem || null;
+          currentSlots[slotId] = sourceItem || null;
+          if (onUpdateStats) {
+            onUpdateStats({
+              anchorSlots: currentSlots
+            });
+          }
+          setSelectedSlotForMove(null);
+          playHaptic('thump');
+        }
+      } else {
+        if (isOccupied) {
+          setSelectedSlotForMove(slotId);
+          playHaptic('thump');
+        } else {
+          setActiveAnchorSlot(slotId);
+          playHaptic('thump');
+        }
+      }
+    } else {
+      if (isOccupied) {
+        setActiveAnchorSlot(slotId);
+        playHaptic('thump');
+      }
+    }
+  };
+
+  const anchorSlots = useMemo(() => {
+    if (stats.anchorSlots && Object.keys(stats.anchorSlots).length > 0) {
+      return stats.anchorSlots;
+    }
+    return {
+      slot1: stats.equippedLeftDecorId || null,
+      slot2: null,
+      slot3: null,
+      slot4: null,
+      slot5: stats.equippedRightDecorId || null,
+    };
+  }, [stats.anchorSlots, stats.equippedLeftDecorId, stats.equippedRightDecorId]);
+
+  const placeableItems = useMemo(() => {
+    return SHOP_ITEMS.filter(item => 
+      (item.type === 'pot' || item.type === 'decoration' || item.type === 'fence') && 
+      (item.id === 'pot_clay_basic' || stats.ownedItemIds?.includes(item.id) || stats.equippedFenceId === item.id)
+    );
+  }, [stats.ownedItemIds, stats.equippedFenceId]);
+
+  const handlePlaceItem = (slotId: string, itemId: string | null) => {
+    const currentSlots = { ...anchorSlots };
+    if (itemId) {
+      const isFence = itemId.startsWith('fence_');
+      const targetItem = currentSlots[slotId];
+
+      if (isFence) {
+        // Validate occupied slot is not a pot or decoration
+        if (targetItem && (targetItem.startsWith('pot_') || targetItem.startsWith('dec_') || targetItem.startsWith('decor_'))) {
+          showLocalToast("Fence pieces cannot be placed onto grid slots already occupied by pots or decorations!", 'error');
+          playHaptic('thump');
+          return;
+        }
+
+        // Validate limit to number of fence pieces placed based on level
+        const currentFencesCount = Object.values(currentSlots).filter(id => id && id.startsWith('fence_')).length;
+        const targetWasFence = targetItem && targetItem.startsWith('fence_');
+        const netFenceIncrease = targetWasFence ? 0 : 1;
+        const maxAllowed = getMaxFencesAllowed(stats.level || 1);
+
+        if (currentFencesCount + netFenceIncrease > maxAllowed) {
+          showLocalToast(`Maximum fence pieces reached (${maxAllowed}) for Garden Lvl ${stats.level}. Level up your garden to unlock more space!`, 'error');
+          playHaptic('thump');
+          return;
+        }
+      } else {
+        // Placing a pot/decoration: Validate target slot is not occupied by a fence
+        if (targetItem && targetItem.startsWith('fence_')) {
+          showLocalToast("Pots or decorations cannot be placed onto grid slots already occupied by fences!", 'error');
+          playHaptic('thump');
+          return;
+        }
+      }
+
+      // If it's a unique pot/decoration, remove it from other slots to prevent duplicates.
+      // Do not do this for fences, as the user can place same design fences in multiple slots!
+      if (!isFence) {
+        Object.keys(currentSlots).forEach(key => {
+          if (currentSlots[key] === itemId) {
+            currentSlots[key] = null;
+          }
+        });
+      }
+      currentSlots[slotId] = itemId;
+    } else {
+      currentSlots[slotId] = null;
+    }
+
+    if (onUpdateStats) {
+      onUpdateStats({
+        anchorSlots: currentSlots
+      });
+    }
+    playHaptic('thump');
+  };
 
   const currentThemeId = stats.themeId || 'cream_butter';
   // @ts-ignore
@@ -543,6 +1048,34 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
     <div className={bgClass} style={{ backgroundColor: baseBgColor }}>
       <WeatherParticles isMonsoon={!!isMonsoon} isNight={!!isNight} isAutumn={!!isAutumn} isWinter={!!isWinter} />
       
+      <AnimatePresence>
+        {localToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] max-w-sm w-full px-4 pointer-events-none"
+          >
+            <div className={`p-4 rounded-2xl shadow-2xl backdrop-blur-md border flex items-start gap-3 pointer-events-auto ${
+              localToast.type === 'error'
+                ? 'bg-red-500/90 border-red-500/30 text-white'
+                : localToast.type === 'success'
+                ? 'bg-emerald-500/90 border-emerald-500/30 text-white'
+                : 'bg-zinc-900/90 border-zinc-700/50 text-white'
+            }`}>
+              {localToast.type === 'error' ? (
+                <ShieldAlert className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-100" />
+              ) : (
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-100" />
+              )}
+              <div className="flex-1">
+                <p className="text-xs font-bold leading-relaxed">{localToast.message}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="relative z-10 space-y-8">
       {/* Rest Mode Banner / Settings */}
       {activeRestMode && activeRestMode.isActive ? (
@@ -645,31 +1178,170 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
            <div className="absolute top-4 left-8 w-12 h-12 rounded-full bg-orange-300/40 blur-md"></div>
         )}
         
-        {/* Small Decorations */}
+        {/* Customize Terrain Layout Mode Toggle */}
         {!stats.isSimpleMode && (
-          <>
-            <div className="absolute bottom-2 left-4 z-0 opacity-80 pointer-events-none flex items-end">
-                 {equippedLeftDecorId === 'dec_butterfly' && <div className="w-3 h-3 bg-fuchsia-500 rounded-full animate-bounce blur-[1px] mb-8"></div>}
-                 {equippedLeftDecorId === 'dec_bird' && <div className="w-4 h-3 bg-blue-400 rounded-full blur-[1px] mb-6 translate-x-4"></div>}
-                 {equippedLeftDecorId === 'dec_fruit_basket' && <div className="w-8 h-6 bg-amber-700 rounded-b-xl border-t-2 border-amber-500 flex justify-center"><div className="w-4 h-2 bg-rose-500 rounded-full -mt-1"></div></div>}
-                 {equippedLeftDecorId === 'dec_mango_basket' && <div className="w-8 h-6 bg-amber-800 rounded-b-xl border-t border-amber-600 flex justify-center"><div className="w-5 h-3 bg-yellow-500 rounded-full -mt-1 blur-[1px]"></div></div>}
-                 {equippedLeftDecorId === 'dec_small_pond' && <div className="w-16 h-4 bg-cyan-500/40 rounded-full blur-[2px]"></div>}
-                 {equippedLeftDecorId === 'dec_clay_lamp' && <div className="w-4 h-2 bg-orange-800 rounded-b-full"><div className="w-2 h-2 bg-yellow-400 rounded-full mx-auto -mt-2 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.8)]"></div></div>}
-                 {equippedLeftDecorId === 'dec_kolshi' && <div className="w-5 h-6 bg-slate-300 rounded-full border border-slate-400"></div>}
-                 {equippedLeftDecorId === 'dec_rickshaw_sign' && <div className="w-10 h-6 bg-rose-600 rounded-sm border-2 border-yellow-400 text-[6px] text-yellow-300 text-center font-bold">ART</div>}
+          <button
+            onClick={() => {
+              setIsCustomizingTerrain(!isCustomizingTerrain);
+              playHaptic('thump');
+            }}
+            className={`absolute top-4 right-4 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold tracking-wide transition-all border duration-300 pointer-events-auto cursor-pointer ${
+              isCustomizingTerrain 
+                ? 'bg-emerald-500 text-zinc-900 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)] scale-105 font-sans' 
+                : 'bg-zinc-900/60 hover:bg-zinc-900/80 text-white/90 border-white/10 hover:border-white/30 hover:scale-102 font-sans'
+            }`}
+          >
+            {isCustomizingTerrain ? (
+              <>
+                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Layout Done</span>
+              </>
+            ) : (
+              <>
+                <Wrench className="w-3.5 h-3.5" />
+                <span>Customize Terrain</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* Snap-to-Grid Helper Card */}
+        {!stats.isSimpleMode && isCustomizingTerrain && (
+          <div className="absolute top-16 right-4 z-30 w-64 bg-zinc-950/95 backdrop-blur-md text-[#FDFBF7] rounded-[24px] p-4 border border-white/10 shadow-2xl flex flex-col gap-3 pointer-events-auto font-sans animate-fade-in">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+              <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span className="text-xs font-extrabold uppercase tracking-widest text-white">Snap-to-Grid Helper</span>
             </div>
             
-            <div className="absolute bottom-2 right-4 z-0 opacity-80 pointer-events-none flex items-end">
-                 {equippedRightDecorId === 'dec_butterfly' && <div className="w-3 h-3 bg-fuchsia-500 rounded-full animate-bounce blur-[1px] mb-8"></div>}
-                 {equippedRightDecorId === 'dec_bird' && <div className="w-4 h-3 bg-blue-400 rounded-full blur-[1px] mb-6 -translate-x-4"></div>}
-                 {equippedRightDecorId === 'dec_fruit_basket' && <div className="w-8 h-6 bg-amber-700 rounded-b-xl border-t-2 border-amber-500 flex justify-center"><div className="w-4 h-2 bg-rose-500 rounded-full -mt-1"></div></div>}
-                 {equippedRightDecorId === 'dec_mango_basket' && <div className="w-8 h-6 bg-amber-800 rounded-b-xl border-t border-amber-600 flex justify-center"><div className="w-5 h-3 bg-yellow-500 rounded-full -mt-1 blur-[1px]"></div></div>}
-                 {equippedRightDecorId === 'dec_small_pond' && <div className="w-16 h-4 bg-cyan-500/40 rounded-full blur-[2px]"></div>}
-                 {equippedRightDecorId === 'dec_clay_lamp' && <div className="w-4 h-2 bg-orange-800 rounded-b-full"><div className="w-2 h-2 bg-yellow-400 rounded-full mx-auto -mt-2 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.8)]"></div></div>}
-                 {equippedRightDecorId === 'dec_kolshi' && <div className="w-5 h-6 bg-slate-300 rounded-full border border-slate-400"></div>}
-                 {equippedRightDecorId === 'dec_rickshaw_sign' && <div className="w-10 h-6 bg-rose-600 rounded-sm border-2 border-yellow-400 text-[6px] text-yellow-300 text-center font-bold">ART</div>}
+            <p className="text-[10px] text-white/70 leading-relaxed font-medium">
+              Use smart guides to optimize placement or auto-arrange owned items to prevent overlaps and visual occlusion.
+            </p>
+
+            <div className="flex flex-col gap-2">
+              {/* Show Guides Switch */}
+              <button
+                onClick={() => {
+                  setEnableSnapGuide(!enableSnapGuide);
+                  playHaptic('thump');
+                }}
+                className={`flex items-center justify-between px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
+                  enableSnapGuide 
+                    ? 'bg-emerald-500/15 border-emerald-400/50 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.15)]' 
+                    : 'bg-white/5 border-white/10 text-white/60 hover:border-white/25 hover:bg-white/10'
+                }`}
+              >
+                <span>Show Snap Guides</span>
+                <span className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${enableSnapGuide ? 'bg-emerald-400 shadow-[0_0_6px_#10b981]' : 'bg-white/20'}`} />
+              </button>
+
+              {/* Auto Arrange Layout */}
+              <button
+                onClick={() => {
+                  handleSnapToGridAutoArrange();
+                  setEnableSnapGuide(true);
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-zinc-900 text-[11px] font-extrabold uppercase tracking-wide hover:brightness-110 active:scale-98 transition-all duration-200 flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(16,185,129,0.2)] pointer-events-auto cursor-pointer"
+              >
+                <Grid className="w-3.5 h-3.5" />
+                <span>Auto-Arrange Layout</span>
+              </button>
             </div>
-          </>
+          </div>
+        )}
+
+        {/* Interactive Anchor Slots */}
+        {!stats.isSimpleMode && (
+          <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none select-none z-10">
+            {SLOT_DEFINITIONS.map((slot) => {
+              const placedItemId = anchorSlots[slot.id as keyof typeof anchorSlots];
+              const isOccupied = !!placedItemId;
+              const isSelectedForMove = selectedSlotForMove === slot.id;
+              
+              return (
+                <div 
+                  key={slot.id} 
+                  className={`${slot.className} ${slot.scaleClass} transition-all duration-300 flex flex-col items-center justify-end h-20 w-20 relative`}
+                  onDragOver={handleSlotDragOver}
+                  onDrop={(e) => handleSlotDrop(e, slot.id)}
+                >
+                  {/* Snap-to-Grid Guide Ring Overlay */}
+                  {isCustomizingTerrain && enableSnapGuide && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                      <motion.div
+                        animate={{ 
+                          scale: [0.85, 1.05, 0.85],
+                          borderColor: ['slot1', 'slot3', 'slot4'].includes(slot.id) 
+                            ? ['rgba(245,158,11,0.2)', 'rgba(245,158,11,0.7)', 'rgba(245,158,11,0.2)'] 
+                            : ['rgba(16,185,129,0.2)', 'rgba(16,185,129,0.7)', 'rgba(16,185,129,0.2)']
+                        }}
+                        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                        className={`absolute w-16 h-16 rounded-full border-2 border-dashed flex flex-col items-center justify-center p-0.5 bg-black/10`}
+                      >
+                        <div className="text-[7px] font-extrabold uppercase font-mono tracking-tight text-center leading-none scale-90 mb-0.5 opacity-90 drop-shadow-sm" style={{ color: ['slot1', 'slot3', 'slot4'].includes(slot.id) ? '#f59e0b' : '#10b981' }}>
+                          {['slot1', 'slot3', 'slot4'].includes(slot.id) ? 'Tall / Back' : 'Short / Front'}
+                        </div>
+                        <div className="text-[5.5px] font-mono text-white/50 text-center leading-none scale-75 opacity-70">
+                          {['slot1', 'slot3', 'slot4'].includes(slot.id) ? 'Fences/Decor' : 'Pots/Decors'}
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+
+                  {/* Item placed rendering */}
+                  {isOccupied && (
+                    <div 
+                      draggable={isCustomizingTerrain}
+                      onDragStart={(e) => handleSlotDragStart(e, slot.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSlotTap(slot.id, true);
+                      }}
+                      className={`cursor-pointer pointer-events-auto transform hover:scale-110 transition-all duration-200 active:scale-95 relative z-20 flex flex-col items-center justify-end p-1 rounded-xl ${
+                        isSelectedForMove ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-zinc-900 scale-105 animate-pulse shadow-[0_0_20px_rgba(52,211,153,0.6)]' : ''
+                      }`}
+                    >
+                      {renderAnchoredItemGraphics(placedItemId)}
+                      
+                      {/* Floating shadow under placed item */}
+                      <div className="w-8 h-1 bg-black/25 rounded-full blur-[1px] mt-0.5" />
+                    </div>
+                  )}
+
+                  {/* Pedestal / Highlight when Empty or in Customize Mode */}
+                  {isCustomizingTerrain && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSlotTap(slot.id, isOccupied);
+                      }}
+                      className="pointer-events-auto flex flex-col items-center justify-end relative z-30 animate-fade-in group cursor-pointer mt-1"
+                    >
+                      {isOccupied ? (
+                        <div className="w-12 h-4 bg-gradient-to-b from-stone-400 to-stone-600 rounded-full border border-stone-300 shadow-[0_2px_4px_rgba(0,0,0,0.4)] opacity-80 flex items-center justify-center -mt-1 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[6px] font-mono text-white/90 font-bold scale-75">
+                            {isSelectedForMove ? 'Tap Target' : `Move Slot ${slot.id.replace('slot', '')}`}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className={`w-12 h-12 rounded-full border-2 border-dashed flex items-center justify-center transition-all duration-300 shadow-[0_0_8px_rgba(255,255,255,0.05)] ${
+                          selectedSlotForMove 
+                            ? 'border-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.3)]' 
+                            : 'border-white/40 hover:border-emerald-400 bg-black/25 hover:bg-emerald-500/10 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                        }`}>
+                          <Plus className={`w-4 h-4 transition-colors ${selectedSlotForMove ? 'text-emerald-400' : 'text-white/60 group-hover:text-emerald-400'}`} />
+                        </div>
+                      )}
+
+                      {/* Floating tooltip with Slot label */}
+                      <span className="absolute bottom-14 scale-90 whitespace-nowrap bg-zinc-900 text-white border border-white/10 text-[9px] font-medium font-mono px-2 py-0.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40">
+                        {slot.label} {isOccupied ? (isSelectedForMove ? '(Tap target to Swap/Move)' : '(Tap to select, drag, or double tap to Edit)') : '(Tap to Place/Move)'}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
         
         <div className="relative z-10">
@@ -1026,6 +1698,169 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Customized Anchor Slot Customization Modal */}
+      <AnimatedModal 
+        isOpen={!!activeAnchorSlot} 
+        onClose={() => setActiveAnchorSlot(null)} 
+        alignment="bottom" 
+        className="!p-6 !max-w-md mx-auto !rounded-t-[32px] !rounded-b-none overflow-hidden bg-[#1A1C1E] text-[#FDFBF7] border border-white/10 z-50"
+      >
+        <div className="flex flex-col gap-5">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold font-display text-white">
+                Customize Slot {activeAnchorSlot ? activeAnchorSlot.replace('slot', '#') : ''}
+              </h3>
+              <p className="text-xs text-white/60 font-sans">
+                {activeAnchorSlot ? SLOT_DEFINITIONS.find(s => s.id === activeAnchorSlot)?.label : ''}
+              </p>
+            </div>
+            <button 
+              onClick={() => setActiveAnchorSlot(null)}
+              className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/80 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Snap-to-Grid Recommended Guides */}
+          {activeAnchorSlot && (
+            <div className="p-3 rounded-2xl bg-[#141517] border border-white/5 text-[11px] font-sans leading-relaxed text-white/80">
+              {['slot1', 'slot3', 'slot4'].includes(activeAnchorSlot) ? (
+                <div className="flex gap-2.5 items-start">
+                  <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5 animate-pulse" />
+                  <div>
+                    <span className="font-extrabold text-amber-400">Background Slot Snap Recommendation: </span>
+                    Fences or taller decorations (Birds, Butterflies, Rickshaw Signs) fit best here to prevent visual overlaps with foreground plants.
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2.5 items-start">
+                  <Sparkles className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5 animate-pulse" />
+                  <div>
+                    <span className="font-extrabold text-emerald-400">Foreground Slot Snap Recommendation: </span>
+                    Pots or low-profile decorations (Pond, Fruit Basket, Clay Lamp, pitcher) fit best here to prevent blocking background items.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Current Selection / Remove action */}
+          {activeAnchorSlot && anchorSlots[activeAnchorSlot as keyof typeof anchorSlots] && (
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                  {renderAnchoredItemGraphics(anchorSlots[activeAnchorSlot as keyof typeof anchorSlots]!)}
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">
+                    {SHOP_ITEMS.find(item => item.id === anchorSlots[activeAnchorSlot as keyof typeof anchorSlots])?.name || 'Placed Item'}
+                  </div>
+                  <div className="text-[10px] text-white/40">Currently Anchored</div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  handlePlaceItem(activeAnchorSlot, null);
+                  setActiveAnchorSlot(null);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold transition-all border border-red-500/20 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Remove</span>
+              </button>
+            </div>
+          )}
+
+          {/* Grid of placeable options */}
+          <div className="space-y-3">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 font-sans">
+              Your Available Items ({placeableItems.length})
+            </span>
+            
+            {placeableItems.length === 0 ? (
+              <div className="p-8 text-center rounded-2xl bg-white/5 border border-dashed border-white/10">
+                <Archive className="w-8 h-8 text-white/30 mx-auto mb-2 animate-bounce" />
+                <p className="text-xs text-white/60 font-medium">No placeable pots or decorations owned yet.</p>
+                <p className="text-[10px] text-white/40 mt-1">Visit the Garden Shop to unlock premium items!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+                {placeableItems.map(item => {
+                  const isFence = item.id.startsWith('fence_');
+                  const isEquippedInAnotherSlot = !isFence && Object.entries(anchorSlots).some(([key, val]) => val === item.id && key !== activeAnchorSlot);
+                  const isEquippedHere = activeAnchorSlot ? anchorSlots[activeAnchorSlot as keyof typeof anchorSlots] === item.id : false;
+                  
+                  const isBackgroundSlot = activeAnchorSlot ? ['slot1', 'slot3', 'slot4'].includes(activeAnchorSlot) : false;
+                  const isTallOrFence = item.type === 'fence' || ['dec_butterfly', 'dec_bird', 'dec_rickshaw_sign'].includes(item.id);
+                  const isOptimal = activeAnchorSlot 
+                    ? (isBackgroundSlot ? isTallOrFence : !isTallOrFence)
+                    : false;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        if (activeAnchorSlot) {
+                          handlePlaceItem(activeAnchorSlot, item.id);
+                          setActiveAnchorSlot(null);
+                        }
+                      }}
+                      className={`flex flex-col items-center p-3 rounded-2xl border transition-all relative overflow-hidden group text-center cursor-pointer ${
+                        isEquippedHere
+                          ? 'bg-emerald-500/10 border-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.15)]'
+                          : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
+                      }`}
+                    >
+                      {/* Graphics preview */}
+                      <div className="w-14 h-14 rounded-xl bg-black/20 border border-white/5 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+                        {renderAnchoredItemGraphics(item.id)}
+                      </div>
+                      
+                      {/* Name & Type */}
+                      <div className="text-[11px] font-bold text-white line-clamp-1">{item.name}</div>
+                      <div className="text-[9px] text-white/40 font-mono capitalize mt-0.5">{item.type}</div>
+                      
+                      {/* Equipped Status badge */}
+                      {isEquippedHere && (
+                        <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shadow">
+                          <Check className="w-2.5 h-2.5 text-zinc-900 stroke-[3]" />
+                        </div>
+                      )}
+                      
+                      {isEquippedInAnotherSlot ? (
+                        <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[7px] font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/10 uppercase tracking-wider font-sans">
+                          Placed
+                        </div>
+                      ) : isOptimal ? (
+                        <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[7px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider font-mono">
+                          ✨ Optimal
+                        </div>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          
+          <div className="text-[10px] text-white/40 text-center font-medium font-sans bg-white/5 p-3 rounded-2xl border border-white/10 space-y-1.5">
+            <div>
+              💡 Tap any item to place it. Pots and decorations are unique, while fences can be duplicated.
+            </div>
+            <div className="text-emerald-400 font-bold font-mono text-[11px] tracking-wide flex items-center justify-center gap-1.5">
+              <span>🚧 Fences Placed:</span>
+              <span className="bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 text-emerald-300">
+                {Object.values(anchorSlots).filter(id => id && id.startsWith('fence_')).length} / {getMaxFencesAllowed(stats.level || 1)}
+              </span>
+              <span className="text-white/40 font-normal font-sans text-[10px]">(Max based on Garden Lvl {stats.level})</span>
+            </div>
+          </div>
+        </div>
+      </AnimatedModal>
 
     </div>
   );

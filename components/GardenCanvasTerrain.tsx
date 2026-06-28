@@ -31,6 +31,7 @@ interface CanvasItem {
   habit?: Habit; // For plants
   companionId?: string; // For companion
   npcType?: string; // For npc
+  fenceId?: string; // For fence
 }
 
 export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits, logs, stats, onWaterPlant, onMailboxClick }) => {
@@ -423,8 +424,43 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
       }
     });
 
+    // Add perimeter fences if equipped or if any fence is placed in anchor slots
+    const slots = stats.anchorSlots || {};
+    const equippedFence = stats.equippedFenceId;
+    
+    // Find fence placed in left slots (slot1, slot2)
+    const leftFenceItem = slots.slot1 && slots.slot1.startsWith('fence_') ? slots.slot1 :
+                          slots.slot2 && slots.slot2.startsWith('fence_') ? slots.slot2 : null;
+                          
+    // Find fence placed in right slots (slot4, slot5)
+    const rightFenceItem = slots.slot4 && slots.slot4.startsWith('fence_') ? slots.slot4 :
+                           slots.slot5 && slots.slot5.startsWith('fence_') ? slots.slot5 : null;
+                           
+    const hasAnyFencePlaced = Object.values(slots).some(itemId => itemId && itemId.startsWith('fence_'));
+    const activeFenceId = equippedFence || leftFenceItem || rightFenceItem || null;
+
+    if (activeFenceId) {
+       // Fences always cover all perimeter borders of the terrain at all levels
+       const showLeftBorder = true;
+       const showRightBorder = true;
+
+       const leftFenceId = leftFenceItem || activeFenceId;
+       const topFenceId = rightFenceItem || activeFenceId;
+
+       if (showLeftBorder) {
+          for (let y = 0; y < GRID_ROWS; y++) {
+             items.push({ id: `fence_left_${y}`, type: 'fence', gridX: 0, gridY: y, fenceId: leftFenceId });
+          }
+       }
+       if (showRightBorder) {
+          for (let x = 1; x < GRID_COLS; x++) {
+             items.push({ id: `fence_top_${x}`, type: 'fence', gridX: x, gridY: 0, fenceId: topFenceId });
+          }
+       }
+    }
+
     return items;
-  }, [habits, stats.perfectGardenDays, logs]);
+  }, [habits, stats.perfectGardenDays, stats.equippedFenceId, stats.anchorSlots, logs, GRID_COLS, GRID_ROWS]);
 
   const renderItems = useMemo(() => {
     const items = [...staticItems];
@@ -478,12 +514,244 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
     timeAtmosphere = <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay pointer-events-none z-50" />;
   }
 
+  const equippedBackgroundId = stats.equippedBackgroundId || 'bg_default';
+
+  let customBgClass = seasonBg;
+  if (equippedBackgroundId === 'bg_default') {
+    if (seasonMonth === 3 || seasonMonth === 4) {
+      customBgClass = "bg-gradient-to-b from-[#fef08a] via-[#fcd34d] to-[#166534]"; // Grishmo (Sunny Gold)
+    } else if (seasonMonth === 5 || seasonMonth === 6) {
+      customBgClass = "bg-gradient-to-b from-[#334155] via-[#475569] to-[#064e3b]"; // Borsha (Monsoon Rain)
+    } else if (seasonMonth === 7 || seasonMonth === 8) {
+      customBgClass = "bg-gradient-to-b from-[#bae6fd] via-[#7dd3fc] to-[#15803d]"; // Sharat (Autumn Blue)
+    } else if (seasonMonth === 9 || seasonMonth === 10) {
+      customBgClass = "bg-gradient-to-b from-[#fed7aa] via-[#ffedd5] to-[#166534]"; // Hemanto (Dewy Gold)
+    } else if (seasonMonth === 11 || seasonMonth === 0) {
+      customBgClass = "bg-gradient-to-b from-[#e2e8f0] via-[#cbd5e1] to-[#1e3a1e]"; // Sheet (Foggy Winter)
+    } else if (seasonMonth === 1 || seasonMonth === 2) {
+      customBgClass = "bg-gradient-to-b from-[#bbf7d0] via-[#86efac] to-[#15803d]"; // Bashonto (Vibrant Spring)
+    }
+  } else if (equippedBackgroundId === 'bg_rooftop') {
+    customBgClass = "bg-gradient-to-b from-[#0f172a] via-[#1e1b4b] to-[#311042]";
+  } else if (equippedBackgroundId === 'bg_village') {
+    customBgClass = "bg-gradient-to-b from-[#022c22] via-[#064e3b] to-[#14532d]";
+  } else if (equippedBackgroundId === 'bg_morning_sun') {
+    customBgClass = "bg-gradient-to-b from-[#78350f] via-[#d97706] to-[#f59e0b]";
+  } else if (equippedBackgroundId === 'bg_monsoon') {
+    customBgClass = "bg-gradient-to-b from-[#1e293b] via-[#334155] to-[#0f172a]";
+  } else if (equippedBackgroundId === 'bg_zamindar_palace') {
+    customBgClass = "bg-gradient-to-b from-[#4c0519] via-[#2e1065] to-[#030712]";
+  }
+
   return (
     <div 
-      className={`relative w-full h-[600px] border-4 border-[#8BC34A]/30 rounded-[32px] overflow-hidden shadow-2xl shadow-green-900/20 ${seasonBg}`}
+      className={`relative w-full h-[600px] border-4 border-[#8BC34A]/30 rounded-[32px] overflow-hidden shadow-2xl shadow-green-900/20 ${customBgClass}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Dynamic Background Visual Art Layers */}
+      {equippedBackgroundId === 'bg_default' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+          {/* Sun or Mist */}
+          {(seasonMonth === 11 || seasonMonth === 0) ? (
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-yellow-100/20 blur-xl" />
+          ) : (
+            <div className="absolute top-12 left-12 w-20 h-20 rounded-full bg-gradient-to-b from-yellow-100 to-yellow-300/40 blur-[1px] shadow-[0_0_30px_rgba(253,224,71,0.25)]" />
+          )}
+
+          {/* Overlapping Rolling Hills */}
+          <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-emerald-800/15 rounded-t-[120px] blur-[1px]" />
+          <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-emerald-700/25 rounded-t-[100px]" />
+          <div className="absolute bottom-0 w-full h-16 bg-emerald-600/35 rounded-t-[60px]" />
+
+          {/* Gentle Flat-styled Trees */}
+          <svg className="absolute bottom-12 left-[12%] w-16 h-28 opacity-40 text-emerald-800" viewBox="0 0 100 150">
+            <path d="M50,150 L50,70" fill="none" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
+            <ellipse cx="50" cy="55" rx="30" ry="40" fill="#047857" />
+            <ellipse cx="35" cy="50" rx="15" ry="20" fill="#059669" />
+            <ellipse cx="65" cy="50" rx="15" ry="20" fill="#10b981" />
+          </svg>
+
+          <svg className="absolute bottom-8 right-[15%] w-12 h-20 opacity-35 text-emerald-700" viewBox="0 0 100 150">
+            <path d="M50,150 L50,85" fill="none" stroke="#78350f" strokeWidth="3" strokeLinecap="round" />
+            <polygon points="50,20 15,90 85,90" fill="#065f46" />
+            <polygon points="50,45 25,100 75,100" fill="#059669" />
+          </svg>
+
+          {/* Drifting Clouds */}
+          <div className="absolute top-16 left-[25%] w-24 h-6 bg-white/30 rounded-full blur-[1.5px] animate-[pulse_6s_ease-in-out_infinite]" />
+          <div className="absolute top-8 right-[20%] w-36 h-8 bg-white/20 rounded-full blur-[2px] animate-[pulse_8s_ease-in-out_infinite]" />
+        </div>
+      )}
+
+      {equippedBackgroundId === 'bg_rooftop' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+          {/* Distant building layers (silhouettes in indigo/slate) */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 flex items-end justify-between opacity-30 gap-2 px-4">
+            <div className="w-16 h-36 bg-slate-800 rounded-t" />
+            <div className="w-20 h-40 bg-slate-800 rounded-t" />
+            <div className="w-12 h-28 bg-slate-800 rounded-t" />
+            <div className="w-24 h-48 bg-slate-800 rounded-t" />
+            <div className="w-16 h-32 bg-slate-800 rounded-t" />
+            <div className="w-20 h-44 bg-slate-800 rounded-t" />
+          </div>
+          {/* Midground building layers with warm glowing windows */}
+          <div className="absolute bottom-0 left-0 right-0 h-36 flex items-end justify-between opacity-60 gap-4 px-12">
+            <div className="w-24 h-28 bg-slate-700 rounded-t relative flex flex-col justify-around p-2 gap-1">
+              <div className="flex justify-between"><div className="w-2 h-2 bg-yellow-200 rounded-sm" /><div className="w-2 h-2 bg-yellow-200 rounded-sm" /></div>
+              <div className="flex justify-between"><div className="w-2 h-2 bg-yellow-200/50 rounded-sm" /><div className="w-2 h-2 bg-yellow-200 rounded-sm" /></div>
+            </div>
+            <div className="w-16 h-32 bg-slate-700 rounded-t relative flex flex-col justify-around p-2 gap-1">
+              <div className="w-2 h-2 bg-yellow-100 rounded-sm mx-auto" />
+              <div className="w-2 h-2 bg-yellow-100/30 rounded-sm mx-auto" />
+              <div className="w-2 h-2 bg-yellow-100 rounded-sm mx-auto" />
+            </div>
+            <div className="w-28 h-24 bg-slate-700 rounded-t relative flex flex-col justify-around p-3 gap-1">
+              <div className="flex justify-around"><div className="w-2.5 h-2.5 bg-yellow-200 rounded-sm" /><div className="w-2.5 h-2.5 bg-yellow-200/10 rounded-sm" /><div className="w-2.5 h-2.5 bg-yellow-200 rounded-sm" /></div>
+            </div>
+            <div className="w-20 h-36 bg-slate-700 rounded-t relative flex flex-col justify-around p-2 gap-1">
+              <div className="w-2 h-2 bg-yellow-200/80 rounded-sm" />
+              <div className="w-2 h-2 bg-yellow-200/90 rounded-sm" />
+            </div>
+          </div>
+          {/* Cute clothesline/radio tower element */}
+          <div className="absolute bottom-16 right-8 w-16 h-24 flex flex-col items-center justify-end">
+            <div className="w-1 h-20 bg-slate-600" />
+            <div className="absolute top-4 w-4 h-4 rounded-full bg-red-500/80 animate-ping" />
+            <div className="absolute top-5 w-2 h-2 rounded-full bg-red-600" />
+          </div>
+        </div>
+      )}
+
+      {equippedBackgroundId === 'bg_village' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+          {/* Soft rolling green hills */}
+          <div className="absolute bottom-0 w-[120%] -left-[10%] h-48 bg-emerald-950/40 rounded-t-[100px] blur-sm" />
+          <div className="absolute bottom-0 w-[110%] -right-[5%] h-36 bg-emerald-900/60 rounded-t-[120px]" />
+          
+          {/* Thatched hut and coconut tree silhouettes */}
+          <div className="absolute bottom-8 left-12 w-24 h-24 relative opacity-80">
+            {/* Straw roof */}
+            <div className="w-20 h-10 bg-amber-800/80 rounded-t-full border border-amber-950" />
+            {/* Clay wall body */}
+            <div className="w-16 h-12 bg-amber-700/70 border-x border-b border-amber-950 mx-auto" />
+          </div>
+
+          {/* Elegant flat vector Coconut Tree */}
+          <svg className="absolute bottom-8 right-16 w-24 h-40 opacity-80" viewBox="0 0 100 150">
+            {/* Curved trunk */}
+            <path d="M50,150 Q40,90 20,20" fill="none" stroke="#78350f" strokeWidth="5" strokeLinecap="round" />
+            {/* Palm fronds/leaves */}
+            <path d="M20,20 Q10,10 0,25" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
+            {/* Frond 2 */}
+            <path d="M20,20 Q20,5 35,15" fill="none" stroke="#059669" strokeWidth="4" strokeLinecap="round" />
+            {/* Frond 3 */}
+            <path d="M20,20 Q15,35 25,50" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
+            {/* Frond 4 */}
+            <path d="M20,20 Q5,30 -10,35" fill="none" stroke="#065f46" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+
+          {/* Flying white birds in sky */}
+          <svg className="absolute top-16 left-1/3 w-32 h-16 opacity-40 text-emerald-200" viewBox="0 0 200 100">
+            <path d="M20,40 Q30,30 40,40 Q50,30 60,40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M120,25 Q130,15 140,25 Q150,15 160,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
+
+      {equippedBackgroundId === 'bg_morning_sun' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 bg-gradient-to-b from-amber-200 via-orange-300 to-amber-950/20">
+          {/* Massive glowing morning sun */}
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-gradient-to-b from-yellow-300 to-orange-500 shadow-[0_0_80px_rgba(245,158,11,0.6)] flex items-center justify-center">
+            <div className="w-40 h-40 rounded-full bg-white/20 animate-pulse" />
+          </div>
+
+          {/* Mountain ranges */}
+          <div className="absolute bottom-0 w-[150%] -left-[25%] h-52 bg-amber-950/40 rounded-t-[140px] blur-[2px]" />
+          <div className="absolute bottom-0 w-[130%] -right-[15%] h-40 bg-amber-900/60 rounded-t-[100px]" />
+          <div className="absolute bottom-0 w-full h-24 bg-amber-800/80 rounded-t-[60px]" />
+
+          {/* Sunbeam vectors radiating */}
+          <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <line x1="50" y1="30" x2="0" y2="0" stroke="#fcd34d" strokeWidth="4" />
+            <line x1="50" y1="30" x2="100" y2="0" stroke="#fcd34d" strokeWidth="4" />
+            <line x1="50" y1="30" x2="0" y2="50" stroke="#fcd34d" strokeWidth="4" />
+            <line x1="50" y1="30" x2="100" y2="50" stroke="#fcd34d" strokeWidth="4" />
+            <line x1="50" y1="30" x2="25" y2="100" stroke="#fcd34d" strokeWidth="4" />
+            <line x1="50" y1="30" x2="75" y2="100" stroke="#fcd34d" strokeWidth="4" />
+          </svg>
+        </div>
+      )}
+
+      {equippedBackgroundId === 'bg_monsoon' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
+          {/* Dark heavy cloud SVGs at the top */}
+          <div className="absolute top-0 inset-x-0 h-40 opacity-40">
+            <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
+              <path d="M0,100 C100,50 200,120 300,70 C400,20 450,90 500,50 L500,0 L0,0 Z" fill="#475569" />
+              <path d="M0,80 C80,30 180,90 280,50 C380,10 440,70 500,30 L500,0 L0,0 Z" fill="#334155" />
+            </svg>
+          </div>
+
+          {/* Misty background silhouettes */}
+          <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-slate-800/30 rounded-t-[100px] blur-[3px]" />
+          <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-slate-700/40 rounded-t-[80px]" />
+
+          {/* Falling Rain drops */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(147,197,253,0.15)_100%)]" />
+        </div>
+      )}
+
+      {equippedBackgroundId === 'bg_zamindar_palace' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 bg-gradient-to-b from-[#1e1b4b] via-[#311042] to-[#581c87]/30">
+          {/* Royal Palace dome silhouette in background */}
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-48 h-48 relative opacity-40">
+            {/* Dome */}
+            <div className="w-32 h-24 bg-purple-950 border border-purple-900 rounded-t-full mx-auto" />
+            {/* Ornamental Spire */}
+            <div className="w-1.5 h-10 bg-amber-400 mx-auto" />
+            <div className="w-4 h-4 rounded-full bg-amber-400 mx-auto -mt-2 shadow-[0_0_10px_#f59e0b]" />
+          </div>
+
+          {/* Arch / Pillars framing the frame */}
+          <svg className="absolute inset-0 w-full h-full opacity-60 text-purple-950" viewBox="0 0 400 600" preserveAspectRatio="none">
+            {/* Left Column */}
+            <rect x="0" y="0" width="24" height="600" fill="currentColor" />
+            <path d="M24,100 C40,100 48,120 48,150 L48,600 L24,600 Z" fill="currentColor" opacity="0.8" />
+            {/* Right Column */}
+            <rect x="376" y="0" width="24" height="600" fill="currentColor" />
+            <path d="M376,100 C360,100 352,120 352,150 L352,600 L376,600 Z" fill="currentColor" opacity="0.8" />
+            {/* Arch at the top */}
+            <path d="M 0,0 L 400,0 L 400,100 Q 200,160 0,100 Z" fill="currentColor" />
+          </svg>
+
+          {/* Hanging golden lantern with real glow */}
+          <div className="absolute top-12 left-16 w-12 h-24 flex flex-col items-center">
+            {/* Cord */}
+            <div className="w-0.5 h-12 bg-amber-600" />
+            {/* Lantern cap */}
+            <div className="w-8 h-3 bg-amber-500 rounded-t-full border border-amber-800" />
+            {/* Glass with glow */}
+            <div className="w-6 h-8 bg-amber-300 rounded-b-md border border-amber-800 shadow-[0_0_20px_#f59e0b] relative flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_#fff] animate-ping" />
+              <div className="w-2 h-2 rounded-full bg-white absolute" />
+            </div>
+          </div>
+          
+          <div className="absolute top-12 right-16 w-12 h-24 flex flex-col items-center">
+            {/* Cord */}
+            <div className="w-0.5 h-12 bg-amber-600" />
+            {/* Lantern cap */}
+            <div className="w-8 h-3 bg-amber-500 rounded-t-full border border-amber-800" />
+            {/* Glass with glow */}
+            <div className="w-6 h-8 bg-amber-300 rounded-b-md border border-amber-800 shadow-[0_0_20px_#f59e0b] relative flex items-center justify-center">
+              <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_#fff] animate-ping" />
+              <div className="w-2 h-2 rounded-full bg-white absolute" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Premium glowing overlay and light beams */}
       <motion.div 
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-white/20 to-transparent blur-3xl pointer-events-none rounded-full" 
@@ -789,6 +1057,163 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                  </div>
                )
             }
+            else if (item.type === 'fence') {
+                const fenceId = item.fenceId || stats.equippedFenceId || 'fence_wooden';
+                return (
+                  <div key={item.id} className="absolute" style={{ zIndex: item.gridY + item.gridX, left: `${leftPercent}%`, top: `${topPercent}%`, transform: `translate(-50%, -100%) rotateZ(45deg) rotateX(-60deg)`, transformOrigin: 'bottom center' }}>
+                     {fenceId === 'fence_bamboo' && (() => {
+                        const level = stats.level || 1;
+                        return (
+                          <div className="relative w-12 h-14 flex items-end justify-center pointer-events-none">
+                            <div className="flex gap-[3px] items-end h-full">
+                              <div className="w-2.5 h-11 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+                              <div className="w-2.5 h-13 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+                              <div className="w-2.5 h-10 bg-gradient-to-t from-lime-800 via-lime-500 to-lime-300 rounded-md border border-lime-900" />
+                            </div>
+                            <div className="absolute bottom-3 left-0 right-0 h-1 bg-lime-900/80 rounded" />
+                            <div className="absolute bottom-7 left-0 right-0 h-1 bg-lime-900/80 rounded" />
+                            <div className="absolute bottom-0 w-10 h-1 bg-black/20 rounded-full blur-[1px] -z-10" />
+
+                            {/* Visual Evolution - Level-based sprouting & blooming ivy */}
+                            {level >= 4 && (
+                              <>
+                                {/* Level 4-6 Sprout: Cute little lime leaf shoots popping from the bamboo */}
+                                <div className="absolute -left-1 top-6 w-2.5 h-1.5 bg-lime-400 border border-lime-700 rounded-tr-full rounded-bl-full rotate-[15deg]" />
+                                <div className="absolute right-1 top-4 w-2 h-1 bg-lime-400 border border-lime-700 rounded-tl-full rounded-br-full -rotate-[25deg]" />
+                                <div className="absolute left-4 top-2 w-2 h-1 bg-lime-400 border border-lime-700 rounded-tr-full rounded-bl-full rotate-[40deg]" />
+                              </>
+                            )}
+                            {level >= 7 && (
+                              <>
+                                {/* Level 7-9 Bloom: Flowering Vines and Pink Blossom hanging from the bamboo */}
+                                <div className="absolute left-2 top-5 w-2 h-2 rounded-full bg-pink-400 border border-pink-600 shadow-sm" />
+                                <div className="absolute right-2 top-7 w-2 h-2 rounded-full bg-pink-400 border border-pink-600 shadow-sm" />
+                                <div className="absolute left-1 top-8 w-1.5 h-1.5 rounded-full bg-pink-300 border border-pink-500" />
+                                {/* Small trailing vine path */}
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 56">
+                                  <path d="M 12,28 Q 18,36 28,30 T 36,44" fill="none" stroke="#22c55e" strokeWidth="1" strokeLinecap="round" />
+                                </svg>
+                              </>
+                            )}
+                            {level >= 10 && (
+                              <>
+                                {/* Level 10+ Mythic: Glowing teal spirit lights / fireflies pulsing */}
+                                <div className="absolute -top-1 left-2 w-2 h-2 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+                                <div className="absolute top-8 right-0 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#22d3ee] animate-pulse delay-75" />
+                                <div className="absolute top-11 left-1 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#22d3ee] animate-pulse delay-150" />
+                                {/* Mystic golden line overlay on the bindings */}
+                                <div className="absolute bottom-3 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_4px_#22d3ee]" />
+                                <div className="absolute bottom-7 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_4px_#22d3ee]" />
+                              </>
+                            )}
+                          </div>
+                        );
+                     })()}
+                     {fenceId === 'fence_wooden' && (() => {
+                        const level = stats.level || 1;
+                        return (
+                          <div className="relative w-12 h-14 flex items-end justify-center pointer-events-none">
+                            <div className="flex gap-[3px] items-end h-full">
+                              <div className="relative w-2.5 h-10 bg-amber-700 border border-amber-950 rounded-b">
+                                <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+                              </div>
+                              <div className="relative w-2.5 h-12 bg-amber-700 border border-amber-950 rounded-b">
+                                <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+                              </div>
+                              <div className="relative w-2.5 h-10 bg-amber-700 border border-amber-950 rounded-b">
+                                <div className="absolute -top-1.5 left-0 right-0 h-0 w-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-amber-700" />
+                              </div>
+                            </div>
+                            <div className="absolute bottom-2.5 left-0 right-0 h-1.5 bg-amber-800 border-t border-b border-amber-950" />
+                            <div className="absolute bottom-7 left-0 right-0 h-1.5 bg-amber-800 border-t border-b border-amber-950" />
+                            <div className="absolute bottom-0 w-10 h-1 bg-black/20 rounded-full blur-[1px] -z-10" />
+
+                            {/* Visual Evolution - Level-based ivy & flower details */}
+                            {level >= 4 && (
+                              <>
+                                {/* Level 4-6 Sprout: Delicate green climbing leaf buds */}
+                                <div className="absolute left-1 bottom-4 w-2 h-2 rounded-full bg-emerald-500 border border-emerald-700" />
+                                <div className="absolute right-2 bottom-8 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-emerald-700" />
+                                <div className="absolute left-5 top-5 w-2 h-2 rounded-full bg-emerald-500 border border-emerald-700" />
+                              </>
+                            )}
+                            {level >= 7 && (
+                              <>
+                                {/* Level 7-9 Bloom: Flowering Ivy climbing the posts with bright yellow/orange blossoms */}
+                                <div className="absolute left-1 bottom-4 w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-600 shadow-sm flex items-center justify-center">
+                                  <div className="w-1 h-1 bg-white rounded-full" />
+                                </div>
+                                <div className="absolute right-1 bottom-7 w-2.5 h-2.5 rounded-full bg-amber-400 border border-amber-600 shadow-sm flex items-center justify-center">
+                                  <div className="w-1 h-1 bg-white rounded-full" />
+                                </div>
+                                <div className="absolute left-5 top-4 w-2 h-2 rounded-full bg-amber-300 border border-amber-500 shadow-sm" />
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 56">
+                                  <path d="M 8,42 C 14,35 12,20 24,18 C 30,17 32,10 38,12" fill="none" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round" />
+                                </svg>
+                              </>
+                            )}
+                            {level >= 10 && (
+                              <>
+                                {/* Level 10+ Mythic: Fairy lights hanging gracefully on the crossbeams */}
+                                <div className="absolute bottom-[13px] left-2 w-2 h-2 rounded-full bg-yellow-200 border border-yellow-400 shadow-[0_0_8px_#fef08a] animate-pulse" />
+                                <div className="absolute bottom-[13px] left-6 w-2 h-2 rounded-full bg-yellow-200 border border-yellow-400 shadow-[0_0_8px_#fef08a] animate-pulse delay-300" />
+                                <div className="absolute bottom-[31px] left-4 w-2 h-2 rounded-full bg-yellow-200 border border-yellow-400 shadow-[0_0_8px_#fef08a] animate-pulse delay-150" />
+                                <div className="absolute bottom-[31px] left-8 w-2 h-2 rounded-full bg-yellow-200 border border-yellow-400 shadow-[0_0_8px_#fef08a] animate-pulse delay-500" />
+                                {/* Hanging wire effect */}
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 56">
+                                  <path d="M 6,31 Q 12,36 18,31 T 30,31 T 42,31" fill="none" stroke="#4b5563" strokeWidth="0.8" strokeLinecap="round" />
+                                  <path d="M 6,13 Q 12,18 18,13 T 30,13 T 42,13" fill="none" stroke="#4b5563" strokeWidth="0.8" strokeLinecap="round" />
+                                </svg>
+                              </>
+                            )}
+                          </div>
+                        );
+                     })()}
+                     {fenceId === 'fence_clay_wall' && (() => {
+                        const level = stats.level || 1;
+                        return (
+                          <div className="relative w-12 h-12 flex items-end justify-center pointer-events-none">
+                            <div className="w-12 h-7 bg-gradient-to-t from-amber-900 to-amber-700 border border-amber-950 rounded-t-md shadow-[inset_0_1px_2px_rgba(255,255,255,0.2)] flex items-center justify-center">
+                              <div className="w-8 h-[2px] bg-amber-600/30 rounded absolute top-1.5" />
+                            </div>
+                            <div className="absolute bottom-0 w-12 h-1 bg-black/30 rounded-full blur-[1px] -z-10" />
+
+                            {/* Visual Evolution - Level-based textures, ivy and marigold/rose flowers */}
+                            {level >= 4 && (
+                              <>
+                                {/* Level 4-6 Sprout: Cute creeping moss & vine at the base */}
+                                <div className="absolute bottom-1 left-2 w-3 h-2 bg-emerald-600/80 rounded-full blur-[0.5px]" />
+                                <div className="absolute bottom-1.5 right-1 w-4 h-1.5 bg-emerald-500/90 rounded-full blur-[0.5px]" />
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 48">
+                                  <path d="M 4,44 Q 12,38 16,42 T 28,40" fill="none" stroke="#059669" strokeWidth="1" strokeLinecap="round" />
+                                </svg>
+                              </>
+                            )}
+                            {level >= 7 && (
+                              <>
+                                {/* Level 7-9 Bloom: Rich climbing roses (red/orange) and hanging vine details */}
+                                <div className="absolute left-2 top-6 w-2 h-2 rounded-full bg-rose-500 border border-rose-700 shadow-sm" />
+                                <div className="absolute right-3 top-5 w-2 h-2 rounded-full bg-rose-500 border border-rose-700 shadow-sm" />
+                                <div className="absolute left-6 top-7 w-1.5 h-1.5 rounded-full bg-rose-400 border border-rose-600 shadow-sm" />
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 48 48">
+                                  <path d="M 2,42 C 6,32 10,24 20,26 C 26,27 34,20 40,24" fill="none" stroke="#10b981" strokeWidth="1.2" strokeLinecap="round" />
+                                </svg>
+                              </>
+                            )}
+                            {level >= 10 && (
+                              <>
+                                {/* Level 10+ Mythic: Ancient gold runic glow markings and magical floating petals */}
+                                <div className="absolute left-1/2 -translate-x-1/2 bottom-3 text-[10px] text-amber-300 font-mono font-bold tracking-widest opacity-80 filter drop-shadow-[0_0_3px_#f59e0b] select-none animate-pulse">✨</div>
+                                <div className="absolute top-5 left-3 w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#f59e0b] animate-bounce" />
+                                <div className="absolute top-4 right-2 w-1 h-1 rounded-full bg-amber-300 shadow-[0_0_5px_#f59e0b] animate-bounce delay-150" />
+                              </>
+                            )}
+                          </div>
+                        );
+                     })()}
+                  </div>
+                )
+             }
             return null;
          })}
        </motion.div>

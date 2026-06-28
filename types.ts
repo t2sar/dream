@@ -193,6 +193,7 @@ export interface UserStats {
   equippedLeftDecorId?: string;
   equippedRightDecorId?: string;
   equippedSeasonalDecorId?: string;
+  anchorSlots?: Record<string, string | null>;
   isSimpleMode?: boolean;
   boostItemCounts?: Record<string, number>;
   claimedRewardIds?: string[];

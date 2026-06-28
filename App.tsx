@@ -3791,6 +3791,11 @@ function App() {
                   onBackdate={stableBackdate}
                   onSnoozeHabit={stableSnoozeHabit}
                   onMailboxClick={handleMailboxClick}
+                  onUpdateStats={(updatedFields) => {
+                    const merged = { ...extraStats, ...updatedFields };
+                    setExtraStats(merged);
+                    persistData(habits, logs, merged);
+                  }}
                 />
                 </React.Profiler>
 
