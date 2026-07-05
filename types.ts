@@ -146,6 +146,8 @@ export interface HabitLog {
 export interface CompanionUnlock {
   id: string;
   unlockedAt: string;
+  trustDays?: number;
+  lastVisitDate?: string;
 }
 
 export interface OrchardEntry {

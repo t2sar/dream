@@ -43,7 +43,7 @@ export const GardenCompanions: React.FC<GardenCompanionsProps> = ({ stats }) => 
         if (!comp) return null;
 
         return (
-          <CompanionCard key={id} companionId={id} />
+          <CompanionCard key={id} companionId={id} trustDays={stats.companions?.find(c => c.id === id)?.trustDays || 0} />
         );
       })}
     </div>
@@ -52,18 +52,33 @@ export const GardenCompanions: React.FC<GardenCompanionsProps> = ({ stats }) => 
 
 interface CompanionCardProps {
   companionId: string;
+  trustDays: number;
 }
 
-export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => {
+export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId, trustDays }) => {
+
+  let trustLevel = 1;
+  if (trustDays > 100) trustLevel = 6;
+  else if (trustDays > 70) trustLevel = 5;
+  else if (trustDays > 45) trustLevel = 4;
+  else if (trustDays > 25) trustLevel = 3;
+  else if (trustDays > 10) trustLevel = 2;
+
   const SvgComponent = CompanionAssetsDictionary[companionId];
   const [targetPos, setTargetPos] = useState<{ x: number, y: number, name?: string, status?: string } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isFleeing, setIsFleeing] = useState(false);
 
   useEffect(() => {
     // Only certain companions visit
     if (companionId === 'kaktadhua' || companionId === 'jonaki') return;
 
     const pickTarget = () => {
+      if (trustLevel < 2) {
+         setTargetPos(null);
+         return;
+      }
+      
       // Find all habit card nodes in the DOM
       const nodes = Array.from(document.querySelectorAll('.habit-card-visit-node')) as HTMLElement[];
       const container = containerRef.current?.closest('.inset-0') as HTMLElement; // The GardenCompanions parent
@@ -74,8 +89,15 @@ export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => 
         nodes.forEach((node) => {
            const status = node.getAttribute('data-status') || 'Normal';
            let weight = 1;
-           if (status === 'Dead' || status === 'Critical') weight = 10;
-           else if (status === 'Wilting') weight = 5;
+           
+           // Level 3+ Perk: Helpful Nudge - strongly prefers wilting/critical plants
+           if (trustLevel >= 3) {
+               if (status === 'Dead' || status === 'Critical') weight = 50;
+               else if (status === 'Wilting') weight = 20;
+           } else {
+               if (status === 'Dead' || status === 'Critical') weight = 3;
+               else if (status === 'Wilting') weight = 2;
+           }
            
            for (let i = 0; i < weight; i++) {
               weightedNodes.push(node);
@@ -104,7 +126,7 @@ export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => 
 
     const scheduleNext = () => {
       timerId = setTimeout(() => {
-        pickTarget();
+        if (!isFleeing) pickTarget();
         scheduleNext();
       }, 10000 + Math.random() * 8000);
     };
@@ -117,7 +139,28 @@ export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => 
     return () => {
       clearTimeout(timerId);
     };
-  }, [companionId]);
+  }, [companionId, trustLevel, isFleeing]);
+
+  useEffect(() => {
+    if (trustLevel >= 4) {
+      const handleMouseMove = (e: MouseEvent) => {
+        if (Math.random() > 0.95) { 
+           const container = containerRef.current?.closest('.inset-0') as HTMLElement;
+           if (container) {
+             const containerRect = container.getBoundingClientRect();
+             setTargetPos({ 
+               x: e.clientX - containerRect.left - 30, 
+               y: e.clientY - containerRect.top - 30, 
+               name: 'Cursor', 
+               status: 'Normal' 
+             });
+           }
+        }
+      };
+      document.addEventListener('mousemove', handleMouseMove);
+      return () => document.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [trustLevel]);
 
   if (!SvgComponent) return null;
   
@@ -203,8 +246,34 @@ export const CompanionCard: React.FC<CompanionCardProps> = ({ companionId }) => 
   return (
     <div 
       ref={containerRef}
-      className={`absolute ${appliedClass} w-16 h-16 z-20 group pointer-events-auto cursor-pointer`}
-      style={style}
+      onMouseEnter={() => {
+        if (trustLevel <= 1) {
+           setIsFleeing(true);
+           setTargetPos(null); // flee back to edge
+           setTimeout(() => setIsFleeing(false), 5000);
+        }
+      }}
+      onClick={() => {
+         if (trustLevel <= 2) {
+           setIsFleeing(true);
+           setTargetPos(null);
+           setTimeout(() => setIsFleeing(false), 5000);
+         } else if (trustLevel >= 3) {
+           // Happy animation
+           const el = containerRef.current;
+           if (el) {
+              el.style.transform = (el.style.transform || '') + ' scale(1.2) rotate(10deg)';
+              setTimeout(() => {
+                 if (el) el.style.transform = el.style.transform.replace(' scale(1.2) rotate(10deg)', '');
+              }, 300);
+           }
+         }
+      }}
+      className={`absolute ${appliedClass} w-16 h-16 z-20 group pointer-events-auto cursor-pointer ${isFleeing ? 'opacity-50' : ''}`}
+      style={{
+         ...style,
+         ...(trustLevel >= 6 ? { filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.6))' } : {})
+      }}
     >
       <div className={`relative w-full h-full ${isVisiting ? 'animate-companion-nuzzle' : (isFlyer ? 'animate-companion-float' : (isSitter ? 'animate-companion-bounce' : ''))}`}>
          {isFlyer && (

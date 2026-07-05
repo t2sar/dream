@@ -950,6 +950,43 @@ function App() {
     }, 2000); // 2 second delay for gentle entry after loading
   }, [dataLoading, user, extraStats, habits, logs, activeRestMode, dateKey]);
 
+
+  // Companion Daily Trust Logic
+  useEffect(() => {
+    if (dataLoading || !user) return;
+    const activeCompId = extraStats.activeCompanionId;
+    if (activeCompId) {
+      setExtraStats(prev => {
+        const companions = prev.companions || [];
+        const compIndex = companions.findIndex(c => c.id === activeCompId);
+        if (compIndex === -1) return prev;
+        
+        const comp = companions[compIndex];
+        if (comp.lastVisitDate === dateKey) return prev;
+
+        const newComps = [...companions];
+        const newTrustDays = (comp.trustDays || 0) + 1;
+        
+        // Level 5: Guardian - Nature's Shield (1 free streak freeze every 14 days)
+        let addedFreezes = 0;
+        if (newTrustDays >= 71 && newTrustDays % 14 === 0) {
+           addedFreezes = 1;
+        }
+
+        newComps[compIndex] = {
+          ...comp,
+          trustDays: newTrustDays,
+          lastVisitDate: dateKey
+        };
+        return { 
+          ...prev, 
+          companions: newComps,
+          streakFreezes: (prev.streakFreezes || 0) + addedFreezes 
+        };
+      });
+    }
+  }, [dataLoading, user, dateKey, extraStats.activeCompanionId]);
+
   // Process missed habits once per day
   useEffect(() => {
     if (dataLoading || habits.length === 0) return;
@@ -1867,12 +1904,30 @@ function App() {
   };
 
   const handleMailboxClick = () => {
-    // Only allow once per day/week, we check lastMailboxGiftDate
     const todayStr = new Date().toISOString().split("T")[0];
     if (extraStats.lastMailboxGiftDate === todayStr) {
-      // Already collected!
-      alert("The Mailbox is empty. Check back next week!");
+      alert("The Mailbox is empty. Check back later!");
       return;
+    }
+    
+    // Check if it's a Companion Foraged Gift (Level 4+)
+    let isCompanionGift = false;
+    let isRareFamiliarGift = false;
+    let companionName = "Your Companion";
+    if (extraStats.activeCompanionId && extraStats.companions) {
+       const activeComp = extraStats.companions.find(c => c.id === extraStats.activeCompanionId);
+       if (activeComp && (activeComp.trustDays || 0) >= 46) {
+          const trustDays = activeComp.trustDays || 0;
+          const todayHash = Math.floor(Date.now() / 86400000);
+          
+          if (trustDays >= 100 && todayHash % 14 === 0) {
+             isRareFamiliarGift = true;
+             companionName = activeComp.id.charAt(0).toUpperCase() + activeComp.id.slice(1);
+          } else if (todayHash % 5 === 0) {
+             isCompanionGift = true;
+             companionName = activeComp.id.charAt(0).toUpperCase() + activeComp.id.slice(1);
+          }
+       }
     }
 
     const letters = [
@@ -1905,8 +1960,17 @@ function App() {
     const habit = habits.find((h) => h.id === habitId);
     if (!habit || habit.plantStage !== "Fruiting Plant") return;
 
+    // Check for Level 6 Companion boost
+    let synergyMultiplier = 1;
+    if (extraStats.activeCompanionId && extraStats.companions) {
+       const activeComp = extraStats.companions.find(c => c.id === extraStats.activeCompanionId);
+       if (activeComp && (activeComp.trustDays || 0) >= 100) {
+          synergyMultiplier = 1.1;
+       }
+    }
+
     const diff = habit.difficulty || "medium";
-    const xpReward =
+    let xpReward =
       diff === "easy"
         ? 30
         : diff === "medium"
@@ -1914,7 +1978,7 @@ function App() {
           : diff === "hard"
             ? 80
             : 120;
-    const coinReward =
+    let coinReward =
       diff === "easy"
         ? 400
         : diff === "medium"
@@ -1922,6 +1986,9 @@ function App() {
           : diff === "hard"
             ? 1000
             : 1600;
+
+    xpReward = Math.floor(xpReward * synergyMultiplier);
+    coinReward = Math.floor(coinReward * synergyMultiplier);
 
     playHaptic("harvest");
     const newOrchard = [...(extraStats.orchard || [])];
@@ -3380,17 +3447,41 @@ function App() {
     );
   }
 
+  // Dynamic Ambient Background Colors based on time of day
+  const currentAppHour = new Date().getHours();
+  let ambientAppColors = ['var(--accent-mustard)', 'var(--accent-seafoam)', 'var(--accent-blush)', 'var(--accent-periwinkle)', 'var(--accent-coral)'];
+  
+  if (currentAppHour >= 5 && currentAppHour < 8) {
+    // Dawn: Oranges, Pinks, Yellows
+    ambientAppColors = ['#f97316', '#ec4899', '#f59e0b', '#eab308', '#f43f5e'];
+  } else if (currentAppHour >= 8 && currentAppHour < 17) {
+    // Day
+    ambientAppColors = ['var(--accent-mustard)', 'var(--accent-seafoam)', 'var(--accent-blush)', 'var(--accent-periwinkle)', 'var(--accent-coral)'];
+  } else if (currentAppHour >= 17 && currentAppHour < 19) {
+    // Sunset
+    ambientAppColors = ['#ea580c', '#c026d3', '#e11d48', '#d946ef', '#f97316'];
+  } else if (currentAppHour >= 19 && currentAppHour < 22) {
+    // Evening
+    ambientAppColors = ['#4338ca', '#6d28d9', '#312e81', '#4c1d95', '#3730a3'];
+  } else {
+    // Deep Night
+    ambientAppColors = ['#1e1b4b', '#312e81', '#0f172a', '#1e293b', '#172554'];
+  }
+
   return (
     <div 
       className="app-background-reset pb-24 md:pb-0 md:pl-28 transition-all relative overflow-hidden flex min-h-[100dvh]"
     >
-      {/* Playful Organic Ambience - Vibrant */}
+      {/* Playful Organic Ambience - Vibrant & Time-Reactive */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden mix-blend-normal opacity-100">
-        <div className="absolute top-[-10%] right-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-mustard) 0%, transparent 50%)' }} />
-        <div className="absolute top-[10%] left-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-seafoam) 0%, transparent 50%)' }} />
-        <div className="absolute bottom-[-10%] right-[5%] w-[70vw] h-[70vw] max-w-[700px] max-h-[700px] opacity-100 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-blush) 0%, transparent 50%)' }} />
-        <div className="absolute bottom-[-5%] left-[10%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-90 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-periwinkle) 0%, transparent 50%)' }} />
-        <div className="absolute top-[30%] right-[30%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 blur-3xl mix-blend-normal" style={{ background: 'radial-gradient(circle, var(--accent-coral) 0%, transparent 50%)' }} />
+        <div className="absolute top-[5%] right-[5%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 blur-[100px] rounded-full mix-blend-normal transition-colors duration-[5000ms] ease-in-out animate-ambient-drift" style={{ backgroundColor: ambientAppColors[0] }} />
+        <div className="absolute top-[20%] left-[0%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] opacity-70 blur-[100px] rounded-full mix-blend-normal transition-colors duration-[5000ms] ease-in-out animate-ambient-drift-reverse" style={{ backgroundColor: ambientAppColors[1] }} />
+        <div className="absolute bottom-[5%] right-[15%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] opacity-80 blur-[100px] rounded-full mix-blend-normal transition-colors duration-[5000ms] ease-in-out animate-ambient-drift-slow" style={{ backgroundColor: ambientAppColors[2] }} />
+        <div className="absolute bottom-[10%] left-[15%] w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] opacity-70 blur-[100px] rounded-full mix-blend-normal transition-colors duration-[5000ms] ease-in-out animate-ambient-drift" style={{ backgroundColor: ambientAppColors[3] }} />
+        <div className="absolute top-[40%] right-[40%] w-[35vw] h-[35vw] max-w-[350px] max-h-[350px] opacity-60 blur-[100px] rounded-full mix-blend-normal transition-colors duration-[5000ms] ease-in-out animate-ambient-drift-reverse" style={{ backgroundColor: ambientAppColors[4] }} />
+        
+        {/* Ethereal blur overlay to soften the floating gradient blobs */}
+        <div className="absolute inset-0 backdrop-blur-[80px]" />
       </div>
 
       {/* Sync Status Indicator (Absolute Top Right) */}

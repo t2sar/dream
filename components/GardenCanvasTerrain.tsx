@@ -25,13 +25,14 @@ interface GardenCanvasTerrainProps {
 
 interface CanvasItem {
   id: string;
-  type: 'plant' | 'fence' | 'pond' | 'companion' | 'npc';
+  type: 'plant' | 'fence' | 'pond' | 'companion' | 'npc' | 'terrain_detail';
   gridX: number;
   gridY: number;
   habit?: Habit; // For plants
   companionId?: string; // For companion
   npcType?: string; // For npc
   fenceId?: string; // For fence
+  detailType?: 'pebble' | 'leaf' | 'moss';
 }
 
 export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits, logs, stats, onWaterPlant, onMailboxClick }) => {
@@ -97,6 +98,14 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const parallaxTranslateY = useTransform(smoothY, [-0.5, 0.5], [-20, 20]);
   const skyTranslateX = useTransform(smoothX, [-0.5, 0.5], [40, -40]);
   const skyTranslateY = useTransform(smoothY, [-0.5, 0.5], [40, -40]);
+  
+  // Custom Parallax layers for backgrounds
+  const bgLayer1X = useTransform(smoothX, [-0.5, 0.5], [8, -8]);
+  const bgLayer1Y = useTransform(smoothY, [-0.5, 0.5], [8, -8]);
+  const bgLayer2X = useTransform(smoothX, [-0.5, 0.5], [20, -20]);
+  const bgLayer2Y = useTransform(smoothY, [-0.5, 0.5], [20, -20]);
+  const bgLayer3X = useTransform(smoothX, [-0.5, 0.5], [45, -45]);
+  const bgLayer3Y = useTransform(smoothY, [-0.5, 0.5], [45, -45]);
 
   const [hour, setHour] = useState(new Date().getHours());
   const [companionState, setCompanionState] = useState<{gridX: number, gridY: number, status: 'idle' | 'water_alert'}>({gridX: 4, gridY: 4, status: 'idle'});
@@ -359,8 +368,18 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
     }
     const hasPerfectWeek = consecutiveDaysHasLogs || (stats.perfectGardenDays ? stats.perfectGardenDays >= 7 : false);
     
+    // Level 4 Bonded Companion Gift chance (20% chance daily)
+    let hasCompanionGift = false;
+    if (stats.activeCompanionId && stats.companions) {
+       const activeComp = stats.companions.find(c => c.id === stats.activeCompanionId);
+       if (activeComp && (activeComp.trustDays || 0) >= 46) {
+          const todayHash = Math.floor(Date.now() / 86400000);
+          if (todayHash % 5 === 0) hasCompanionGift = true; // 20% chance
+       }
+    }
+    
     // Spawn mailbox fixed at grid (GRID_COLS - 2, 2)
-    items.push({ id: 'npc_mailbox', type: 'npc', npcType: hasPerfectWeek ? 'mailbox_raised' : 'mailbox_flat', gridX: GRID_COLS - 2, gridY: 2 });
+    items.push({ id: 'npc_mailbox', type: 'npc', npcType: (hasPerfectWeek || hasCompanionGift) ? 'mailbox_raised' : 'mailbox_flat', gridX: GRID_COLS - 2, gridY: 2 });
     occupied.add(`${GRID_COLS - 2},2`);
 
     // Pre-calculate spiral coordinates around the pond
@@ -459,6 +478,22 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
        }
     }
 
+    // 3. Terrain Details (Pebbles, leaves, moss scattered on empty tiles)
+    const detailTypes: ('pebble' | 'leaf' | 'moss')[] = ['pebble', 'leaf', 'moss'];
+    for (let x = 1; x < GRID_COLS - 1; x++) {
+       for (let y = 1; y < GRID_ROWS - 1; y++) {
+          if (!occupied.has(`${x},${y}`) && !pondCondition(x, y) && !perimeterCondition(x, y)) {
+             // 15% chance to spawn a terrain detail
+             // Use pseudo-random based on coordinates so they don't jitter on every render
+             const hash = Math.floor(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) * 1000;
+             if (Math.abs(hash) % 100 < 15) {
+                const detailType = detailTypes[Math.abs(hash) % detailTypes.length];
+                items.push({ id: `detail_${x}_${y}`, type: 'terrain_detail', gridX: x, gridY: y, detailType });
+             }
+          }
+       }
+    }
+
     return items;
   }, [habits, stats.perfectGardenDays, stats.equippedFenceId, stats.anchorSlots, logs, GRID_COLS, GRID_ROWS]);
 
@@ -499,18 +534,18 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
   const isNightMode = currentHour >= 22 || currentHour < 5;
 
   if (currentHour >= 5 && currentHour < 8) {
-    timeOverlay = "bg-gradient-to-tr from-orange-500/10 to-pink-500/5 mix-blend-overlay"; // Dawn
+    timeOverlay = "bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-orange-500/30 via-pink-500/10 to-transparent mix-blend-overlay"; // Dawn
     timeAtmosphere = <div className="absolute inset-0 bg-yellow-500/10 mix-blend-overlay pointer-events-none z-50" />;
   } else if (currentHour >= 8 && currentHour < 17) {
-    timeOverlay = "bg-gradient-to-b from-blue-300/10 to-transparent mix-blend-overlay"; // Day
+    timeOverlay = "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-100/20 via-blue-300/10 to-transparent mix-blend-overlay"; // Day
   } else if (currentHour >= 17 && currentHour < 19) {
-    timeOverlay = "bg-gradient-to-tr from-orange-600/20 to-purple-600/10 mix-blend-overlay"; // Sunset
+    timeOverlay = "bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-red-500/30 via-orange-500/20 to-purple-600/10 mix-blend-overlay"; // Sunset
     timeAtmosphere = <div className="absolute inset-0 bg-orange-500/10 mix-blend-overlay pointer-events-none z-50" />;
   } else if (isNightMode) {
-    timeOverlay = "bg-gradient-to-b from-indigo-900/30 to-slate-900/40 mix-blend-overlay"; // Deep Night
+    timeOverlay = "bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-800/30 via-slate-900/40 to-black/50 mix-blend-overlay"; // Deep Night
     timeAtmosphere = <div className="absolute inset-0 bg-blue-900/30 mix-blend-overlay pointer-events-none z-50" />;
   } else {
-    timeOverlay = "bg-gradient-to-b from-indigo-900/20 to-slate-900/30 mix-blend-overlay"; // Night/Evening
+    timeOverlay = "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900/30 to-black/40 mix-blend-overlay"; // Night/Evening
     timeAtmosphere = <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay pointer-events-none z-50" />;
   }
 
@@ -553,34 +588,39 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
       {equippedBackgroundId === 'bg_default' && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
           {/* Sun or Mist */}
-          {(seasonMonth === 11 || seasonMonth === 0) ? (
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-yellow-100/20 blur-xl" />
-          ) : (
-            <div className="absolute top-12 left-12 w-20 h-20 rounded-full bg-gradient-to-b from-yellow-100 to-yellow-300/40 blur-[1px] shadow-[0_0_30px_rgba(253,224,71,0.25)]" />
-          )}
+          <motion.div style={{ x: bgLayer3X, y: bgLayer3Y }} className="absolute inset-0 z-0">
+            {(seasonMonth === 11 || seasonMonth === 0) ? (
+              <div className="absolute top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full bg-yellow-100/20 blur-xl" />
+            ) : (
+              <div className="absolute top-12 left-12 w-20 h-20 rounded-full bg-gradient-to-b from-yellow-100 to-yellow-300/40 blur-[1px] shadow-[0_0_30px_rgba(253,224,71,0.25)]" />
+            )}
+            {/* Drifting Clouds */}
+            <div className="absolute top-16 left-[25%] w-24 h-6 bg-white/30 rounded-full blur-[1.5px] animate-[pulse_6s_ease-in-out_infinite]" />
+            <div className="absolute top-8 right-[20%] w-36 h-8 bg-white/20 rounded-full blur-[2px] animate-[pulse_8s_ease-in-out_infinite]" />
+          </motion.div>
 
-          {/* Overlapping Rolling Hills */}
-          <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-emerald-800/15 rounded-t-[120px] blur-[1px]" />
-          <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-emerald-700/25 rounded-t-[100px]" />
-          <div className="absolute bottom-0 w-full h-16 bg-emerald-600/35 rounded-t-[60px]" />
+          {/* Overlapping Rolling Hills & Trees */}
+          <motion.div style={{ x: bgLayer2X, y: bgLayer2Y }} className="absolute inset-0 z-10">
+            <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-emerald-800/15 rounded-t-[120px] blur-[1px]" />
+            
+            <svg className="absolute bottom-12 left-[12%] w-16 h-28 opacity-40 text-emerald-800" viewBox="0 0 100 150">
+              <path d="M50,150 L50,70" fill="none" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
+              <ellipse cx="50" cy="55" rx="30" ry="40" fill="#047857" />
+              <ellipse cx="35" cy="50" rx="15" ry="20" fill="#059669" />
+              <ellipse cx="65" cy="50" rx="15" ry="20" fill="#10b981" />
+            </svg>
+          </motion.div>
 
-          {/* Gentle Flat-styled Trees */}
-          <svg className="absolute bottom-12 left-[12%] w-16 h-28 opacity-40 text-emerald-800" viewBox="0 0 100 150">
-            <path d="M50,150 L50,70" fill="none" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
-            <ellipse cx="50" cy="55" rx="30" ry="40" fill="#047857" />
-            <ellipse cx="35" cy="50" rx="15" ry="20" fill="#059669" />
-            <ellipse cx="65" cy="50" rx="15" ry="20" fill="#10b981" />
-          </svg>
+          <motion.div style={{ x: bgLayer1X, y: bgLayer1Y }} className="absolute inset-0 z-20">
+            <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-emerald-700/25 rounded-t-[100px]" />
+            <div className="absolute bottom-0 w-full h-16 bg-emerald-600/35 rounded-t-[60px]" />
 
-          <svg className="absolute bottom-8 right-[15%] w-12 h-20 opacity-35 text-emerald-700" viewBox="0 0 100 150">
-            <path d="M50,150 L50,85" fill="none" stroke="#78350f" strokeWidth="3" strokeLinecap="round" />
-            <polygon points="50,20 15,90 85,90" fill="#065f46" />
-            <polygon points="50,45 25,100 75,100" fill="#059669" />
-          </svg>
-
-          {/* Drifting Clouds */}
-          <div className="absolute top-16 left-[25%] w-24 h-6 bg-white/30 rounded-full blur-[1.5px] animate-[pulse_6s_ease-in-out_infinite]" />
-          <div className="absolute top-8 right-[20%] w-36 h-8 bg-white/20 rounded-full blur-[2px] animate-[pulse_8s_ease-in-out_infinite]" />
+            <svg className="absolute bottom-8 right-[15%] w-12 h-20 opacity-35 text-emerald-700" viewBox="0 0 100 150">
+              <path d="M50,150 L50,85" fill="none" stroke="#78350f" strokeWidth="3" strokeLinecap="round" />
+              <polygon points="50,20 15,90 85,90" fill="#065f46" />
+              <polygon points="50,45 25,100 75,100" fill="#059669" />
+            </svg>
+          </motion.div>
         </div>
       )}
 
@@ -625,80 +665,90 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
 
       {equippedBackgroundId === 'bg_village' && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
-          {/* Soft rolling green hills */}
-          <div className="absolute bottom-0 w-[120%] -left-[10%] h-48 bg-emerald-950/40 rounded-t-[100px] blur-sm" />
-          <div className="absolute bottom-0 w-[110%] -right-[5%] h-36 bg-emerald-900/60 rounded-t-[120px]" />
-          
-          {/* Thatched hut and coconut tree silhouettes */}
-          <div className="absolute bottom-8 left-12 w-24 h-24 relative opacity-80">
-            {/* Straw roof */}
-            <div className="w-20 h-10 bg-amber-800/80 rounded-t-full border border-amber-950" />
-            {/* Clay wall body */}
-            <div className="w-16 h-12 bg-amber-700/70 border-x border-b border-amber-950 mx-auto" />
-          </div>
+          {/* Flying white birds in sky & far hills */}
+          <motion.div style={{ x: bgLayer3X, y: bgLayer3Y }} className="absolute inset-0 z-0">
+            <div className="absolute bottom-0 w-[120%] -left-[10%] h-48 bg-emerald-950/40 rounded-t-[100px] blur-sm" />
+            <svg className="absolute top-16 left-1/3 w-32 h-16 opacity-40 text-emerald-200" viewBox="0 0 200 100">
+              <path d="M20,40 Q30,30 40,40 Q50,30 60,40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M120,25 Q130,15 140,25 Q150,15 160,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </motion.div>
 
-          {/* Elegant flat vector Coconut Tree */}
-          <svg className="absolute bottom-8 right-16 w-24 h-40 opacity-80" viewBox="0 0 100 150">
-            {/* Curved trunk */}
-            <path d="M50,150 Q40,90 20,20" fill="none" stroke="#78350f" strokeWidth="5" strokeLinecap="round" />
-            {/* Palm fronds/leaves */}
-            <path d="M20,20 Q10,10 0,25" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
-            {/* Frond 2 */}
-            <path d="M20,20 Q20,5 35,15" fill="none" stroke="#059669" strokeWidth="4" strokeLinecap="round" />
-            {/* Frond 3 */}
-            <path d="M20,20 Q15,35 25,50" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
-            {/* Frond 4 */}
-            <path d="M20,20 Q5,30 -10,35" fill="none" stroke="#065f46" strokeWidth="4" strokeLinecap="round" />
-          </svg>
+          {/* Mid hill */}
+          <motion.div style={{ x: bgLayer2X, y: bgLayer2Y }} className="absolute inset-0 z-10">
+            <div className="absolute bottom-0 w-[110%] -right-[5%] h-36 bg-emerald-900/60 rounded-t-[120px]" />
+          </motion.div>
 
-          {/* Flying white birds in sky */}
-          <svg className="absolute top-16 left-1/3 w-32 h-16 opacity-40 text-emerald-200" viewBox="0 0 200 100">
-            <path d="M20,40 Q30,30 40,40 Q50,30 60,40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <path d="M120,25 Q130,15 140,25 Q150,15 160,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          {/* Thatched hut and coconut tree silhouettes (Foreground) */}
+          <motion.div style={{ x: bgLayer1X, y: bgLayer1Y }} className="absolute inset-0 z-20">
+            <div className="absolute bottom-8 left-12 w-24 h-24 relative opacity-80">
+              <div className="w-20 h-10 bg-amber-800/80 rounded-t-full border border-amber-950" />
+              <div className="w-16 h-12 bg-amber-700/70 border-x border-b border-amber-950 mx-auto" />
+            </div>
+
+            <svg className="absolute bottom-8 right-16 w-24 h-40 opacity-80" viewBox="0 0 100 150">
+              <path d="M50,150 Q40,90 20,20" fill="none" stroke="#78350f" strokeWidth="5" strokeLinecap="round" />
+              <path d="M20,20 Q10,10 0,25" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
+              <path d="M20,20 Q20,5 35,15" fill="none" stroke="#059669" strokeWidth="4" strokeLinecap="round" />
+              <path d="M20,20 Q15,35 25,50" fill="none" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
+              <path d="M20,20 Q5,30 -10,35" fill="none" stroke="#065f46" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </motion.div>
         </div>
       )}
 
       {equippedBackgroundId === 'bg_morning_sun' && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0 bg-gradient-to-b from-amber-200 via-orange-300 to-amber-950/20">
-          {/* Massive glowing morning sun */}
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-gradient-to-b from-yellow-300 to-orange-500 shadow-[0_0_80px_rgba(245,158,11,0.6)] flex items-center justify-center">
-            <div className="w-40 h-40 rounded-full bg-white/20 animate-pulse" />
-          </div>
+          {/* Massive glowing morning sun & sunbeams */}
+          <motion.div style={{ x: bgLayer3X, y: bgLayer3Y }} className="absolute inset-0 z-0">
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-gradient-to-b from-yellow-300 to-orange-500 shadow-[0_0_80px_rgba(245,158,11,0.6)] flex items-center justify-center">
+              <div className="w-40 h-40 rounded-full bg-white/20 animate-pulse" />
+            </div>
+            <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <line x1="50" y1="30" x2="0" y2="0" stroke="#fcd34d" strokeWidth="4" />
+              <line x1="50" y1="30" x2="100" y2="0" stroke="#fcd34d" strokeWidth="4" />
+              <line x1="50" y1="30" x2="0" y2="50" stroke="#fcd34d" strokeWidth="4" />
+              <line x1="50" y1="30" x2="100" y2="50" stroke="#fcd34d" strokeWidth="4" />
+              <line x1="50" y1="30" x2="25" y2="100" stroke="#fcd34d" strokeWidth="4" />
+              <line x1="50" y1="30" x2="75" y2="100" stroke="#fcd34d" strokeWidth="4" />
+            </svg>
+          </motion.div>
 
-          {/* Mountain ranges */}
-          <div className="absolute bottom-0 w-[150%] -left-[25%] h-52 bg-amber-950/40 rounded-t-[140px] blur-[2px]" />
-          <div className="absolute bottom-0 w-[130%] -right-[15%] h-40 bg-amber-900/60 rounded-t-[100px]" />
-          <div className="absolute bottom-0 w-full h-24 bg-amber-800/80 rounded-t-[60px]" />
+          {/* Far Mountains */}
+          <motion.div style={{ x: bgLayer2X, y: bgLayer2Y }} className="absolute inset-0 z-10">
+            <div className="absolute bottom-0 w-[150%] -left-[25%] h-52 bg-amber-950/40 rounded-t-[140px] blur-[2px]" />
+          </motion.div>
 
-          {/* Sunbeam vectors radiating */}
-          <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line x1="50" y1="30" x2="0" y2="0" stroke="#fcd34d" strokeWidth="4" />
-            <line x1="50" y1="30" x2="100" y2="0" stroke="#fcd34d" strokeWidth="4" />
-            <line x1="50" y1="30" x2="0" y2="50" stroke="#fcd34d" strokeWidth="4" />
-            <line x1="50" y1="30" x2="100" y2="50" stroke="#fcd34d" strokeWidth="4" />
-            <line x1="50" y1="30" x2="25" y2="100" stroke="#fcd34d" strokeWidth="4" />
-            <line x1="50" y1="30" x2="75" y2="100" stroke="#fcd34d" strokeWidth="4" />
-          </svg>
+          {/* Mid & Near Mountains */}
+          <motion.div style={{ x: bgLayer1X, y: bgLayer1Y }} className="absolute inset-0 z-20">
+            <div className="absolute bottom-0 w-[130%] -right-[15%] h-40 bg-amber-900/60 rounded-t-[100px]" />
+            <div className="absolute bottom-0 w-full h-24 bg-amber-800/80 rounded-t-[60px]" />
+          </motion.div>
         </div>
       )}
 
       {equippedBackgroundId === 'bg_monsoon' && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
           {/* Dark heavy cloud SVGs at the top */}
-          <div className="absolute top-0 inset-x-0 h-40 opacity-40">
-            <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
-              <path d="M0,100 C100,50 200,120 300,70 C400,20 450,90 500,50 L500,0 L0,0 Z" fill="#475569" />
-              <path d="M0,80 C80,30 180,90 280,50 C380,10 440,70 500,30 L500,0 L0,0 Z" fill="#334155" />
-            </svg>
-          </div>
+          <motion.div style={{ x: bgLayer3X, y: bgLayer3Y }} className="absolute inset-0 z-0 opacity-40">
+            <div className="absolute top-0 inset-x-0 h-40">
+              <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
+                <path d="M0,100 C100,50 200,120 300,70 C400,20 450,90 500,50 L500,0 L0,0 Z" fill="#475569" />
+                <path d="M0,80 C80,30 180,90 280,50 C380,10 440,70 500,30 L500,0 L0,0 Z" fill="#334155" />
+              </svg>
+            </div>
+          </motion.div>
 
           {/* Misty background silhouettes */}
-          <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-slate-800/30 rounded-t-[100px] blur-[3px]" />
-          <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-slate-700/40 rounded-t-[80px]" />
+          <motion.div style={{ x: bgLayer2X, y: bgLayer2Y }} className="absolute inset-0 z-10">
+            <div className="absolute bottom-0 w-[140%] -left-[20%] h-44 bg-slate-800/30 rounded-t-[100px] blur-[3px]" />
+          </motion.div>
+          <motion.div style={{ x: bgLayer1X, y: bgLayer1Y }} className="absolute inset-0 z-20">
+            <div className="absolute bottom-0 w-[110%] -right-[5%] h-32 bg-slate-700/40 rounded-t-[80px]" />
+          </motion.div>
 
           {/* Falling Rain drops */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(147,197,253,0.15)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(147,197,253,0.15)_100%)] z-30" />
         </div>
       )}
 
@@ -958,19 +1008,22 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                        </svg>
                     )}
 
-                    <div className="relative w-28 h-36 flex flex-col items-center justify-end cursor-pointer group" onClick={() => onWaterPlant(item.habit!.id)}>
-                      <div className="absolute inset-x-0 bottom-1 w-full h-[120%] z-10 transition-transform group-hover:scale-[1.05] origin-bottom overflow-hidden" style={{ clipPath: 'inset(0 0 15% 0)' }}>
-                        <PlantIcon 
-                           plantType={item.habit.plantType} 
-                           stage={item.habit.plantStage} 
-                           status={item.habit.plantStatus} 
-                           health={item.habit.plantHealth}
+                                        <div className="relative w-28 h-36 flex flex-col items-center justify-end cursor-pointer group" onClick={() => onWaterPlant(item.habit!.id)}>
+                      {/* Glow effect behind the plant on hover */}
+                      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 blur-xl rounded-full transition-all duration-300 pointer-events-none z-0" />
+                      
+                      <div className="absolute inset-x-0 bottom-1 w-full h-[120%] z-10 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:scale-110 origin-bottom" style={{ clipPath: 'inset(-20% -20% 15% -20%)' }}>
+                        <PlantIcon
+                            plantType={item.habit.plantType}
+                            stage={item.habit.plantStage}
+                            status={item.habit.plantStatus}
+                            health={item.habit.plantHealth}
                            isLegendary={item.habit.isLegendary}
                            isArchived={item.habit.isArchived}
-                           className={`w-full h-full absolute top-[10%] drop-shadow-xl object-contain origin-bottom animate-breeze ${isNightMode ? 'brightness-75 saturate-75' : ''}`} 
-                        />
+                           className={`w-full h-full absolute top-[10%] drop-shadow-xl group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] group-hover:brightness-110 object-contain origin-bottom animate-breeze transition-all duration-300 ${isNightMode ? 'brightness-75 saturate-75' : ''}`} 
+                         />
                       </div>
-                      <div className={`bg-black/30 blur-[3px] transition-all duration-1000 w-16 h-4 absolute bottom-0 z-0 rounded-full`} />
+                      <div className={`bg-black/30 group-hover:bg-black/40 group-hover:scale-90 blur-[3px] transition-all duration-300 w-16 h-4 absolute bottom-0 z-0 rounded-full`} />
                     </div>
                  </div>
                )
@@ -1213,7 +1266,21 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
                      })()}
                   </div>
                 )
-             }
+             } else if (item.type === 'terrain_detail') {
+                return (
+                  <div key={item.id} className="absolute pointer-events-none" style={{ zIndex: 0, left: `${leftPercent}%`, top: `${topPercent}%`, transform: 'translate(-50%, -50%) rotateZ(45deg) rotateX(-60deg)' }}>
+                     {item.detailType === 'pebble' && (
+                        <div className="w-1.5 h-1 bg-slate-400/80 rounded-[40%] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.2)] mix-blend-overlay rotate-12" />
+                     )}
+                     {item.detailType === 'leaf' && (
+                        <div className="w-2 h-1 bg-emerald-700/60 rounded-full rounded-tr-[1px] shadow-sm mix-blend-overlay rotate-[35deg]" />
+                     )}
+                     {item.detailType === 'moss' && (
+                        <div className="w-3 h-2 bg-emerald-600/40 rounded-full blur-[0.5px] mix-blend-overlay" />
+                     )}
+                  </div>
+                );
+            }
             return null;
          })}
        </motion.div>
@@ -1221,6 +1288,14 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
        </div>
        </TransformComponent>
       </TransformWrapper>
+      
+      {/* Subtle Paper-Grain / Organic Noise Overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-[90] opacity-[0.06] mix-blend-soft-light" 
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
       
       <AnimatePresence>
         {showMilestoneAnimation && (

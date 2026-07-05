@@ -181,6 +181,34 @@ export function GardenShop({ stats, onBuyItem, onEquipItem, onEquipCompanion }: 
                   </div>
                   <h4 className="font-extrabold font-display text-primary-anchor text-sm mb-0.5">{showDetails ? comp.name : '???'}</h4>
                   <h5 className="font-bold text-[10px] text-accent-seafoam mb-2 uppercase tracking-wide">{showDetails ? comp.banglaName : 'Unknown'}</h5>
+                  {isUnlocked && (
+                     <div className="mb-2 w-full text-left bg-surface/50 rounded-xl p-2 border border-surface-alt">
+                        {(() => {
+                           const trustDays = stats.companions?.find(c => c.id === comp.id)?.trustDays || 0;
+                           let trustLevel = 1;
+                           let trustLabel = "Shy / Wild";
+                           let nextGoal = 11;
+                           if (trustDays > 100) { trustLevel = 6; trustLabel = "Soulbound Familiar"; nextGoal = 0; }
+                           else if (trustDays > 70) { trustLevel = 5; trustLabel = "Guardian"; nextGoal = 101; }
+                           else if (trustDays > 45) { trustLevel = 4; trustLabel = "Bonded"; nextGoal = 71; }
+                           else if (trustDays > 25) { trustLevel = 3; trustLabel = "Comfortable"; nextGoal = 46; }
+                           else if (trustDays > 10) { trustLevel = 2; trustLabel = "Curious"; nextGoal = 26; }
+                           
+                           return (
+                             <>
+                               <div className="flex justify-between items-center mb-1">
+                                 <span className="text-[10px] font-bold text-primary-anchor uppercase">Trust Lv.{trustLevel}</span>
+                                 <span className="text-[9px] font-bold text-accent-seafoam bg-accent-seafoam/10 px-1.5 py-0.5 rounded-sm">{trustLabel}</span>
+                               </div>
+                               <div className="w-full bg-surface-alt rounded-full h-1.5">
+                                 <div className="bg-accent-mustard h-1.5 rounded-full" style={{ width: `${nextGoal === 0 ? 100 : Math.min(100, (trustDays / nextGoal) * 100)}%` }}></div>
+                               </div>
+                               <div className="text-[9px] text-text-muted mt-1 text-right">{trustDays} Days {nextGoal > 0 ? `/ ${nextGoal}` : '+'}</div>
+                             </>
+                           );
+                        })()}
+                     </div>
+                  )}
                   <p className="text-[11px] text-text-muted font-medium leading-tight md:block hidden mb-3">
                     {isUnlocked ? `Unlocked: ${comp.unlockConditionStr}` : (showDetails ? `Locked (${comp.unlockConditionStr})` : 'Condition locked')}
                   </p>

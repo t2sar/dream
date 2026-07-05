@@ -297,10 +297,10 @@
 @keyframes breathe {
   0%,
   100% {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.03) translateY(-2px);
   }
 }
 
@@ -653,3 +653,38 @@
   animation: sheen-swipe 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
+
+@keyframes ambient-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(5vw, -5vh) scale(1.05); }
+  66% { transform: translate(-3vw, 4vh) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes ambient-drift-reverse {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-4vw, 6vh) scale(1.02); }
+  66% { transform: translate(5vw, -3vh) scale(0.98); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-ambient-drift {
+  animation: ambient-drift 20s ease-in-out infinite;
+}
+
+.animate-ambient-drift-reverse {
+  animation: ambient-drift-reverse 25s ease-in-out infinite;
+}
+
+.animate-ambient-drift-slow {
+  animation: ambient-drift 30s ease-in-out infinite reverse;
+}
+
+@keyframes breeze {
+  0%, 100% { transform: rotate(-3deg) scale(1); }
+  50% { transform: rotate(4deg) scale(1.02) translateY(-1px); }
+}
+.animate-breeze {
+  animation: breeze 7s ease-in-out infinite;
+  transform-origin: bottom center;
+}

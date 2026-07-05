@@ -972,6 +972,32 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
 
   const plantsNeedingWater = scheduled.filter(h => (h.plantHealth ?? 100) >= 50);
 
+  
+  const gridAmbientDetails = React.useMemo(() => {
+    return Array.from({ length: 15 }).map((_, i) => {
+      // Use index to seed pseudo-randomness so it stays stable across renders
+      const pseudoRandom = (seed: number) => {
+         const x = Math.sin(seed++) * 10000;
+         return x - Math.floor(x);
+      };
+      
+      const r1 = pseudoRandom(i * 10);
+      const r2 = pseudoRandom(i * 10 + 1);
+      const r3 = pseudoRandom(i * 10 + 2);
+      const r4 = pseudoRandom(i * 10 + 3);
+
+      const types = ['pebble', 'leaf', 'moss'] as const;
+      return {
+        id: `ambient-${i}`,
+        type: types[Math.floor(r1 * types.length)],
+        top: `${r2 * 90 + 5}%`,
+        left: `${r3 * 90 + 5}%`,
+        scale: 0.5 + r4 * 1.5,
+        rotation: r1 * 360,
+      };
+    });
+  }, []);
+
   const getUrgencyText = (habit: Habit) => {
     if (habit.plantHealth === 0) return 'Dead';
     if ((habit.plantHealth ?? 100) < 25) return 'Critical';
@@ -1481,7 +1507,21 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
         )}
 
         {habits.length > 0 && (
-          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 items-stretch content-start">
+          <motion.div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 items-stretch content-start relative z-10">
+            {/* Grid Breakers / Ambient Detail Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-[32px] -m-4 p-4">
+              {gridAmbientDetails.map((detail) => (
+                <div 
+                  key={detail.id}
+                  className="absolute mix-blend-overlay opacity-60 hover:opacity-100 transition-all duration-1000 ease-out hover:scale-150 group"
+                  style={{ top: detail.top, left: detail.left, transform: `scale(${detail.scale}) rotate(${detail.rotation}deg)` }}
+                >
+                  {detail.type === 'pebble' && <div className="w-3 h-2 bg-slate-400/50 rounded-[40%] shadow-[inset_0_-1px_1px_rgba(0,0,0,0.1)] group-hover:bg-slate-300/80 transition-colors duration-500" />}
+                  {detail.type === 'leaf' && <div className="w-4 h-2 bg-emerald-700/40 rounded-full rounded-tr-[1px] group-hover:bg-emerald-500/60 transition-colors duration-500" />}
+                  {detail.type === 'moss' && <div className="w-5 h-3 bg-emerald-600/30 rounded-full blur-[1px] group-hover:bg-emerald-400/50 transition-colors duration-500" />}
+                </div>
+              ))}
+            </div>
             <AnimatePresence mode="popLayout">
             {(() => {
                let globalIndex = 0;
@@ -2132,7 +2172,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
         scale: 1, y: 0, borderColor: "", boxShadow: "", backgroundColor: "" 
       }}
       transition={justCompleted ? { duration: 0.8, type: "spring", bounce: 0.5 } : { }}
-      className={`${cardBg} rounded-2xl p-4 flex flex-col justify-between group transition-transform duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card premium-shadow bg-clip-padding`}
+      className={`${cardBg} rounded-2xl p-3 flex flex-col justify-between group transition-all duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card premium-shadow bg-clip-padding hover:-translate-y-1 hover:scale-[1.02] hover:z-20 hover:shadow-[0_8px_30px_rgba(45,212,191,0.15)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]`}
     >
       {sheenActive && (
         <div className="sheen-layer sheen-active" />
@@ -2244,7 +2284,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
              {/* Premium Glass Showcase Container for Plant Icon */}
              <div 
                onClick={() => setShowAgeInfo(!showAgeInfo)} 
-               className="w-[74px] h-[92px] shrink-0 flex flex-col items-center justify-end relative group cursor-pointer bg-gradient-to-b from-slate-900/10 to-slate-900/5 dark:from-white/10 dark:to-white/5 border border-slate-900/15 dark:border-white/15 rounded-xl p-1 shadow-inner transition-all duration-300 hover:scale-[1.03] active:scale-95 pt-1 overflow-hidden"
+               className="w-[64px] h-[80px] shrink-0 flex flex-col items-center justify-end relative group cursor-pointer bg-gradient-to-b from-slate-900/10 to-slate-900/5 dark:from-white/10 dark:to-white/5 border border-slate-900/15 dark:border-white/15 rounded-xl p-1 shadow-inner transition-all duration-300 hover:scale-[1.03] active:scale-95 pt-1 overflow-hidden"
              >
                {/* Ambient grid background pattern inside display case */}
                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:8px_8px] pointer-events-none" />
@@ -2284,7 +2324,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                    </motion.div>
                  )}
                </AnimatePresence>
-               <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-16 h-20 absolute bottom-[8%] z-10 drop-shadow-md animate-breathe transform-gpu will-change-transform group-hover:scale-[1.05] transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-105' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'opacity-95' : ''}`} />
+               <PlantIcon plantType={habit.plantType} stage={habit.plantStage} status={habit.plantStatus} isPrivate={habit.isPrivate} health={habit.plantHealth} isLegendary={habit.isLegendary} isArchived={habit.isArchived} className={`w-14 h-16 absolute bottom-[8%] z-10 drop-shadow-md animate-breathe transform-gpu will-change-transform group-hover:scale-[1.05] transition-transform ${isSlipped ? 'opacity-80 grayscale-[0.5]' : ''} ${canHarvest ? 'animate-bounce drop-shadow-sm scale-105' : ''} ${habit.plantStage === 'Fruiting Plant' && !canHarvest ? 'opacity-95' : ''}`} />
                {/* Position custom pot exactly overlapping the base */}
                {renderPot(equippedPotId, 'absolute bottom-[12%] inset-x-3.5 h-3 z-20')}
                {/* Elliptical shadow under the plant */}
@@ -2317,7 +2357,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                     })()}
                  </div>
 
-                 <h4 className="font-extrabold text-primary-text text-[13px] lg:text-[14px] capitalize tracking-tight leading-snug truncate mt-0.5 flex items-center gap-1.5">
+                 <h4 className="font-extrabold text-primary-text text-[12px] lg:text-[13px] capitalize tracking-tight leading-snug truncate mt-0.5 flex items-center gap-1.5">
                    <span className="truncate max-w-[130px] sm:max-w-none">{habit.type === 'avoid' && habit.isPrivate ? 'Protected' : habit.name}</span>
                    {isFrozen && (
                      <div title="Streak Protected" className="bg-[#E0F7FA]/20 text-[#00BCD4] p-0.5 rounded-full ring-1 ring-[#00BCD4]/30 shadow-[0_0_8px_rgba(0,188,212,0.3)]">
@@ -2501,7 +2541,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                       if (isSlipped && onUndo) onUndo();
                       else if (!isSlipped) onWater();
                     }} 
-                    className={`flex-1 py-2 px-3 min-h-[38px] h-[38px] rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[var(--primary-anchor)] text-[var(--bg-base)] border border-transparent hover:opacity-90 shadow-md'}`}
+                    className={`flex-1 py-2 px-3 min-h-[38px] h-[38px] rounded-xl font-extrabold text-xs tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center gap-1.5 ${isSlipped ? 'bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10' : isCompleted ? buttonBg + ' ' + buttonHover : 'bg-[var(--primary-anchor)] text-[var(--bg-base)] border border-transparent hover:opacity-90 shadow-md'}`}
                  >
                     {habit.type === 'avoid' ? <ShieldAlert className="w-4 h-4" /> : isSlipped ? <AlertCircle className="w-4 h-4" /> : <Droplet className="w-4 h-4" />}
                     <span className="truncate">{getDisplayButtonText()}</span>
@@ -2509,7 +2549,7 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
                  {!isCompleted && !isSlipped && habit.type !== 'avoid' && onSlip && (
                    <button
                      onClick={() => onSlip()}
-                     className="px-3 py-2 min-h-[38px] h-[38px] flex-1 rounded-xl font-extrabold text-xs lg:text-sm tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10"
+                     className="px-3 py-2 min-h-[38px] h-[38px] flex-1 rounded-xl font-extrabold text-xs tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] active:shadow-inner active:opacity-80 flex items-center justify-center bg-transparent text-[#E57C5D] border border-[#E57C5D] hover:bg-[#E57C5D]/10"
                    >
                      <span className="truncate">Missed</span>
                    </button>
