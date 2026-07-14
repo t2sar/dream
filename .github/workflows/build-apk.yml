@@ -89,8 +89,13 @@ jobs:
       - name: Install Web Dependencies
         run: npm ci || npm install
 
+      - name: Generate App Icons
+        run: |
+          npm install -D @capacitor/assets
+          npx @capacitor/assets generate --android
+
       - name: Build Web App
-        run: npm run build
+        run: npm run build:android
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
