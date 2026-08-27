@@ -2172,8 +2172,10 @@ const PlantHabitCard: React.FC<any> = React.memo(({ habit, status, buttonText, o
       } : { 
         scale: 1, y: 0, borderColor: "", boxShadow: "", backgroundColor: "" 
       }}
-      transition={justCompleted ? { duration: 0.8, type: "spring", bounce: 0.5 } : { }}
-      className={`${cardBg} rounded-2xl p-3 flex flex-col justify-between group transition-all duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card premium-shadow bg-clip-padding hover:-translate-y-1 hover:scale-[1.02] hover:z-20 hover:shadow-[0_8px_30px_rgba(45,212,191,0.15)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]`}
+      transition={justCompleted ? { duration: 0.8, type: "spring", bounce: 0.5 } : { type: "spring", stiffness: 400, damping: 25 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`${cardBg} rounded-2xl p-3 flex flex-col justify-between group transition-all duration-300 relative h-full overflow-hidden border ${cardBorder} ${justCompleted ? '' : cardGlow} habit-card premium-shadow bg-clip-padding hover:shadow-[0_8px_30px_rgba(45,212,191,0.15)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]`}
     >
       {sheenActive && (
         <div className="sheen-layer sheen-active" />
