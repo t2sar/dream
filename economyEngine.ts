@@ -1,3 +1,4 @@
+import { getTodayDateString } from './scheduleUtils';
 // Secure Virtual Economy Calculation Engine
 import { UserStats, ShopItem, Habit } from './types';
 
@@ -30,7 +31,7 @@ export function calculateDailyCoinCap(habits: Habit[], userLevel: number): numbe
  * Returns updated extraStats fields if a reset occurred.
  */
 export function processDailyEconomyReset(extraStats: Partial<UserStats>): Partial<UserStats> | null {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayDateString();
     const lastReset = extraStats.lastCoinResetDate;
     
     if (lastReset !== todayStr) {

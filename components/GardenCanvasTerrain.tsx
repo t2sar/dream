@@ -1,3 +1,4 @@
+import { getLogicalTodayDate, getTodayDateString } from '../scheduleUtils';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Habit, UserStats, HabitLog } from '../types';
 import { PlantIcon } from './PlantIcon';
@@ -198,7 +199,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
     if (!stats.activeCompanionId) return;
     
     const walker = setInterval(() => {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getTodayDateString();
         // Find plants that need watering (not avoid types, no logs today)
         const unwatered = habits.filter(h => h.type !== 'avoid' && !(logs[todayStr] && logs[todayStr].includes(h.id)));
         
@@ -238,7 +239,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
 
   // Weekly Completion Rate Calculation
   const weeklyCompletionRate = useMemo(() => {
-    const today = new Date();
+    const today = getLogicalTodayDate();
     const last7Days = Array.from({length: 7}, (_, i) => {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
@@ -279,7 +280,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
 
   // Weather: Monsoon Rain if a hydration habit is completed today.
   const hasHydrationCompletedToday = useMemo(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayDateString();
     const completedTodayIds = logs[todayStr] || [];
     return habits.some(h => 
       (h.name.toLowerCase().includes('water') || h.name.toLowerCase().includes('hydrat') || h.name.toLowerCase().includes('drink')) 
@@ -313,7 +314,7 @@ export const GardenCanvasTerrain: React.FC<GardenCanvasTerrainProps> = ({ habits
     });
 
     // Wandering Baul Event check
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getTodayDateString();
     const dayOfWeek = new Date().getDay();
     const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
     let dayHash = 0;

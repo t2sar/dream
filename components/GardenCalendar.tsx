@@ -1,3 +1,4 @@
+import { getLogicalTodayDate } from '../scheduleUtils';
 import React, { useState, useMemo } from 'react';
 import { Habit, HabitLog, RestMode } from '../types';
 import {
@@ -35,7 +36,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [backdateMenuOpenFor, setBackdateMenuOpenFor] = useState<string | null>(null);
 
-  const today = startOfDay(new Date());
+  const today = startOfDay(getLogicalTodayDate());
   const todayStr = format(today, 'yyyy-MM-dd');
   const tMinus1 = format(subDays(today, 1), 'yyyy-MM-dd');
   const tMinus2 = format(subDays(today, 2), 'yyyy-MM-dd');
@@ -48,7 +49,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const jumpToToday = () => {
     setCurrentMonth(startOfMonth(new Date()));
-    setSelectedDate(startOfDay(new Date()));
+    setSelectedDate(startOfDay(getLogicalTodayDate()));
   };
 
   const monthData = useMemo(() => {
@@ -64,7 +65,7 @@ export const GardenCalendar: React.FC<GardenCalendarProps> = React.memo(({ logs,
 
     const daysData = days.map(day => {
       const dateKey = format(day, 'yyyy-MM-dd');
-      const isPastOrToday = !isBefore(startOfDay(new Date()), day);
+      const isPastOrToday = !isBefore(startOfDay(getLogicalTodayDate()), day);
       const slippedIds = (stats?.slipLogs?.[dateKey] || []).map(s => s.id);
       
       let scheduled = 0;

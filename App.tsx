@@ -1,3 +1,4 @@
+import { getLogicalTodayDate, getTodayDateString } from './scheduleUtils';
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -529,7 +530,7 @@ function App() {
   const [sortType, setSortType] = useState<
     "health" | "alpha" | "recent" | "recovery" | "custom"
   >("custom");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(getLogicalTodayDate());
   const dateKey = format(date, "yyyy-MM-dd");
 
   // Refs for data persistence
@@ -543,7 +544,7 @@ function App() {
     // Throttled background side-effects loop (time updates, midnight rollover)
     // Only runs heavily when idle or unfocused, reducing battery consumption
     const runChecks = () => {
-      const newDate = new Date();
+      const newDate = getLogicalTodayDate();
       setDate((prevDate) => {
         if (format(newDate, "yyyy-MM-dd") !== format(prevDate, "yyyy-MM-dd")) {
           return newDate; // triggers midnight cascade
@@ -610,7 +611,7 @@ function App() {
   const [hasProcessedStreak, setHasProcessedStreak] = useState(false);
   const hasShownMotivationRef = React.useRef(false);
 
-  const activeEvent = React.useMemo(() => getActiveEvent(new Date()), []);
+  const activeEvent = React.useMemo(() => getActiveEvent(getLogicalTodayDate()), []);
   const eventProgress =
     extraStats.eventProgress?.eventId === activeEvent?.id
       ? extraStats.eventProgress
@@ -851,7 +852,7 @@ function App() {
   useEffect(() => {
     if (dataLoading || !user || !extraStats || hasProcessedStreak) return;
 
-    const todayStr = format(new Date(), "yyyy-MM-dd");
+    const todayStr = getTodayDateString();
     const lastLogin = extraStats.lastLoginDate;
 
     if (lastLogin === todayStr) {
@@ -1621,7 +1622,7 @@ function App() {
       plantStage: "Seed",
       plantHealth: 100,
       plantStatus: "Healthy",
-      lastMissCheckedDate: format(new Date(), "yyyy-MM-dd"),
+      lastMissCheckedDate: getTodayDateString(),
       graceDays: 0,
       createdAt: new Date().toISOString(),
       creationDate: new Date().toISOString(),
@@ -1707,7 +1708,7 @@ function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `garden-backup-${format(new Date(), "yyyy-MM-dd")}.json`;
+    a.download = `garden-backup-${getTodayDateString()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1736,7 +1737,7 @@ function App() {
         plantStage: "Seed",
         plantHealth: 100,
         xp: 0,
-        lastMissCheckedDate: new Date().toISOString().split("T")[0],
+        lastMissCheckedDate: getTodayDateString(),
         createdAt: new Date().toISOString(),
         creationDate: new Date().toISOString(),
       };
@@ -1757,7 +1758,7 @@ function App() {
         archivedAt: undefined,
         archiveType: undefined,
         archiveNote: undefined,
-        lastMissCheckedDate: new Date().toISOString().split("T")[0], // reset miss checking
+        lastMissCheckedDate: getTodayDateString(), // reset miss checking
       };
     }
 
@@ -1904,7 +1905,7 @@ function App() {
   };
 
   const handleMailboxClick = () => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateString();
     if (extraStats.lastMailboxGiftDate === todayStr) {
       alert("The Mailbox is empty. Check back later!");
       return;
@@ -2015,7 +2016,7 @@ function App() {
     }
 
     const currentDailyCoins = extraStats.dailyCoinsEarned || 0;
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateString();
     const lastReset = extraStats.lastCoinResetDate || todayStr;
 
     let activeDailyCoins = currentDailyCoins;
@@ -2181,10 +2182,10 @@ function App() {
   };
 
   const handleBackdate = (habitId: string, targetDateKey: string) => {
-    const todayStr = format(new Date(), "yyyy-MM-dd");
-    const tMinus1 = format(subDays(new Date(), 1), "yyyy-MM-dd");
-    const tMinus2 = format(subDays(new Date(), 2), "yyyy-MM-dd");
-    const tMinus3 = format(subDays(new Date(), 3), "yyyy-MM-dd");
+    const todayStr = getTodayDateString();
+    const tMinus1 = format(subDays(getLogicalTodayDate(), 1), "yyyy-MM-dd");
+    const tMinus2 = format(subDays(getLogicalTodayDate(), 2), "yyyy-MM-dd");
+    const tMinus3 = format(subDays(getLogicalTodayDate(), 3), "yyyy-MM-dd");
     if (
       targetDateKey !== tMinus1 &&
       targetDateKey !== tMinus2 &&
@@ -2203,7 +2204,7 @@ function App() {
     if (targetDateKey < creationDate) return;
 
     const weekStartFormat = format(
-      startOfWeek(new Date(), { weekStartsOn: 1 }),
+      startOfWeek(getLogicalTodayDate(), { weekStartsOn: 1 }),
       "yyyy-MM-dd",
     );
     let currentUsed = extraStats.backdatesUsedThisWeek || 0;
@@ -2256,7 +2257,7 @@ function App() {
 
     // Recompute streak locally
     let newStreak = 0;
-    let checkDate = new Date();
+    let checkDate = getLogicalTodayDate();
     // Count days backward from today
     while (true) {
       const dStr = format(checkDate, "yyyy-MM-dd");
@@ -2546,8 +2547,8 @@ function App() {
         if (activeEvent && activeEvent.id === "monsoon_festival") incRainy++;
 
         // Wandering Baul Event Check
-        const todayStr = new Date().toISOString().split("T")[0];
-        const dayOfWeek = new Date().getDay();
+        const todayStr = getTodayDateString();
+        const dayOfWeek = getLogicalTodayDate().getDay();
         const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Friday or Saturday
 
         // Deterministic 50% chance based on date string
@@ -2875,7 +2876,7 @@ function App() {
 
     // Weekly Consistency Check
     if (isNowCompleted) {
-      const today = new Date();
+      const today = getLogicalTodayDate();
       const currentWeekStart = format(
         startOfWeek(today, { weekStartsOn: 1 }),
         "yyyy-MM-dd",
@@ -3021,7 +3022,7 @@ function App() {
     const newChallenge = {
       id: Date.now().toString(),
       templateId,
-      startDate: format(new Date(), "yyyy-MM-dd"),
+      startDate: getTodayDateString(),
       endDate: format(
         new Date(Date.now() + template.durationDays * 24 * 60 * 60 * 1000),
         "yyyy-MM-dd",
@@ -3426,7 +3427,7 @@ function App() {
             plantStage: "Seed",
             plantHealth: 100,
             plantStatus: "Healthy",
-            lastMissCheckedDate: format(new Date(), "yyyy-MM-dd"),
+            lastMissCheckedDate: getTodayDateString(),
             graceDays: 0,
             createdAt: new Date().toISOString(),
             creationDate: new Date().toISOString(),
@@ -4005,13 +4006,13 @@ function App() {
                       </div>
 
                       <div
-                        className={`p-8 rounded-[32px] border relative shadow-sm ${getSeasonThemeClasses(getBengaliSeason(new Date()))}`}
+                        className={`p-8 rounded-[32px] border relative shadow-sm ${getSeasonThemeClasses(getBengaliSeason(getLogicalTodayDate()))}`}
                       >
                         <h2 className="text-xl font-bold font-display text-primary-text mb-6 flex items-center gap-2">
                           <Trophy className="w-5 h-5 text-status-healthy" />
                           Habit Garden{" "}
                           <span className="text-[10px] uppercase font-mono tracking-widest ml-2 bg-black/5 px-2 py-1 rounded-md">
-                            {getBengaliSeason(new Date())}
+                            {getBengaliSeason(getLogicalTodayDate())}
                           </span>
                         </h2>
                         <div className="flex gap-2 overflow-x-auto pb-4 custom-scrollbar mb-4">

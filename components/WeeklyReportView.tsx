@@ -1,3 +1,4 @@
+import { getLogicalTodayDate } from '../scheduleUtils';
 import React, { useState, useMemo } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { startOfWeek, endOfWeek, subWeeks, eachDayOfInterval, format, isBefore, startOfDay, isSameDay } from 'date-fns';
@@ -16,7 +17,7 @@ const TrendSparkline = React.memo(({ data }: { data: { date: Date; completed: nu
   if (!data || data.length === 0) return null;
 
   const sparkData = data.map((d) => {
-    const isFuture = isBefore(startOfDay(new Date()), d.date) && !isSameDay(startOfDay(new Date()), d.date);
+    const isFuture = isBefore(startOfDay(getLogicalTodayDate()), d.date) && !isSameDay(startOfDay(getLogicalTodayDate()), d.date);
     if (isFuture) return null;
     
     if (d.isRestDay) return 1; 
@@ -79,7 +80,7 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ l
   const [weeksAgo, setWeeksAgo] = useState(0);
 
   const reportData = useMemo(() => {
-    const today = startOfDay(new Date());
+    const today = startOfDay(getLogicalTodayDate());
     const weekStart = startOfWeek(subWeeks(today, weeksAgo), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(subWeeks(today, weeksAgo), { weekStartsOn: 1 });
     const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -424,7 +425,7 @@ export const WeeklyReportView: React.FC<WeeklyReportViewProps> = React.memo(({ l
         
         <div className="grid grid-cols-7 gap-2">
           {reportData.dailyBreakdown.map((day, i) => {
-            const isFuture = isBefore(startOfDay(new Date()), day.date) && !isSameDay(startOfDay(new Date()), day.date);
+            const isFuture = isBefore(startOfDay(getLogicalTodayDate()), day.date) && !isSameDay(startOfDay(getLogicalTodayDate()), day.date);
             const rate = day.scheduled > 0 ? day.completed / day.scheduled : 0;
             
             let bgColor = "bg-surface-alt/5";

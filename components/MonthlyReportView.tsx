@@ -1,3 +1,4 @@
+import { getLogicalTodayDate } from '../scheduleUtils';
 import React, { useState, useMemo } from 'react';
 import { Habit, HabitLog, MonthlyGardenReport, RestMode } from '../types';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isBefore, startOfDay, isSameDay, subMonths } from 'date-fns';
@@ -16,7 +17,7 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
   const [monthsAgo, setMonthsAgo] = useState(0);
 
   const reportData = useMemo(() => {
-    const today = startOfDay(new Date());
+    const today = startOfDay(getLogicalTodayDate());
     const targetDate = subMonths(today, monthsAgo);
     const monthStart = startOfMonth(targetDate);
     const monthEnd = endOfMonth(targetDate);
@@ -395,8 +396,8 @@ export const MonthlyReportView: React.FC<MonthlyReportViewProps> = React.memo(({
             <div key={`empty-${i}`} className="w-10 h-10" />
           ))}
           {reportData.dailyBreakdown.map((day, i) => {
-            const isFuture = isBefore(startOfDay(new Date()), day.date) && !isSameDay(startOfDay(new Date()), day.date);
-            const isToday = isSameDay(startOfDay(new Date()), day.date);
+            const isFuture = isBefore(startOfDay(getLogicalTodayDate()), day.date) && !isSameDay(startOfDay(getLogicalTodayDate()), day.date);
+            const isToday = isSameDay(startOfDay(getLogicalTodayDate()), day.date);
             const rate = day.scheduled > 0 ? day.completed / day.scheduled : 0;
             
             let bgColor = "bg-surface-alt/5 border border-surface-alt";

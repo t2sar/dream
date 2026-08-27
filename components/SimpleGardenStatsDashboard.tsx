@@ -1,3 +1,4 @@
+import { getLogicalTodayDate, getTodayDateString } from '../scheduleUtils';
 import React, { useState, useMemo } from 'react';
 import { Habit, HabitLog, UserStats, SimpleStatsDashboardSummary, DashboardSettings, DashboardHighlight, Tab } from '../types';
 import * as LucideIcons from 'lucide-react';
@@ -38,7 +39,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
   // For MVP, we derive from raw data to keep it simple as we don't have a background cron cache.
   
   const computedSummary = useMemo<SimpleStatsDashboardSummary>(() => {
-    const today = new Date();
+    const today = getLogicalTodayDate();
     let startDate: Date;
     let endDate: Date;
 
@@ -149,7 +150,7 @@ export const SimpleGardenStatsDashboard = React.memo(function SimpleGardenStatsD
   }, [period, habits, logs, stats]);
 
   const missedTodayCount = useMemo(() => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const todayStr = getTodayDateString();
     const activeHabits = habits.filter(h => !h.isArchived);
     let count = 0;
     activeHabits.forEach(h => {

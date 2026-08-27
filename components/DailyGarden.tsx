@@ -1,3 +1,4 @@
+import { getLogicalTodayDate } from '../scheduleUtils';
 import React, { useState, useMemo, useEffect } from 'react';
 import { Habit, HabitLog, UserStats, SeasonalEvent, UserEventProgress, RestMode } from '../types';
 import { format, subDays, startOfWeek, differenceInCalendarDays } from 'date-fns';
@@ -14,7 +15,7 @@ import confetti from 'canvas-confetti';
 import { playHaptic } from '../haptics';
 
 const WeatherOverlay = () => {
-    const season = getBengaliSeason(new Date());
+    const season = getBengaliSeason(getLogicalTodayDate());
     
     if (season === 'Borsha') {
       return (
@@ -957,7 +958,7 @@ export const DailyGarden: React.FC<DailyGardenProps> = React.memo(({
      return dates;
   };
 
-  const weekStartFormat = format(startOfWeek(new Date(), {weekStartsOn: 1}), 'yyyy-MM-dd');
+  const weekStartFormat = format(startOfWeek(getLogicalTodayDate(), {weekStartsOn: 1}), 'yyyy-MM-dd');
   const usedBackdates = stats.backdateWeekStart === weekStartFormat ? (stats.backdatesUsedThisWeek || 0) : 0;
   const backdatesLeftThisWeek = Math.max(0, 3 - usedBackdates);
 

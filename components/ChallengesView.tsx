@@ -1,3 +1,4 @@
+import { getLogicalTodayDate } from '../scheduleUtils';
 import React, { useState } from 'react';
 import { Habit, UserStats, ChallengeTemplate, ActiveChallenge, HabitCategory } from '../types';
 import { CHALLENGE_TEMPLATES, getChallengeTemplate } from '../challengesData';
@@ -50,7 +51,7 @@ export const ChallengesView: React.FC<ChallengesViewProps> = React.memo(({ habit
                  <div className="mt-4 flex gap-1">
                     {Array.from({ length: activeTemplate.durationDays }).map((_, i) => {
                        const d = addDays(parseISO(activeChallenge.startDate), i);
-                       const isToday = isSameDay(d, new Date());
+                       const isToday = isSameDay(d, getLogicalTodayDate());
                        const isPastDay = isPast(d) && !isToday;
                        const isCompleted = activeChallenge.completedDates.some((cd: string) => isSameDay(parseISO(cd), d));
                        

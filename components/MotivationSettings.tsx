@@ -74,16 +74,42 @@ export const MotivationSettings: React.FC<MotivationSettingsProps> = ({ stats, o
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const parsed = JSON.parse(event.target?.result as string);
+        const text = event.target?.result as string;
+        let parsed: any[] = [];
+        
+        if (file.name.endsWith('.json')) {
+          parsed = JSON.parse(text);
+        } else if (file.name.endsWith('.txt')) {
+          parsed = text.split('\n').filter((line: string) => line.trim().length > 0).map((line: string, index: number) => ({
+            id: Date.now().toString() + '-' + index,
+            quote_text: line.trim(),
+            created_at: new Date().toISOString()
+          }));
+        }
+
         if (Array.isArray(parsed)) {
-          // Keep existing and append imported (deduplicate by id if needed, or simply let user delete)
-          onUpdate({ ...stats, motivations: parsed });
+          // Keep existing and append imported
+          const existing = stats.motivations || [];
+          const newMotivations = [...existing, ...parsed];
+          
+          // Deduplicate by ID or quote text to prevent exact duplicates
+          const uniqueMotivations = Array.from(
+            new Map(newMotivations.map((item: any) => [item.id || item.quote_text, item])).values()
+          );
+          
+          onUpdate({ ...stats, motivations: uniqueMotivations as UserMotivation[] });
         }
       } catch (err) {
-        console.error("Invalid JSON file", err);
+        console.error("Invalid file format", err);
+      }
+      
+      // Reset input so the same file can be selected again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     };
     reader.readAsText(file);
@@ -142,7 +168,7 @@ export const MotivationSettings: React.FC<MotivationSettingsProps> = ({ stats, o
                  <button onClick={() => fileInputRef.current?.click()} className="p-2 hover:bg-[var(--surface)] rounded-full hover:text-[var(--primary-anchor)] transition-transform hover:scale-110" title="Import JSON">
                    <Upload className="w-5 h-5" />
                  </button>
-                 <input type="file" accept=".json" ref={fileInputRef} onChange={handleImport} className="hidden" />
+                 <input type="file" accept=".json,.txt" ref={fileInputRef} onChange={handleImport} className="hidden" />
                  <button onClick={() => setShowManageModal(false)} className="p-2 hover:bg-[var(--surface)] rounded-full hover:text-[var(--primary-anchor)] transition-transform hover:scale-110 ml-2">
                    <X className="w-6 h-6" />
                  </button>

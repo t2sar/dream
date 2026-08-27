@@ -1,13 +1,23 @@
 import { Habit, HabitLog } from './types';
-import { differenceInCalendarDays, differenceInWeeks, differenceInMonths, isValid, parseISO, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+import { differenceInCalendarDays, differenceInWeeks, differenceInMonths, isValid, parseISO, startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
+
+
+export function getLogicalTodayDate(): Date {
+  const now = new Date();
+  return new Date(now.getTime() - 5 * 60 * 60 * 1000);
+}
+
+export function getTodayDateString(): string {
+  return format(getLogicalTodayDate(), 'yyyy-MM-dd');
+}
 
 export function isHabitDueToday(habit: Habit): boolean {
-  return isHabitDueOnDate(habit, new Date());
+  return isHabitDueOnDate(habit, getLogicalTodayDate());
 }
 
 export function isHabitDueOnDate(habit: Habit, date: Date | string): boolean {
   const targetDate = typeof date === 'string' ? parseISO(date) : date;
-  const dateKey = typeof date === 'string' ? date : targetDate.toISOString().split('T')[0];
+  const dateKey = typeof date === 'string' ? date : format(targetDate, 'yyyy-MM-dd');
   const createdDate = habit.createdAt ? new Date(habit.createdAt) : targetDate;
   
   if (habit.snoozedDates && habit.snoozedDates.includes(dateKey)) {
@@ -71,7 +81,7 @@ export function isPeriodTargetReached(habit: Habit, logs: HabitLog): boolean {
      return false;
   }
   
-  const today = new Date();
+  const today = getLogicalTodayDate();
   const start = startOfWeek(today, { weekStartsOn: 1 });
   const end = endOfWeek(today, { weekStartsOn: 1 });
   
@@ -93,7 +103,7 @@ export function isPeriodTargetReached(habit: Habit, logs: HabitLog): boolean {
 }
 
 export function getCompletedCountThisWeek(habit: Habit, logs: HabitLog): number {
-  const today = new Date();
+  const today = getLogicalTodayDate();
   const start = startOfWeek(today, { weekStartsOn: 1 });
   const end = endOfWeek(today, { weekStartsOn: 1 });
   
