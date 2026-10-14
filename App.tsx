@@ -57,6 +57,7 @@ import {
 } from "./services/firebase";
 
 import { AnimatedModal } from "./components/AnimatedModal";
+import { AppearanceSettings } from "./components/AppearanceSettings";
 import { CustomCategoryManager } from "./components/CustomCategoryManager";
 import { DailyGoalRing } from "./components/DailyGoalRing";
 import {
@@ -258,132 +259,9 @@ const MOTIVATIONAL_QUOTES = [
   },
 ];
 
-export const APP_THEMES = [
-  {
-    id: "cream_butter",
-    name: "Cream Butter",
-    description:
-      "Playful organic light theme with warm cream canvas & sage accent.",
-    colors: {
-      "--color-background-main": "#FDFBF7",
-      "--color-primary-anchor": "#1C1B1F",
-      "--color-primary-text": "#1C1B1F",
-      "--color-surface-card": "#FFFFFF",
-      "--color-surface-soft": "#FDFBF7",
-      "--color-surface-alt": "#F4EDE4",
-      "--color-secondary-text": "#4A4A4A",
-      "--color-muted-text": "#737373",
-      "--color-primary-mint": "#4EADA0",
-    },
-    accentColor: "78 173 160",
-    isDark: false,
-  },
-  {
-    id: "midnight_slate",
-    name: "Midnight Slate",
-    description:
-      "Sleek blue tech theme with carbon panels and cool slate colors.",
-    colors: {
-      "--color-background-main": "#0B101B",
-      "--color-primary-anchor": "#F1F5F9",
-      "--color-primary-text": "#F1F5F9",
-      "--color-surface-card": "#151B2C",
-      "--color-surface-soft": "#0B101B",
-      "--color-surface-alt": "#212A3E",
-      "--color-secondary-text": "#94A3B8",
-      "--color-muted-text": "#64748B",
-      "--color-primary-mint": "#22D3EE",
-    },
-    accentColor: "34 211 238",
-    isDark: true,
-  },
-  {
-    id: "cosmic_cyber",
-    name: "Cyberpunk Neon",
-    description:
-      "Immersive synthwave dark purple featuring hot neon pink actions.",
-    colors: {
-      "--color-background-main": "#08040F",
-      "--color-primary-anchor": "#FAF5FF",
-      "--color-primary-text": "#FAF5FF",
-      "--color-surface-card": "#140B25",
-      "--color-surface-soft": "#08040F",
-      "--color-surface-alt": "#2F144D",
-      "--color-secondary-text": "#D8B4FE",
-      "--color-muted-text": "#A855F7",
-      "--color-primary-mint": "#ED1E79",
-    },
-    accentColor: "237 30 121",
-    isDark: true,
-  },
-  {
-    id: "forest_zen",
-    name: "Forest Zen",
-    description:
-      "Peaceful forest floor greens, dark moss, and soft birch details.",
-    colors: {
-      "--color-background-main": "#0A130D",
-      "--color-primary-anchor": "#E6F4EA",
-      "--color-primary-text": "#E6F4EA",
-      "--color-surface-card": "#122017",
-      "--color-surface-soft": "#0A130D",
-      "--color-surface-alt": "#223829",
-      "--color-secondary-text": "#A3D9C9",
-      "--color-muted-text": "#5EA388",
-      "--color-primary-mint": "#4EADA0",
-    },
-    accentColor: "78 173 160",
-    isDark: true,
-  },
-  {
-    id: "retro_paper",
-    name: "Retro Paper",
-    description:
-      "Classic tactile feel of vintage journals with rust/coral dyes.",
-    colors: {
-      "--color-background-main": "#F3EDE0",
-      "--color-primary-anchor": "#29241E",
-      "--color-primary-text": "#29241E",
-      "--color-surface-card": "#FDFBF7",
-      "--color-surface-soft": "#F3EDE0",
-      "--color-surface-alt": "#E3D5B7",
-      "--color-secondary-text": "#5C5245",
-      "--color-muted-text": "#8E7D66",
-      "--color-primary-mint": "#D05A3F",
-    },
-    accentColor: "208 90 63",
-    isDark: false,
-  },
-  {
-    id: "classic_obsidian",
-    name: "Classic Obsidian",
-    description: "Pure contrast deep space theme with emerald habit trackers.",
-    colors: {
-      "--color-background-main": "#050608",
-      "--color-primary-anchor": "#FFFFFF",
-      "--color-primary-text": "#FFFFFF",
-      "--color-surface-card": "#10121A",
-      "--color-surface-soft": "#050608",
-      "--color-surface-alt": "#20232E",
-      "--color-secondary-text": "#94A3B8",
-      "--color-muted-text": "#5A657C",
-      "--color-primary-mint": "#10B981",
-    },
-    accentColor: "16 185 129",
-    isDark: true,
-  },
-];
+import { ALL_THEMES, applyAppTheme } from "./themeConfig";
+export { ALL_THEMES as APP_THEMES, applyAppTheme };
 
-const _themeVarCache: Record<string, string> = {};
-
-export function applyAppTheme(
-  themeId: string,
-  customAccentColor?: string,
-  cornerRoundness?: "sharp" | "medium" | "soft",
-  borderStyle?: "invisible" | "subtle" | "solid" | "neon",
-) {
-  // Theme rules are now strictly enforced via CSS using the Playful Organic Modernism design tokens
-}
 
 function checkWeeklyConsistencyThreeWeeks(
   habits: Habit[],
@@ -835,7 +713,7 @@ function App() {
   // Accent and Full Visual Theme Controller Effect
   useEffect(() => {
     if (!extraStats) return;
-    const themeId = extraStats.themeId || "cream_butter";
+    const themeId = extraStats.themeId || "system_default";
     const accentColor = extraStats.accentColor;
     const cornerRoundness = extraStats.cornerRoundness || "soft";
     const borderStyle = extraStats.borderStyle || "subtle";
@@ -2724,6 +2602,7 @@ function App() {
         baseCoinsDelta,
         newExtraStats,
         dynamicCap,
+        true,
       );
       currentDailyCoins += allowedBase;
       finalCoinsDelta = allowedBase + bonusCoinsDelta;
@@ -4577,6 +4456,25 @@ function App() {
                       ? "Cloud Sync Protocol Active"
                       : "Offline Mode (Changes Queued)"}
                   </div>
+
+                  {/* Dedicated Appearance Section */}
+                  <AppearanceSettings
+                    currentThemeId={extraStats.themeId}
+                    onThemeChange={(newThemeId) => {
+                      const newStats = {
+                        ...extraStats,
+                        themeId: newThemeId,
+                      };
+                      setExtraStats(newStats);
+                      persistData(habits, logs, newStats);
+                      applyAppTheme(
+                        newThemeId,
+                        extraStats.accentColor,
+                        extraStats.cornerRoundness,
+                        extraStats.borderStyle,
+                      );
+                    }}
+                  />
 
                   <div className="flex items-center justify-between bg-[var(--surface-alt)]/50 border-0 p-6 rounded-[32px] mb-4 shadow-sm transition-all hover:bg-[var(--surface-alt)]">
                     <div>

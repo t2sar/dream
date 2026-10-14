@@ -56,11 +56,17 @@ export function processDailyEconomyReset(extraStats: Partial<UserStats>): Partia
  * Determines if the user can earn coins, preventing farming exploits.
  * Returns the actual amount of coins they are allowed to earn, given their cap.
  */
-export function calculateSecureCoinReward(requestedCoins: number, extraStats: Partial<UserStats>, dynamicCap: number): number {
+export function calculateSecureCoinReward(
+    requestedCoins: number, 
+    extraStats: Partial<UserStats>, 
+    dynamicCap: number,
+    options?: { applySeasonBoost?: boolean } | boolean
+): number {
     const todayEarned = extraStats.dailyCoinsEarned || 0;
+    const shouldBoost = typeof options === 'boolean' ? options : !!options?.applySeasonBoost;
     
     let finalRequested = requestedCoins;
-    if (requestedCoins > 0) {
+    if (requestedCoins > 0 && shouldBoost) {
         // Hemanto Season Logic (10% boost in Oct/Nov)
         const currentMonth = new Date().getMonth();
         if (currentMonth === 9 || currentMonth === 10) {
@@ -74,7 +80,7 @@ export function calculateSecureCoinReward(requestedCoins: number, extraStats: Pa
     }
     
     const allowedEarnings = Math.min(finalRequested, dynamicCap - todayEarned);
-    return allowedEarnings;
+    return Math.max(0, allowedEarnings);
 }
 
 export function runEconomyDiagnostics(extraStats?: Partial<UserStats>, habits?: Habit[]) {
@@ -115,6 +121,13 @@ export function runEconomyDiagnostics(extraStats?: Partial<UserStats>, habits?: 
     // Test 5: Reward when over cap (edge case)
     const res5 = calculateSecureCoinReward(100, { dailyCoinsEarned: 1200 }, 1000);
     if (res5 !== 0) { console.error("Economy Test 5 Failed: Expected 0, got", res5); passed = false; }
+    
+    // Test 6: Seasonal Boost active check (when explicitly enabled)
+    const currentMonth = new Date().getMonth();
+    const isHemantoMonth = currentMonth === 9 || currentMonth === 10;
+    const expectedSeasonReward = isHemantoMonth ? 110 : 100;
+    const res6 = calculateSecureCoinReward(100, { dailyCoinsEarned: 500 }, 1000, true);
+    if (res6 !== expectedSeasonReward) { console.error("Economy Test 6 Failed: Expected " + expectedSeasonReward + ", got", res6); passed = false; }
     
     if (passed) {
         console.log("Economy Engine Secure: Daily ceilings strictly enforced. No overflow detected.");
